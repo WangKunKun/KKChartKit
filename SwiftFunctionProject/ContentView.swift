@@ -9,9 +9,41 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
+        NavigationStack {
+            List {
+                Section("雷达图") {
+                    NavigationLink("默认主题 demo") {
+                        RadarChartBasicDemo()
+                    }
+                    NavigationLink("样式扩展测试") {
+                        RadarChartStyleDemo()
+                    }
+                }
+            }
+            .navigationTitle("HYMCharts")
+            .onAppear {
+                #if DEBUG
+                ChartSelfTest.runAll()
+                #endif
+            }
+        }
+    }
+}
+
+/// 默认主题雷达图 demo
+struct RadarChartBasicDemo: View {
+    private static let demoModel: RadarChartModel = {
+        let labels = ["进攻", "防守", "速度", "技巧", "体力", "意识"]
+        let values: [Double] = [80, 60, 90, 50, 70, 85]
+        return RadarChartModel(
+            dimensions: zip(labels, values).map { RadarDimension(label: $0, value: $1) },
+            showsCenterScore: true, centerScore: nil)
+    }()
+
+    var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                Text("HYMCharts · 雷达图")
+                Text("HYMCharts · 雷达图（默认主题）")
                     .font(.headline)
                     .foregroundStyle(.white)
                 RadarChart(model: Self.demoModel)
@@ -20,19 +52,7 @@ struct ContentView: View {
             .padding()
         }
         .background(Color.black)
-        .onAppear {
-            #if DEBUG
-            ChartSelfTest.runAll()
-            #endif
-        }
-    }
-
-    private static var demoModel: RadarChartModel {
-        let labels = ["进攻", "防守", "速度", "技巧", "体力", "意识"]
-        let values: [Double] = [80, 60, 90, 50, 70, 85]
-        let dims = zip(labels, values).map { RadarDimension(label: $0, value: $1) }
-        // centerScore=nil：自动算归一化均值（≈72.5）
-        return RadarChartModel(dimensions: dims, showsCenterScore: true, centerScore: nil)
+        .navigationTitle("默认 demo")
     }
 }
 

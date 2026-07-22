@@ -10,6 +10,20 @@ public enum GridRingFill {
     case colors([UIColor])
 }
 
+/// 线型（实线 / 虚线）
+public enum ChartLineStyle {
+    case solid
+    case dashed(dashLength: CGFloat = 4, gap: CGFloat = 3)
+
+    /// 转为 CAShapeLayer.lineDashPattern；nil 表示实线
+    public var dashPattern: [NSNumber]? {
+        switch self {
+        case .solid: return nil
+        case .dashed(let dash, let gap): return [dash as NSNumber, gap as NSNumber]
+        }
+    }
+}
+
 /// 雷达图主题（纯值类型；所有外观集中于此，改色只动这里）
 public struct RadarChartTheme: HYMChartTheme {
     public var backgroundGradientStart: UIColor
@@ -24,9 +38,6 @@ public struct RadarChartTheme: HYMChartTheme {
     public var labelFont:  UIFont
     public var scoreColor: UIColor
     public var scoreFont:  UIFont
-    public var scoreSubtitleColor: UIColor
-    public var scoreSubtitleFont:  UIFont
-    public var scoreSubtitleText:  String
     public var gridRingCount: Int
     public var cardCornerRadius: CGFloat
     public var dataLineWidth: CGFloat
@@ -37,6 +48,25 @@ public struct RadarChartTheme: HYMChartTheme {
     public var showsAxes: Bool
     public var showsData: Bool
     public var showsBackground: Bool
+    // —— 样式扩展（2026-07-22）——
+    public var showsVertexDots: Bool          // 数据点独立显隐（与 showsData 正交）
+    public var showsLabelDots: Bool           // 标题顶点圆点显隐
+    public var labelDotColor: UIColor
+    public var labelDotRadius: CGFloat
+    public var showsOuterRing: Bool           // 最外圈边框独立显隐
+    public var outerRingColor: UIColor
+    public var outerRingLineWidth: CGFloat
+    public var outerRingLineStyle: ChartLineStyle  // 最外圈线型（独立于内圈网格）
+    public var gridLineStyle: ChartLineStyle  // 内圈网格线型
+    public var axisLineStyle: ChartLineStyle  // 放射轴线型
+    // —— 装饰 ring（最外圈外）——
+    public var showsDecorativeRing: Bool
+    public var decorativeRingColor: UIColor
+    public var decorativeRingLineWidth: CGFloat
+    public var decorativeRingLineStyle: ChartLineStyle
+    public var decorativeRingInset: CGFloat        // 距最外圈外的间距 pt
+    public var decorativeRingSides: Int            // -1=跟随维度数；0=圆形；N=正N边形
+    public var decorativeRingFillColor: UIColor?   // 装饰 ring 填充色（nil = 透明）
 
     public init(
         backgroundGradientStart: UIColor = UIColor(red: 0x2A/255.0, green: 0x1B/255.0, blue: 0x5C/255.0, alpha: 1),
@@ -51,9 +81,6 @@ public struct RadarChartTheme: HYMChartTheme {
         labelFont:  UIFont = .systemFont(ofSize: 14),
         scoreColor: UIColor = .white,
         scoreFont:  UIFont = .boldSystemFont(ofSize: 36),
-        scoreSubtitleColor: UIColor = UIColor(red: 0xC7/255.0, green: 0xD2/255.0, blue: 0xFE/255.0, alpha: 1),
-        scoreSubtitleFont:  UIFont = .systemFont(ofSize: 13),
-        scoreSubtitleText:  String = "综合评分",
         gridRingCount: Int = 5,
         cardCornerRadius: CGFloat = 16,
         dataLineWidth: CGFloat = 2,
@@ -63,7 +90,24 @@ public struct RadarChartTheme: HYMChartTheme {
         showsGridLines: Bool = true,
         showsAxes: Bool = true,
         showsData: Bool = true,
-        showsBackground: Bool = true
+        showsBackground: Bool = true,
+        showsVertexDots: Bool = true,
+        showsLabelDots: Bool = false,
+        labelDotColor: UIColor = .white,
+        labelDotRadius: CGFloat = 4,
+        showsOuterRing: Bool = true,
+        outerRingColor: UIColor = UIColor.white.withAlphaComponent(0.15),
+        outerRingLineWidth: CGFloat = 1.5,
+        outerRingLineStyle: ChartLineStyle = .solid,
+        gridLineStyle: ChartLineStyle = .solid,
+        axisLineStyle: ChartLineStyle = .solid,
+        showsDecorativeRing: Bool = false,
+        decorativeRingColor: UIColor = UIColor.white.withAlphaComponent(0.3),
+        decorativeRingLineWidth: CGFloat = 1,
+        decorativeRingLineStyle: ChartLineStyle = .solid,
+        decorativeRingInset: CGFloat = 0,
+        decorativeRingSides: Int = -1,
+        decorativeRingFillColor: UIColor? = nil
     ) {
         self.backgroundGradientStart = backgroundGradientStart
         self.backgroundGradientEnd = backgroundGradientEnd
@@ -77,9 +121,6 @@ public struct RadarChartTheme: HYMChartTheme {
         self.labelFont = labelFont
         self.scoreColor = scoreColor
         self.scoreFont = scoreFont
-        self.scoreSubtitleColor = scoreSubtitleColor
-        self.scoreSubtitleFont = scoreSubtitleFont
-        self.scoreSubtitleText = scoreSubtitleText
         self.gridRingCount = gridRingCount
         self.cardCornerRadius = cardCornerRadius
         self.dataLineWidth = dataLineWidth
@@ -90,5 +131,22 @@ public struct RadarChartTheme: HYMChartTheme {
         self.showsAxes = showsAxes
         self.showsData = showsData
         self.showsBackground = showsBackground
+        self.showsVertexDots = showsVertexDots
+        self.showsLabelDots = showsLabelDots
+        self.labelDotColor = labelDotColor
+        self.labelDotRadius = labelDotRadius
+        self.showsOuterRing = showsOuterRing
+        self.outerRingColor = outerRingColor
+        self.outerRingLineWidth = outerRingLineWidth
+        self.outerRingLineStyle = outerRingLineStyle
+        self.gridLineStyle = gridLineStyle
+        self.axisLineStyle = axisLineStyle
+        self.showsDecorativeRing = showsDecorativeRing
+        self.decorativeRingColor = decorativeRingColor
+        self.decorativeRingLineWidth = decorativeRingLineWidth
+        self.decorativeRingLineStyle = decorativeRingLineStyle
+        self.decorativeRingInset = decorativeRingInset
+        self.decorativeRingSides = decorativeRingSides
+        self.decorativeRingFillColor = decorativeRingFillColor
     }
 }

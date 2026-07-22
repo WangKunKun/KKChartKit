@@ -15,13 +15,15 @@ public final class RadarChartRenderer: HYMChartRenderer {
     private let axisLayer = CAShapeLayer()
     private let dataFillLayer = CAShapeLayer()
     private let dataStrokeLayer = CAShapeLayer()
-    private let vertexDotsLayer = CAShapeLayer()
+    private let vertexDotsContainerLayer = CALayer()  // 数据点容器（每点一个子 layer，支持 per-dim 颜色）
+    private let labelDotsContainerLayer = CALayer()   // 标题顶点圆点容器（每点子 layer，支持 per-dim 颜色）
+    private let outerRingLayer = CAShapeLayer()     // 最外圈边框（连接标题顶点）
+    private let decorativeRingLayer = CAShapeLayer()  // 装饰 ring（最外圈外，用 HYMRingRenderer）
 
     // MARK: - 私有子视图
     private weak var hostView: UIView?
     private var labels: [UILabel] = []
     private let scoreLabel = UILabel()
-    private let subtitleLabel = UILabel()
 
     // MARK: - 当前状态（render 时存，供动画/命中读取）
     private var currentModel: RadarChartModel?
@@ -36,41 +38,41 @@ public final class RadarChartRenderer: HYMChartRenderer {
         gradientLayer.endPoint = CGPoint(x: 0.5, y: 1)
         gradientLayer.masksToBounds = true
         view.layer.addSublayer(gradientLayer)
+        view.layer.addSublayer(decorativeRingLayer)   // 装饰 ring：背景渐变之上、网格之下
         view.layer.addSublayer(gridFillContainerLayer)
 
         gridLayer.fillColor = UIColor.clear.cgColor
+        outerRingLayer.fillColor = UIColor.clear.cgColor
         axisLayer.fillColor = UIColor.clear.cgColor
         view.layer.addSublayer(gridLayer)
+        view.layer.addSublayer(outerRingLayer)   // 最外圈：内圈网格之上、放射轴之下
         view.layer.addSublayer(axisLayer)
 
         dataFillLayer.fillColor = UIColor.clear.cgColor
         dataStrokeLayer.fillColor = UIColor.clear.cgColor
-        vertexDotsLayer.fillColor = UIColor.clear.cgColor
         view.layer.addSublayer(dataFillLayer)
         view.layer.addSublayer(dataStrokeLayer)
-        view.layer.addSublayer(vertexDotsLayer)
+        view.layer.addSublayer(vertexDotsContainerLayer)
+        view.layer.addSublayer(labelDotsContainerLayer)   // 标题顶点圆点：数据点之上
 
         scoreLabel.textAlignment = .center
-        subtitleLabel.textAlignment = .center
         scoreLabel.numberOfLines = 1
-        subtitleLabel.numberOfLines = 1
-        view.addSubview(subtitleLabel)
         view.addSubview(scoreLabel)
     }
 
     public func unmount(from view: UIView) {
         labels.forEach { $0.removeFromSuperview() }
         labels.removeAll()
-        [gradientLayer, gridFillContainerLayer, gridLayer, axisLayer,
-         dataFillLayer, dataStrokeLayer, vertexDotsLayer].forEach { $0.removeFromSuperlayer() }
+        [gradientLayer, decorativeRingLayer, gridFillContainerLayer, gridLayer, outerRingLayer, axisLayer,
+         dataFillLayer, dataStrokeLayer, vertexDotsContainerLayer, labelDotsContainerLayer].forEach { $0.removeFromSuperlayer() }
         scoreLabel.removeFromSuperview()
-        subtitleLabel.removeFromSuperview()
         hostView = nil
     }
 
     // MARK: - 动画契约
     public var animatableLayers: [CALayer] {
-        [dataFillLayer, dataStrokeLayer, vertexDotsLayer, gridLayer, axisLayer, gridFillContainerLayer]
+        [decorativeRingLayer, dataFillLayer, dataStrokeLayer, vertexDotsContainerLayer, labelDotsContainerLayer,
+         gridLayer, outerRingLayer, axisLayer, gridFillContainerLayer]
     }
 
     public var centerScoreTarget: Double? {
@@ -86,7 +88,7 @@ public final class RadarChartRenderer: HYMChartRenderer {
         scoreLabel.font = theme.scoreFont
         scoreLabel.textColor = theme.scoreColor
         scoreLabel.sizeToFit()
-        scoreLabel.center = CGPoint(x: lastCenter.x, y: lastCenter.y + 18)
+        scoreLabel.center = lastCenter   // 无副标题，分数居中
         scoreLabel.alpha = CGFloat(min(1, progress * 1.5))   // 前段淡入
     }
 
@@ -104,23 +106,27 @@ public final class RadarChartRenderer: HYMChartRenderer {
 
         guard !model.dimensions.isEmpty else {
             gridLayer.path = nil
+            outerRingLayer.path = nil
             axisLayer.path = nil
             dataFillLayer.path = nil
             dataStrokeLayer.path = nil
-            vertexDotsLayer.path = nil
+            vertexDotsContainerLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
+            labelDotsContainerLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
+            decorativeRingLayer.path = nil
             scoreLabel.isHidden = true
-            subtitleLabel.isHidden = true
             return
         }
 
         let center = context.center
         let radius = maxRadius(bounds: context.bounds)
 
+        rebuildDecorativeRing(model, center: center, radius: radius, bounds: context.bounds)
         rebuildGridFill(model, center: center, radius: radius)
         rebuildGrid(model, center: center, radius: radius)
         rebuildAxis(model, center: center, radius: radius)
         rebuildData(model, center: center, radius: radius)
         rebuildVertexDots(model, center: center, radius: radius)
+        rebuildLabelDots(model, center: center, radius: radius)
         rebuildLabels(model, center: center, radius: radius)
         rebuildScore(model, center: center)
 
@@ -134,25 +140,38 @@ public final class RadarChartRenderer: HYMChartRenderer {
                                 theme.backgroundGradientEnd.cgColor]
         gridLayer.strokeColor = theme.gridColor.cgColor
         gridLayer.lineWidth = 1
+        gridLayer.lineDashPattern = theme.gridLineStyle.dashPattern
         axisLayer.strokeColor = theme.axisColor.cgColor
         axisLayer.lineWidth = 1
+        axisLayer.lineDashPattern = theme.axisLineStyle.dashPattern
+
+        // 最外圈边框（独立于内圈网格 showsGridLines）
+        outerRingLayer.strokeColor = theme.outerRingColor.cgColor
+        outerRingLayer.lineWidth = theme.outerRingLineWidth
+        outerRingLayer.lineDashPattern = theme.outerRingLineStyle.dashPattern
 
         dataFillLayer.fillColor = theme.dataFillColor.cgColor
         dataFillLayer.strokeColor = UIColor.clear.cgColor
         dataStrokeLayer.fillColor = UIColor.clear.cgColor
         dataStrokeLayer.strokeColor = theme.dataStrokeColor.cgColor
         dataStrokeLayer.lineWidth = theme.dataLineWidth
-        vertexDotsLayer.fillColor = theme.vertexDotColor.cgColor
-        vertexDotsLayer.strokeColor = theme.vertexDotRingColor.cgColor
-        vertexDotsLayer.lineWidth = 2
+        // 数据点/标题顶点颜色在 rebuild* 按每点设置（支持 per-dim）
+        // 装饰 ring
+        decorativeRingLayer.strokeColor = theme.decorativeRingColor.cgColor
+        decorativeRingLayer.lineWidth = theme.decorativeRingLineWidth
+        decorativeRingLayer.lineDashPattern = theme.decorativeRingLineStyle.dashPattern
+        decorativeRingLayer.fillColor = (theme.decorativeRingFillColor ?? UIColor.clear).cgColor
 
         // 显隐开关（彼此正交）
         gridLayer.isHidden = !theme.showsGridLines
+        outerRingLayer.isHidden = !theme.showsOuterRing
         axisLayer.isHidden = !theme.showsAxes
         let dataHidden = !theme.showsData
         dataFillLayer.isHidden = dataHidden
         dataStrokeLayer.isHidden = dataHidden
-        vertexDotsLayer.isHidden = dataHidden
+        vertexDotsContainerLayer.isHidden = !theme.showsVertexDots   // 数据点独立显隐
+        labelDotsContainerLayer.isHidden = !theme.showsLabelDots
+        decorativeRingLayer.isHidden = !theme.showsDecorativeRing
         gradientLayer.isHidden = !theme.showsBackground
     }
 
@@ -169,16 +188,19 @@ public final class RadarChartRenderer: HYMChartRenderer {
         let n = model.dimensions.count
         guard let theme = currentTheme else { return }
         let ringCount = max(1, theme.gridRingCount)
-        let path = UIBezierPath()
+        let innerPath = UIBezierPath()    // 内圈（k < ringCount-1）→ gridLayer
+        let outerPath = UIBezierPath()    // 最外圈（k == ringCount-1）→ outerRingLayer
         for k in 0..<ringCount {
             let pts = RadarGeometry.ringPoints(count: n, center: center, radius: radius,
                                                ringIndex: k, ringCount: ringCount)
             guard let first = pts.first else { continue }
+            let path = (k == ringCount - 1) ? outerPath : innerPath
             path.move(to: first)
             for p in pts.dropFirst() { path.addLine(to: p) }
             path.close()
         }
-        gridLayer.path = path.cgPath
+        gridLayer.path = innerPath.cgPath
+        outerRingLayer.path = outerPath.cgPath
     }
 
     // MARK: - 网格底色（每圈独立 fill）
@@ -259,19 +281,57 @@ public final class RadarChartRenderer: HYMChartRenderer {
         dataStrokeLayer.path = path.cgPath
     }
 
-    // MARK: - 顶点圆点
+    // MARK: - 顶点圆点（每点一个子 layer，支持 per-dim 颜色）
     private func rebuildVertexDots(_ model: RadarChartModel, center: CGPoint, radius: CGFloat) {
         guard let theme = currentTheme else { return }
+        vertexDotsContainerLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
         let n = model.dimensions.count
         let dotRadius = theme.vertexDotRadius
-        let path = UIBezierPath()
         for i in 0..<n {
-            let ratio = model.dimensions[i].normalized
-            let p = RadarGeometry.point(index: i, count: n, center: center, radius: radius, ratio: ratio)
-            path.append(UIBezierPath(arcCenter: p, radius: dotRadius,
-                                     startAngle: 0, endAngle: 2 * CGFloat.pi, clockwise: true))
+            let dim = model.dimensions[i]
+            let p = RadarGeometry.point(index: i, count: n, center: center, radius: radius, ratio: dim.normalized)
+            let dot = CAShapeLayer()
+            dot.path = UIBezierPath(arcCenter: p, radius: dotRadius,
+                                    startAngle: 0, endAngle: 2 * CGFloat.pi, clockwise: true).cgPath
+            dot.fillColor = (dim.dataDotColor ?? theme.vertexDotColor).cgColor
+            dot.strokeColor = theme.vertexDotRingColor.cgColor
+            dot.lineWidth = 2
+            vertexDotsContainerLayer.addSublayer(dot)
         }
-        vertexDotsLayer.path = path.cgPath
+    }
+
+    // MARK: - 标题顶点圆点（最外圈顶点；每点子 layer，支持 per-dim 颜色）
+    private func rebuildLabelDots(_ model: RadarChartModel, center: CGPoint, radius: CGFloat) {
+        guard let theme = currentTheme else { return }
+        labelDotsContainerLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
+        let n = model.dimensions.count
+        let dotRadius = theme.labelDotRadius
+        for i in 0..<n {
+            let dim = model.dimensions[i]
+            let p = RadarGeometry.point(index: i, count: n, center: center, radius: radius, ratio: 1)
+            let dot = CAShapeLayer()
+            dot.path = UIBezierPath(arcCenter: p, radius: dotRadius,
+                                    startAngle: 0, endAngle: 2 * CGFloat.pi, clockwise: true).cgPath
+            dot.fillColor = (dim.labelDotColor ?? theme.labelDotColor).cgColor
+            dot.strokeColor = UIColor.clear.cgColor
+            labelDotsContainerLayer.addSublayer(dot)
+        }
+    }
+
+    // MARK: - 装饰 ring（最外圈外，用 HYMRingRenderer 绘制）
+    // 半径优先 = radius + labelOuterPadding（与标签圈一致，可与文字重叠）+ inset 微调；
+    // 若超出 view 边界则裁剪到边界。
+    private func rebuildDecorativeRing(_ model: RadarChartModel, center: CGPoint, radius: CGFloat, bounds: CGRect) {
+        guard let theme = currentTheme else { return }
+        let sides = (theme.decorativeRingSides == -1) ? model.dimensions.count : theme.decorativeRingSides
+        let viewHalf = min(bounds.width, bounds.height) / 2
+        let desired = radius + theme.labelOuterPadding + theme.decorativeRingInset
+        let decorativeRadius = max(0, min(desired, viewHalf - 0.5))
+        decorativeRingLayer.path = HYMRingRenderer.ringPath(
+            center: center,
+            radius: decorativeRadius,
+            sides: sides,
+            startAngle: -CGFloat.pi / 2)
     }
 
     // MARK: - 文案标签（顶点外侧）
@@ -287,10 +347,11 @@ public final class RadarChartRenderer: HYMChartRenderer {
             let r = radius + gap
             let labelCenter = CGPoint(x: center.x + r * cos(a), y: center.y + r * sin(a))
 
+            let dim = model.dimensions[i]
             let lbl = UILabel()
-            lbl.text = model.dimensions[i].label
-            lbl.textColor = theme.labelColor
-            lbl.font = theme.labelFont
+            lbl.text = dim.label
+            lbl.textColor = dim.labelColor ?? theme.labelColor
+            lbl.font = dim.labelFont ?? theme.labelFont
             lbl.textAlignment = .center
             lbl.sizeToFit()
             lbl.center = labelCenter
@@ -305,22 +366,13 @@ public final class RadarChartRenderer: HYMChartRenderer {
         let resolved = resolvedCenterScore(model)
         if let value = resolved {
             scoreLabel.isHidden = false
-            subtitleLabel.isHidden = false
             scoreLabel.text = formatScore(value)
             scoreLabel.font = theme.scoreFont
             scoreLabel.textColor = theme.scoreColor
             scoreLabel.sizeToFit()
-
-            subtitleLabel.text = theme.scoreSubtitleText
-            subtitleLabel.font = theme.scoreSubtitleFont
-            subtitleLabel.textColor = theme.scoreSubtitleColor
-            subtitleLabel.sizeToFit()
-
-            subtitleLabel.center = CGPoint(x: center.x, y: center.y - 10)
-            scoreLabel.center = CGPoint(x: center.x, y: center.y + 18)
+            scoreLabel.center = center   // 无副标题，分数居中
         } else {
             scoreLabel.isHidden = true
-            subtitleLabel.isHidden = true
         }
     }
 

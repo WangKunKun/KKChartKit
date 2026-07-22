@@ -1,5 +1,6 @@
 import Foundation
 import CoreGraphics
+import UIKit
 
 /// 单个维度（纯值类型）
 public struct RadarDimension {
@@ -9,11 +10,25 @@ public struct RadarDimension {
     public var value: Double
     /// 满分值（用于归一化），默认 100
     public var maxValue: Double
+    /// 该维度标签颜色（nil → 用 Theme 统一 labelColor）
+    public var labelColor: UIColor?
+    /// 该维度标签字体（nil → 用 Theme 统一 labelFont）
+    public var labelFont: UIFont?
+    /// 该维度数据点颜色（nil → 用 Theme 统一 vertexDotColor）
+    public var dataDotColor: UIColor?
+    /// 该维度最外圈顶点圆点颜色（nil → 用 Theme 统一 labelDotColor）
+    public var labelDotColor: UIColor?
 
-    public init(label: String, value: Double, maxValue: Double = 100) {
+    public init(label: String, value: Double, maxValue: Double = 100,
+                labelColor: UIColor? = nil, labelFont: UIFont? = nil,
+                dataDotColor: UIColor? = nil, labelDotColor: UIColor? = nil) {
         self.label = label
         self.value = value
         self.maxValue = maxValue
+        self.labelColor = labelColor
+        self.labelFont = labelFont
+        self.dataDotColor = dataDotColor
+        self.labelDotColor = labelDotColor
     }
 
     /// 归一化比值 [0,1]，越界裁剪（内部使用）
