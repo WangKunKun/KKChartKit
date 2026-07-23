@@ -12,6 +12,9 @@ public struct HYMChartRenderContext {
 
 /// 图表渲染器契约：给定 model/theme/context，重建 layer 子树与子视图。
 /// 具体图表（如 RadarChartRenderer）实现此协议；通用容器 HYMChartView 注入使用。
+///
+/// 注意：本协议只承载**所有图表通用**的能力。某类图表特有的数据/动画
+/// （如雷达图「中心分数」）不得在此定义，应放进该图表特有的 Model/Renderer。
 public protocol HYMChartRenderer: AnyObject {
     /// 无参构造（供泛型容器 `Renderer()` 实例化）
     init()
@@ -29,8 +32,8 @@ public protocol HYMChartRenderer: AnyObject {
     /// 参加入场动画的 layer（容器统一驱动 scale + opacity）
     var animatableLayers: [CALayer] { get }
 
-    /// 入场动画每帧回调（容器驱动 DisplayLink，传归一化且已 ease 的进度 0...1）。
-    /// Renderer 据此更新自身需要数值滚动的子视图（如中心分数 label）。
+    /// 入场动画逐帧回调（容器驱动 DisplayLink，传归一化且已 ease 的进度 0...1）。
+    /// Renderer 据此更新自身需要的逐帧子视图动画（通用；具体含义由各图表自定义）。
     func updateEntranceAnimation(progress: Double)
 
     // —— 交互能力（声明为 requirement，保证 override 走 witness table 可靠动态派发）——
@@ -38,14 +41,11 @@ public protocol HYMChartRenderer: AnyObject {
     func hitTest(_ point: CGPoint) -> HYMChartHitTarget?
     /// 选中态视觉反馈（预留）；默认空
     func applySelection(_ target: HYMChartHitTarget?)
-    /// 数值动画目标（如中心分数）；默认 nil
-    var centerScoreTarget: Double? { get }
 }
 
-/// 默认实现：可交互为可选；不关心的图表无需实现这些方法
+/// 默认实现：交互与逐帧回调为可选；不关心的图表无需实现这些方法
 public extension HYMChartRenderer {
     func hitTest(_ point: CGPoint) -> HYMChartHitTarget? { nil }
     func applySelection(_ target: HYMChartHitTarget?) {}
-    var centerScoreTarget: Double? { nil }
     func updateEntranceAnimation(progress: Double) {}
 }

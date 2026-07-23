@@ -46,7 +46,7 @@ struct RadarChartBasicDemo: View {
                 Text("HYMCharts · 雷达图（默认主题）")
                     .font(.headline)
                     .foregroundStyle(.white)
-                RadarChart(model: Self.demoModel)
+                RadarChart(model: Self.demoModel, replayOnTap: true)
                     .frame(width: 320, height: 320)
             }
             .padding()

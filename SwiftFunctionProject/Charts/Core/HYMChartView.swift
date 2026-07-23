@@ -78,39 +78,31 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     private func performEntranceAnimation() {
         animator.stop()
         let animatable = renderer.animatableLayers
-        let duration: CFTimeInterval = 0.6
+        let duration: CFTimeInterval = 0.8
 
         // 第 1 步：无动画设「初始态」——scale 极小 + 透明。
-        // 关键：必须在 identity transform 下，frame 由 Renderer.render 已设为 bounds（锚点居中）；
-        // 非 identity 下设 frame 属未定义行为（CALayer 文档）。
+        // 必须在 identity transform 下（frame 由 render 设为 bounds，锚点居中）。
         CATransaction.begin()
         CATransaction.setDisableActions(true)
-        let tiny = CGAffineTransform.identity.scaledBy(x: 0.01, y: 0.01)
         for l in animatable {
-            l.setAffineTransform(tiny)
             l.opacity = 0
         }
         renderer.updateEntranceAnimation(progress: 0)
         CATransaction.commit()
 
-        // 第 2 步：隐式动画过渡到「终态」——scale identity + 不透明
-        CATransaction.begin()
-        CATransaction.setAnimationDuration(duration)
-        CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .easeOut))
-        for l in animatable {
-            l.setAffineTransform(.identity)
-            l.opacity = 1
-        }
-        CATransaction.commit()
-
-        // 第 3 步：数值滚动（如中心分数），DisplayLink 驱动
-        if renderer.centerScoreTarget != nil {
-            animator.startEaseOut(duration: 0.8,
-                handler: { [weak self] progress in
-                    self?.renderer.updateEntranceAnimation(progress: progress)
-                },
-                completion: { })
-        }
+        // 第 2 步：逐帧驱动 animatableLayers 的 scale + opacity（DisplayLink）。
+        // 不用 CATransaction 隐式动画：本方法在 layoutSubviews 内调用，UIKit 的 layout 上下文
+        // 会抑制隐式动画（实测 setDisableActions(false) 亦无效）；改由 animator 每帧手动插值，
+        // 与 renderer.updateEntranceAnimation（分数淡入）共用同一 progress，同步且可靠。
+        animator.startEaseOut(duration: duration,
+            handler: { [weak self] progress in
+                guard let self else { return }
+                for l in animatable {
+                    l.opacity = Float(progress)
+                }
+                self.renderer.updateEntranceAnimation(progress: progress)
+            },
+            completion: { })
     }
 
     // MARK: - 触摸命中

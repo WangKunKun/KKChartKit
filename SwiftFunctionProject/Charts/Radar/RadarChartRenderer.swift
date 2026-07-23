@@ -71,25 +71,31 @@ public final class RadarChartRenderer: HYMChartRenderer {
 
     // MARK: - 动画契约
     public var animatableLayers: [CALayer] {
-        [decorativeRingLayer, dataFillLayer, dataStrokeLayer, vertexDotsContainerLayer, labelDotsContainerLayer,
-         gridLayer, outerRingLayer, axisLayer, gridFillContainerLayer]
-    }
-
-    public var centerScoreTarget: Double? {
-        guard let m = currentModel else { return nil }
-        return resolvedCenterScore(m)
+//        [decorativeRingLayer, dataFillLayer, dataStrokeLayer, vertexDotsContainerLayer, labelDotsContainerLayer,
+//         gridLayer, outerRingLayer, axisLayer, gridFillContainerLayer]
+        
+        [dataFillLayer, dataStrokeLayer, vertexDotsContainerLayer]
     }
 
     public func updateEntranceAnimation(progress: Double) {
-        guard let theme = currentTheme else { return }
-        let target = centerScoreTarget ?? 0
-        let value = target * progress
-        scoreLabel.text = formatScore(value)
+        // 中心分数是雷达图特有的数据（存于 RadarChartModel），动画目标在此从自身 model 派生，
+        // 不经通用协议暴露（协议只提供逐帧回调 progress）。
+        
+        let alpha = CGFloat(min(1, progress))
+//        for label in self.labels {
+//            label.alpha = alpha
+//        }
+        
+        guard let theme = currentTheme, let model = currentModel else { return }
+        let target = resolvedCenterScore(model) ?? 0
+        
+        // 分数不滚动：始终显示最终值；progress 仅驱动淡入（0→1）
+        scoreLabel.text = formatScore(target)
         scoreLabel.font = theme.scoreFont
         scoreLabel.textColor = theme.scoreColor
         scoreLabel.sizeToFit()
         scoreLabel.center = lastCenter   // 无副标题，分数居中
-        scoreLabel.alpha = CGFloat(min(1, progress * 1.5))   // 前段淡入
+        scoreLabel.alpha = alpha
     }
 
     // MARK: - render
