@@ -54,6 +54,27 @@ public enum ChartSelfTest {
         let renderer = RadarChartRenderer()
         assert(renderer.hitTest(.zero) == nil, "default hitTest should be nil")
 
+        // —— RadarHitTarget / 通用 kind 槽位 ——
+        let rht = RadarHitTarget(category: .dataVertex, dimensionIndex: 3)
+        assert(rht.kind == "dataVertex", "dataVertex kind wrong: \(rht.kind)")
+        assert(rht.index == 3, "index should equal dimensionIndex")
+        assert(rht.identifier == "dataVertex:3", "identifier wrong: \(rht.identifier)")
+        assert(RadarHitTarget(category: .labelVertex, dimensionIndex: 2).kind == "labelVertex")
+        struct _PlainTarget: HYMChartHitTarget { let identifier = "x"; let index = 0 }
+        assert(_PlainTarget().kind == "", "default kind should be empty")
+
+        // —— hitTest / applySelection 基本行为（render 后）——
+        let tapRenderer = RadarChartRenderer()
+        let tapModel = RadarChartModel(dimensions: [
+            RadarDimension(label: "a", value: 80),
+            RadarDimension(label: "b", value: 60),
+        ])
+        tapRenderer.render(model: tapModel, theme: RadarChartTheme(),
+                           context: HYMChartRenderContext(bounds: CGRect(x: 0, y: 0, width: 200, height: 200),
+                                                          center: CGPoint(x: 100, y: 100)))
+        assert(tapRenderer.hitTest(CGPoint(x: 100, y: 100)) == nil, "center should not hit any vertex")
+        tapRenderer.applySelection(nil)   // 不崩溃即可
+
         print("✅ ChartSelfTest passed")
     }
 }

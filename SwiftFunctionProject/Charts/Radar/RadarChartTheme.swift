@@ -48,7 +48,7 @@ public struct RadarChartTheme: HYMChartTheme {
     public var showsAxes: Bool
     public var showsData: Bool
     public var showsBackground: Bool
-    // —— 样式扩展（2026-07-22）——
+    // —— 样式扩展 ——
     public var showsVertexDots: Bool          // 数据点独立显隐（与 showsData 正交）
     public var showsLabelDots: Bool           // 标题顶点圆点显隐
     public var labelDotColor: UIColor
@@ -58,7 +58,7 @@ public struct RadarChartTheme: HYMChartTheme {
     public var outerRingLineWidth: CGFloat
     public var outerRingLineStyle: ChartLineStyle  // 最外圈线型（独立于内圈网格）
     public var gridLineStyle: ChartLineStyle  // 内圈网格线型
-    public var axisLineStyle: ChartLineStyle  // 放射轴线型
+    public var axisLineStyle: ChartLineStyle  // 放射线型
     // —— 装饰 ring（最外圈外）——
     public var showsDecorativeRing: Bool
     public var decorativeRingColor: UIColor
@@ -67,6 +67,12 @@ public struct RadarChartTheme: HYMChartTheme {
     public var decorativeRingInset: CGFloat        // 距最外圈外的间距 pt
     public var decorativeRingSides: Int            // -1=跟随维度数；0=圆形；N=正N边形
     public var decorativeRingFillColor: UIColor?   // 装饰 ring 填充色（nil = 透明）
+    // —— 选中态高亮（顶点点击）——
+    public var selectionScale: CGFloat          // 选中放大倍数；1.0 = 不放大
+    public var selectionStrokeColor: UIColor?   // 选中描边色；nil = 沿用原描边
+    public var selectionStrokeWidth: CGFloat    // 描边线宽
+    public var selectionColor: UIColor?         // 选中变色；nil = 用原色不变色
+    public var selectionHitPadding: CGFloat     // 命中容差（pt）
 
     public init(
         backgroundGradientStart: UIColor = UIColor(red: 0x2A/255.0, green: 0x1B/255.0, blue: 0x5C/255.0, alpha: 1),
@@ -107,7 +113,12 @@ public struct RadarChartTheme: HYMChartTheme {
         decorativeRingLineStyle: ChartLineStyle = .solid,
         decorativeRingInset: CGFloat = 0,
         decorativeRingSides: Int = -1,
-        decorativeRingFillColor: UIColor? = nil
+        decorativeRingFillColor: UIColor? = nil,
+        selectionScale: CGFloat = 1.5,
+        selectionStrokeColor: UIColor? = .white,
+        selectionStrokeWidth: CGFloat = 2,
+        selectionColor: UIColor? = UIColor(red: 0xFF/255.0, green: 0xC1/255.0, blue: 0x07/255.0, alpha: 1),
+        selectionHitPadding: CGFloat = 10
     ) {
         self.backgroundGradientStart = backgroundGradientStart
         self.backgroundGradientEnd = backgroundGradientEnd
@@ -148,5 +159,10 @@ public struct RadarChartTheme: HYMChartTheme {
         self.decorativeRingInset = decorativeRingInset
         self.decorativeRingSides = decorativeRingSides
         self.decorativeRingFillColor = decorativeRingFillColor
+        self.selectionScale = selectionScale
+        self.selectionStrokeColor = selectionStrokeColor
+        self.selectionStrokeWidth = selectionStrokeWidth
+        self.selectionColor = selectionColor
+        self.selectionHitPadding = selectionHitPadding
     }
 }

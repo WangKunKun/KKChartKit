@@ -49,6 +49,13 @@ public final class HYMRadarThemeBuilder: NSObject {
     /// -1=跟随维度数；0=圆形；N=正N边形
     @objc public var decorativeRingSides: Int = -1
 
+    // —— 选中态高亮（顶点点击）——
+    @objc public var selectionScale: CGFloat = 1.5
+    @objc public var selectionStrokeColor: UIColor? = .white
+    @objc public var selectionStrokeWidth: CGFloat = 2
+    @objc public var selectionColor: UIColor?
+    @objc public var selectionHitPadding: CGFloat = 10
+
     // —— 网格底色 GridRingFill ——
     @objc public var gridRingFill: String = "none"
     @objc public var gridRingColors: [UIColor] = []
@@ -104,6 +111,12 @@ public final class HYMRadarThemeBuilder: NSObject {
         t.decorativeRingLineWidth = decorativeRingLineWidth
         t.decorativeRingInset = decorativeRingInset
         t.decorativeRingSides = decorativeRingSides
+        // 选中态
+        t.selectionScale = selectionScale
+        t.selectionStrokeColor = selectionStrokeColor
+        t.selectionStrokeWidth = selectionStrokeWidth
+        t.selectionColor = selectionColor
+        t.selectionHitPadding = selectionHitPadding
         // 网格底色
         switch gridRingFill.lowercased() {
         case "gradient":

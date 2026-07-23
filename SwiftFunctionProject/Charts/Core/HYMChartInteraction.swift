@@ -13,4 +13,12 @@ public protocol HYMChartHitTarget {
     var identifier: String { get }
     /// 序号
     var index: Int { get }
+    /// 通用类别槽位（如 "dataVertex"/"labelVertex"）；默认 "" 表示不分类。
+    /// 具体类别值由各图表特有 HitTarget 定义，不污染本通用协议。
+    var kind: String { get }
+}
+
+public extension HYMChartHitTarget {
+    /// 默认不分类
+    var kind: String { "" }
 }

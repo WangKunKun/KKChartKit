@@ -108,9 +108,9 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     // MARK: - 触摸命中
     @objc private func onTap(_ gr: UITapGestureRecognizer) {
         let p = gr.location(in: self)
-        if let target = renderer.hitTest(p) {
-            onHit?(target, .tap)
-        }
+        let target = renderer.hitTest(p)
+        renderer.applySelection(target)        // 命中→选中，未命中→取消（通用）
+        if let target { onHit?(target, .tap) }
     }
 
     deinit {

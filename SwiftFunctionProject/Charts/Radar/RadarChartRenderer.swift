@@ -1,7 +1,25 @@
 import UIKit
 
+/// 雷达图命中目标类别（特有；String rawValue 用于派生通用 `kind`）。
+public enum RadarHitCategory: String {
+    case dataVertex      // 数据值顶点（内圈）
+    case labelVertex     // 标题顶点圆点（最外圈）
+}
+
+/// 雷达图命中目标（特有）。强类型 `category` 给 Swift 用；`kind` 派生给通用层/OC。
+public struct RadarHitTarget: HYMChartHitTarget {
+    public let category: RadarHitCategory
+    public let dimensionIndex: Int
+    public init(category: RadarHitCategory, dimensionIndex: Int) {
+        self.category = category
+        self.dimensionIndex = dimensionIndex
+    }
+    public var identifier: String { "\(category.rawValue):\(dimensionIndex)" }
+    public var index: Int { dimensionIndex }
+    public var kind: String { category.rawValue }
+}
+
 /// 雷达图渲染器：实现 HYMChartRenderer，承载全部 layer 重建 / 标签 / 主题配色 / 数值动画。
-/// 本期 hitTest 保持协议默认 nil（无交互命中），后续 override 增加命中目标。
 public final class RadarChartRenderer: HYMChartRenderer {
     public typealias Model = RadarChartModel
     public typealias Theme = RadarChartTheme
@@ -29,6 +47,17 @@ public final class RadarChartRenderer: HYMChartRenderer {
     private var currentModel: RadarChartModel?
     private var currentTheme: RadarChartTheme?
     private var lastCenter = CGPoint.zero
+    private var lastRadius: CGFloat = 0
+    /// 命中检测缓存：数据顶点先入、标题顶点后入（遍历时数据顶点优先）
+    private struct HitRecord {
+        let category: RadarHitCategory
+        let dimensionIndex: Int
+        let center: CGPoint
+        let radius: CGFloat
+    }
+    private var hitRecords: [HitRecord] = []
+    /// 当前选中（单选互斥）
+    private var currentSelection: (category: RadarHitCategory, dimensionIndex: Int)?
 
     // MARK: - mount / unmount
     public func mount(into view: UIView) {
@@ -71,24 +100,17 @@ public final class RadarChartRenderer: HYMChartRenderer {
 
     // MARK: - 动画契约
     public var animatableLayers: [CALayer] {
-//        [decorativeRingLayer, dataFillLayer, dataStrokeLayer, vertexDotsContainerLayer, labelDotsContainerLayer,
-//         gridLayer, outerRingLayer, axisLayer, gridFillContainerLayer]
-        
         [dataFillLayer, dataStrokeLayer, vertexDotsContainerLayer]
     }
 
     public func updateEntranceAnimation(progress: Double) {
         // 中心分数是雷达图特有的数据（存于 RadarChartModel），动画目标在此从自身 model 派生，
         // 不经通用协议暴露（协议只提供逐帧回调 progress）。
-        
         let alpha = CGFloat(min(1, progress))
-//        for label in self.labels {
-//            label.alpha = alpha
-//        }
-        
+
         guard let theme = currentTheme, let model = currentModel else { return }
         let target = resolvedCenterScore(model) ?? 0
-        
+
         // 分数不滚动：始终显示最终值；progress 仅驱动淡入（0→1）
         scoreLabel.text = formatScore(target)
         scoreLabel.font = theme.scoreFont
@@ -120,6 +142,8 @@ public final class RadarChartRenderer: HYMChartRenderer {
             labelDotsContainerLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
             decorativeRingLayer.path = nil
             scoreLabel.isHidden = true
+            hitRecords.removeAll()
+            currentSelection = nil
             return
         }
 
@@ -138,6 +162,20 @@ public final class RadarChartRenderer: HYMChartRenderer {
 
         // animatable layer 的 frame = bounds（identity transform 下），保证容器 scale 动画锚点居中
         for l in animatableLayers { l.frame = context.bounds }
+
+        // 命中缓存：数据顶点先入、标题顶点后入（遍历时数据顶点优先）
+        lastRadius = radius
+        hitRecords.removeAll()
+        let nHit = model.dimensions.count
+        for i in 0..<nHit {
+            let dim = model.dimensions[i]
+            let pData = RadarGeometry.point(index: i, count: nHit, center: center, radius: radius, ratio: dim.normalized)
+            hitRecords.append(HitRecord(category: .dataVertex, dimensionIndex: i, center: pData, radius: theme.vertexDotRadius))
+        }
+        for i in 0..<nHit {
+            let pLabel = RadarGeometry.point(index: i, count: nHit, center: center, radius: radius, ratio: 1)
+            hitRecords.append(HitRecord(category: .labelVertex, dimensionIndex: i, center: pLabel, radius: theme.labelDotRadius))
+        }
     }
 
     // MARK: - 主题配色
@@ -287,46 +325,52 @@ public final class RadarChartRenderer: HYMChartRenderer {
         dataStrokeLayer.path = path.cgPath
     }
 
-    // MARK: - 顶点圆点（每点一个子 layer，支持 per-dim 颜色）
+    // MARK: - 顶点圆点（每点一个子 layer，支持 per-dim 颜色 + 选中高亮）
     private func rebuildVertexDots(_ model: RadarChartModel, center: CGPoint, radius: CGFloat) {
         guard let theme = currentTheme else { return }
         vertexDotsContainerLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
         let n = model.dimensions.count
-        let dotRadius = theme.vertexDotRadius
+        let baseDotRadius = theme.vertexDotRadius
         for i in 0..<n {
             let dim = model.dimensions[i]
             let p = RadarGeometry.point(index: i, count: n, center: center, radius: radius, ratio: dim.normalized)
+            let selected = (currentSelection?.category == .dataVertex && currentSelection?.dimensionIndex == i)
+            let dotRadius = selected ? baseDotRadius * theme.selectionScale : baseDotRadius
             let dot = CAShapeLayer()
             dot.path = UIBezierPath(arcCenter: p, radius: dotRadius,
                                     startAngle: 0, endAngle: 2 * CGFloat.pi, clockwise: true).cgPath
-            dot.fillColor = (dim.dataDotColor ?? theme.vertexDotColor).cgColor
-            dot.strokeColor = theme.vertexDotRingColor.cgColor
-            dot.lineWidth = 2
+            let baseColor = dim.dataDotColor ?? theme.vertexDotColor
+            dot.fillColor = (selected ? (theme.selectionColor ?? baseColor) : baseColor).cgColor
+            dot.strokeColor = (selected ? (theme.selectionStrokeColor ?? theme.vertexDotRingColor)
+                                        : theme.vertexDotRingColor).cgColor
+            dot.lineWidth = selected ? max(2, theme.selectionStrokeWidth) : 2
             vertexDotsContainerLayer.addSublayer(dot)
         }
     }
 
-    // MARK: - 标题顶点圆点（最外圈顶点；每点子 layer，支持 per-dim 颜色）
+    // MARK: - 标题顶点圆点（最外圈顶点；每点子 layer，支持 per-dim 颜色 + 选中高亮）
     private func rebuildLabelDots(_ model: RadarChartModel, center: CGPoint, radius: CGFloat) {
         guard let theme = currentTheme else { return }
         labelDotsContainerLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
         let n = model.dimensions.count
-        let dotRadius = theme.labelDotRadius
+        let baseDotRadius = theme.labelDotRadius
         for i in 0..<n {
             let dim = model.dimensions[i]
             let p = RadarGeometry.point(index: i, count: n, center: center, radius: radius, ratio: 1)
+            let selected = (currentSelection?.category == .labelVertex && currentSelection?.dimensionIndex == i)
+            let dotRadius = selected ? baseDotRadius * theme.selectionScale : baseDotRadius
             let dot = CAShapeLayer()
             dot.path = UIBezierPath(arcCenter: p, radius: dotRadius,
                                     startAngle: 0, endAngle: 2 * CGFloat.pi, clockwise: true).cgPath
-            dot.fillColor = (dim.labelDotColor ?? theme.labelDotColor).cgColor
-            dot.strokeColor = UIColor.clear.cgColor
+            let baseColor = dim.labelDotColor ?? theme.labelDotColor
+            dot.fillColor = (selected ? (theme.selectionColor ?? baseColor) : baseColor).cgColor
+            dot.strokeColor = (selected ? (theme.selectionStrokeColor ?? UIColor.clear) : UIColor.clear).cgColor
+            dot.lineWidth = selected ? max(2, theme.selectionStrokeWidth) : 0
             labelDotsContainerLayer.addSublayer(dot)
         }
     }
 
     // MARK: - 装饰 ring（最外圈外，用 HYMRingRenderer 绘制）
-    // 半径优先 = radius + labelOuterPadding（与标签圈一致，可与文字重叠）+ inset 微调；
-    // 若超出 view 边界则裁剪到边界。
     private func rebuildDecorativeRing(_ model: RadarChartModel, center: CGPoint, radius: CGFloat, bounds: CGRect) {
         guard let theme = currentTheme else { return }
         let sides = (theme.decorativeRingSides == -1) ? model.dimensions.count : theme.decorativeRingSides
@@ -385,5 +429,30 @@ public final class RadarChartRenderer: HYMChartRenderer {
     private func formatScore(_ value: Double) -> String {
         let rounded = (value * 10).rounded() / 10   // 保留 1 位小数
         return rounded.rounded() == rounded ? String(Int(rounded)) : String(format: "%.1f", rounded)
+    }
+
+    // MARK: - 命中与选中
+    public func hitTest(_ point: CGPoint) -> HYMChartHitTarget? {
+        let pad = currentTheme?.selectionHitPadding ?? 10
+        for r in hitRecords {
+            let dx = point.x - r.center.x
+            let dy = point.y - r.center.y
+            let reach = r.radius + pad
+            if dx * dx + dy * dy <= reach * reach {
+                return RadarHitTarget(category: r.category, dimensionIndex: r.dimensionIndex)
+            }
+        }
+        return nil
+    }
+
+    public func applySelection(_ target: HYMChartHitTarget?) {
+        if let radar = target as? RadarHitTarget {
+            currentSelection = (radar.category, radar.dimensionIndex)
+        } else {
+            currentSelection = nil
+        }
+        guard let model = currentModel else { return }
+        rebuildVertexDots(model, center: lastCenter, radius: lastRadius)
+        rebuildLabelDots(model, center: lastCenter, radius: lastRadius)
     }
 }
