@@ -15,10 +15,13 @@ public final class HYMRadarDimensionBridge: NSObject {
     @objc public var dataDotColor: UIColor?
     /// 该维度最外圈顶点圆点颜色（nil → Theme 统一 labelDotColor）
     @objc public var labelDotColor: UIColor?
+    /// 该维度标题顶点圆点是否显示（nil → 用 Theme 全局；@YES/@NO → 独立覆盖）
+    @objc public var showsLabelDot: NSNumber?
 
     @objc public init(label: String, value: Double, maxValue: Double = 100,
                       labelColor: UIColor? = nil, labelFont: UIFont? = nil,
-                      dataDotColor: UIColor? = nil, labelDotColor: UIColor? = nil) {
+                      dataDotColor: UIColor? = nil, labelDotColor: UIColor? = nil,
+                      showsLabelDot: NSNumber? = nil) {
         self.label = label
         self.value = value
         self.maxValue = maxValue
@@ -26,6 +29,7 @@ public final class HYMRadarDimensionBridge: NSObject {
         self.labelFont = labelFont
         self.dataDotColor = dataDotColor
         self.labelDotColor = labelDotColor
+        self.showsLabelDot = showsLabelDot
         super.init()
     }
 
@@ -33,6 +37,7 @@ public final class HYMRadarDimensionBridge: NSObject {
     internal var dimension: RadarDimension {
         RadarDimension(label: label, value: value, maxValue: maxValue,
                        labelColor: labelColor, labelFont: labelFont,
-                       dataDotColor: dataDotColor, labelDotColor: labelDotColor)
+                       dataDotColor: dataDotColor, labelDotColor: labelDotColor,
+                       showsLabelDot: showsLabelDot?.boolValue)
     }
 }

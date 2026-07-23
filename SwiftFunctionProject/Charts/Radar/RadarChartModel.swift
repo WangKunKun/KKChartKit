@@ -18,10 +18,13 @@ public struct RadarDimension {
     public var dataDotColor: UIColor?
     /// 该维度最外圈顶点圆点颜色（nil → 用 Theme 统一 labelDotColor）
     public var labelDotColor: UIColor?
+    /// 该维度标题顶点圆点是否显示（nil → 用 Theme 统一 showsLabelDots；独立覆盖）
+    public var showsLabelDot: Bool?
 
     public init(label: String, value: Double, maxValue: Double = 100,
                 labelColor: UIColor? = nil, labelFont: UIFont? = nil,
-                dataDotColor: UIColor? = nil, labelDotColor: UIColor? = nil) {
+                dataDotColor: UIColor? = nil, labelDotColor: UIColor? = nil,
+                showsLabelDot: Bool? = nil) {
         self.label = label
         self.value = value
         self.maxValue = maxValue
@@ -29,6 +32,7 @@ public struct RadarDimension {
         self.labelFont = labelFont
         self.dataDotColor = dataDotColor
         self.labelDotColor = labelDotColor
+        self.showsLabelDot = showsLabelDot
     }
 
     /// 归一化比值 [0,1]，越界裁剪（内部使用）

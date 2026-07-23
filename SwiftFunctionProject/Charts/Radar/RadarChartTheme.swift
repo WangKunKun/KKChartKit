@@ -42,6 +42,9 @@ public struct RadarChartTheme: HYMChartTheme {
     public var cardCornerRadius: CGFloat
     public var dataLineWidth: CGFloat
     public var labelOuterPadding: CGFloat
+    /// 左右两侧（水平方向）标签一行最大长度；<=0 = 不换行（单行，向后兼容）。
+    /// 上下（垂直方向）标签始终单行，不受此值影响。
+    public var labelMaxLineLength: CGFloat
     public var vertexDotRadius: CGFloat
     public var gridRingFill: GridRingFill
     public var showsGridLines: Bool
@@ -90,7 +93,8 @@ public struct RadarChartTheme: HYMChartTheme {
         gridRingCount: Int = 5,
         cardCornerRadius: CGFloat = 16,
         dataLineWidth: CGFloat = 2,
-        labelOuterPadding: CGFloat = 22,
+        labelOuterPadding: CGFloat = 15,
+        labelMaxLineLength: CGFloat = 0,
         vertexDotRadius: CGFloat = 5,
         gridRingFill: GridRingFill = .none,
         showsGridLines: Bool = true,
@@ -136,6 +140,7 @@ public struct RadarChartTheme: HYMChartTheme {
         self.cardCornerRadius = cardCornerRadius
         self.dataLineWidth = dataLineWidth
         self.labelOuterPadding = labelOuterPadding
+        self.labelMaxLineLength = labelMaxLineLength
         self.vertexDotRadius = vertexDotRadius
         self.gridRingFill = gridRingFill
         self.showsGridLines = showsGridLines

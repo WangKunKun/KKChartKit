@@ -4,7 +4,9 @@ import UIKit
 @objcMembers
 public final class HYMHeatmapChartViewBridge: NSObject {
     private let chart: HYMChartView<HeatmapChartRenderer>
-    private let theme: HeatmapChartTheme
+    private var theme: HeatmapChartTheme
+    /// 当前 model（applyTheme 时复用，触发重新渲染）
+    private var currentModel: HeatmapChartModel?
 
     /// OC 端命中回调：命中格子时触发 (row, column)。
     @objc public var onHit: ((NSInteger, NSInteger) -> Void)?
@@ -23,7 +25,7 @@ public final class HYMHeatmapChartViewBridge: NSObject {
     /// OC 嵌入用（加入父 view）。
     @objc public var chartView: UIView { chart }
 
-    /// 配置数据。rows 为嵌套数组；rowLabels/columnLabels 可传 nil。
+    /// 配置数据。rows 为嵌套数组；rowLabels/columnLabels 可传 nil。缓存 model 供 applyTheme 复用。
     @objc public func configure(rows: [[HYMHeatmapCellBridge]],
                                 rowLabels: [String]?,
                                 columnLabels: [String]?) {
@@ -31,7 +33,16 @@ public final class HYMHeatmapChartViewBridge: NSObject {
             rows: rows.map { $0.map { $0.heatCell } },
             rowLabels: rowLabels,
             columnLabels: columnLabels)
+        self.currentModel = m
         chart.configure(model: m, theme: theme)
+    }
+
+    /// 修改主题后调用：用新 theme 重新渲染（复用当前 model，触发 layoutSubviews → render）。
+    @objc public func applyTheme(_ theme: HYMHeatmapThemeBuilder) {
+        self.theme = theme.build()
+        if let m = currentModel {
+            chart.configure(model: m, theme: self.theme)
+        }
     }
 
     @objc public func playEntranceAnimation() {

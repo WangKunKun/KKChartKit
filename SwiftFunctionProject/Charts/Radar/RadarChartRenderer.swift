@@ -173,6 +173,8 @@ public final class RadarChartRenderer: HYMChartRenderer {
             hitRecords.append(HitRecord(category: .dataVertex, dimensionIndex: i, center: pData, radius: theme.vertexDotRadius))
         }
         for i in 0..<nHit {
+            let dim = model.dimensions[i]
+            guard (dim.showsLabelDot ?? theme.showsLabelDots) else { continue }   // 不画的不命中
             let pLabel = RadarGeometry.point(index: i, count: nHit, center: center, radius: radius, ratio: 1)
             hitRecords.append(HitRecord(category: .labelVertex, dimensionIndex: i, center: pLabel, radius: theme.labelDotRadius))
         }
@@ -356,6 +358,8 @@ public final class RadarChartRenderer: HYMChartRenderer {
         let baseDotRadius = theme.labelDotRadius
         for i in 0..<n {
             let dim = model.dimensions[i]
+            // per-dim 显隐：nil → 用全局 theme.showsLabelDots
+            guard (dim.showsLabelDot ?? theme.showsLabelDots) else { continue }
             let p = RadarGeometry.point(index: i, count: n, center: center, radius: radius, ratio: 1)
             let selected = (currentSelection?.category == .labelVertex && currentSelection?.dimensionIndex == i)
             let dotRadius = selected ? baseDotRadius * theme.selectionScale : baseDotRadius
@@ -392,19 +396,49 @@ public final class RadarChartRenderer: HYMChartRenderer {
 
         let n = model.dimensions.count
         let gap = theme.labelOuterPadding
+        let maxLine = theme.labelMaxLineLength
         for i in 0..<n {
             let a = RadarGeometry.angle(index: i, count: n)
             let r = radius + gap
-            let labelCenter = CGPoint(x: center.x + r * cos(a), y: center.y + r * sin(a))
+            let cosA = cos(a), sinA = sin(a)
+            let labelCenter = CGPoint(x: center.x + r * cosA, y: center.y + r * sinA)
 
             let dim = model.dimensions[i]
             let lbl = UILabel()
             lbl.text = dim.label
             lbl.textColor = dim.labelColor ?? theme.labelColor
             lbl.font = dim.labelFont ?? theme.labelFont
-            lbl.textAlignment = .center
+            // 方向判断：|sin|>=|cos| → 上下（垂直方向，单行）；否则左右（水平方向，可换行）
+            let isVertical = abs(sinA) >= abs(cosA)
+            if !isVertical && maxLine > 0 {
+                // 左右 + 开启换行：多行，宽度限制为 maxLine
+                lbl.numberOfLines = 0
+                lbl.preferredMaxLayoutWidth = maxLine
+            } else {
+                // 上下 或 未开启换行：单行
+                lbl.numberOfLines = 1
+            }
             lbl.sizeToFit()
-            lbl.center = labelCenter
+            let w = lbl.bounds.width, h = lbl.bounds.height
+            if isVertical {
+                // 上下：近边（靠雷达图一侧）对齐 labelCenter，离顶点 = labelOuterPadding（与左右一致）
+                lbl.textAlignment = .center
+                if sinA < 0 {
+                    // 顶部：底边对齐 labelCenter.y，向上延展
+                    lbl.frame = CGRect(x: labelCenter.x - w / 2, y: labelCenter.y - h, width: w, height: h)
+                } else {
+                    // 底部：顶边对齐 labelCenter.y，向下延展
+                    lbl.frame = CGRect(x: labelCenter.x - w / 2, y: labelCenter.y, width: w, height: h)
+                }
+            } else if cosA > 0 {
+                // 右侧：左边缘对齐顶点外侧，向右延展（避免覆盖/贴近顶点）
+                lbl.textAlignment = .left
+                lbl.frame = CGRect(x: labelCenter.x, y: labelCenter.y - h / 2, width: w, height: h)
+            } else {
+                // 左侧：右边缘对齐顶点外侧，向左延展
+                lbl.textAlignment = .right
+                lbl.frame = CGRect(x: labelCenter.x - w, y: labelCenter.y - h / 2, width: w, height: h)
+            }
             view.addSubview(lbl)
             labels.append(lbl)
         }

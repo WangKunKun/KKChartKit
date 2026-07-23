@@ -40,7 +40,9 @@ public final class HYMRadarThemeBuilder: NSObject {
     @objc public var gridRingCount: Int = 5
     @objc public var cardCornerRadius: CGFloat = 16
     @objc public var dataLineWidth: CGFloat = 2
-    @objc public var labelOuterPadding: CGFloat = 22
+    @objc public var labelOuterPadding: CGFloat = 10
+    /// 左右标签一行最大长度；<=0 = 不换行（单行）
+    @objc public var labelMaxLineLength: CGFloat = 0
     @objc public var vertexDotRadius: CGFloat = 5
     @objc public var labelDotRadius: CGFloat = 4
     @objc public var outerRingLineWidth: CGFloat = 1.5
@@ -105,6 +107,7 @@ public final class HYMRadarThemeBuilder: NSObject {
         t.cardCornerRadius = cardCornerRadius
         t.dataLineWidth = dataLineWidth
         t.labelOuterPadding = labelOuterPadding
+        t.labelMaxLineLength = labelMaxLineLength
         t.vertexDotRadius = vertexDotRadius
         t.labelDotRadius = labelDotRadius
         t.outerRingLineWidth = outerRingLineWidth
