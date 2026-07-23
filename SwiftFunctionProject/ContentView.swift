@@ -24,6 +24,11 @@ struct ContentView: View {
                         HeatmapChartDemo()
                     }
                 }
+                Section("OC demo") {
+                    NavigationLink("蛛网图 + 热力图（OC）") {
+                        OCChartDemoHost()
+                    }
+                }
             }
             .navigationTitle("HYMCharts")
             .onAppear {
