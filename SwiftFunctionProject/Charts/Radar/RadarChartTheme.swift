@@ -70,6 +70,9 @@ public struct RadarChartTheme: HYMChartTheme {
     public var decorativeRingInset: CGFloat        // 距最外圈外的间距 pt
     public var decorativeRingSides: Int            // -1=跟随维度数；0=圆形；N=正N边形
     public var decorativeRingFillColor: UIColor?   // 装饰 ring 填充色（nil = 透明）
+    /// 装饰 ring 半径比例（相对 viewHalf，0~1）；nil = 顶点圈 + labelOuterPadding + inset（旧行为）。
+    /// 1.0 = 贴 view 边，0.7 = 70% viewHalf，可自由放大/缩小。
+    public var decorativeRingRadiusRatio: CGFloat?
     // —— 选中态高亮（顶点点击）——
     public var selectionScale: CGFloat          // 选中放大倍数；1.0 = 不放大
     public var selectionStrokeColor: UIColor?   // 选中描边色；nil = 沿用原描边
@@ -118,6 +121,7 @@ public struct RadarChartTheme: HYMChartTheme {
         decorativeRingInset: CGFloat = 0,
         decorativeRingSides: Int = -1,
         decorativeRingFillColor: UIColor? = nil,
+        decorativeRingRadiusRatio: CGFloat? = nil,
         selectionScale: CGFloat = 1.5,
         selectionStrokeColor: UIColor? = .white,
         selectionStrokeWidth: CGFloat = 2,
@@ -164,6 +168,7 @@ public struct RadarChartTheme: HYMChartTheme {
         self.decorativeRingInset = decorativeRingInset
         self.decorativeRingSides = decorativeRingSides
         self.decorativeRingFillColor = decorativeRingFillColor
+        self.decorativeRingRadiusRatio = decorativeRingRadiusRatio
         self.selectionScale = selectionScale
         self.selectionStrokeColor = selectionStrokeColor
         self.selectionStrokeWidth = selectionStrokeWidth

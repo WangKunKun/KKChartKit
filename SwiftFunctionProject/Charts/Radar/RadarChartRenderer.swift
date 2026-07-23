@@ -148,7 +148,8 @@ public final class RadarChartRenderer: HYMChartRenderer {
         }
 
         let center = context.center
-        let radius = maxRadius(bounds: context.bounds)
+        let (maxLabelW, maxLabelH) = measureLabels(model, theme)
+        let radius = maxRadius(bounds: context.bounds, maxLabelW: maxLabelW, maxLabelH: maxLabelH)
 
         rebuildDecorativeRing(model, center: center, radius: radius, bounds: context.bounds)
         rebuildGridFill(model, center: center, radius: radius)
@@ -221,12 +222,33 @@ public final class RadarChartRenderer: HYMChartRenderer {
         gradientLayer.isHidden = !theme.showsBackground
     }
 
-    private func maxRadius(bounds: CGRect) -> CGFloat {
+    private func maxRadius(bounds: CGRect, maxLabelW: CGFloat, maxLabelH: CGFloat) -> CGFloat {
         guard let theme = currentTheme else { return 0 }
-        let half = min(bounds.width, bounds.height) / 2
-        let cardHalf = half - theme.labelOuterPadding
+        let gap = theme.labelOuterPadding
         let dotMargin = theme.vertexDotRadius + 2
-        return max(0, cardHalf - dotMargin)
+        // 水平方向扣左右 label 宽，垂直方向扣上下 label 高；取小者后保证雷达图 + label 全在 bounds 内
+        let halfW = bounds.width / 2 - gap - maxLabelW
+        let halfH = bounds.height / 2 - gap - maxLabelH
+        return max(0, min(halfW, halfH) - dotMargin)
+    }
+
+    /// 测量所有 label 占用尺寸（考虑 labelMaxLineLength 换行），取全局 max 宽/高。
+    /// 用于 maxRadius 提前扣除 label 区域，保证内容不超出 bounds（方案 A）。
+    private func measureLabels(_ model: RadarChartModel, _ theme: RadarChartTheme) -> (maxW: CGFloat, maxH: CGFloat) {
+        let maxLine = theme.labelMaxLineLength
+        let wrapWidth: CGFloat = maxLine > 0 ? maxLine : .greatestFiniteMagnitude
+        var maxW: CGFloat = 0, maxH: CGFloat = 0
+        for dim in model.dimensions {
+            let font = dim.labelFont ?? theme.labelFont
+            let size = (dim.label as NSString).boundingRect(
+                with: CGSize(width: wrapWidth, height: .greatestFiniteMagnitude),
+                options: [.usesLineFragmentOrigin, .usesFontLeading],
+                attributes: [.font: font],
+                context: nil).size
+            maxW = max(maxW, size.width)
+            maxH = max(maxH, size.height)
+        }
+        return (maxW, maxH)
     }
 
     // MARK: - 网格描边
@@ -379,7 +401,13 @@ public final class RadarChartRenderer: HYMChartRenderer {
         guard let theme = currentTheme else { return }
         let sides = (theme.decorativeRingSides == -1) ? model.dimensions.count : theme.decorativeRingSides
         let viewHalf = min(bounds.width, bounds.height) / 2
-        let desired = radius + theme.labelOuterPadding + theme.decorativeRingInset
+        // 半径：decorativeRingRadiusRatio 优先（相对 viewHalf，0~1，可自由放大/缩小）；nil = 顶点圈 + gap + inset
+        let desired: CGFloat
+        if let ratio = theme.decorativeRingRadiusRatio {
+            desired = viewHalf * max(0, min(1, ratio))
+        } else {
+            desired = radius + theme.labelOuterPadding + theme.decorativeRingInset
+        }
         let decorativeRadius = max(0, min(desired, viewHalf - 0.5))
         decorativeRingLayer.path = HYMRingRenderer.ringPath(
             center: center,

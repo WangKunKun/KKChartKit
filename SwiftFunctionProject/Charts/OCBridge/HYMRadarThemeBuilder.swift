@@ -31,6 +31,8 @@ public final class HYMRadarThemeBuilder: NSObject {
     @objc public var outerRingColor: UIColor?
     @objc public var decorativeRingColor: UIColor?
     @objc public var decorativeRingFillColor: UIColor?
+    /// 装饰 ring 半径比例（相对 viewHalf，0~1）；nil = 顶点圈+gap+inset 旧行为
+    @objc public var decorativeRingRadiusRatio: NSNumber?
 
     // —— 字体（nil → 用主题默认）——
     @objc public var labelFont: UIFont?
@@ -99,6 +101,7 @@ public final class HYMRadarThemeBuilder: NSObject {
         if let v = outerRingColor { t.outerRingColor = v }
         if let v = decorativeRingColor { t.decorativeRingColor = v }
         if let v = decorativeRingFillColor { t.decorativeRingFillColor = v }
+        if let v = decorativeRingRadiusRatio { t.decorativeRingRadiusRatio = CGFloat(v.doubleValue) }
         // 字体
         if let v = labelFont { t.labelFont = v }
         if let v = scoreFont { t.scoreFont = v }

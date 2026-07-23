@@ -8,6 +8,7 @@ HYMHeatmapCellBridge *hmCell(double v);
 @property (nonatomic, strong) HYMRadarChartViewBridge *radarBridge;
 @property (nonatomic, strong) HYMHeatmapChartViewBridge *heatmapBridge;
 @property (nonatomic, assign) BOOL themeToggleOn;
+@property (nonatomic, strong) UIButton *themeButton;
 @end
 
 @implementation OCChartDemoViewController
@@ -19,6 +20,7 @@ HYMHeatmapCellBridge *hmCell(double v);
     [self setupRadar];
     [self setupHeatmap];
     [self setupThemeToggle];
+    [self setupRingTest];
 }
 
 #pragma mark - 蛛网图（雷达图）
@@ -31,9 +33,15 @@ HYMHeatmapCellBridge *hmCell(double v);
     theme.showsBackground = NO;
     theme.showsGridLines = NO;
     theme.gridRingFill = @"gradient";
-    UIColor * color = [[UIColor colorNamed:@"Green"] colorWithAlphaComponent:0.06];
+    UIColor * originColor = [UIColor colorNamed:@"Green"];
+    UIColor * color = [originColor colorWithAlphaComponent:0.06];
     theme.gridRingColors = @[color,color,color,color,color,color];
-    theme.decorativeRingFillColor = [[UIColor colorNamed:@"Green"] colorWithAlphaComponent:0.08];
+    theme.decorativeRingFillColor = [originColor colorWithAlphaComponent:0.08];
+    theme.axisLineStyle = @"dashed";
+    theme.dataLineWidth = 1;
+    theme.dataStrokeColor = [originColor colorWithAlphaComponent:0.4];
+    theme.dataFillColor = [originColor colorWithAlphaComponent:0.2];
+    theme.decorativeRingRadiusRatio = @1;
     // 强引用持有 bridge，否则出作用域释放 → chartView 失效、onHit 不触发
     self.radarBridge = [[HYMRadarChartViewBridge alloc] initWithTheme:theme frame:CGRectZero];
     UIView *chart = self.radarBridge.chartView;
@@ -42,7 +50,7 @@ HYMHeatmapCellBridge *hmCell(double v);
     [NSLayoutConstraint activateConstraints:@[
         [chart.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:16],
         [chart.centerXAnchor constraintEqualToAnchor:self.view.centerXAnchor],
-        [chart.widthAnchor constraintEqualToConstant:300],
+        [chart.widthAnchor constraintEqualToAnchor:self.view.widthAnchor],
         [chart.heightAnchor constraintEqualToConstant:300],
     ]];
 
@@ -120,6 +128,7 @@ HYMHeatmapCellBridge *hmCell(double v);
 
 - (void)setupThemeToggle {
     UIButton *btn = [UIButton buttonWithType:UIButtonTypeSystem];
+    self.themeButton = btn;
     [btn setTitle:@"切换雷达图主题（applyTheme）" forState:UIControlStateNormal];
     btn.titleLabel.font = [UIFont systemFontOfSize:15 weight:UIFontWeightMedium];
     btn.translatesAutoresizingMaskIntoConstraints = NO;
@@ -129,6 +138,43 @@ HYMHeatmapCellBridge *hmCell(double v);
         [btn.topAnchor constraintEqualToAnchor:self.heatmapBridge.chartView.bottomAnchor constant:24],
         [btn.centerXAnchor constraintEqualToAnchor:self.view.centerXAnchor],
     ]];
+}
+
+#pragma mark - HYMRingRenderer 测试（验证独立绘制器 OC 可用）
+
+- (void)setupRingTest {
+    UIView *container = [[UIView alloc] init];
+    container.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.view addSubview:container];
+    [NSLayoutConstraint activateConstraints:@[
+        [container.topAnchor constraintEqualToAnchor:self.themeButton.bottomAnchor constant:24],
+        [container.centerXAnchor constraintEqualToAnchor:self.view.centerXAnchor],
+        [container.widthAnchor constraintEqualToConstant:240],
+        [container.heightAnchor constraintEqualToConstant:90],
+    ]];
+    // 三个 ring：圆(sides=0) / 正六边形(sides=6) / 虚线三角形(sides=3, dashed)
+    CAShapeLayer *circle = [HYMRingRenderer ringLayerWithCenter:CGPointMake(45, 45)
+                                                          radius:32 sides:0
+                                                     strokeColor:UIColor.systemCyanColor
+                                                       lineWidth:2 fillColor:nil
+                                                          dashed:NO dashLength:0 dashGap:0
+                                                       startAngle:-M_PI_2];
+    CAShapeLayer *hex = [HYMRingRenderer ringLayerWithCenter:CGPointMake(120, 45)
+                                                       radius:32 sides:6
+                                                  strokeColor:UIColor.systemRedColor
+                                                    lineWidth:2 fillColor:nil
+                                                       dashed:NO dashLength:0 dashGap:0
+                                                    startAngle:-M_PI_2];
+    CAShapeLayer *tri = [HYMRingRenderer ringLayerWithCenter:CGPointMake(195, 45)
+                                                       radius:32 sides:3
+                                                  strokeColor:UIColor.systemYellowColor
+                                                    lineWidth:2 fillColor:nil
+                                                       dashed:YES dashLength:4 dashGap:3
+                                                    startAngle:-M_PI_2];
+    [container.layer addSublayer:circle];
+    [container.layer addSublayer:hex];
+    [container.layer addSublayer:tri];
+    NSLog(@"[OC] HYMRingRenderer: 3 个 ring layer 已添加（圆/六边形/虚线三角形）");
 }
 
 /// 切换雷达图主题：主题 A（默认紫色、不换行）↔ 主题 B（红色、左右标签换行）。
