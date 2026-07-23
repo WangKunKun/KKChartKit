@@ -39,16 +39,9 @@ public enum ChartSelfTest {
         assert(resolvedCenterScore(manual) == 88, "manual should be 88")
 
         // —— HYMColorInterpolation ——
-        // 注意：不用 `==` 比较 UIColor（受 colorspace/精度影响不可靠），一律比组件值
         let black = UIColor.black, white = UIColor.white
-        let at0 = HYMColorInterpolation.lerp(black, white, 0)
-        var r0: CGFloat = 0, g0: CGFloat = 0, b0: CGFloat = 0, a0: CGFloat = 0
-        at0.getRed(&r0, green: &g0, blue: &b0, alpha: &a0)
-        assert(abs(r0) < 0.001 && abs(g0) < 0.001 && abs(b0) < 0.001 && abs(a0 - 1) < 0.001, "lerp t=0 wrong")
-        let mid = HYMColorInterpolation.lerp(black, white, 0.5)
-        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
-        mid.getRed(&r, green: &g, blue: &b, alpha: &a)
-        assert(abs(r - 0.5) < 0.01 && abs(g - 0.5) < 0.01 && abs(b - 0.5) < 0.01, "lerp mid wrong")
+        assertTintsEqual(HYMColorInterpolation.lerp(black, white, 0), (0, 0, 0), eps: 0.001, msg: "lerp t=0")
+        assertTintsEqual(HYMColorInterpolation.lerp(black, white, 0.5), (0.5, 0.5, 0.5), eps: 0.01, msg: "lerp mid")
 
         // —— 交互默认空命中 ——
         let renderer = RadarChartRenderer()
@@ -63,7 +56,7 @@ public enum ChartSelfTest {
         struct _PlainTarget: HYMChartHitTarget { let identifier = "x"; let index = 0 }
         assert(_PlainTarget().kind == "", "default kind should be empty")
 
-        // —— hitTest / applySelection 基本行为（render 后）——
+        // —— Radar hitTest / applySelection 基本行为（render 后）——
         let tapRenderer = RadarChartRenderer()
         let tapModel = RadarChartModel(dimensions: [
             RadarDimension(label: "a", value: 80),
@@ -75,7 +68,80 @@ public enum ChartSelfTest {
         assert(tapRenderer.hitTest(CGPoint(x: 100, y: 100)) == nil, "center should not hit any vertex")
         tapRenderer.applySelection(nil)   // 不崩溃即可
 
+        // —— HeatmapGeometry ——
+        let hmLayout = HeatmapGeometry.layout(
+            bounds: CGRect(x: 0, y: 0, width: 30, height: 30),
+            rows: 3, columns: 4, rowSpacing: 0, columnSpacing: 0, alignment: .leading)
+        assert(abs(hmLayout.cellSize - 7.0) < 0.001,
+               "heatmap cellSize should be min(30/4,30/3)=7, got \(hmLayout.cellSize)")
+        let hm00 = HeatmapGeometry.cellFrame(row: 0, col: 0, layout: hmLayout, rowSpacing: 0, columnSpacing: 0)
+        assert(abs(hm00.minX) < 0.001 && abs(hm00.minY) < 0.001, "heatmap (0,0) at origin, got \(hm00)")
+        let hm12 = HeatmapGeometry.cellFrame(row: 1, col: 2, layout: hmLayout, rowSpacing: 0, columnSpacing: 0)
+        assert(abs(hm12.minX - 14.0) < 0.001 && abs(hm12.minY - 7.0) < 0.001, "heatmap (1,2) wrong, got \(hm12)")
+        // 行/列间距分开：rowSpacing=2, columnSpacing=4
+        let hmSp = HeatmapGeometry.layout(bounds: CGRect(x: 0, y: 0, width: 100, height: 100),
+                                          rows: 2, columns: 2, rowSpacing: 2, columnSpacing: 4, alignment: .leading)
+        let hmSp11 = HeatmapGeometry.cellFrame(row: 1, col: 1, layout: hmSp, rowSpacing: 2, columnSpacing: 4)
+        // cellSize = min((100-4)/2, (100-2)/2) = min(48,49) = 48
+        assert(abs(hmSp.cellSize - 48.0) < 0.001, "cellSize with spacing wrong: \(hmSp.cellSize)")
+        // (1,1): x = 48+4=52? 实际 x = 0 + 1*(48+4)=52, y = 0 + 1*(48+2)=50
+        assert(abs(hmSp11.minX - 52.0) < 0.001 && abs(hmSp11.minY - 50.0) < 0.001,
+               "(1,1) with split spacing wrong: \(hmSp11)")
+
+        // —— HeatmapChartModel ——
+        let hmModel = HeatmapChartModel(rows: [
+            [HeatmapCell(value: 10), HeatmapCell(value: 20), HeatmapCell(value: 30)],
+            [HeatmapCell(value: 40), HeatmapCell(value: 50)]   // 锯齿行
+        ])
+        assert(hmModel.maxColumns == 3, "maxColumns should be 3, got \(hmModel.maxColumns)")
+        let hmRange = hmModel.resolvedValueRange
+        assert(abs(hmRange.lowerBound - 10) < 0.001 && abs(hmRange.upperBound - 50) < 0.001,
+               "resolved range 10...50, got \(hmRange)")
+
+        // —— HeatmapColorScale ——
+        let hmScale = HeatmapColorScale.gradient(low: .black, high: .white)
+        assertTintsEqual(hmScale.color(at: 0), (0, 0, 0), eps: 0.001, msg: "scale t=0 black")
+        assertTintsEqual(hmScale.color(at: 1), (1, 1, 1), eps: 0.001, msg: "scale t=1 white")
+        assertTintsEqual(hmScale.color(at: 0.5), (0.5, 0.5, 0.5), eps: 0.01, msg: "scale t=0.5 mid")
+        let hmStops = HeatmapColorScale.stops([(value: 0, color: .black), (value: 100, color: .white)])
+        assertTintsEqual(hmStops.color(at: 0.5), (0.5, 0.5, 0.5), eps: 0.01, msg: "stops t=0.5 mid")
+
+        // —— HeatmapColorScale.alpha：单色 + 透明度按 t ——
+        let hmAlpha = HeatmapColorScale.alpha(.black)
+        var aA: CGFloat = 0
+        var aR: CGFloat = 0, aG: CGFloat = 0, aB: CGFloat = 0
+        hmAlpha.color(at: 1).getRed(&aR, green: &aG, blue: &aB, alpha: &aA)
+        assert(abs(aA - 1) < 0.001, "alpha t=1 should be opaque, got \(aA)")
+        hmAlpha.color(at: 0).getRed(&aR, green: &aG, blue: &aB, alpha: &aA)
+        assert(abs(aA) < 0.001, "alpha t=0 should be transparent, got \(aA)")
+        hmAlpha.color(at: 0.5).getRed(&aR, green: &aG, blue: &aB, alpha: &aA)
+        assert(abs(aA - 0.5) < 0.001, "alpha t=0.5 should be 0.5, got \(aA)")
+
+        // —— Heatmap 命中/选中 ——
+        let hmRenderer = HeatmapChartRenderer()
+        assert(hmRenderer.hitTest(CGPoint(x: 5, y: 5)) == nil, "renderer without render should miss")
+        hmRenderer.render(model: hmModel, theme: HeatmapChartTheme(),
+                          context: HYMChartRenderContext(bounds: CGRect(x: 0, y: 0, width: 300, height: 200),
+                                                         center: .zero))
+        if let hit = hmRenderer.hitTest(CGPoint(x: 5, y: 5)) as? HeatmapHitTarget {
+            assert(hit.row == 0 && hit.column == 0, "should hit (0,0), got \(hit.row),\(hit.column)")
+        } else {
+            assertionFailure("should hit (0,0) after render")
+        }
+        hmRenderer.applySelection(HeatmapHitTarget(row: 0, column: 0))   // 选中 (0,0) 不崩溃
+        hmRenderer.applySelection(nil)                                    // 取消不崩溃
+
         print("✅ ChartSelfTest passed")
+    }
+
+    /// 比较 UIColor RGB 分量（UIColor == 受色彩空间/精度影响不可靠，一律比分量）。
+    static func assertTintsEqual(_ color: UIColor, _ expected: (CGFloat, CGFloat, CGFloat),
+                                 eps: CGFloat, msg: String,
+                                 file: StaticString = #file, line: UInt = #line) {
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        color.getRed(&r, green: &g, blue: &b, alpha: &a)
+        assert(abs(r - expected.0) < eps && abs(g - expected.1) < eps && abs(b - expected.2) < eps,
+               "\(msg): got r=\(r) g=\(g) b=\(b)", file: file, line: line)
     }
 }
 #endif

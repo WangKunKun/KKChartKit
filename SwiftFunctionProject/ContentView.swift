@@ -19,6 +19,11 @@ struct ContentView: View {
                         RadarChartStyleDemo()
                     }
                 }
+                Section("热力图") {
+                    NavigationLink("默认 demo") {
+                        HeatmapChartDemo()
+                    }
+                }
             }
             .navigationTitle("HYMCharts")
             .onAppear {
