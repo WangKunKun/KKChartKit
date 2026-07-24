@@ -59,6 +59,8 @@ public final class HYMRadarThemeBuilder: NSObject {
     @objc public var selectionStrokeWidth: CGFloat = 2
     @objc public var selectionColor: UIColor?
     @objc public var selectionHitPadding: CGFloat = 10
+    @objc public var dataVertexTappable: Bool = true
+    @objc public var labelVertexTappable: Bool = true
 
     // —— 网格底色 GridRingFill ——
     @objc public var gridRingFill: String = "none"
@@ -123,6 +125,8 @@ public final class HYMRadarThemeBuilder: NSObject {
         t.selectionStrokeWidth = selectionStrokeWidth
         t.selectionColor = selectionColor
         t.selectionHitPadding = selectionHitPadding
+        t.dataVertexTappable = dataVertexTappable
+        t.labelVertexTappable = labelVertexTappable
         // 网格底色
         switch gridRingFill.lowercased() {
         case "gradient":

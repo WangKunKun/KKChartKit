@@ -14,8 +14,6 @@ public struct RadarChart: View {
                 onHit: ((RadarHitTarget, HYMChartGesture) -> Void)? = nil) {
         self.model = model
         self.theme = theme
-        self.theme.showsDecorativeRing = true
-        self.theme.showsLabelDots = true
         self.playsAnimationOnAppear = playsAnimationOnAppear
         self.onHit = onHit
     }

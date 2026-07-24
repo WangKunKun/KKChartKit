@@ -79,6 +79,8 @@ public struct RadarChartTheme: HYMChartTheme {
     public var selectionStrokeWidth: CGFloat    // 描边线宽
     public var selectionColor: UIColor?         // 选中变色；nil = 用原色不变色
     public var selectionHitPadding: CGFloat     // 命中容差（pt）
+    public var dataVertexTappable: Bool         // 数据顶点是否可点击（默认 true）
+    public var labelVertexTappable: Bool        // 标题顶点是否可点击（默认 true）
 
     public init(
         backgroundGradientStart: UIColor = UIColor(red: 0x2A/255.0, green: 0x1B/255.0, blue: 0x5C/255.0, alpha: 1),
@@ -126,7 +128,9 @@ public struct RadarChartTheme: HYMChartTheme {
         selectionStrokeColor: UIColor? = .white,
         selectionStrokeWidth: CGFloat = 2,
         selectionColor: UIColor? = UIColor(red: 0xFF/255.0, green: 0xC1/255.0, blue: 0x07/255.0, alpha: 1),
-        selectionHitPadding: CGFloat = 10
+        selectionHitPadding: CGFloat = 10,
+        dataVertexTappable: Bool = true,
+        labelVertexTappable: Bool = true
     ) {
         self.backgroundGradientStart = backgroundGradientStart
         self.backgroundGradientEnd = backgroundGradientEnd
@@ -174,5 +178,7 @@ public struct RadarChartTheme: HYMChartTheme {
         self.selectionStrokeWidth = selectionStrokeWidth
         self.selectionColor = selectionColor
         self.selectionHitPadding = selectionHitPadding
+        self.dataVertexTappable = dataVertexTappable
+        self.labelVertexTappable = labelVertexTappable
     }
 }

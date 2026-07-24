@@ -495,8 +495,16 @@ public final class RadarChartRenderer: HYMChartRenderer {
 
     // MARK: - 命中与选中
     public func hitTest(_ point: CGPoint) -> HYMChartHitTarget? {
-        let pad = currentTheme?.selectionHitPadding ?? 10
+        guard let theme = currentTheme else { return nil }
+        let pad = theme.selectionHitPadding
+        let dataTap = theme.dataVertexTappable
+        let labelTap = theme.labelVertexTappable
         for r in hitRecords {
+            // 按开关过滤：关闭的那类顶点不参与命中
+            switch r.category {
+            case .dataVertex:  if !dataTap { continue }
+            case .labelVertex: if !labelTap { continue }
+            }
             let dx = point.x - r.center.x
             let dy = point.y - r.center.y
             let reach = r.radius + pad
