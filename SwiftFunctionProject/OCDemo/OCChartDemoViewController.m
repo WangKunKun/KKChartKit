@@ -198,7 +198,7 @@ HYMHeatmapCellBridge *hmCell(double v);
 
 @end
 
-/// 文件级 C 函数：快速造热力图格子（值 / 满值100 / 无覆盖色）。
+/// 文件级 C 函数：快速造热力图格子（值 / 无覆盖色 / 默认有效 / 无 tooltip 覆盖）。
 HYMHeatmapCellBridge *hmCell(double v) {
-    return [[HYMHeatmapCellBridge alloc] initWithValue:v maxValue:100 color:nil];
+    return [[HYMHeatmapCellBridge alloc] initWithValue:v color:nil valid:YES tooltipText:nil];
 }

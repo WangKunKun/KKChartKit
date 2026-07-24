@@ -6,11 +6,14 @@ public struct HeatmapHitTarget: HYMChartHitTarget {
     public let index: Int
     public let row: Int
     public let column: Int
-    public init(row: Int, column: Int) {
+    /// 该格子弹窗文本（自定义优先，否则 `format(value)`）。nil 表示无文本。
+    public let tooltipText: String?
+    public init(row: Int, column: Int, tooltipText: String? = nil) {
         self.row = row
         self.column = column
         self.identifier = "(\(row),\(column))"
         self.index = row * 1000 + column
+        self.tooltipText = tooltipText
     }
 }
 
@@ -107,6 +110,7 @@ public final class HeatmapChartRenderer: HYMChartRenderer {
         // 4) 绘制格子（选中格子加边框）
         for (r, row) in model.rows.enumerated() {
             for (c, cell) in row.enumerated() {
+                guard cell.isValid else { continue }   // 无效格：占位不绘制、不进命中缓存
                 let f = HeatmapGeometry.cellFrame(row: r, col: c, layout: layout,
                                                   rowSpacing: theme.rowSpacing, columnSpacing: theme.columnSpacing)
                 lastCellFrames.append((r, c, f))
@@ -196,9 +200,11 @@ public final class HeatmapChartRenderer: HYMChartRenderer {
 
     // MARK: - 命中（覆盖协议默认 nil 实现）
     public func hitTest(_ point: CGPoint) -> HYMChartHitTarget? {
-        guard currentModel != nil else { return nil }
+        guard let model = currentModel else { return nil }
         for hit in lastCellFrames where hit.frame.contains(point) {
-            return HeatmapHitTarget(row: hit.row, column: hit.col)
+            let cell = model.rows[hit.row][hit.col]
+            let text = cell.tooltipText ?? Self.format(cell.value)
+            return HeatmapHitTarget(row: hit.row, column: hit.col, tooltipText: text)
         }
         return nil
     }
@@ -212,5 +218,22 @@ public final class HeatmapChartRenderer: HYMChartRenderer {
         }
         guard let model = currentModel, let theme = currentTheme, let ctx = lastContext else { return }
         render(model: model, theme: theme, context: ctx)
+    }
+
+    // MARK: - Tooltip 锚点（覆盖协议默认 nil）
+    public func tooltipAnchor(for target: HYMChartHitTarget) -> HYMChartTooltipAnchor? {
+        guard let theme = currentTheme, theme.showsTooltipOnHit,
+              let h = target as? HeatmapHitTarget,
+              let hit = lastCellFrames.first(where: { $0.row == h.row && $0.col == h.column })
+        else { return nil }
+        return HYMChartTooltipAnchor(frame: hit.frame, preferredPlacements: [.top, .bottom])
+    }
+
+    /// 默认 value 文本：去尾零（80.0 → "80"；80.5 → "80.5"）。
+    static func format(_ value: Double) -> String {
+        if value.truncatingRemainder(dividingBy: 1) == 0 {
+            return String(Int(value))
+        }
+        return String(value)
     }
 }

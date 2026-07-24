@@ -39,6 +39,9 @@ public final class HYMHeatmapThemeBuilder: NSObject {
     /// nil = 同 cellCornerRadius
     @objc public var selectionBorderCornerRadius: NSNumber?
 
+    /// 点击格子是否弹默认 tooltip（默认 YES）。
+    @objc public var showsTooltipOnHit: Bool = true
+
     @objc public override init() { super.init() }
 
     internal func build() -> HeatmapChartTheme {
@@ -62,6 +65,7 @@ public final class HYMHeatmapThemeBuilder: NSObject {
         t.selectionBorderColor = selectionBorderColor
         t.selectionBorderWidth = selectionBorderWidth
         if let v = selectionBorderCornerRadius { t.selectionBorderCornerRadius = CGFloat(v.doubleValue) }
+        t.showsTooltipOnHit = showsTooltipOnHit
         return t
     }
 

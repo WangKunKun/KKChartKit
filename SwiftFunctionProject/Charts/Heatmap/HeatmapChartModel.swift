@@ -6,21 +6,24 @@ import UIKit
 public struct HeatmapCell {
     /// 原始数值（如百分比 0~100，或任意量纲）。
     public var value: Double
-    /// 满值，用于单格归一化；默认 100。<=0 时按 1 兜底。
-    public var maxValue: Double
-    /// 单格覆盖色；nil → 由 Theme 色阶按全局值域归一化计算。
+    /// 单格覆盖色；nil → 由 Theme 色阶按 Model 值域归一化计算。
     public var color: UIColor?
+    /// 是否有效；false = 无效占位（占布局位置但不绘制、不命中、不参与色阶）。
+    public var isValid: Bool
+    /// 该格子弹窗文本；nil → 默认格式化 `value`。仅当 tooltip 启用时生效。
+    public var tooltipText: String?
 
-    public init(value: Double, maxValue: Double = 100, color: UIColor? = nil) {
+    public init(value: Double, color: UIColor? = nil,
+                isValid: Bool = true, tooltipText: String? = nil) {
         self.value = value
-        self.maxValue = maxValue
         self.color = color
+        self.isValid = isValid
+        self.tooltipText = tooltipText
     }
 
-    /// 单格自归一化比值 [0,1]（越界裁剪；内部使用）。
-    public var normalized: CGFloat {
-        let m = maxValue > 0 ? maxValue : 1
-        return CGFloat(max(0, min(1, value / m)))
+    /// 无效占位格：占位但不绘制、不命中、不参与色阶。
+    public static func placeholder() -> HeatmapCell {
+        HeatmapCell(value: 0, isValid: false)
     }
 }
 
@@ -28,15 +31,20 @@ public struct HeatmapCell {
 ///
 /// `rows` 为二维数组：外层=行（自上而下），内层=该行格子（自左而右）。
 /// 行数与每行格子数均不固定，支持锯齿行（每行长度不同）。
+///
+/// 色阶归一化值域由 `valueRange` 决定（或便捷 `init(minValue:maxValue:)`）；
+/// 未指定时默认 `0...有效格value的最大值`——即「值越大越实色」，
+/// value=0 全透明、value=max 满色，与 `.alpha` 色阶语义一致。
 public struct HeatmapChartModel: HYMChartModel {
     public var rows: [[HeatmapCell]]
-    /// 色阶归一化基准；nil → 自动按全体 value 的 min/max。用于跨格子统一可比的色阶映射。
+    /// 色阶归一化值域；nil → 自动 `0...数据max`。用于跨格子统一可比的色阶映射。
     public var valueRange: ClosedRange<Double>?
     /// 可选行标签（左侧），长度应等于 rows.count；nil 不显示。
     public var rowLabels: [String]?
     /// 可选列标签（顶部），长度应等于 maxColumns；nil 不显示。
     public var columnLabels: [String]?
 
+    /// 主构造：显式 `valueRange` 优先；nil → 自动 `0...数据max`。
     public init(rows: [[HeatmapCell]],
                 valueRange: ClosedRange<Double>? = nil,
                 rowLabels: [String]? = nil,
@@ -47,14 +55,31 @@ public struct HeatmapChartModel: HYMChartModel {
         self.columnLabels = columnLabels
     }
 
-    /// 实际生效的归一化值域；显式 nil/数据为空/极差为 0 时回退 0...1（纯函数，便于自检）。
+    /// 便捷构造：用独立的 min/max 指定值域（内部转成 `valueRange = minValue...maxValue`）。
+    /// 适合「值域固定、不随数据变化」的场景，如 0...100 百分比。
+    public init(rows: [[HeatmapCell]],
+                minValue: Double,
+                maxValue: Double,
+                rowLabels: [String]? = nil,
+                columnLabels: [String]? = nil) {
+        self.rows = rows
+        self.rowLabels = rowLabels
+        self.columnLabels = columnLabels
+        let lo = Swift.min(minValue, maxValue)
+        let hi = Swift.max(minValue, maxValue)
+        self.valueRange = lo...hi
+    }
+
+    /// 实际生效的归一化值域（纯函数，便于自检）：
+    /// 显式 `valueRange` 优先；否则 `0...有效格value的最大值`；
+    /// 数据为空或最大值 <= 0 时回退 `0...1`。
     public var resolvedValueRange: ClosedRange<Double> {
         if let r = valueRange { return r }
-        let vals = rows.flatMap { $0 }.map { $0.value }
-        guard let lo = vals.min(), let hi = vals.max(), hi > lo else {
+        let vals = rows.flatMap { $0 }.compactMap { $0.isValid ? $0.value : nil }
+        guard let hi = vals.max(), hi > 0 else {
             return 0...1
         }
-        return lo...hi
+        return 0...hi
     }
 
     /// 最大列数（锯齿行取最长行）。

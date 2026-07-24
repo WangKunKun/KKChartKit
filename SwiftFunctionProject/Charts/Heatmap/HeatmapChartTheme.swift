@@ -14,7 +14,8 @@ public enum HeatmapColorScale {
     /// 多段：按 value（原始值）升序的 (value, color) 锚点，首尾 value 作归一化基准，相邻段线性插值。
     case stops([(value: Double, color: UIColor)])
     /// 单色 + 透明度按 t（0→1）变化：t=0 全透明，t=1 全不透明。
-    /// 适合「值越大越实色」；t 通常 = value/max（需值域下界为 0，即数据含 0 或显式 valueRange=0...max）。
+    /// 适合「值越大越实色」；t = value/值域上界。Model 默认值域为 0...数据max（下界为 0），
+    /// 故 value=0 全透明、value=max 全不透明。
     case alpha(UIColor)
 
     /// 取归一化比值 t∈[0,1]（越界裁剪）对应的颜色（纯函数）。
@@ -89,6 +90,10 @@ public struct HeatmapChartTheme: HYMChartTheme {
     public var selectionBorderWidth: CGFloat          // 边框宽度
     public var selectionBorderCornerRadius: CGFloat?  // 边框圆角；nil = 同 cellCornerRadius
 
+    /// 点击有效格子是否弹出默认 tooltip（默认 true）。
+    /// false 时 Renderer 不提供锚点 → 不弹窗。
+    public var showsTooltipOnHit: Bool
+
     public init(
         colorScale: HeatmapColorScale = .gradient(
             low: UIColor(red: 0x9b/255.0, green: 0xe9/255.0, blue: 0xa8/255.0, alpha: 1),
@@ -110,7 +115,8 @@ public struct HeatmapChartTheme: HYMChartTheme {
         showsEntranceAnimation: Bool = true,
         selectionBorderColor: UIColor? = .black,
         selectionBorderWidth: CGFloat = 2,
-        selectionBorderCornerRadius: CGFloat? = nil
+        selectionBorderCornerRadius: CGFloat? = nil,
+        showsTooltipOnHit: Bool = true
     ) {
         self.colorScale = colorScale
         self.emptyColor = emptyColor
@@ -131,5 +137,6 @@ public struct HeatmapChartTheme: HYMChartTheme {
         self.selectionBorderColor = selectionBorderColor
         self.selectionBorderWidth = selectionBorderWidth
         self.selectionBorderCornerRadius = selectionBorderCornerRadius
+        self.showsTooltipOnHit = showsTooltipOnHit
     }
 }

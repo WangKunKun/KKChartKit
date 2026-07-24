@@ -95,8 +95,22 @@ public enum ChartSelfTest {
         ])
         assert(hmModel.maxColumns == 3, "maxColumns should be 3, got \(hmModel.maxColumns)")
         let hmRange = hmModel.resolvedValueRange
-        assert(abs(hmRange.lowerBound - 10) < 0.001 && abs(hmRange.upperBound - 50) < 0.001,
-               "resolved range 10...50, got \(hmRange)")
+        assert(abs(hmRange.lowerBound - 0) < 0.001 && abs(hmRange.upperBound - 50) < 0.001,
+               "resolved range 0...50 (default 0...dataMax), got \(hmRange)")
+        // 默认值域 = 0...数据max；显式 valueRange / min,max 优先
+        let autoRangeT = HeatmapChartModel(rows: [[HeatmapCell(value: 20)]]).resolvedValueRange
+        assert(abs(autoRangeT.lowerBound) < 0.001 && abs(autoRangeT.upperBound - 20) < 0.001,
+               "auto range should be 0...dataMax(20), got \(autoRangeT)")
+        let fixedRangeT = HeatmapChartModel(rows: [[HeatmapCell(value: 20)]], minValue: 0, maxValue: 90).resolvedValueRange
+        assert(abs(fixedRangeT.lowerBound) < 0.001 && abs(fixedRangeT.upperBound - 90) < 0.001,
+               "explicit min/max should be 0...90, got \(fixedRangeT)")
+        // 用户场景：value=20 在 0...90 值域 + .alpha 色阶 → t≈0.222 → 有颜色（非全透明，即非 emptyColor）
+        let uScale = HeatmapColorScale.alpha(.black)
+        let uT = (20 - fixedRangeT.lowerBound) / max(1e-9, fixedRangeT.upperBound - fixedRangeT.lowerBound)
+        var uA: CGFloat = 0, uR: CGFloat = 0, uG: CGFloat = 0, uB: CGFloat = 0
+        uScale.color(at: CGFloat(uT)).getRed(&uR, green: &uG, blue: &uB, alpha: &uA)
+        assert(abs(uA - 0.222) < 0.01,
+               "value=20 in 0...90 with .alpha → t≈0.22 → should have color, got alpha \(uA)")
 
         // —— HeatmapColorScale ——
         let hmScale = HeatmapColorScale.gradient(low: .black, high: .white)
@@ -130,6 +144,104 @@ public enum ChartSelfTest {
         }
         hmRenderer.applySelection(HeatmapHitTarget(row: 0, column: 0))   // 选中 (0,0) 不崩溃
         hmRenderer.applySelection(nil)                                    // 取消不崩溃
+
+        // —— HYMChartTooltipGeometry 定位 ——
+        // 锚点居中、上方充足 → .top，frame 不越界
+        let ttContainer = CGRect(x: 0, y: 0, width: 200, height: 200)
+        let ttAnchor = CGRect(x: 90, y: 100, width: 20, height: 20)   // midX=100, minY=100
+        let ttSize = CGSize(width: 60, height: 30)
+        let ttTop = HYMChartTooltipGeometry.resolve(anchor: ttAnchor, size: ttSize,
+                                                    container: ttContainer,
+                                                    preferred: [.top, .bottom], gap: 6)
+        assert(ttTop?.placement == .top, "should pick .top when room above, got \(String(describing: ttTop?.placement))")
+        // .top: 底边 = anchor.minY - gap = 94；frame.minY = 94 - 30 = 64；不越界
+        assert(abs((ttTop?.frame.minY ?? 0) - 64) < 0.001, "top frame minY should be 64, got \(String(describing: ttTop?.frame.minY))")
+        assert(abs((ttTop?.frame.midX ?? 0) - 100) < 0.001, "top should center on anchor midX")
+        assert(ttTop!.arrowX >= ttTop!.frame.minX && ttTop!.arrowX <= ttTop!.frame.maxX,
+               "arrowX must stay inside frame")
+
+        // 锚点贴顶（上方不够，gap+size 超出）→ 翻转 .bottom
+        let topAnchor = CGRect(x: 90, y: 5, width: 20, height: 20)    // minY=5，上方只剩 5pt < gap+30
+        let flip = HYMChartTooltipGeometry.resolve(anchor: topAnchor, size: ttSize,
+                                                   container: ttContainer,
+                                                   preferred: [.top, .bottom], gap: 6)
+        assert(flip?.placement == .bottom, "should flip to .bottom when top overflows")
+
+        // 上下都不够（锚点使两侧都溢出），但容器能容纳 tooltip → 选溢出更少方向并裁进 container 不越界
+        // 注：用例须保证 container 高度 ≥ tooltip 高度，否则物理上无法完全裁进 container。
+        let sqContainer = CGRect(x: 0, y: 0, width: 200, height: 40)  // height 40 ≥ tooltip 30
+        let sqAnchor = CGRect(x: 90, y: 2, width: 20, height: 20)     // minY=2, maxY=22
+        let squeezed = HYMChartTooltipGeometry.resolve(anchor: sqAnchor, size: ttSize,
+                                                       container: sqContainer,
+                                                       preferred: [.top, .bottom], gap: 6)
+        assert(squeezed != nil, "must still produce a frame when nothing fits fully")
+        assert(squeezed!.frame.minY >= sqContainer.minY - 0.001 && squeezed!.frame.maxY <= sqContainer.maxY + 0.001,
+               "squeezed frame must be clipped inside container, got \(squeezed!.frame)")
+
+        // 水平超出 → 贴边
+        let sideAnchor = CGRect(x: 180, y: 100, width: 20, height: 20) // midX=190，弹窗会右溢出
+        let side = HYMChartTooltipGeometry.resolve(anchor: sideAnchor, size: ttSize,
+                                                   container: ttContainer,
+                                                   preferred: [.top, .bottom], gap: 6)
+        assert(side!.frame.maxX <= ttContainer.maxX + 0.001,
+               "right overflow must be clipped, got \(side!.frame.maxX)")
+
+        // size 为 0 → nil
+        assert(HYMChartTooltipGeometry.resolve(anchor: ttAnchor, size: .zero,
+                                               container: ttContainer,
+                                               preferred: [.top], gap: 6) == nil,
+               "zero size should return nil")
+
+        // —— 通用 tooltip 槽位默认值 ——
+        struct _TipTarget: HYMChartHitTarget { let identifier = "t"; let index = 0 }
+        assert(_TipTarget().tooltipText == nil, "default tooltipText should be nil")
+        let _tipRenderer = HeatmapChartRenderer()
+        assert(_tipRenderer.tooltipAnchor(for: _TipTarget()) == nil,
+               "default tooltipAnchor should be nil")
+
+        // —— HeatmapCell 无效占位 ——
+        assert(HeatmapCell.placeholder().isValid == false, "placeholder should be invalid")
+        assert(HeatmapCell(value: 50).isValid == true, "default cell should be valid")
+        // 无效格不参与色阶归一化：[10, placeholder, 30] → range 10...30
+        let mixed7 = HeatmapChartModel(rows: [
+            [HeatmapCell(value: 10), HeatmapCell.placeholder(), HeatmapCell(value: 30)]
+        ])
+        let mixedRange7 = mixed7.resolvedValueRange
+        assert(abs(mixedRange7.lowerBound - 0) < 0.001 && abs(mixedRange7.upperBound - 30) < 0.001,
+               "invalid cells excluded; default range 0...30, got \(mixedRange7)")
+
+        // —— Heatmap value 默认格式化 ——
+        assert(HeatmapChartRenderer.format(80.0) == "80", "80.0 should format to '80'")
+        assert(HeatmapChartRenderer.format(80.5) == "80.5", "80.5 should format to '80.5'")
+        assert(HeatmapChartRenderer.format(0.0) == "0", "0.0 should format to '0'")
+
+        // —— 无效格不命中、有效格命中带 tooltipText ——
+        let nilModel8 = HeatmapChartModel(rows: [
+            [HeatmapCell.placeholder(), HeatmapCell(value: 50, tooltipText: "自定义")]
+        ])
+        let nilRenderer8 = HeatmapChartRenderer()
+        nilRenderer8.render(model: nilModel8, theme: HeatmapChartTheme(),
+                            context: HYMChartRenderContext(bounds: CGRect(x: 0, y: 0, width: 300, height: 200),
+                                                           center: .zero))
+        // theme 默认 rowSpacing=columnSpacing=3, leading, 无 rowLabels/columnLabels → cellBounds=bounds；
+        // cellSize=min((300-3)/2, 200)=148；(0,0)=invalid frame(0,0,148,148)；(0,1)=valid frame(151,0,148,148)
+        let hitInvalid8 = nilRenderer8.hitTest(CGPoint(x: 5, y: 5))   // 落在 (0,0) 无效格位置 → 未进命中缓存 → nil
+        assert(hitInvalid8 == nil, "invalid cell must not be hit, got \(String(describing: hitInvalid8))")
+        let hitValid8 = nilRenderer8.hitTest(CGPoint(x: 200, y: 50))  // 落在 (0,1) 有效格
+        if let h = hitValid8 as? HeatmapHitTarget {
+            assert(h.row == 0 && h.column == 1, "should hit (0,1)")
+            assert(h.tooltipText == "自定义", "custom tooltipText should win, got \(String(describing: h.tooltipText))")
+        } else {
+            assertionFailure("should hit valid cell (0,1)")
+        }
+        // 默认 value 格式化
+        let defModel8 = HeatmapChartModel(rows: [[HeatmapCell(value: 42)]])
+        let defRenderer8 = HeatmapChartRenderer()
+        defRenderer8.render(model: defModel8, theme: HeatmapChartTheme(),
+                            context: HYMChartRenderContext(bounds: CGRect(x: 0, y: 0, width: 100, height: 100),
+                                                           center: .zero))
+        let hitDef8 = defRenderer8.hitTest(CGPoint(x: 50, y: 50)) as? HeatmapHitTarget
+        assert(hitDef8?.tooltipText == "42", "default tooltipText should be formatted value, got \(String(describing: hitDef8?.tooltipText))")
 
         print("✅ ChartSelfTest passed")
     }

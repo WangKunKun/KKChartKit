@@ -21,6 +21,16 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     /// 命中交互单元时回调（带手势类型，为扩展留位）
     public var onHit: ((any HYMChartHitTarget, HYMChartGesture) -> Void)?
 
+    /// tooltip 外观主题（通用；默认 `.default`，可覆盖）。
+    public var tooltipTheme: HYMChartTooltipTheme = .default {
+        didSet { tooltipController?.theme = tooltipTheme }
+    }
+    /// 命中时是否显示默认 tooltip（通用默认 false，避免影响现有图表；
+    /// 需要弹窗的图表在其封装层显式置 true）。
+    public var showsTooltipOnHit: Bool = false
+    /// 弹窗控制器（首次显示时懒创建）。
+    private var tooltipController: HYMChartTooltipController?
+
     // MARK: - Renderer
     private let renderer: Renderer
 
@@ -110,11 +120,34 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         let p = gr.location(in: self)
         let target = renderer.hitTest(p)
         renderer.applySelection(target)        // 命中→选中，未命中→取消（通用）
+        updateTooltip(for: target)            // tooltip 跟随选中态
         if let target { onHit?(target, .tap) }
     }
 
+    // MARK: - Tooltip
+    private func ensureTooltipController() -> HYMChartTooltipController {
+        if let c = tooltipController { return c }
+        let c = HYMChartTooltipController(host: self, theme: tooltipTheme)
+        tooltipController = c
+        return c
+    }
+
+    /// 命中后更新 tooltip：开关关 / 无文本 / 无锚点 → 隐藏；否则显示。
+    private func updateTooltip(for target: HYMChartHitTarget?) {
+        guard showsTooltipOnHit else { tooltipController?.hide(); return }
+        guard let target,
+              let text = target.tooltipText,
+              let anchor = renderer.tooltipAnchor(for: target) else {
+            tooltipController?.hide()
+            return
+        }
+        ensureTooltipController().show(anchor: anchor.frame, text: text,
+                                       in: bounds, preferred: anchor.preferredPlacements)
+    }
+
     deinit {
-        animator.stop()              // 打破 displayLink ↔ animator 循环
-        renderer.unmount(from: self) // 清理 layer/子视图
+        animator.stop()                       // 打破 displayLink ↔ animator 循环
+        tooltipController?.removeFromSuperview()
+        renderer.unmount(from: self)          // 清理 layer/子视图
     }
 }

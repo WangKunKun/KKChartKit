@@ -16,9 +16,14 @@ public protocol HYMChartHitTarget {
     /// 通用类别槽位（如 "dataVertex"/"labelVertex"）；默认 "" 表示不分类。
     /// 具体类别值由各图表特有 HitTarget 定义，不污染本通用协议。
     var kind: String { get }
+    /// 弹窗显示文本（数据驱动）；默认 nil = 不显示弹窗。
+    /// 具体图表的 `XXXHitTarget` 按需覆盖（从自身数据派生）。
+    var tooltipText: String? { get }
 }
 
 public extension HYMChartHitTarget {
     /// 默认不分类
     var kind: String { "" }
+    /// 默认不显示弹窗
+    var tooltipText: String? { nil }
 }

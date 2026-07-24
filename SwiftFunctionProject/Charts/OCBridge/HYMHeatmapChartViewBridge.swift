@@ -15,6 +15,7 @@ public final class HYMHeatmapChartViewBridge: NSObject {
         self.theme = theme.build()
         self.chart = HYMChartView<HeatmapChartRenderer>(frame: frame)
         super.init()
+        chart.showsTooltipOnHit = true   // 开启通用 tooltip 机制；开关细节由 theme.showsTooltipOnHit 控制
         chart.onHit = { [weak self] target, _ in
             if let h = target as? HeatmapHitTarget {
                 self?.onHit?(h.row, h.column)

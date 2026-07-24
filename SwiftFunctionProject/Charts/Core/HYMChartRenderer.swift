@@ -10,6 +10,16 @@ public struct HYMChartRenderContext {
     }
 }
 
+/// 弹窗锚点（绘图驱动）：锚点 frame（view 坐标系）+ 偏好放置方向。
+public struct HYMChartTooltipAnchor {
+    public var frame: CGRect
+    public var preferredPlacements: [HYMChartTooltipPlacement]
+    public init(frame: CGRect, preferredPlacements: [HYMChartTooltipPlacement]) {
+        self.frame = frame
+        self.preferredPlacements = preferredPlacements
+    }
+}
+
 /// 图表渲染器契约：给定 model/theme/context，重建 layer 子树与子视图。
 /// 具体图表（如 RadarChartRenderer）实现此协议；通用容器 HYMChartView 注入使用。
 ///
@@ -41,6 +51,8 @@ public protocol HYMChartRenderer: AnyObject {
     func hitTest(_ point: CGPoint) -> HYMChartHitTarget?
     /// 选中态视觉反馈（预留）；默认空
     func applySelection(_ target: HYMChartHitTarget?)
+    /// 弹窗锚点：命中目标 → 锚点（绘图驱动）；默认 nil
+    func tooltipAnchor(for target: HYMChartHitTarget) -> HYMChartTooltipAnchor?
 }
 
 /// 默认实现：交互与逐帧回调为可选；不关心的图表无需实现这些方法
@@ -48,4 +60,5 @@ public extension HYMChartRenderer {
     func hitTest(_ point: CGPoint) -> HYMChartHitTarget? { nil }
     func applySelection(_ target: HYMChartHitTarget?) {}
     func updateEntranceAnimation(progress: Double) {}
+    func tooltipAnchor(for target: HYMChartHitTarget) -> HYMChartTooltipAnchor? { nil }
 }
