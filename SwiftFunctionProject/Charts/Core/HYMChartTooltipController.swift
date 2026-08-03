@@ -54,6 +54,40 @@ public final class HYMChartTooltipController {
         }
     }
 
+    /// 显示「自定义内容 view」弹窗（contentView 模式）。
+    /// 复用 HYMChartTooltipGeometry 定位与 show/hide 动画；外壳由 HYMChartTooltip 提供。
+    public func show(anchor: CGRect, contentView: UIView,
+                     in container: CGRect,
+                     preferred: [HYMChartTooltipPlacement]) {
+        guard let host = host else { return }
+        tooltip.configure(contentView: contentView, theme: theme)
+        let size = tooltip.sizeThatFits(CGSize(width: theme.maxWidth, height: .greatestFiniteMagnitude))
+        guard let r = HYMChartTooltipGeometry.resolve(
+            anchor: anchor, size: size, container: container,
+            preferred: preferred, gap: theme.gap) else {
+            tooltip.isHidden = true
+            return
+        }
+        host.bringSubviewToFront(tooltip)
+        tooltip.frame = r.frame
+        tooltip.applyArrow(placement: r.placement, arrowX: r.arrowX)
+        tooltip.layoutIfNeeded()
+
+        if theme.showsAnimation {
+            tooltip.alpha = 0
+            tooltip.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+            tooltip.isHidden = false
+            UIView.animate(withDuration: 0.18, delay: 0, options: []) {
+                self.tooltip.alpha = 1
+                self.tooltip.transform = .identity
+            }
+        } else {
+            tooltip.alpha = 1
+            tooltip.transform = .identity
+            tooltip.isHidden = false
+        }
+    }
+
     /// 隐藏弹窗。
     public func hide() {
         guard !tooltip.isHidden else { return }

@@ -525,4 +525,14 @@ public final class RadarChartRenderer: HYMChartRenderer {
         rebuildVertexDots(model, center: lastCenter, radius: lastRadius)
         rebuildLabelDots(model, center: lastCenter, radius: lastRadius)
     }
+
+    // MARK: - 命中单元 frame（供外部自定义弹窗定位）
+    public func hitFrame(for target: HYMChartHitTarget) -> CGRect? {
+        guard let r = target as? RadarHitTarget,
+              let rec = hitRecords.first(where: { $0.category == r.category
+                                          && $0.dimensionIndex == r.dimensionIndex })
+        else { return nil }
+        let rad = rec.radius
+        return CGRect(x: rec.center.x - rad, y: rec.center.y - rad, width: rad * 2, height: rad * 2)
+    }
 }

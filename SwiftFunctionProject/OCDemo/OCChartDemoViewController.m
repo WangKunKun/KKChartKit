@@ -63,14 +63,14 @@ HYMHeatmapCellBridge *hmCell(double v);
     // 维度标签用 4 字，便于 toggleRadarTheme 开启换行时观察左右标签换行。
     // per-dim 演示：防守能力(右)显式隐藏标题点 @NO，其余 nil=沿用全局 showsLabelDots
     NSArray<HYMRadarDimensionBridge *> *dims = @[
-        [self dimWithLabel:@"进攻能力" value:80],
-        [self dimWithLabel:@"防守能力" value:60 showsLabelDot:@NO],
-        [self dimWithLabel:@"速度能力" value:90],
-        [self dimWithLabel:@"技巧能力" value:50],
-        [self dimWithLabel:@"体力能力" value:70],
-        [self dimWithLabel:@"意识能力" value:85],
+        [self dimWithLabel:@"进攻能力" value:0],
+        [self dimWithLabel:@"防守能力" value:0 showsLabelDot:@NO],
+        [self dimWithLabel:@"速度能力" value:0],
+        [self dimWithLabel:@"技巧能力" value:0],
+        [self dimWithLabel:@"体力能力" value:0],
+        [self dimWithLabel:@"意识能力" value:0],
     ];
-    [self.radarBridge configureWithDimensions:dims showsCenterScore:YES centerScore:nil];
+    [self.radarBridge configureWithDimensions:dims showsCenterScore:NO centerScore:nil];
     [self.radarBridge playEntranceAnimation];
 }
 
@@ -82,7 +82,7 @@ HYMHeatmapCellBridge *hmCell(double v);
     return [[HYMRadarDimensionBridge alloc] initWithLabel:label value:value maxValue:100
                                                labelColor:nil labelFont:nil
                                              dataDotColor:nil labelDotColor:nil
-                                             showsLabelDot:showsLabelDot];
+                                             showsLabelDot:@(NO)];
 }
 
 #pragma mark - 热力图
@@ -111,6 +111,45 @@ HYMHeatmapCellBridge *hmCell(double v);
 
     self.heatmapBridge.onHit = ^(NSInteger row, NSInteger column) {
         NSLog(@"[OC] 热力图命中 (%ld,%ld)", (long)row, (long)column);
+    };
+
+    // onHitLocated：外部自定义弹窗（UIKit）。hit=NO（点空白取消选中）时移除浮层。
+    // 设置后内置 tooltip 自动不显示（Core 互斥）。
+    __weak __typeof(self) weakSelf = self;
+    self.heatmapBridge.onHitLocated = ^(BOOL hit, NSInteger row, NSInteger column, CGRect frame, CGPoint location) {
+        __strong __typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        [[strongSelf.view viewWithTag:9527] removeFromSuperview];   // 先移除旧浮层（命中重建、取消清空）
+        if (!hit) return;
+        UIView *chartView = strongSelf.heatmapBridge.chartView;
+        CGRect frameInView = [chartView convertRect:frame toView:strongSelf.view];
+
+        UILabel *tip = [[UILabel alloc] initWithFrame:CGRectMake(frameInView.origin.x,
+                                                                  frameInView.origin.y - 28,
+                                                                  frameInView.size.width, 24)];
+        tip.backgroundColor = [UIColor systemBlueColor];
+        tip.textColor = [UIColor whiteColor];
+        tip.font = [UIFont systemFontOfSize:12];
+        tip.textAlignment = NSTextAlignmentCenter;
+        tip.text = [NSString stringWithFormat:@"(%ld,%ld)", (long)row, (long)column];
+        tip.layer.cornerRadius = 6;
+        tip.layer.masksToBounds = YES;
+        tip.tag = 9527;
+        [strongSelf.view addSubview:tip];
+        NSLog(@"[OC] onHitLocated hit=%d row=%ld col=%ld frame=%@ location=%@",
+              (int)hit, (long)row, (long)column, NSStringFromCGRect(frame), NSStringFromCGPoint(location));
+    };
+
+    // popupContentProvider：新模式——OC 只返回内容 view（UILabel），SDK 套外壳 + 定位 + 显隐。
+    // 设了它 → onHitLocated 的自定义浮层不再显示（popup 优先），onHit 仍触发。
+    self.heatmapBridge.popupContentProvider = ^UIView *(NSInteger row, NSInteger column) {
+        UILabel *content = [[UILabel alloc] init];
+        content.text = [NSString stringWithFormat:@"(%ld,%ld)", (long)row, (long)column];
+        content.font = [UIFont systemFontOfSize:13 weight:UIFontWeightSemibold];
+        content.textColor = [UIColor whiteColor];
+        content.numberOfLines = 0;
+        [content sizeToFit];
+        return content;
     };
 
     NSArray<NSArray<HYMHeatmapCellBridge *> *> *rows = @[

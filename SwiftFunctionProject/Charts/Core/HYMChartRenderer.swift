@@ -53,6 +53,8 @@ public protocol HYMChartRenderer: AnyObject {
     func applySelection(_ target: HYMChartHitTarget?)
     /// 弹窗锚点：命中目标 → 锚点（绘图驱动）；默认 nil
     func tooltipAnchor(for target: HYMChartHitTarget) -> HYMChartTooltipAnchor?
+    /// 命中单元的几何 frame（view 坐标系），供外部自定义弹窗定位；独立于 tooltip 开关。默认 nil。
+    func hitFrame(for target: HYMChartHitTarget) -> CGRect?
 }
 
 /// 默认实现：交互与逐帧回调为可选；不关心的图表无需实现这些方法
@@ -61,4 +63,5 @@ public extension HYMChartRenderer {
     func applySelection(_ target: HYMChartHitTarget?) {}
     func updateEntranceAnimation(progress: Double) {}
     func tooltipAnchor(for target: HYMChartHitTarget) -> HYMChartTooltipAnchor? { nil }
+    func hitFrame(for target: HYMChartHitTarget) -> CGRect? { nil }
 }

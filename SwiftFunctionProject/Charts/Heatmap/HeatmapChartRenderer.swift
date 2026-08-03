@@ -229,6 +229,14 @@ public final class HeatmapChartRenderer: HYMChartRenderer {
         return HYMChartTooltipAnchor(frame: hit.frame, preferredPlacements: [.top, .bottom])
     }
 
+    // MARK: - 命中单元 frame（独立于 tooltip 开关，供外部自定义弹窗定位）
+    public func hitFrame(for target: HYMChartHitTarget) -> CGRect? {
+        guard let h = target as? HeatmapHitTarget,
+              let hit = lastCellFrames.first(where: { $0.row == h.row && $0.col == h.column })
+        else { return nil }
+        return hit.frame
+    }
+
     /// 默认 value 文本：去尾零（80.0 → "80"；80.5 → "80.5"）。
     static func format(_ value: Double) -> String {
         if value.truncatingRemainder(dividingBy: 1) == 0 {

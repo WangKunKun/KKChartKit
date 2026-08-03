@@ -28,6 +28,18 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     /// 命中时是否显示默认 tooltip（通用默认 false，避免影响现有图表；
     /// 需要弹窗的图表在其封装层显式置 true）。
     public var showsTooltipOnHit: Bool = false
+    /// 命中后带位置信息的回调（外部自定义弹窗用）。
+    /// 命中→context 非 nil（含 target/frame/location）；未命中（取消选中）→nil，外部据此隐藏弹窗。
+    /// 设置后内置 tooltip 自动不显示（见 `updateTooltip` 互斥）。
+    public var onHitLocated: ((HYMChartHitContext?, HYMChartGesture) -> Void)?
+
+    /// 命中弹窗的「内容 view」提供者（外部自定义弹窗的便利模式）。
+    ///
+    /// 设了它：SDK 命中时调用获取内容 view，套统一外壳(背景/圆角/箭头)，
+    /// 用 `HYMChartTooltipGeometry` 智能定位(边界避让) + 显隐动画显示；未命中自动隐藏。
+    /// 设了它 → 跳过 `onHitLocated` 与内置 text tooltip（三层 fallback 最高优先级）。
+    /// 内容 view 应能报告尺寸(`intrinsicContentSize` 或 `sizeThatFits(_:)`)。
+    public var popupContentProvider: ((HYMChartHitContext) -> UIView?)?
     /// 弹窗控制器（首次显示时懒创建）。
     private var tooltipController: HYMChartTooltipController?
 
@@ -119,9 +131,37 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     @objc private func onTap(_ gr: UITapGestureRecognizer) {
         let p = gr.location(in: self)
         let target = renderer.hitTest(p)
-        renderer.applySelection(target)        // 命中→选中，未命中→取消（通用）
-        updateTooltip(for: target)            // tooltip 跟随选中态
-        if let target { onHit?(target, .tap) }
+        renderer.applySelection(target)
+
+        if let target {
+            onHit?(target, .tap)                       // 始终：命中事件通知
+
+            let ctx = HYMChartHitContext(
+                target: target,
+                frame: renderer.hitFrame(for: target) ?? .zero,
+                location: p)
+
+            if popupContentProvider != nil {           // ① popup 模式（最高优先）
+                if let cv = popupContentProvider?(ctx),
+                   let anchor = renderer.tooltipAnchor(for: target) {
+                    ensureTooltipController().show(anchor: anchor.frame, contentView: cv,
+                                                  in: bounds, preferred: anchor.preferredPlacements)
+                } else {
+                    tooltipController?.hide()
+                }
+            } else if onHitLocated != nil {            // ② onHitLocated 外部全权
+                onHitLocated?(ctx, .tap)
+                tooltipController?.hide()
+            } else {                                   // ③ 内置 text tooltip
+                updateTooltip(for: target)
+            }
+        } else {
+            // 未命中：按激活模式镜像处理（popup 模式不触发 onHitLocated，与命中分支对称）
+            tooltipController?.hide()
+            if popupContentProvider == nil, onHitLocated != nil {
+                onHitLocated?(nil, .tap)
+            }
+        }
     }
 
     // MARK: - Tooltip
@@ -134,6 +174,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
 
     /// 命中后更新 tooltip：开关关 / 无文本 / 无锚点 → 隐藏；否则显示。
     private func updateTooltip(for target: HYMChartHitTarget?) {
+        if onHitLocated != nil { tooltipController?.hide(); return }   // 外部接管弹窗 → 跳过内置
         guard showsTooltipOnHit else { tooltipController?.hide(); return }
         guard let target,
               let text = target.tooltipText,

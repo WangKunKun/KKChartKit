@@ -27,3 +27,21 @@ public extension HYMChartHitTarget {
     /// 默认不显示弹窗
     var tooltipText: String? { nil }
 }
+
+/// 一次命中 + 其在 chartView 内的几何位置（供外部自定义弹窗定位）。
+///
+/// 位置不进 `HYMChartHitTarget`（保持其"数据，非绘图细节"语义），单独放在此 context。
+/// `frame` 与 `location` 均为 chartView 坐标系；外部按需用 `convertRect:fromView:` 等转换。
+public struct HYMChartHitContext {
+    /// 命中的语义单元（含 identifier/index 及具体图表的 row/column 等）。
+    public let target: any HYMChartHitTarget
+    /// 命中单元在 chartView 坐标系的 frame。
+    public let frame: CGRect
+    /// 触发点在 chartView 坐标系的位置。
+    public let location: CGPoint
+    public init(target: any HYMChartHitTarget, frame: CGRect, location: CGPoint) {
+        self.target = target
+        self.frame = frame
+        self.location = location
+    }
+}

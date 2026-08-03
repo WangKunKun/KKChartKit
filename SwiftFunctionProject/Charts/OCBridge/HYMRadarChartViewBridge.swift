@@ -11,6 +11,32 @@ public final class HYMRadarChartViewBridge: NSObject {
     /// OC 端命中回调：(kind 字符串, 维度 index)。kind = "dataVertex"/"labelVertex"。
     @objc public var onHit: ((NSString, NSInteger) -> Void)?
 
+    /// OC 端带位置的命中回调：(hit, kind, dimensionIndex, frame, location)。
+    /// hit=YES 命中；hit=NO 未命中（取消选中，外部据此隐藏弹窗）。
+    /// 设置后内置 tooltip 自动不显示。
+    @objc public var onHitLocated: ((Bool, NSString, NSInteger, CGRect, CGPoint) -> Void)? {
+        didSet {
+            chart.onHitLocated = onHitLocated != nil ? { [weak self] context, _ in
+                guard let self else { return }
+                if let context, let r = context.target as? RadarHitTarget {
+                    self.onHitLocated?(true, r.kind as NSString, r.dimensionIndex, context.frame, context.location)
+                } else {
+                    self.onHitLocated?(false, "" as NSString, 0, .zero, .zero)
+                }
+            } : nil
+        }
+    }
+
+    /// OC 端弹窗内容提供者：(kind, dimensionIndex) → 内容 UIView。SDK 套外壳 + 智能定位 + 显隐。
+    @objc public var popupContentProvider: ((NSString, NSInteger) -> UIView?)? {
+        didSet {
+            chart.popupContentProvider = popupContentProvider != nil ? { [weak self] context in
+                guard let self, let r = context.target as? RadarHitTarget else { return nil }
+                return self.popupContentProvider?(r.kind as NSString, r.dimensionIndex)
+            } : nil
+        }
+    }
+
     @objc public init(theme: HYMRadarThemeBuilder, frame: CGRect) {
         self.theme = theme.build()
         self.chart = HYMChartView<RadarChartRenderer>(frame: frame)

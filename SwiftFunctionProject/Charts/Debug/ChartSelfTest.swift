@@ -243,6 +243,83 @@ public enum ChartSelfTest {
         let hitDef8 = defRenderer8.hitTest(CGPoint(x: 50, y: 50)) as? HeatmapHitTarget
         assert(hitDef8?.tooltipText == "42", "default tooltipText should be formatted value, got \(String(describing: hitDef8?.tooltipText))")
 
+        // —— HYMChartHitContext 构造 ——
+        let _ctx = HYMChartHitContext(target: _PlainTarget(), frame: CGRect(x: 1, y: 2, width: 3, height: 4),
+                                      location: CGPoint(x: 5, y: 6))
+        assert(abs(_ctx.frame.minX - 1) < 0.001, "HitContext.frame wrong: \(_ctx.frame)")
+        assert(abs(_ctx.location.x - 5) < 0.001, "HitContext.location wrong: \(_ctx.location)")
+        assert(_ctx.target.identifier == "x", "HitContext.target wrong")
+
+        // —— hitFrame 协议默认 nil ——
+        // 未实现 hitFrame 的 renderer（render 前 / 默认实现）应返回 nil
+        let _fr = HeatmapChartRenderer()
+        assert(_fr.hitFrame(for: _PlainTarget()) == nil,
+               "hitFrame default should be nil before implementation")
+
+        // —— Heatmap hitFrame：命中单元返回缓存 frame，且独立于 showsTooltipOnHit ——
+        let hfModel = HeatmapChartModel(rows: [
+            [HeatmapCell(value: 10), HeatmapCell(value: 20), HeatmapCell(value: 30)]
+        ])
+        let hfRenderer = HeatmapChartRenderer()
+        var hfTheme = HeatmapChartTheme()
+        hfTheme.showsTooltipOnHit = false   // 关键：关掉内置 tooltip，hitFrame 仍必须可用
+        hfRenderer.render(model: hfModel, theme: hfTheme,
+                          context: HYMChartRenderContext(bounds: CGRect(x: 0, y: 0, width: 300, height: 200),
+                                                         center: .zero))
+        let hfClick = CGPoint(x: 5, y: 5)
+        if let hfHit = hfRenderer.hitTest(hfClick) {
+            let hfFrame = hfRenderer.hitFrame(for: hfHit)
+            assert(hfFrame != nil, "heatmap hitFrame should not be nil even with tooltip off")
+            assert(hfFrame?.contains(hfClick) == true,
+                   "heatmap hitFrame should contain the click point, got \(String(describing: hfFrame))")
+        } else {
+            assertionFailure("heatmap should hit (0,0)")
+        }
+
+        // —— Radar hitFrame：顶点 center+radius → 正方形 frame ——
+        let rdModel = RadarChartModel(dimensions: [
+            RadarDimension(label: "a", value: 80),
+            RadarDimension(label: "b", value: 60),
+        ])
+        let rdRenderer = RadarChartRenderer()
+        rdRenderer.render(model: rdModel, theme: RadarChartTheme(),
+                          context: HYMChartRenderContext(bounds: CGRect(x: 0, y: 0, width: 200, height: 200),
+                                                         center: CGPoint(x: 100, y: 100)))
+        let rdFrame = rdRenderer.hitFrame(for: RadarHitTarget(category: .dataVertex, dimensionIndex: 0))
+        assert(rdFrame != nil, "radar dataVertex hitFrame should not be nil")
+        if let rf = rdFrame {
+            assert(rf.width > 0 && abs(rf.width - rf.height) < 0.001,
+                   "radar hitFrame should be a non-zero square, got \(rf)")
+        }
+        // 不存在的维度 → nil
+        assert(rdRenderer.hitFrame(for: RadarHitTarget(category: .dataVertex, dimensionIndex: 99)) == nil,
+               "radar hitFrame for missing dimension should be nil")
+
+        // —— HYMChartTooltip contentView 模式（外壳复用，内容 view 尺寸驱动）——
+        let tipLabel = UILabel()
+        tipLabel.text = "内容"
+        tipLabel.font = .systemFont(ofSize: 16)
+        var tipTheme = HYMChartTooltipTheme()
+        tipTheme.contentInset = .zero
+        tipTheme.showsArrow = false
+        let expSize = tipLabel.sizeThatFits(CGSize(width: tipTheme.maxWidth, height: .greatestFiniteMagnitude))
+        let tipView = HYMChartTooltip()
+        tipView.configure(contentView: tipLabel, theme: tipTheme)
+        let tipSize = tipView.sizeThatFits(CGSize(width: tipTheme.maxWidth, height: .greatestFiniteMagnitude))
+        assert(abs(tipSize.width - expSize.width) < 0.001 && abs(tipSize.height - expSize.height) < 0.001,
+               "contentView mode sizeThatFits should equal contentView size (inset 0, no arrow), got \(tipSize) vs \(expSize)")
+
+        // —— HYMChartTooltipController.show(contentView:) 不崩 ——
+        let ctrlHost = UIView(frame: CGRect(x: 0, y: 0, width: 200, height: 200))
+        let ctrl = HYMChartTooltipController(host: ctrlHost)
+        let popLabel = UILabel()
+        popLabel.text = "弹窗内容"
+        popLabel.font = .systemFont(ofSize: 14)
+        ctrl.show(anchor: CGRect(x: 90, y: 100, width: 20, height: 20),
+                  contentView: popLabel,
+                  in: ctrlHost.bounds,
+                  preferred: [.top, .bottom])
+
         print("✅ ChartSelfTest passed")
     }
 

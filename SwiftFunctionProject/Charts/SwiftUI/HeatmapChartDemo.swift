@@ -35,6 +35,19 @@ struct HeatmapChartDemo: View {
                     .foregroundStyle(.secondary)
                 HeatmapChart(model: Self.model) { target, _ in
                     print("🔥 heatmap hit: (\(target.row),\(target.column)) tip=\(target.tooltipText ?? "nil")")
+                } popup: { context in
+                    if let h = context.target as? HeatmapHitTarget {
+                        AnyView(
+                            VStack(spacing: 2) {
+                                Text("(\(h.row),\(h.column))")
+                                    .font(.system(size: 13, weight: .semibold))
+                                if let tip = h.tooltipText { Text(tip).font(.system(size: 11)) }
+                            }
+                            .foregroundStyle(.white)
+                        )
+                    } else {
+                        AnyView(EmptyView())
+                    }
                 }
                 .frame(height: 220)
                 .padding(.horizontal)
