@@ -1,0 +1,18 @@
+# macOS
+.DS_Store
+
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xccheckout
+*.moved-aside
+*.hmap
+*.ipa
+
+# 编辑器
+.obsidian/
+
+# 临时文件
+git更新图.png
