@@ -92,7 +92,7 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer {
             ? [] : makeYTicks(model: model, domain: currentViewport.yDomain)
         let yTickWidth = currentYTicks.map { textSize(AxisRenderer.format($0), font: cartTheme.tickLabelFont).width }.max() ?? 0
         let xTickHeight = textSize("0", font: cartTheme.tickLabelFont).height
-        let titleHeight = model.title == nil ? 0 : textSize(model.title!, font: cartTheme.titleFont).height
+        let titleHeight = model.title.map { textSize($0, font: cartTheme.titleFont).height } ?? 0
         currentPlotFrame = CartesianGeometry.layout(
             bounds: context.bounds,
             contentInset: cartTheme.contentInset,
@@ -101,9 +101,8 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer {
             axisLabelGap: cartTheme.axisLabelGap,
             titleHeight: titleHeight)
 
-        guard model.maxPointCount > 0 else { return }
-
-        // 4) 网格 + 轴 + 标题（挂在 series 之下）
+        // 4) 网格 + 轴 + 标题（挂在 series 之下）。
+        // 空数据也画空坐标系（规格：防御式兜底），只是跳过 series 绘制。
         rootLayer.addSublayer(GridRenderer.makeGridLayer(
             yTicks: currentYTicks, categoryCount: model.maxPointCount,
             viewport: currentViewport, plotFrame: currentPlotFrame, theme: cartTheme))
@@ -112,8 +111,10 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer {
         addTickLabels(model: model, theme: cartTheme)
         addTitleLabel(model: model, theme: cartTheme)
 
-        // 5) 子类绘制（模板方法扩展点）
-        drawSeries(model: model, theme: theme, plotFrame: currentPlotFrame)
+        // 5) 子类绘制（模板方法扩展点；空数据不进 series）
+        if model.maxPointCount > 0 {
+            drawSeries(model: model, theme: theme, plotFrame: currentPlotFrame)
+        }
     }
 
     // MARK: - 子类扩展点
@@ -127,7 +128,7 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer {
     public func hitTest(_ point: CGPoint) -> HYMChartHitTarget? { seriesHitTest(point) }
 
     // MARK: - 便捷（子类用）
-    /// 值 → 屏幕（用当前 viewport/plotFrame）。
+    /// 值 → 屏幕（view 坐标系），用当前 viewport/plotFrame；须在 render 之后调用。
     func screenPoint(x: Double, y: Double) -> CGPoint {
         CartesianGeometry.point(x: x, y: y, viewport: currentViewport, plotFrame: currentPlotFrame)
     }
@@ -138,7 +139,8 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer {
         // x：类目域 -0.5...n-0.5（点 i 落 band 中心）。显式 min/max 覆盖。
         let xMin = model.xAxis.min ?? -0.5
         let xMax = model.xAxis.max ?? Double(count - 1) + 0.5
-        // y：显式 min/max 同显式时直接用；否则 nice scale（显式端单独生效时与自动端合并）
+        // y：显式 min/max 同显式时直接用；否则 nice scale（显式端单独生效时与自动端合并）。
+        // 注意：显式端与自动刻度不对齐时，首/末刻度与轴线间会有空隙（显式端优先的语义，与 Highcharts 一致）。
         let bounds = model.dataBounds ?? (min: 0, max: 1)
         let scale = NiceScaleGenerator.generate(
             dataMin: model.yAxis.min ?? bounds.min,
