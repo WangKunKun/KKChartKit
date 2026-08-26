@@ -1,5 +1,4 @@
 import Foundation
-import CoreGraphics
 import UIKit
 
 /// 轴类型。阶段 0 仅实现 `.category` 的渲染；`.value` 为阶段 5 散点图预留。
@@ -72,7 +71,8 @@ public struct CartesianChartModel: HYMChartModel {
         return (lo, hi)
     }
 
-    /// 实际生效的类目标签：显式非空优先；否则自动 "1"..."n"。
+    /// 实际生效的类目标签：显式非空优先；否则自动 "1"..."n"（1-based，用户友好）。
+    /// 锯齿 series（各系列长度不一）时以最长 series 为准；短系列的空位语义由渲染层决定。
     public var categoryLabels: [String] {
         if case .category(let labels) = xAxis.kind, !labels.isEmpty {
             return Array(labels.prefix(maxPointCount))
