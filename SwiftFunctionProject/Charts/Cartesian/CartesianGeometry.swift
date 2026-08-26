@@ -1,0 +1,52 @@
+import CoreGraphics
+import UIKit
+
+/// 轴系图表几何纯函数（plot 布局、值↔屏幕映射；DEBUG 自检覆盖）。
+public enum CartesianGeometry {
+
+    /// 计算 plot 区（网格 + series 绘制区）frame。
+    ///
+    /// 布局模型：内容 inset → 顶部让出标题 → 左侧让出 y 刻度 label → 底部让出 x 刻度 label。
+    /// `yAxisTickLabelWidth` / `xAxisTickLabelHeight` 由调用方按最宽/最高刻度文本量好传入。
+    public static func layout(bounds: CGRect,
+                              contentInset: UIEdgeInsets,
+                              yAxisTickLabelWidth: CGFloat,
+                              xAxisTickLabelHeight: CGFloat,
+                              axisLabelGap: CGFloat,
+                              titleHeight: CGFloat) -> CGRect {
+        let x = bounds.minX + contentInset.left + yAxisTickLabelWidth + axisLabelGap
+        let y = bounds.minY + contentInset.top + titleHeight + axisLabelGap
+        let w = max(0, bounds.width - contentInset.left - contentInset.right
+                        - yAxisTickLabelWidth - axisLabelGap)
+        let h = max(0, bounds.height - contentInset.top - contentInset.bottom
+                        - titleHeight - axisLabelGap - xAxisTickLabelHeight - axisLabelGap)
+        return CGRect(x: x, y: y, width: w, height: h)
+    }
+
+    /// 值 → 屏幕（view 坐标系）。x/y 均为线性映射；y 轴屏幕向下，故值越大 y 越小。
+    /// 类目模式下数据点 x 取索引值（域 -0.5...n-0.5 时点落在 band 中心）。
+    public static func point(x: Double, y: Double,
+                             viewport: CartesianViewport,
+                             plotFrame: CGRect) -> CGPoint {
+        let tx = (x - viewport.xMin) / max(viewport.xSpan, 1e-9)
+        let ty = (y - viewport.yMin) / max(viewport.ySpan, 1e-9)
+        return CGPoint(x: plotFrame.minX + tx * plotFrame.width,
+                       y: plotFrame.maxY - ty * plotFrame.height)
+    }
+
+    /// 屏幕 → 值（`point` 的逆映射）。
+    public static func value(at point: CGPoint,
+                             viewport: CartesianViewport,
+                             plotFrame: CGRect) -> (x: Double, y: Double) {
+        let tx = (point.x - plotFrame.minX) / max(plotFrame.width, 1e-9)
+        let ty = (plotFrame.maxY - point.y) / max(plotFrame.height, 1e-9)
+        return (viewport.xMin + tx * viewport.xSpan,
+                viewport.yMin + ty * viewport.ySpan)
+    }
+
+    /// 类目 label 抽样步长：类目数超过 `maxLabels`（默认 10）时隔 N 取 1 显示。
+    public static func categoryLabelStride(count: Int, maxLabels: Int = 10) -> Int {
+        guard count > maxLabels, maxLabels > 0 else { return 1 }
+        return Int(ceil(Double(count) / Double(maxLabels)))
+    }
+}

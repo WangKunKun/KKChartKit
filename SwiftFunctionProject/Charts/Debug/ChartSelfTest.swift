@@ -389,6 +389,28 @@ public enum ChartSelfTest {
         // E 补充：NaN 的 step/ticks
         assert(abs(nsE.step - 1) < 0.001 && nsE.ticks == [0, 1], "NaN fallback step/ticks wrong")
 
+        // —— CartesianGeometry ——
+        // 布局：inset(上16,左12,下24,右12) + y刻度宽34 + x刻度高14 + gap4 + 标题高20
+        let plot = CartesianGeometry.layout(
+            bounds: CGRect(x: 0, y: 0, width: 320, height: 200),
+            contentInset: UIEdgeInsets(top: 16, left: 12, bottom: 24, right: 12),
+            yAxisTickLabelWidth: 34, xAxisTickLabelHeight: 14,
+            axisLabelGap: 4, titleHeight: 20)
+        // plot = x: 12+34+4=50, y: 16+20+4=40, w: 320-50-12=258, h: 200-40-24-14-4=118
+        assert(abs(plot.minX - 50) < 0.001 && abs(plot.minY - 40) < 0.001, "plot origin wrong: \(plot)")
+        assert(abs(plot.width - 258) < 0.001 && abs(plot.height - 118) < 0.001, "plot size wrong: \(plot)")
+        // 值→屏幕：类目域 -0.5...3.5、值域 0...100
+        let vpG = CartesianViewport(xMin: -0.5, xMax: 3.5, yMin: 0, yMax: 100)
+        let p0 = CartesianGeometry.point(x: 0, y: 50, viewport: vpG, plotFrame: plot)
+        assert(abs(p0.x - 82.25) < 0.001, "point x should be 82.25, got \(p0.x)")
+        assert(abs(p0.y - 99.0) < 0.001, "point y should be 99, got \(p0.y)")
+        // 逆映射 roundtrip
+        let back = CartesianGeometry.value(at: p0, viewport: vpG, plotFrame: plot)
+        assert(abs(back.x - 0) < 0.001 && abs(back.y - 50) < 0.001, "roundtrip wrong: \(back)")
+        // 类目 label 抽样
+        assert(CartesianGeometry.categoryLabelStride(count: 8) == 1, "8 cats stride 1")
+        assert(CartesianGeometry.categoryLabelStride(count: 30) == 3, "30 cats stride 3")
+
         print("✅ ChartSelfTest passed")
     }
 
