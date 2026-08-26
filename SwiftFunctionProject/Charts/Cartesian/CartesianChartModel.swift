@@ -73,10 +73,12 @@ public struct CartesianChartModel: HYMChartModel {
 
     /// 实际生效的类目标签：显式非空优先；否则自动 "1"..."n"（1-based，用户友好）。
     /// 锯齿 series（各系列长度不一）时以最长 series 为准；短系列的空位语义由渲染层决定。
+    /// 空 series 返回 []（`1...0` 会触发 Range 构造崩溃，必须先判空）。
     public var categoryLabels: [String] {
         if case .category(let labels) = xAxis.kind, !labels.isEmpty {
             return Array(labels.prefix(maxPointCount))
         }
+        guard maxPointCount > 0 else { return [] }
         return (1...maxPointCount).map { String($0) }
     }
 }
