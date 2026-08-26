@@ -342,6 +342,16 @@ public enum ChartSelfTest {
                .categoryLabels == ["1", "2"],
                "auto labels should be 1...n")
 
+        // —— CartesianViewport ——
+        let vp = CartesianViewport(xMin: -0.5, xMax: 3.5, yMin: 0, yMax: 100)
+        assert(vp.xDomain == -0.5...3.5 && vp.yDomain == 0...100, "domains wrong")
+        assert(abs(vp.xSpan - 4) < 0.001 && abs(vp.ySpan - 100) < 0.001, "spans wrong")
+        assert(vp.clamp(x: 5) == 3.5 && vp.clamp(x: -9) == -0.5, "x clamp wrong")
+        assert(vp.clamp(y: -3) == 0 && vp.clamp(y: 120) == 100, "y clamp wrong")
+        // 退化域（span=0）不崩溃：clamp 直接返回界值
+        let vp0 = CartesianViewport(xMin: 1, xMax: 1, yMin: 0, yMax: 0)
+        assert(vp0.clamp(x: 99) == 1 && vp0.clamp(y: -5) == 0, "degenerate clamp wrong")
+
         print("✅ ChartSelfTest passed")
     }
 
