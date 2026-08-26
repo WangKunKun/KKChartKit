@@ -24,6 +24,11 @@ struct ContentView: View {
                         HeatmapChartDemo()
                     }
                 }
+                Section("折线图") {
+                    NavigationLink("折线图 demo（实时属性面板）") {
+                        LineChartDemo()
+                    }
+                }
                 Section("OC demo") {
                     NavigationLink("蛛网图 + 热力图（OC）") {
                         OCChartDemoHost()
