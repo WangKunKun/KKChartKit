@@ -356,6 +356,29 @@ public enum ChartSelfTest {
         assert(vpNorm.xMin == 0 && vpNorm.xMax == 10, "x init normalization failed")
         assert(vpNorm.yMin == -10 && vpNorm.yMax == 50, "y init normalization failed")
 
+        // —— NiceScaleGenerator（Heckbert nice numbers，maxTickCount=6）——
+        // A: 全正 (3,97) → 含 0 下界 → 0...100 步长 20
+        let nsA = NiceScaleGenerator.generate(dataMin: 3, dataMax: 97)
+        assert(abs(nsA.min) < 0.001 && abs(nsA.max - 100) < 0.001 && abs(nsA.step - 20) < 0.001,
+               "case A should be 0...100 step 20, got \(nsA)")
+        assert(nsA.ticks.first! == 0 && nsA.ticks.last! == 100, "case A ticks ends wrong")
+        assert(nsA.ticks.count == 6, "case A should have 6 ticks, got \(nsA.ticks.count)")
+        // B: 含负 (-37,25) → -40...30 步长 10
+        let nsB = NiceScaleGenerator.generate(dataMin: -37, dataMax: 25)
+        assert(abs(nsB.min - (-40)) < 0.001 && abs(nsB.max - 30) < 0.001 && abs(nsB.step - 10) < 0.001,
+               "case B should be -40...30 step 10, got \(nsB)")
+        // C: 平线 (50,50) → 全正 → 0...50 步长 10（顶格，Highcharts 同类行为）
+        let nsC = NiceScaleGenerator.generate(dataMin: 50, dataMax: 50)
+        assert(abs(nsC.min) < 0.001 && abs(nsC.max - 50) < 0.001 && abs(nsC.step - 10) < 0.001,
+               "case C should be 0...50 step 10, got \(nsC)")
+        // D: 全零 (0,0) → 0...1 步长 0.2
+        let nsD = NiceScaleGenerator.generate(dataMin: 0, dataMax: 0)
+        assert(abs(nsD.min) < 0.001 && abs(nsD.max - 1) < 0.001 && abs(nsD.step - 0.2) < 0.001,
+               "case D should be 0...1 step 0.2, got \(nsD)")
+        // E: NaN 防御 → 0...1
+        let nsE = NiceScaleGenerator.generate(dataMin: .nan, dataMax: .nan)
+        assert(abs(nsE.min) < 0.001 && abs(nsE.max - 1) < 0.001, "NaN should fall back 0...1")
+
         print("✅ ChartSelfTest passed")
     }
 
