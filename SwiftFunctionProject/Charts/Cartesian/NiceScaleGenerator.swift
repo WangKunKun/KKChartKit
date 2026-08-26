@@ -16,7 +16,8 @@ public enum NiceScaleGenerator {
     ///
     /// 规则：
     /// - 数据全非负（min ≥ 0）时下界从 0 起算（柱状图语义直觉）。
-    /// - 平线（min == max）：值为 0 → 0...1；否则上界保持数据值（顶格）。
+    /// - 平线（min == max）：值为 0 → 0...1；正值顶格（下界钳 0 后 range 正常）；
+    ///   负值上浮 |lo|×10% 防零 range（如 -50...-50 → 上浮至 -45 后 nice 化为 -50...-45）。
     /// - NaN 输入 → 0...1 兜底。
     /// - maxTickCount 为目标刻度上限（近似，实际可能 ±2）。
     public static func generate(dataMin: Double, dataMax: Double,
@@ -27,7 +28,7 @@ public enum NiceScaleGenerator {
         var lo = dataMin, hi = dataMax
         if lo > hi { swap(&lo, &hi) }
         if lo >= 0 { lo = 0 }                       // 全非负：含 0 下界
-        if hi <= lo { hi = lo + (lo == 0 ? 1 : 0) }  // 平线 0 → 0...1
+        if hi <= lo { hi = lo + (lo == 0 ? 1 : abs(lo) * 0.1) }  // 平线：0 → 0...1；负值上浮 10% 防零 range
         let range = niceNum(hi - lo)
         let step = niceNum(range / Double(max(maxTickCount, 2)))
         let niceMin = (lo / step).rounded(.down) * step

@@ -378,6 +378,16 @@ public enum ChartSelfTest {
         // E: NaN 防御 → 0...1
         let nsE = NiceScaleGenerator.generate(dataMin: .nan, dataMax: .nan)
         assert(abs(nsE.min) < 0.001 && abs(nsE.max - 1) < 0.001, "NaN should fall back 0...1")
+        // F: 负平线 (-50,-50) → 上浮 10% 后 nice 化（-45 → ceil 至 -45，下界 floor 至 -50）
+        let nsF = NiceScaleGenerator.generate(dataMin: -50, dataMax: -50)
+        assert(abs(nsF.min - (-50)) < 0.001, "case F niceMin should be -50, got \(nsF.min)")
+        assert(abs(nsF.max - (-45)) < 0.001, "case F niceMax should be -45, got \(nsF.max)")
+        assert(abs(nsF.step - 1) < 0.001, "case F step should be 1, got \(nsF.step)")
+        // G: Infinity 防御 → 0...1
+        let nsG = NiceScaleGenerator.generate(dataMin: .infinity, dataMax: 100)
+        assert(abs(nsG.min) < 0.001 && abs(nsG.max - 1) < 0.001, "Infinity should fall back 0...1")
+        // E 补充：NaN 的 step/ticks
+        assert(abs(nsE.step - 1) < 0.001 && nsE.ticks == [0, 1], "NaN fallback step/ticks wrong")
 
         print("✅ ChartSelfTest passed")
     }
