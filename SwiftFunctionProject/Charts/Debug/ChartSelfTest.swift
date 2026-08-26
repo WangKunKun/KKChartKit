@@ -422,6 +422,29 @@ public enum ChartSelfTest {
         assert(AxisRenderer.format(0.30000000000000004) == "0.3", "float noise should collapse to '0.3'")
         assert(AxisRenderer.format(123.456) == "123.5", ">=100 non-integer should avoid scientific notation, got '\(AxisRenderer.format(123.456))'")
 
+        // —— LineChartRenderer ——
+        let lineRenderer = LineChartRenderer()
+        assert(lineRenderer.hitTest(CGPoint(x: 5, y: 5)) == nil, "no render should miss")
+        let lineModel = CartesianChartModel(
+            title: "折线",
+            series: [CartesianSeriesElement(name: "s", data: [10, 60, 30])])
+        lineRenderer.render(model: lineModel, theme: CartesianChartTheme(),
+                            context: HYMChartRenderContext(
+                                bounds: CGRect(x: 0, y: 0, width: 320, height: 200),
+                                center: .zero))
+        // 用渲染器自身的屏幕映射反推数据点位置做命中（避免手算布局）
+        let p1 = lineRenderer.testScreenPoint(series: 0, index: 1)
+        if let hit = lineRenderer.hitTest(CGPoint(x: p1.x, y: p1.y)) as? LineHitTarget {
+            assert(hit.seriesIndex == 0 && hit.index == 1, "should hit series0 index1, got \(hit)")
+            assert(abs(hit.value - 60) < 0.001, "hit value should be 60")
+            assert(hit.tooltipText != nil, "tooltipText should exist")
+        } else {
+            assertionFailure("should hit data point (0,1)")
+        }
+        // 点附近 ±8pt 命中；远处不命中
+        assert(lineRenderer.hitTest(CGPoint(x: p1.x + 8, y: p1.y)) != nil, "±8pt should hit")
+        assert(lineRenderer.hitTest(CGPoint(x: 5, y: 5)) == nil, "far corner should miss")
+
         print("✅ ChartSelfTest passed")
     }
 
