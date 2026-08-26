@@ -410,6 +410,10 @@ public enum ChartSelfTest {
         // 类目 label 抽样
         assert(CartesianGeometry.categoryLabelStride(count: 8) == 1, "8 cats stride 1")
         assert(CartesianGeometry.categoryLabelStride(count: 30) == 3, "30 cats stride 3")
+        // 边界：恰等于 maxLabels 不抽样；maxLabels 非法（≤0）回退 1
+        assert(CartesianGeometry.categoryLabelStride(count: 10) == 1, "10 cats at boundary stride 1")
+        assert(CartesianGeometry.categoryLabelStride(count: 11) == 2, "11 cats stride 2")
+        assert(CartesianGeometry.categoryLabelStride(count: 5, maxLabels: 0) == 1, "invalid maxLabels fallback 1")
 
         print("✅ ChartSelfTest passed")
     }
