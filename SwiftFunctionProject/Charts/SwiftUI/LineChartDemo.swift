@@ -13,6 +13,20 @@ struct LineChartDemo: View {
     @State private var seriesColor = CartesianChartTheme().seriesColor
     @State private var pointColorOn = false
     @State private var pointColor = UIColor.systemRed
+    @State private var backgroundOn = false
+    @State private var backgroundColor = UIColor.systemBackground
+    @State private var titleColor = CartesianChartTheme().titleColor
+    @State private var titleFontSize = 14.0
+    @State private var titleBold = true
+    @State private var tickFontSize = 10.0
+    @State private var gridLineWidth = 0.5
+    @State private var axisLineWidth = 1.0
+    @State private var axisLabelGap = 4.0
+    @State private var insetTop = 12.0
+    @State private var insetLeft = 12.0
+    @State private var insetBottom = 12.0
+    @State private var insetRight = 12.0
+    @State private var backgroundCornerRadius = 0.0
 
     var body: some View {
         VStack(spacing: 0) {
@@ -39,6 +53,16 @@ struct LineChartDemo: View {
         var t = theme
         t.seriesColor = seriesColor
         t.pointColor = pointColorOn ? pointColor : nil
+        t.backgroundColor = backgroundOn ? backgroundColor : nil
+        t.backgroundCornerRadius = backgroundCornerRadius
+        t.titleColor = titleColor
+        t.titleFont = .systemFont(ofSize: titleFontSize, weight: titleBold ? .semibold : .regular)
+        t.tickLabelFont = .systemFont(ofSize: tickFontSize)
+        t.gridLineWidth = gridLineWidth
+        t.axisLineWidth = axisLineWidth
+        t.axisLabelGap = axisLabelGap
+        t.contentInset = UIEdgeInsets(top: insetTop, left: insetLeft,
+                                       bottom: insetBottom, right: insetRight)
         return t
     }
 
@@ -70,10 +94,24 @@ struct LineChartDemo: View {
             .toggle(label: "横向网格", value: $theme.showsHorizontalGridlines),
             .toggle(label: "纵向网格", value: $theme.showsVerticalGridlines),
             .color(label: "网格颜色", value: $theme.gridColor),
+            .slider(label: "网格线宽", value: $gridLineWidth, range: 0.5...3, step: 0.5),
             .color(label: "轴颜色", value: $theme.axisLineColor),
+            .slider(label: "轴线宽", value: $axisLineWidth, range: 0.5...3, step: 0.5),
             .color(label: "刻度文字颜色", value: $theme.tickLabelColor),
+            .slider(label: "刻度字号", value: $tickFontSize, range: 8...16, step: 1),
+            .slider(label: "刻度与轴间距", value: $axisLabelGap, range: 2...12, step: 1),
         ])
         let overallSection = ChartDemoPanel.DemoSection(title: "整体", items: [
+            .toggle(label: "背景色", value: $backgroundOn),
+            .color(label: "背景颜色", value: $backgroundColor),
+            .slider(label: "背景圆角", value: $backgroundCornerRadius, range: 0...20, step: 1),
+            .color(label: "标题颜色", value: $titleColor),
+            .slider(label: "标题字号", value: $titleFontSize, range: 10...24, step: 1),
+            .toggle(label: "标题加粗", value: $titleBold),
+            .slider(label: "上边距", value: $insetTop, range: 0...40, step: 1),
+            .slider(label: "左边距", value: $insetLeft, range: 0...40, step: 1),
+            .slider(label: "下边距", value: $insetBottom, range: 0...40, step: 1),
+            .slider(label: "右边距", value: $insetRight, range: 0...40, step: 1),
             .toggle(label: "入场动画", value: $theme.showsEntranceAnimation),
             .toggle(label: "点击弹窗", value: $theme.showsTooltipOnHit),
         ])
