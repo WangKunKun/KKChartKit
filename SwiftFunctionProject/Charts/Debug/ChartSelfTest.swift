@@ -351,6 +351,10 @@ public enum ChartSelfTest {
         // 退化域（span=0）不崩溃：clamp 直接返回界值
         let vp0 = CartesianViewport(xMin: 1, xMax: 1, yMin: 0, yMax: 0)
         assert(vp0.clamp(x: 99) == 1 && vp0.clamp(y: -5) == 0, "degenerate clamp wrong")
+        // init 归一化：颠倒传入自动校正
+        let vpNorm = CartesianViewport(xMin: 10, xMax: 0, yMin: 50, yMax: -10)
+        assert(vpNorm.xMin == 0 && vpNorm.xMax == 10, "x init normalization failed")
+        assert(vpNorm.yMin == -10 && vpNorm.yMax == 50, "y init normalization failed")
 
         print("✅ ChartSelfTest passed")
     }
