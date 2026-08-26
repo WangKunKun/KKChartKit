@@ -12,4 +12,8 @@ public enum HYMChartError: Error {
     case invalidData(String)
     /// 主题缺少必要配置
     case invalidTheme(String)
+    /// 轴系图表：series 为空或全部无数据
+    case emptySeries
+    /// 轴系图表：值域非法（NaN / max ≤ min）
+    case invalidDomain(String)
 }

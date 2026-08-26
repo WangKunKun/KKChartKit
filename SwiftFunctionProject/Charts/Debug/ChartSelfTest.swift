@@ -320,6 +320,28 @@ public enum ChartSelfTest {
                   in: ctrlHost.bounds,
                   preferred: [.top, .bottom])
 
+        // —— Cartesian 数据模型 ——
+        let cartModel = CartesianChartModel(
+            title: "t",
+            series: [CartesianSeriesElement(name: "a", data: [3.0, 97.0]),
+                     CartesianSeriesElement(name: "b", data: [-5.0])])
+        assert(cartModel.maxPointCount == 2, "maxPointCount should be 2, got \(cartModel.maxPointCount)")
+        let db = cartModel.dataBounds!
+        assert(abs(db.min - (-5.0)) < 0.001 && abs(db.max - 97.0) < 0.001,
+               "dataBounds should be (-5, 97), got \(String(describing: db))")
+        // 空 series → nil
+        assert(CartesianChartModel(series: []).dataBounds == nil, "empty series should have nil bounds")
+        // 类目标签：显式优先，空 → 自动数字 1...n
+        assert(CartesianChartModel(series: []).categoryLabels == [],
+               "empty categories should be []")
+        assert(CartesianChartModel(series: [CartesianSeriesElement(name: "a", data: [1, 2, 3])],
+                                   xAxis: CartesianAxisModel(kind: .category(labels: ["x", "y", "z"])))
+               .categoryLabels == ["x", "y", "z"],
+               "explicit category labels should win")
+        assert(CartesianChartModel(series: [CartesianSeriesElement(name: "a", data: [1, 2])])
+               .categoryLabels == ["1", "2"],
+               "auto labels should be 1...n")
+
         print("✅ ChartSelfTest passed")
     }
 
