@@ -415,6 +415,13 @@ public enum ChartSelfTest {
         assert(CartesianGeometry.categoryLabelStride(count: 11) == 2, "11 cats stride 2")
         assert(CartesianGeometry.categoryLabelStride(count: 5, maxLabels: 0) == 1, "invalid maxLabels fallback 1")
 
+        // —— AxisRenderer.format 刻度文本 ——
+        assert(AxisRenderer.format(80.0) == "80", "80.0 should format to '80'")
+        assert(AxisRenderer.format(0.2) == "0.2", "0.2 should format to '0.2'")
+        assert(AxisRenderer.format(-0.0) == "0", "-0.0 should format to '0'")
+        assert(AxisRenderer.format(0.30000000000000004) == "0.3", "float noise should collapse to '0.3'")
+        assert(AxisRenderer.format(123.456) == "123.5", ">=100 non-integer should avoid scientific notation, got '\(AxisRenderer.format(123.456))'")
+
         print("✅ ChartSelfTest passed")
     }
 

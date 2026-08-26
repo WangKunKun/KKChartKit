@@ -14,7 +14,8 @@ enum GridRenderer {
                               theme: CartesianChartTheme) -> CAShapeLayer {
         let layer = CAShapeLayer()
         let path = UIBezierPath()
-        layer.frame = plotFrame
+        // 注意：不设置 layer.frame——path 使用 view 绝对坐标，layer 默认（frame=.zero、
+        // 挂到 rootLayer 原点）时两者坐标系一致；若设 frame=plotFrame 会双重偏移。
         if theme.showsHorizontalGridlines {
             for tick in yTicks {
                 let y = CartesianGeometry.point(x: 0, y: tick,
@@ -24,7 +25,7 @@ enum GridRenderer {
             }
         }
         if theme.showsVerticalGridlines {
-            for c in 0..<max(categoryCount, 0) {
+            for c in 0..<categoryCount {
                 let x = CartesianGeometry.point(x: Double(c), y: 0,
                                                 viewport: viewport, plotFrame: plotFrame).x
                 path.move(to: CGPoint(x: x, y: plotFrame.minY))

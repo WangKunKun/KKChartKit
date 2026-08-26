@@ -61,10 +61,15 @@ enum AxisRenderer {
     }
 
     /// 刻度文本：去尾零（80.0 → "80"；0.2 → "0.2"；-0.0 → "0"）。
+    /// ≥100 的非整数 %g 会产生科学计数法（123.456 → "1.2e+02"），退化为固定 1 位小数。
     static func format(_ value: Double) -> String {
         if value.truncatingRemainder(dividingBy: 1) == 0 {
             return String(Int(value))
         }
-        return String(format: "%.2g", value)
+        let s = String(format: "%.2g", value)
+        if s.contains("e") {
+            return String(format: "%.1f", value)
+        }
+        return s
     }
 }
