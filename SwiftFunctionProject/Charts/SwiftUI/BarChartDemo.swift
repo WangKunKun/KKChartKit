@@ -21,10 +21,22 @@ struct BarChartDemo: View {
 
     // —— 缩放功能测试 ——
     @State private var isZoomEnabled = true
+    /// 类目轴（Y 轴）时间轴模式：按实际数据量把 24h 均分到每个点。
+    /// 注意：条形图轴系渲染待修（docs/todo-bar-axis-fix.md），当前类目标签显示位置错乱，
+    /// 数据链路先就位，轴系修复后显示自然正确。
+    @State private var useTimeAxis = false
 
     var body: some View {
         VStack(spacing: 0) {
-            BarChart(model: currentModel, theme: currentTheme, isZoomEnabled: isZoomEnabled)
+            BarChart(model: currentModel, theme: currentTheme,
+                     onHit: { target, gesture in
+                         let timeTag = useTimeAxis
+                             ? "（\(ChartDemoPanel.timeLabel(at: target.categoryIndex, count: pointCount))）"
+                             : ""
+                         print("🎯 点击条形：第 \(target.categoryIndex + 1) 个类目\(timeTag) · "
+                               + "系列 \(target.seriesIndex + 1) · 值 = \(target.value) · 手势 = \(gesture)")
+                     },
+                     isZoomEnabled: isZoomEnabled)
                 .frame(height: 280)
                 .padding(.horizontal)
                 .padding(.top, 8)
@@ -57,6 +69,7 @@ struct BarChartDemo: View {
         return CartesianChartModel(
             title: title.isEmpty ? nil : title,
             series: series,
+            xAxis: CartesianAxisModel(kind: .category(labels: useTimeAxis ? ChartDemoPanel.timeLabels(count: pointCount) : [])),
             stacking: stacking == .none ? nil : stacking
         )
     }
@@ -88,7 +101,7 @@ struct BarChartDemo: View {
         let dataSection = ChartDemoPanel.DemoSection(title: "数据", items: [
             .textField(label: "标题", value: $title),
             .stepper(label: "系列数量", value: seriesCountBinding, step: 1),
-            .slider(label: "数据点数", value: pointCountBinding, range: 2...12, step: 1),
+            .slider(label: "数据点数", value: pointCountBinding, range: 2...1440, step: 1),
             .button(label: "🎲 随机重生成数据") {
                 regenerateData()
             },
@@ -113,10 +126,13 @@ struct BarChartDemo: View {
         let animationSection = ChartDemoPanel.DemoSection(title: "动画与交互", items: [
             .toggle(label: "入场动画", value: $theme.showsColumnEntranceAnimation),
             .toggle(label: "点击弹窗", value: $theme.showsTooltipOnHit),
-            .toggle(label: "启用缩放（X轴捏合/平移，双击重置）", value: $isZoomEnabled),
+            .toggle(label: "启用缩放（X轴数值轴捏合/平移，双击重置）", value: $isZoomEnabled),
+        ])
+        let xAxisSection = ChartDemoPanel.DemoSection(title: "类目轴", items: [
+            .toggle(label: "24小时时间轴（按数据量均分）", value: $useTimeAxis),
         ])
 
-        return ChartDemoPanel(sections: [dataSection, barSection, stackSection, animationSection])
+        return ChartDemoPanel(sections: [dataSection, xAxisSection, barSection, stackSection, animationSection])
     }
 
     private func regenerateData() {
