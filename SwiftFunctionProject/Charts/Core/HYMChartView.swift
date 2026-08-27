@@ -40,8 +40,8 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
       }
     }
 
-    /// 最小缩放级别（防止缩放过小，默认 1.0 = 100%）
-    public var minimumZoomScale: CGFloat = 1.0
+    /// 最小缩放级别（防止缩放过小，默认 0.5 = 50%，允许缩小）
+    public var minimumZoomScale: CGFloat = 0.5
     /// 最大缩放级别（防止缩放过大，默认 10.0 = 1000%）
     public var maximumZoomScale: CGFloat = 10.0
 
@@ -216,7 +216,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         }
     }
 
-    /// 应用缩放到 viewport（以锚点为中心）
+    /// 应用缩放到 viewport（以锚点为中心，仅缩放 X 轴）
     private func applyZoom(scale: CGFloat, anchor: CGPoint) {
         guard let renderer = renderer as? CartesianRendererBase<CartesianChartTheme>,
               let model = model as? CartesianChartModel else { return }
@@ -232,28 +232,28 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
             plotFrame: plotFrame
         )
 
-        // 3. 计算缩放后的 viewport 宽度
+        // 3. 只缩放 X 轴（类目轴），Y 轴保持不变
         let oldXSpan = baseViewport.xSpan
-        let oldYSpan = baseViewport.ySpan
         let newXSpan = oldXSpan / scale
-        let newYSpan = oldYSpan / scale
 
-        // 4. 计算新的 viewport 边界（保持锚点位置不变）
+        // 4. 计算新的 X 轴边界（保持锚点位置不变）
         let xRatio = (anchorData.x - baseViewport.xMin) / oldXSpan
-        let yRatio = (baseViewport.yMax - anchorData.y) / oldYSpan
+        let newXMin = anchorData.x - newXSpan * xRatio
+        let newXMax = anchorData.x + newXSpan * (1 - xRatio)
 
+        // 5. 创建新 viewport（Y 轴保持原值）
         let newViewport = CartesianViewport(
-            xMin: anchorData.x - newXSpan * xRatio,
-            xMax: anchorData.x + newXSpan * (1 - xRatio),
-            yMin: anchorData.y - newYSpan * (1 - yRatio),
-            yMax: anchorData.y + newYSpan * yRatio
+            xMin: newXMin,
+            xMax: newXMax,
+            yMin: baseViewport.yMin,  // Y 轴不变
+            yMax: baseViewport.yMax   // Y 轴不变
         )
 
-        // 5. 保存自定义 viewport 并重新渲染
+        // 6. 保存自定义 viewport 并重新渲染
         customViewport = newViewport
         renderer.zoomToViewport(newViewport)
 
-        // 6. 强制重新渲染
+        // 7. 强制重新渲染
         setNeedsLayout()
     }
 
@@ -262,13 +262,14 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         guard isZoomEnabled else { return }
         guard let renderer = renderer as? CartesianRendererBase<CartesianChartTheme> else { return }
 
-        // 重置缩放
+        // 重置缩放状态
         customViewport = nil
         renderer.resetZoom()
         currentZoomScale = 1.0
 
-        // 重新渲染
+        // 强制重新渲染
         setNeedsLayout()
+        layoutIfNeeded()  // 立即应用重置
     }
 
     // MARK: - Tooltip
