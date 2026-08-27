@@ -35,6 +35,14 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
 
             // 4. 遍历每个数据点，计算柱体并绘制
             for (index, value) in oneSeries.enumerated() {
+                // 计算基准值（堆叠模式下使用前一系列的累计值）
+                let baselineValue: Double?
+                if model.stacking == .normal && seriesIndex > 0 {
+                    baselineValue = dataToDraw[seriesIndex - 1][index]
+                } else {
+                    baselineValue = nil
+                }
+
                 // 计算动画后的矩形
                 var rect = CartesianGeometry.columnRect(
                     dataPoint: value,
@@ -43,7 +51,8 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
                     viewport: currentViewport,
                     plotArea: plotFrame,
                     theme: theme,
-                    zeroY: zeroY
+                    zeroY: zeroY,
+                    baselineValue: baselineValue
                 )
 
                 // 应用入场动画
@@ -150,18 +159,31 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
         layer.addSublayer(lineLayer)
     }
 
-    /// 计算动画过程中的矩形
+    /// 计算动画过程中的矩形（堆叠模式下从基准线开始生长）
     private func animatedRect(from rect: CGRect, zeroY: CGFloat, progress: Double) -> CGRect {
         let progressCGFloat = CGFloat(min(max(progress, 0), 1))
 
+        // 确定柱段的起始位置（动画开始位置）
+        let startY: CGFloat
         if rect.minY < zeroY {
-            // 正值：从 zeroY 降到 minY
-            let currentHeight = (zeroY - rect.minY) * progressCGFloat
-            return CGRect(x: rect.minX, y: zeroY - currentHeight, width: rect.width, height: currentHeight)
+            // 正值柱段
+            startY = rect.maxY  // 从底部（较大Y值）开始向上生长
         } else {
-            // 负值：从 zeroY 升到 maxY
-            let currentHeight = (rect.maxY - zeroY) * progressCGFloat
-            return CGRect(x: rect.minX, y: zeroY, width: rect.width, height: currentHeight)
+            // 负值柱段
+            startY = rect.minY  // 从顶部（较小Y值）开始向下生长
+        }
+
+        // 计算当前高度
+        let targetHeight = rect.height
+        let currentHeight = targetHeight * progressCGFloat
+
+        // 根据正负值确定最终矩形
+        if rect.minY < zeroY {
+            // 正值：从底部向上生长
+            return CGRect(x: rect.minX, y: startY - currentHeight, width: rect.width, height: currentHeight)
+        } else {
+            // 负值：从顶部向下生长
+            return CGRect(x: rect.minX, y: startY, width: rect.width, height: currentHeight)
         }
     }
 

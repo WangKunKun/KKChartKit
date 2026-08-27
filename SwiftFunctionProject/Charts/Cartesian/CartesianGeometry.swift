@@ -135,6 +135,7 @@ public enum CartesianGeometry {
     ///   - plotArea: plot 区域
     ///   - theme: 主题配置（间距、圆角等）
     ///   - zeroY: 零轴 Y 坐标
+    ///   - baselineValue: 基准值（堆叠模式下使用，nil 表示从零轴开始）
     /// - Returns: 柱体的 CGRect（minY/maxY 根据 zeroY 自动确定方向）
     public static func columnRect(
         dataPoint: Double,
@@ -143,7 +144,8 @@ public enum CartesianGeometry {
         viewport: CartesianViewport,
         plotArea: CGRect,
         theme: CartesianChartTheme,
-        zeroY: CGFloat
+        zeroY: CGFloat,
+        baselineValue: Double? = nil
     ) -> CGRect {
         // 1. 计算柱体宽度
         let slotWidth = plotArea.width / CGFloat(categoryCount)
@@ -155,15 +157,23 @@ public enum CartesianGeometry {
         // 3. 计算数据点对应的 Y 坐标（使用现有的 point 函数）
         let valueY = point(x: Double(categoryIndex), y: dataPoint, viewport: viewport, plotFrame: plotArea).y
 
-        // 4. 根据正负值确定矩形
+        // 4. 计算基准 Y 坐标（堆叠模式下使用）
+        let startY: CGFloat
+        if let baseline = baselineValue {
+            startY = point(x: Double(categoryIndex), y: baseline, viewport: viewport, plotFrame: plotArea).y
+        } else {
+            startY = zeroY
+        }
+
+        // 5. 根据正负值确定矩形
         if dataPoint >= 0 {
-            // 正值：从 zeroY 向上到 valueY
-            let height = zeroY - valueY
+            // 正值：从基准线向上到 valueY
+            let height = startY - valueY
             return CGRect(x: columnX, y: valueY, width: columnWidth, height: height)
         } else {
-            // 负值：从 valueY 向下到 zeroY
-            let height = valueY - zeroY
-            return CGRect(x: columnX, y: zeroY, width: columnWidth, height: height)
+            // 负值：从 valueY 向下到基准线
+            let height = valueY - startY
+            return CGRect(x: columnX, y: startY, width: columnWidth, height: height)
         }
     }
 
@@ -176,6 +186,7 @@ public enum CartesianGeometry {
     ///   - plotArea: plot 区域
     ///   - theme: 主题配置（间距、圆角等）
     ///   - zeroX: 零轴 X 坐标
+    ///   - baselineValue: 基准值（堆叠模式下使用，nil 表示从零轴开始）
     /// - Returns: 条形的 CGRect（minX/maxX 根据 zeroX 自动确定方向）
     public static func barRect(
         dataPoint: Double,
@@ -184,7 +195,8 @@ public enum CartesianGeometry {
         viewport: CartesianViewport,
         plotArea: CGRect,
         theme: CartesianChartTheme,
-        zeroX: CGFloat
+        zeroX: CGFloat,
+        baselineValue: Double? = nil
     ) -> CGRect {
         // 1. 计算条形高度
         let slotHeight = plotArea.height / CGFloat(categoryCount)
@@ -197,14 +209,22 @@ public enum CartesianGeometry {
         // 注意：水平图的 X 轴对应数值，Y 轴对应类目
         let valueX = point(x: dataPoint, y: Double(categoryIndex), viewport: viewport, plotFrame: plotArea).x
 
-        // 4. 根据正负值确定矩形
-        if dataPoint >= 0 {
-            // 正值：从 zeroX 向右到 valueX
-            let width = valueX - zeroX
-            return CGRect(x: zeroX, y: barY, width: width, height: barHeight)
+        // 4. 计算基准 X 坐标（堆叠模式下使用）
+        let startX: CGFloat
+        if let baseline = baselineValue {
+            startX = point(x: baseline, y: Double(categoryIndex), viewport: viewport, plotFrame: plotArea).x
         } else {
-            // 负值：从 valueX 向左到 zeroX
-            let width = zeroX - valueX
+            startX = zeroX
+        }
+
+        // 5. 根据正负值确定矩形
+        if dataPoint >= 0 {
+            // 正值：从基准线向右到 valueX
+            let width = valueX - startX
+            return CGRect(x: startX, y: barY, width: width, height: barHeight)
+        } else {
+            // 负值：从 valueX 向左到基准线
+            let width = startX - valueX
             return CGRect(x: valueX, y: barY, width: width, height: barHeight)
         }
     }

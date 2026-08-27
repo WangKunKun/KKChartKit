@@ -35,6 +35,14 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
 
             // 4. 遍历每个数据点，计算条形并绘制
             for (index, value) in oneSeries.enumerated() {
+                // 计算基准值（堆叠模式下使用前一系列的累计值）
+                let baselineValue: Double?
+                if model.stacking == .normal && seriesIndex > 0 {
+                    baselineValue = dataToDraw[seriesIndex - 1][index]
+                } else {
+                    baselineValue = nil
+                }
+
                 // 计算动画后的矩形
                 var rect = CartesianGeometry.barRect(
                     dataPoint: value,
@@ -43,7 +51,8 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
                     viewport: currentViewport,
                     plotArea: plotFrame,
                     theme: theme,
-                    zeroX: zeroX
+                    zeroX: zeroX,
+                    baselineValue: baselineValue
                 )
 
                 // 应用入场动画
@@ -150,18 +159,31 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
         layer.addSublayer(lineLayer)
     }
 
-    /// 计算动画过程中的矩形
+    /// 计算动画过程中的矩形（堆叠模式下从基准线开始生长）
     private func animatedRect(from rect: CGRect, zeroX: CGFloat, progress: Double) -> CGRect {
         let progressCGFloat = CGFloat(min(max(progress, 0), 1))
 
+        // 确定柱段的起始位置（动画开始位置）
+        let startX: CGFloat
         if rect.minX >= zeroX {
-            // 正值：从 zeroX 向右扩展
-            let currentWidth = (rect.maxX - zeroX) * progressCGFloat
-            return CGRect(x: zeroX, y: rect.minY, width: currentWidth, height: rect.height)
+            // 正值柱段：从左侧（基准线）开始向右生长
+            startX = rect.minX
         } else {
-            // 负值：从 zeroX 向左扩展
-            let currentWidth = (zeroX - rect.minX) * progressCGFloat
-            return CGRect(x: zeroX - currentWidth, y: rect.minY, width: currentWidth, height: rect.height)
+            // 负值柱段：从右侧（基准线）开始向左生长
+            startX = rect.maxX
+        }
+
+        // 计算当前宽度
+        let targetWidth = rect.width
+        let currentWidth = targetWidth * progressCGFloat
+
+        // 根据正负值确定最终矩形
+        if rect.minX >= zeroX {
+            // 正值：从基准线向右生长
+            return CGRect(x: startX, y: rect.minY, width: currentWidth, height: rect.height)
+        } else {
+            // 负值：从基准线向左生长
+            return CGRect(x: startX - currentWidth, y: rect.minY, width: currentWidth, height: rect.height)
         }
     }
 
