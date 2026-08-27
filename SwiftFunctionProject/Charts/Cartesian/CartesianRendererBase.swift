@@ -25,8 +25,6 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer {
     // MARK: - 渲染期状态（供子类命中/动画读取）
     /// 当前生效的 viewport（render 时重算；阶段 0 为固定全量值域）。
     var currentViewport = CartesianViewport(xMin: 0, xMax: 1, yMin: 0, yMax: 1)
-    /// 自定义 viewport（缩放时由外部设置，nil 时使用自动计算的）
-    var customViewport: CartesianViewport?
     /// 当前 plot 区（view 坐标系）。
     var currentPlotFrame: CGRect = .zero
     var currentModel: CartesianChartModel?
@@ -61,6 +59,20 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer {
     /// 子类逐帧动画钩子（progress 0...1，已 ease）。
     open func updateSeriesAnimation(progress: Double) {}
 
+    // MARK: - 协议实现（缩放和平移）
+    /// 应用物理缩放和平移（阶段 4）
+    public func applyPhysicalZoomAndPan(scale: CGFloat, contentOffset: CGPoint, bounds: CGRect) {
+        // 应用缩放到 rootLayer
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        rootLayer.transform = CATransform3DMakeScale(scale, scale, 1.0)
+        rootLayer.position = CGPoint(
+            x: bounds.midX + contentOffset.x,
+            y: bounds.midY + contentOffset.y
+        )
+        CATransaction.commit()
+    }
+
     // MARK: - render（模板方法；子类不得 override，扩展点在 drawSeries）
     public final func render(model: CartesianChartModel, theme: ChartTheme,
                              context: HYMChartRenderContext) {
@@ -87,12 +99,7 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer {
         }
 
         // 2) viewport（y：显式或 nice；x：类目 -0.5...n-0.5）
-        // 如果有自定义 viewport（缩放产生），使用自定义的；否则自动计算
-        if let custom = customViewport {
-            currentViewport = custom
-        } else {
-            currentViewport = makeViewport(model: model)
-        }
+        currentViewport = makeViewport(model: model)
 
         // 3) 布局（需要 y 刻度最宽文本宽度）
         currentYTicks = currentViewport.yMin == currentViewport.yMax
@@ -138,18 +145,6 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer {
     /// 值 → 屏幕（view 坐标系），用当前 viewport/plotFrame；须在 render 之后调用。
     func screenPoint(x: Double, y: Double) -> CGPoint {
         CartesianGeometry.point(x: x, y: y, viewport: currentViewport, plotFrame: currentPlotFrame)
-    }
-
-    /// 外部缩放接口：设置自定义 viewport 并重新渲染
-    /// - Parameter viewport: 缩放后的 viewport（以锚点为中心计算）
-    public func zoomToViewport(_ viewport: CartesianViewport) {
-        customViewport = viewport
-        // 强制重新渲染（由外部的 setNeedsLayout 触发）
-    }
-
-    /// 重置缩放：清除自定义 viewport，恢复自动计算
-    public func resetZoom() {
-        customViewport = nil
     }
 
     // MARK: - 私有

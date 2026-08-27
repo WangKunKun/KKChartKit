@@ -37,10 +37,11 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     public var isZoomEnabled: Bool = false {
       didSet {
         zoomGesture.isEnabled = isZoomEnabled
+        panGesture.isEnabled = isZoomEnabled
       }
     }
 
-    /// 最小缩放级别（防止缩放过小，默认 1.0 = 100%，不允许缩小到小于原始视图）
+    /// 最小缩放级别（防止缩放过小，默认 1.0 = 100%）
     public var minimumZoomScale: CGFloat = 1.0
     /// 最大缩放级别（防止缩放过大，默认 10.0 = 1000%）
     public var maximumZoomScale: CGFloat = 10.0
@@ -58,12 +59,12 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     // MARK: - 缩放状态
     private var currentZoomScale: CGFloat = 1.0
     private var zoomAnchorPoint: CGPoint = .zero
-    private var zoomBaseViewport: CartesianViewport?  // 手势开始时的viewport
     private lazy var zoomGesture = UIPinchGestureRecognizer(target: self, action: #selector(onPinch(_:)))
+    private lazy var panGesture = UIPanGestureRecognizer(target: self, action: #selector(onPan(_:)))
     private lazy var doubleTapGesture = UITapGestureRecognizer(target: self, action: #selector(onDoubleTap(_:)))
 
-    /// 缩放后的自定义 viewport（nil = 使用 renderer 自动计算的 viewport）
-    private var customViewport: CartesianViewport?
+    /// 平移偏移量（内容滚动）
+    private var contentOffset: CGPoint = .zero
 
     // MARK: - Renderer
     private let renderer: Renderer
@@ -88,9 +89,11 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         renderer.mount(into: self)
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap(_:))))
         addGestureRecognizer(zoomGesture)
+        addGestureRecognizer(panGesture)
         addGestureRecognizer(doubleTapGesture)
         doubleTapGesture.numberOfTapsRequired = 2
         zoomGesture.isEnabled = isZoomEnabled
+        panGesture.isEnabled = isZoomEnabled
         doubleTapGesture.isEnabled = isZoomEnabled
     }
 
@@ -191,97 +194,128 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         }
     }
 
-    // MARK: - 缩放手势
+    // MARK: - 缩放手势（物理缩放）
     @objc private func onPinch(_ gr: UIPinchGestureRecognizer) {
         guard isZoomEnabled else { return }
 
         switch gr.state {
         case .began:
             zoomAnchorPoint = gr.location(in: self)
-            // 记录手势开始时的viewport作为基准
-            if let renderer = renderer as? CartesianRendererBase<CartesianChartTheme> {
-                zoomBaseViewport = customViewport ?? renderer.currentViewport
-            }
             currentZoomScale = 1.0
 
         case .changed:
             let scale = gr.scale
-            // 限制缩放范围，但允许从放大状态缩小回来
+            // 限制缩放范围
             let boundedScale = min(max(scale, minimumZoomScale), maximumZoomScale)
 
-            if let renderer = renderer as? CartesianRendererBase<CartesianChartTheme>,
-               let baseViewport = zoomBaseViewport {
-                // 基于基准viewport和手势scale计算新的viewport
-                applyZoom(scale: boundedScale, baseViewport: baseViewport, anchor: zoomAnchorPoint)
-            }
+            // 应用物理缩放（以锚点为中心）
+            applyPhysicalZoom(scale: boundedScale, anchor: zoomAnchorPoint)
 
         case .ended, .cancelled:
             // 更新当前缩放比例
             currentZoomScale = gr.scale
-            // 更新基准viewport为当前viewport，为下次缩放做准备
-            if let renderer = renderer as? CartesianRendererBase<CartesianChartTheme> {
-                zoomBaseViewport = customViewport ?? renderer.currentViewport
-            }
 
         default:
             break
         }
     }
 
-    /// 应用缩放到 viewport（以锚点为中心，仅缩放 X 轴）
-    /// - Parameters:
-    ///   - scale: 手势的缩放比例（相对于手势开始时）
-    ///   - baseViewport: 手势开始时的viewport（基准）
-    ///   - anchor: 缩放锚点的屏幕坐标
-    private func applyZoom(scale: CGFloat, baseViewport: CartesianViewport, anchor: CGPoint) {
-        guard let renderer = renderer as? CartesianRendererBase<CartesianChartTheme> else { return }
+    /// 应用物理缩放（使用 UIView transform）
+    private func applyPhysicalZoom(scale: CGFloat, anchor: CGPoint) {
+        // 计算缩放后的新 scale
+        let newScale = scale
 
-        // 1. 将锚点从屏幕坐标转换为数据坐标（基于基准viewport）
-        let plotFrame = renderer.currentPlotFrame
-        let anchorData = CartesianGeometry.value(
-            at: anchor,
-            viewport: baseViewport,
-            plotFrame: plotFrame
+        // 计算锚点相对于视图中心的位置
+        let anchorRelativeToCenter = CGPoint(
+            x: anchor.x - bounds.midX,
+            y: anchor.y - bounds.midY
         )
 
-        // 2. 只缩放 X 轴（类目轴），Y 轴保持不变
-        let oldXSpan = baseViewport.xSpan
-        let newXSpan = oldXSpan / scale
-
-        // 3. 计算新的 X 轴边界（保持锚点位置不变）
-        let xRatio = (anchorData.x - baseViewport.xMin) / oldXSpan
-        let newXMin = anchorData.x - newXSpan * xRatio
-        let newXMax = anchorData.x + newXSpan * (1 - xRatio)
-
-        // 4. 创建新 viewport（Y 轴保持原值）
-        let newViewport = CartesianViewport(
-            xMin: newXMin,
-            xMax: newXMax,
-            yMin: baseViewport.yMin,  // Y 轴不变
-            yMax: baseViewport.yMax   // Y 轴不变
+        // 计算缩放后的位置调整（保持锚点不动）
+        let positionAdjustment = CGPoint(
+            x: anchorRelativeToCenter.x * (newScale - 1.0) / newScale,
+            y: anchorRelativeToCenter.y * (newScale - 1.0) / newScale
         )
 
-        // 5. 保存自定义 viewport 并重新渲染
-        customViewport = newViewport
-        renderer.zoomToViewport(newViewport)
+        // 应用视图级别的 transform（缩放整个图表）
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        layer.transform = CATransform3DMakeScale(newScale, newScale, 1.0)
+        layer.position = CGPoint(
+            x: bounds.midX - positionAdjustment.x,
+            y: bounds.midY - positionAdjustment.y
+        )
+        CATransaction.commit()
 
-        // 6. 强制重新渲染
-        setNeedsLayout()
+        // 通过 renderer 应用内容平移
+        renderer.applyPhysicalZoomAndPan(scale: newScale, contentOffset: contentOffset, bounds: bounds)
+
+        currentZoomScale = newScale
     }
 
-    /// 双击重置缩放
+    // MARK: - 平移手势
+    @objc private func onPan(_ gr: UIPanGestureRecognizer) {
+        guard isZoomEnabled else { return }
+
+        switch gr.state {
+        case .began:
+            // 记录起始位置
+            break
+
+        case .changed:
+            let translation = gr.translation(in: self)
+
+            // 只允许X轴平移（左右滑动）
+            // 计算缩放调整后的平移量
+            let adjustedTranslation = CGPoint(
+                x: translation.x / currentZoomScale,
+                y: 0  // Y轴不平移
+            )
+
+            // 更新contentOffset
+            contentOffset = CGPoint(
+                x: max(0, adjustedTranslation.x),
+                y: 0
+            )
+
+            // 应用平移（只平移X轴内容）
+            applyPan()
+
+        case .ended, .cancelled:
+            break
+
+        default:
+            break
+        }
+    }
+
+    /// 应用平移（内容滚动）
+    private func applyPan() {
+        // 限制平移范围（不能平移超出内容）
+        let maxOffset = max(0, (bounds.width * currentZoomScale) - bounds.width)
+        contentOffset.x = min(contentOffset.x, maxOffset)
+
+        // 通过 renderer 应用平移
+        renderer.applyPhysicalZoomAndPan(scale: currentZoomScale, contentOffset: contentOffset, bounds: bounds)
+    }
+
+    /// 双击重置缩放和平移
     @objc private func onDoubleTap(_ gr: UITapGestureRecognizer) {
         guard isZoomEnabled else { return }
-        guard let renderer = renderer as? CartesianRendererBase<CartesianChartTheme> else { return }
 
-        // 重置缩放状态
-        customViewport = nil
-        renderer.resetZoom()
+        // 重置缩放和平移状态
         currentZoomScale = 1.0
+        contentOffset = .zero
 
-        // 强制重新渲染
-        setNeedsLayout()
-        layoutIfNeeded()  // 立即应用重置
+        // 通过 renderer 重置缩放和平移
+        renderer.applyPhysicalZoomAndPan(scale: 1.0, contentOffset: .zero, bounds: bounds)
+
+        // 重置视图层的 transform
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        layer.transform = CATransform3DIdentity
+        layer.position = CGPoint(x: bounds.midX, y: bounds.midY)
+        CATransaction.commit()
     }
 
     // MARK: - Tooltip

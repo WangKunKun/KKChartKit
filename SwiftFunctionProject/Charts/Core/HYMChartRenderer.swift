@@ -55,6 +55,14 @@ public protocol HYMChartRenderer: AnyObject {
     func tooltipAnchor(for target: HYMChartHitTarget) -> HYMChartTooltipAnchor?
     /// 命中单元的几何 frame（view 坐标系），供外部自定义弹窗定位；独立于 tooltip 开关。默认 nil。
     func hitFrame(for target: HYMChartHitTarget) -> CGRect?
+
+    // —— 缩放和平移能力（阶段 4）——
+    /// 应用物理缩放和平移（用于外部手势控制）
+    /// - Parameters:
+    ///   - scale: 缩放比例
+    ///   - contentOffset: 内容偏移（用于平移滚动）
+    ///   - bounds: 视图边界（renderer 需要知道以计算中心点）
+    func applyPhysicalZoomAndPan(scale: CGFloat, contentOffset: CGPoint, bounds: CGRect)
 }
 
 /// 默认实现：交互与逐帧回调为可选；不关心的图表无需实现这些方法
@@ -64,4 +72,5 @@ public extension HYMChartRenderer {
     func updateEntranceAnimation(progress: Double) {}
     func tooltipAnchor(for target: HYMChartHitTarget) -> HYMChartTooltipAnchor? { nil }
     func hitFrame(for target: HYMChartHitTarget) -> CGRect? { nil }
+    func applyPhysicalZoomAndPan(scale: CGFloat, contentOffset: CGPoint, bounds: CGRect) {}
 }
