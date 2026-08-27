@@ -84,8 +84,16 @@ public struct CartesianChartModel: HYMChartModel {
     }
 
     /// 所有 series 数据的全局 (min, max)；任一有效数据都没有时为 nil。
+    /// 堆叠模式下使用累计值计算边界，确保 Y 轴刻度尺适应堆叠后的数据范围。
     public var dataBounds: (min: Double, max: Double)? {
-        let flat = series.flatMap { $0.data }
+        let dataToUse: [[Double]]
+        if stacking == .normal {
+            dataToUse = CartesianGeometry.stackedValues(series: series)
+        } else {
+            dataToUse = series.map { $0.data }
+        }
+
+        let flat = dataToUse.flatMap { $0 }
         guard let lo = flat.min(), let hi = flat.max() else { return nil }
         return (lo, hi)
     }
