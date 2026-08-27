@@ -187,24 +187,61 @@ public enum CartesianGeometry {
         }
     }
 
-    /// 把点序列以 Catmull-Rom 平滑曲线加入 path（`LineConnectionStyle.smooth` 用）。
+    /// 把点序列以平滑曲线加入 path（`LineConnectionStyle.smooth` 用）。
     ///
-    /// 调用方须已 `move(to: points[0])`；每段转三次贝塞尔，
-    /// 控制点按标准 Catmull-Rom（张力因子 1/6）——过数据点、曲率连续、无过冲震荡。
-    /// 点数 ≤ 2 时退化为直线。
+    /// **Fritsch–Carlson 单调三次插值**（d3.curveMonotoneX 同款）：切线经限幅处理，
+    /// 数学上保证每段曲线不超出两端点的值域——**视觉波峰/波谷必定落在数据点上**，
+    /// 不会出现 Catmull-Rom 那种数据点旁边冲出虚假波峰的过冲。
+    /// 调用方须已 `move(to: points[0])`；每段转三次贝塞尔；点数 ≤ 2 退化为直线。
     public static func appendSmoothCurve(to path: UIBezierPath, points: [CGPoint]) {
         guard points.count > 2 else {
             for p in points.dropFirst() { path.addLine(to: p) }
             return
         }
-        for i in 0..<points.count - 1 {
-            let p0 = i == 0 ? points[0] : points[i - 1]
+        let n = points.count
+
+        // 1) 各段斜率
+        var delta = [CGFloat](repeating: 0, count: n - 1)
+        for i in 0..<n - 1 {
+            let dx = points[i + 1].x - points[i].x
+            delta[i] = dx != 0 ? (points[i + 1].y - points[i].y) / dx : 0
+        }
+
+        // 2) 各点切线（端点用相邻段斜率；内部点：相邻段斜率异号 → 0（局部极值，平台化），
+        //    同号 → 平均）
+        var m = [CGFloat](repeating: 0, count: n)
+        m[0] = delta[0]
+        m[n - 1] = delta[n - 2]
+        for i in 1..<n - 1 {
+            m[i] = delta[i - 1] * delta[i] <= 0 ? 0 : (delta[i - 1] + delta[i]) / 2
+        }
+
+        // 3) 限幅（防过冲核心）：段斜率为 0 → 两端切线归零；切线平方和超阈值（a²+b²>9）
+        //    按比例收紧到边界——由此每段三次曲线被约束在端点值域内
+        for i in 0..<n - 1 {
+            if delta[i] == 0 {
+                m[i] = 0
+                m[i + 1] = 0
+                continue
+            }
+            let a = m[i] / delta[i]
+            let b = m[i + 1] / delta[i]
+            let s = a * a + b * b
+            if s > 9 {
+                let t = 3 / sqrt(s)
+                m[i] = t * a * delta[i]
+                m[i + 1] = t * b * delta[i]
+            }
+        }
+
+        // 4) Hermite → 三次贝塞尔（控制点在端点切线 1/3 处）
+        for i in 0..<n - 1 {
             let p1 = points[i]
             let p2 = points[i + 1]
-            let p3 = i + 2 < points.count ? points[i + 2] : points[i + 1]
-            let cp1 = CGPoint(x: p1.x + (p2.x - p0.x) / 6, y: p1.y + (p2.y - p0.y) / 6)
-            let cp2 = CGPoint(x: p2.x - (p3.x - p1.x) / 6, y: p2.y - (p3.y - p1.y) / 6)
-            path.addCurve(to: p2, controlPoint1: cp1, controlPoint2: cp2)
+            let dx = (p2.x - p1.x) / 3
+            path.addCurve(to: p2,
+                          controlPoint1: CGPoint(x: p1.x + dx, y: p1.y + m[i] * dx),
+                          controlPoint2: CGPoint(x: p2.x - dx, y: p2.y - m[i + 1] * dx))
         }
     }
 

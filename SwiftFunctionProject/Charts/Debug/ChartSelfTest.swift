@@ -441,15 +441,38 @@ public enum ChartSelfTest {
                "stepCenter wrong: \(center)")
         // 单点/空序列防御
         assert(CartesianGeometry.steppedScreenPoints([CGPoint(x: 1, y: 1)], style: .stepAfter).count == 1, "single point as-is")
-        // 平滑曲线：两点退化直线；三点起有曲线段（path 元素数 = 1 move + 2 curve）
+        // 平滑曲线：两点退化直线；三点起有曲线段
         let twoPtPath = UIBezierPath()
         twoPtPath.move(to: CGPoint(x: 0, y: 0))
         CartesianGeometry.appendSmoothCurve(to: twoPtPath, points: [CGPoint(x: 0, y: 0), CGPoint(x: 10, y: 10)])
         assert(!twoPtPath.isEmpty, "2-point smooth should degrade to a line")
-        let threePtPath = UIBezierPath()
-        threePtPath.move(to: sp[0])
-        CartesianGeometry.appendSmoothCurve(to: threePtPath, points: sp)
-        assert(!threePtPath.isEmpty, "3-point smooth should produce curve segments")
+        // 无过冲契约（Fritsch-Carlson 单调插值）：陡变数据下曲线不得冲出相邻点值域。
+        // 依贝塞尔凸包性质，断言每段控制点 y 落在该段两端点 [min, max] 内即可。
+        //   Catmull-Rom 在此数据下段 2 控制点会到 ~106.7（冲过 100 的假峰）。
+        do {
+            let spikes = [CGPoint(x: 0, y: 0), CGPoint(x: 10, y: 90),
+                          CGPoint(x: 20, y: 100), CGPoint(x: 30, y: 0)]
+            let monotonePath = UIBezierPath()
+            monotonePath.move(to: spikes[0])
+            CartesianGeometry.appendSmoothCurve(to: monotonePath, points: spikes)
+            var segIndex = 0
+            monotonePath.cgPath.applyWithBlock { elem in
+                let e = elem.pointee
+                if e.type == .addCurveToPoint {
+                    let c1 = e.points[0]
+                    let c2 = e.points[1]
+                    let lo = min(spikes[segIndex].y, spikes[segIndex + 1].y)
+                    let hi = max(spikes[segIndex].y, spikes[segIndex + 1].y)
+                    assert(c1.y >= lo - 0.001 && c1.y <= hi + 0.001,
+                           "smooth cp1 overshoot at seg \(segIndex): \(c1.y) not in \(lo)...\(hi)")
+                    assert(c2.y >= lo - 0.001 && c2.y <= hi + 0.001,
+                           "smooth cp2 overshoot at seg \(segIndex): \(c2.y) not in \(lo)...\(hi)")
+                    segIndex += 1
+                }
+            }
+            assert(segIndex == spikes.count - 1,
+                   "should have \(spikes.count - 1) curve segments, got \(segIndex)")
+        }
 
         // —— X 轴标签与柱子组中心对齐契约 ——
         // 每个显示的标签必须正对所属类目中心（柱子组中心）：12 类目全量视口下
