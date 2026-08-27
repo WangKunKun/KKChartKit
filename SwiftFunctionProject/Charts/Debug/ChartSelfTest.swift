@@ -457,6 +457,47 @@ public enum ChartSelfTest {
         let emptyStacked = CartesianGeometry.stackedValues(series: [])
         assert(emptyStacked.isEmpty, "空 series 应返回空数组")
 
+        // —— CartesianGeometry.columnRect ——
+        let colVP = CartesianViewport(xMin: -0.5, xMax: 2.5, yMin: 0, yMax: 100)
+        let colPlot = CGRect(x: 50, y: 40, width: 200, height: 160)
+        let colTheme = CartesianChartTheme()
+
+        // 正值柱测试
+        let posRect = CartesianGeometry.columnRect(
+            dataPoint: 80,
+            categoryIndex: 1,
+            categoryCount: 3,
+            viewport: colVP,
+            plotArea: colPlot,
+            theme: colTheme,
+            zeroY: colPlot.maxY
+        )
+        assert(posRect.minY < colPlot.maxY && posRect.maxY <= colPlot.maxY, "正值柱应在零轴上方")
+        assert(abs(posRect.maxY - colPlot.maxY) < 0.001, "正值柱底部应接触零轴")
+
+        // 负值柱测试
+        let negVP = CartesianViewport(xMin: -0.5, xMax: 2.5, yMin: -100, yMax: 0)
+        let negZeroY = CartesianGeometry.zeroAxisPosition(viewport: negVP, plotArea: colPlot, isHorizontal: false)
+        let negRect = CartesianGeometry.columnRect(
+            dataPoint: -60,
+            categoryIndex: 1,
+            categoryCount: 3,
+            viewport: negVP,
+            plotArea: colPlot,
+            theme: colTheme,
+            zeroY: negZeroY
+        )
+        assert(negRect.minY >= negZeroY && negRect.maxY > negZeroY, "负值柱应在零轴下方")
+        assert(abs(negRect.minY - negZeroY) < 0.001, "负值柱顶部应接触零轴")
+
+        // 柱体宽度测试
+        let expectedWidth = colPlot.width / 3 * 0.8
+        assert(abs(posRect.width - expectedWidth) < 0.001, "柱宽应按比例计算")
+
+        // 柱体 X 位置测试（第二个柱应在中间偏右）
+        let secondColumnX = colPlot.minX + colPlot.width / 3 * 1 + (colPlot.width / 3 * 0.2) / 2
+        assert(abs(posRect.minX - secondColumnX) < 0.001, "柱体 X 位置应正确")
+
         // —— AxisRenderer.format 刻度文本 ——
         assert(AxisRenderer.format(80.0) == "80", "80.0 should format to '80'")
         assert(AxisRenderer.format(0.2) == "0.2", "0.2 should format to '0.2'")

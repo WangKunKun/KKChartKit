@@ -125,4 +125,45 @@ public enum CartesianGeometry {
 
         return stacked
     }
+
+    /// 单个柱体位置（垂直图）
+    /// - Parameters:
+    ///   - dataPoint: 数据点值
+    ///   - categoryIndex: 类目索引（0-based，计算柱体在 plot 中的 X 位置）
+    ///   - categoryCount: 类目总数（计算柱体宽度）
+    ///   - viewport: 值域视口
+    ///   - plotArea: plot 区域
+    ///   - theme: 主题配置（间距、圆角等）
+    ///   - zeroY: 零轴 Y 坐标
+    /// - Returns: 柱体的 CGRect（minY/maxY 根据 zeroY 自动确定方向）
+    public static func columnRect(
+        dataPoint: Double,
+        categoryIndex: Int,
+        categoryCount: Int,
+        viewport: CartesianViewport,
+        plotArea: CGRect,
+        theme: CartesianChartTheme,
+        zeroY: CGFloat
+    ) -> CGRect {
+        // 1. 计算柱体宽度
+        let slotWidth = plotArea.width / CGFloat(categoryCount)
+        let columnWidth = slotWidth * theme.columnWidthRatio
+
+        // 2. 计算 X 位置（居中对齐）
+        let columnX = plotArea.minX + CGFloat(categoryIndex) * slotWidth + (slotWidth - columnWidth) / 2
+
+        // 3. 计算数据点对应的 Y 坐标（使用现有的 point 函数）
+        let valueY = point(x: Double(categoryIndex), y: dataPoint, viewport: viewport, plotFrame: plotArea).y
+
+        // 4. 根据正负值确定矩形
+        if dataPoint >= 0 {
+            // 正值：从 zeroY 向上到 valueY
+            let height = zeroY - valueY
+            return CGRect(x: columnX, y: valueY, width: columnWidth, height: height)
+        } else {
+            // 负值：从 valueY 向下到 zeroY
+            let height = valueY - zeroY
+            return CGRect(x: columnX, y: zeroY, width: columnWidth, height: height)
+        }
+    }
 }
