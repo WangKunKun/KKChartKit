@@ -19,9 +19,12 @@ struct BarChartDemo: View {
     @State private var stackSeparatorOn = false
     @State private var stackSeparatorColor = UIColor.white
 
+    // —— 缩放功能测试 ——
+    @State private var isZoomEnabled = true
+
     var body: some View {
         VStack(spacing: 0) {
-            BarChart(model: currentModel, theme: currentTheme)
+            BarChart(model: currentModel, theme: currentTheme, isZoomEnabled: isZoomEnabled)
                 .frame(height: 280)
                 .padding(.horizontal)
                 .padding(.top, 8)
@@ -110,6 +113,7 @@ struct BarChartDemo: View {
         let animationSection = ChartDemoPanel.DemoSection(title: "动画与交互", items: [
             .toggle(label: "入场动画", value: $theme.showsColumnEntranceAnimation),
             .toggle(label: "点击弹窗", value: $theme.showsTooltipOnHit),
+            .toggle(label: "启用缩放（测试中）", value: $isZoomEnabled),
         ])
 
         return ChartDemoPanel(sections: [dataSection, barSection, stackSection, animationSection])

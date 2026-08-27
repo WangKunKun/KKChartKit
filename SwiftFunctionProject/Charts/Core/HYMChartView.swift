@@ -33,6 +33,18 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     /// 设置后内置 tooltip 自动不显示（见 `updateTooltip` 互斥）。
     public var onHitLocated: ((HYMChartHitContext?, HYMChartGesture) -> Void)?
 
+    /// 缩放手势启用（默认 false，阶段 4 功能）
+    public var isZoomEnabled: Bool = false {
+      didSet {
+        zoomGesture.isEnabled = isZoomEnabled
+      }
+    }
+
+    /// 最小缩放级别（防止缩放过小，默认 1.0 = 100%）
+    public var minimumZoomScale: CGFloat = 1.0
+    /// 最大缩放级别（防止缩放过大，默认 10.0 = 1000%）
+    public var maximumZoomScale: CGFloat = 10.0
+
     /// 命中弹窗的「内容 view」提供者（外部自定义弹窗的便利模式）。
     ///
     /// 设了它：SDK 命中时调用获取内容 view，套统一外壳(背景/圆角/箭头)，
@@ -42,6 +54,15 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     public var popupContentProvider: ((HYMChartHitContext) -> UIView?)?
     /// 弹窗控制器（首次显示时懒创建）。
     private var tooltipController: HYMChartTooltipController?
+
+    // MARK: - 缩放状态
+    private var currentZoomScale: CGFloat = 1.0
+    private var zoomAnchorPoint: CGPoint = .zero
+    private lazy var zoomGesture = UIPinchGestureRecognizer(target: self, action: #selector(onPinch(_:)))
+    private lazy var doubleTapGesture = UITapGestureRecognizer(target: self, action: #selector(onDoubleTap(_:)))
+
+    /// 缩放后的自定义 viewport（nil = 使用 renderer 自动计算的 viewport）
+    private var customViewport: CartesianViewport?
 
     // MARK: - Renderer
     private let renderer: Renderer
@@ -65,6 +86,11 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         isUserInteractionEnabled = true
         renderer.mount(into: self)
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap(_:))))
+        addGestureRecognizer(zoomGesture)
+        addGestureRecognizer(doubleTapGesture)
+        doubleTapGesture.numberOfTapsRequired = 2
+        zoomGesture.isEnabled = isZoomEnabled
+        doubleTapGesture.isEnabled = isZoomEnabled
     }
 
     // MARK: - 公开 API
@@ -162,6 +188,87 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
                 onHitLocated?(nil, .tap)
             }
         }
+    }
+
+    // MARK: - 缩放手势
+    @objc private func onPinch(_ gr: UIPinchGestureRecognizer) {
+        guard isZoomEnabled else { return }
+
+        switch gr.state {
+        case .began:
+            zoomAnchorPoint = gr.location(in: self)
+            currentZoomScale = 1.0
+
+        case .changed:
+            let scale = gr.scale
+            let boundedScale = min(max(scale, minimumZoomScale), maximumZoomScale)
+
+            if let renderer = renderer as? CartesianRendererBase<CartesianChartTheme> {
+                // 计算以锚点为中心的缩放
+                applyZoom(scale: boundedScale, anchor: zoomAnchorPoint)
+            }
+
+        case .ended, .cancelled:
+            currentZoomScale = gr.scale
+
+        default:
+            break
+        }
+    }
+
+    /// 应用缩放到 viewport（以锚点为中心）
+    private func applyZoom(scale: CGFloat, anchor: CGPoint) {
+        guard let renderer = renderer as? CartesianRendererBase<CartesianChartTheme>,
+              let model = model as? CartesianChartModel else { return }
+
+        // 1. 获取当前的 viewport（如果有自定义则用自定义，否则用 renderer 的）
+        let baseViewport = customViewport ?? renderer.currentViewport
+
+        // 2. 将锚点从屏幕坐标转换为数据坐标
+        let plotFrame = renderer.currentPlotFrame
+        let anchorData = CartesianGeometry.value(
+            at: anchor,
+            viewport: baseViewport,
+            plotFrame: plotFrame
+        )
+
+        // 3. 计算缩放后的 viewport 宽度
+        let oldXSpan = baseViewport.xSpan
+        let oldYSpan = baseViewport.ySpan
+        let newXSpan = oldXSpan / scale
+        let newYSpan = oldYSpan / scale
+
+        // 4. 计算新的 viewport 边界（保持锚点位置不变）
+        let xRatio = (anchorData.x - baseViewport.xMin) / oldXSpan
+        let yRatio = (baseViewport.yMax - anchorData.y) / oldYSpan
+
+        let newViewport = CartesianViewport(
+            xMin: anchorData.x - newXSpan * xRatio,
+            xMax: anchorData.x + newXSpan * (1 - xRatio),
+            yMin: anchorData.y - newYSpan * (1 - yRatio),
+            yMax: anchorData.y + newYSpan * yRatio
+        )
+
+        // 5. 保存自定义 viewport 并重新渲染
+        customViewport = newViewport
+        renderer.zoomToViewport(newViewport)
+
+        // 6. 强制重新渲染
+        setNeedsLayout()
+    }
+
+    /// 双击重置缩放
+    @objc private func onDoubleTap(_ gr: UITapGestureRecognizer) {
+        guard isZoomEnabled else { return }
+        guard let renderer = renderer as? CartesianRendererBase<CartesianChartTheme> else { return }
+
+        // 重置缩放
+        customViewport = nil
+        renderer.resetZoom()
+        currentZoomScale = 1.0
+
+        // 重新渲染
+        setNeedsLayout()
     }
 
     // MARK: - Tooltip
