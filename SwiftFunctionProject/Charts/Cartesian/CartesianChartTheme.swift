@@ -55,6 +55,13 @@ public struct CartesianChartTheme: HYMChartTheme {
     public var pointRadius: CGFloat
     public var pointColor: UIColor?
 
+    // —— 面积填充（面积图形态；仅折线图消费）——
+    /// 是否填充折线与零轴之间的区域（默认 false）。
+    public var showsArea: Bool
+    /// 面积渐变色（自上而下，顶部靠近折线浓度高）。
+    /// nil = 自动由各系列颜色派生：[系列色 35% 透明度 → 4% 透明度]。
+    public var areaGradientColors: [UIColor]?
+
     // —— 行为 ——
     public var showsEntranceAnimation: Bool
     public var showsTooltipOnHit: Bool
@@ -104,6 +111,8 @@ public struct CartesianChartTheme: HYMChartTheme {
         showsPoints: Bool = true,
         pointRadius: CGFloat = 3,
         pointColor: UIColor? = nil,
+        showsArea: Bool = false,
+        areaGradientColors: [UIColor]? = nil,
         showsEntranceAnimation: Bool = true,
         showsTooltipOnHit: Bool = true,
         columnWidthRatio: CGFloat = 0.8,
@@ -134,6 +143,8 @@ public struct CartesianChartTheme: HYMChartTheme {
         self.showsPoints = showsPoints
         self.pointRadius = max(0, pointRadius)
         self.pointColor = pointColor
+        self.showsArea = showsArea
+        self.areaGradientColors = areaGradientColors
         self.showsEntranceAnimation = showsEntranceAnimation
         self.showsTooltipOnHit = showsTooltipOnHit
         self.columnWidthRatio = max(0.1, min(1.0, columnWidthRatio))

@@ -39,6 +39,10 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
         lastPointFrames.removeAll()
         lineLayers.removeAll()
 
+        // 零轴（面积填充的闭合边界；Y 轴数据驱动，缩放中恒定）
+        let zeroY = CartesianGeometry.zeroAxisPosition(
+            viewport: currentViewport, plotArea: plotFrame, isHorizontal: false)
+
         for (s, element) in model.series.enumerated() {
             guard !element.data.isEmpty else { continue }
             let color = element.color ?? theme.seriesColor
@@ -66,6 +70,32 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
                     i == 0 ? path.move(to: p) : path.addLine(to: p)
                 }
             }
+
+            // 面积填充（面积图形态）：折线 path 闭合到零轴 → CAGradientLayer + mask。
+            // 先于线添加（线压在面积上）；渐变自上而下（近线浓 → 近零轴淡）。
+            if theme.showsArea, let first = screenPts.first, let last = screenPts.last {
+                let areaPath = UIBezierPath(cgPath: path.cgPath)
+                areaPath.addLine(to: CGPoint(x: last.x, y: zeroY))
+                areaPath.addLine(to: CGPoint(x: first.x, y: zeroY))
+                areaPath.close()
+
+                let gradient = CAGradientLayer()
+                gradient.frame = plotFrame
+                // 坐标系对齐（与 seriesLayer 同技巧）：mask 的 path 是 view 绝对坐标
+                gradient.bounds.origin = plotFrame.origin
+                gradient.colors = (theme.areaGradientColors ?? [
+                    color.withAlphaComponent(0.35).cgColor,
+                    color.withAlphaComponent(0.04).cgColor
+                ])
+                gradient.startPoint = CGPoint(x: 0.5, y: 0)
+                gradient.endPoint = CGPoint(x: 0.5, y: 1)
+
+                let mask = CAShapeLayer()
+                mask.path = areaPath.cgPath
+                gradient.mask = mask
+                seriesLayer.addSublayer(gradient)
+            }
+
             let line = CAShapeLayer()
             line.path = path.cgPath
             line.strokeColor = color.cgColor

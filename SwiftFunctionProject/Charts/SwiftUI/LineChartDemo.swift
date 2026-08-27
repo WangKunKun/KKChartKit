@@ -35,6 +35,11 @@ struct LineChartDemo: View {
     /// X 轴时间轴模式：按实际数据量把 24h 均分到每个点（288 点 = 5 分钟/点，1440 点 = 1 分钟/点）
     @State private var useTimeAxis = true
 
+    // —— 面积填充（面积图形态）——
+    @State private var showsArea = false
+    /// 面积渐变顶部浓度（自动派生渐变的起始透明度）
+    @State private var areaTopAlpha = 0.35
+
     var body: some View {
         VStack(spacing: 0) {
             LineChart(model: currentModel,
@@ -80,6 +85,13 @@ struct LineChartDemo: View {
         t.axisLineWidth = axisLineWidth
         t.axisLabelGap = axisLabelGap
         t.lineConnectionStyle = connectionStyle
+        t.showsArea = showsArea
+        if showsArea {
+            t.areaGradientColors = [
+                seriesColor.withAlphaComponent(areaTopAlpha),
+                seriesColor.withAlphaComponent(0.04)
+            ]
+        }
         t.contentInset = UIEdgeInsets(top: insetTop, left: insetLeft,
                                        bottom: insetBottom, right: insetRight)
         return t
@@ -105,6 +117,10 @@ struct LineChartDemo: View {
                         get: { connectionStyle.rawValue },
                         set: { connectionStyle = LineConnectionStyle(rawValue: $0) ?? .straight }),
                     options: LineConnectionStyle.allCases.map { $0.rawValue }),
+        ])
+        let areaSection = ChartDemoPanel.DemoSection(title: "面积填充", items: [
+            .toggle(label: "填充折线下方区域（面积图）", value: $showsArea),
+            .slider(label: "渐变顶部浓度", value: $areaTopAlpha, range: 0.05...0.8, step: 0.05),
         ])
         let pointSection = ChartDemoPanel.DemoSection(title: "数据点", items: [
             .toggle(label: "显示数据点", value: $theme.showsPoints),
@@ -144,7 +160,7 @@ struct LineChartDemo: View {
             .toggle(label: "入场动画", value: $theme.showsEntranceAnimation),
             .toggle(label: "点击弹窗", value: $theme.showsTooltipOnHit),
         ])
-        return ChartDemoPanel(sections: [dataSection, lineSection, interactionSection, pointSection, gridSection, overallSection])
+        return ChartDemoPanel(sections: [dataSection, lineSection, areaSection, interactionSection, pointSection, gridSection, overallSection])
     }
 
     static func randomData(count: Int) -> [Double] {
