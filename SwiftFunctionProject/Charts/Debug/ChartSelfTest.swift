@@ -436,6 +436,27 @@ public enum ChartSelfTest {
         let zX = CartesianGeometry.zeroAxisPosition(viewport: zhVP, plotArea: zpPlot, isHorizontal: true)
         assert(abs(zX - zpPlot.minX) < 0.001, "水平图全正值域零轴应在左侧")
 
+        // —— CartesianGeometry.stackedValues ——
+        let s1 = CartesianSeriesElement(name: "a", data: [10, 20, 30])
+        let s2 = CartesianSeriesElement(name: "b", data: [5, 15, 25])
+        let stacked = CartesianGeometry.stackedValues(series: [s1, s2])
+        assert(stacked.count == 2, "应返回 2 个系列")
+        assert(stacked[0][2] == 30, "第一个系列应保持原值")
+        assert(stacked[1][2] == 55, "第二个系列应累计: 30+25=55")
+
+        // 锯齿 series 测试
+        let s3 = CartesianSeriesElement(name: "c", data: [100])
+        let s4 = CartesianSeriesElement(name: "d", data: [10, 20, 30, 40])
+        let stacked2 = CartesianGeometry.stackedValues(series: [s3, s4])
+        assert(stacked2[0].count == 4, "应归一化到最长长度 4")
+        assert(stacked2[0][1] == 0, "短系列空位应补零")
+        assert(stacked2[1][0] == 110, "第一个位置应累计: 100+10=110")
+        assert(stacked2[1][1] == 20, "第二个位置应累计: 0+20=20")
+
+        // 空 series 边界情况
+        let emptyStacked = CartesianGeometry.stackedValues(series: [])
+        assert(emptyStacked.isEmpty, "空 series 应返回空数组")
+
         // —— AxisRenderer.format 刻度文本 ——
         assert(AxisRenderer.format(80.0) == "80", "80.0 should format to '80'")
         assert(AxisRenderer.format(0.2) == "0.2", "0.2 should format to '0.2'")

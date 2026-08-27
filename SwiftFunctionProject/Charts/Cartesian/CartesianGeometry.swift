@@ -89,4 +89,40 @@ public enum CartesianGeometry {
             }
         }
     }
+
+    /// 堆叠累计值（归一化为所有 series 同长度）
+    /// - Parameter series: 原始 series 数组（可能长度不一）
+    /// - Returns: 累计值数组，stack[i][j] = sum(series[0...i][j])
+    /// - 锯齿 series：短 series 空位补 0，长度对齐到最长 series
+    public static func stackedValues(series: [CartesianSeriesElement]) -> [[Double]] {
+        guard !series.isEmpty else { return [] }
+
+        // 1. 找到最长 series 的长度
+        let maxLength = series.map { $0.data.count }.max() ?? 0
+        guard maxLength > 0 else { return [] }
+
+        // 2. 归一化所有 series 到相同长度（短 series 补 0）
+        var normalizedData: [[Double]] = []
+        for oneSeries in series {
+            var padded = oneSeries.data
+            while padded.count < maxLength {
+                padded.append(0)
+            }
+            normalizedData.append(padded)
+        }
+
+        // 3. 计算累计值
+        var stacked: [[Double]] = []
+        for (index, data) in normalizedData.enumerated() {
+            if index == 0 {
+                stacked.append(data)  // 第一个系列保持原值
+            } else {
+                let previous = stacked[index - 1]
+                let accumulated = zip(previous, data).map { $0 + $1 }
+                stacked.append(accumulated)
+            }
+        }
+
+        return stacked
+    }
 }
