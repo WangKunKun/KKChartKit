@@ -17,6 +17,12 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
 
     public required init() {}
 
+    // MARK: - 图表方向
+    /// 值轴是否水平（条形图为 true）。决定轴系编排的方向分支：
+    /// 水平图值域落 X（底部数值刻度、竖网格线）、类目域落 Y（左侧类目标签、横网格线）；
+    /// 垂直图（Column/Line）相反。viewport 语义随之对调（见 `makeViewport`）。
+    open var isHorizontalValueAxis: Bool { false }
+
     // MARK: - layer 子树
     /// 根容器（网格/轴线/series 挂其下；入场动画的 opacity 单元）。
     let rootLayer = CALayer()
@@ -38,8 +44,8 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
     var currentModel: CartesianChartModel?
     var currentTheme: ChartTheme?
     var lastContext: HYMChartRenderContext?
-    /// 当前 y 刻度（网格与 y label 同源）。
-    var currentYTicks: [Double] = []
+    /// 当前值轴刻度（网格与值轴 label 同源；垂直图沿 Y 映射、水平图沿 X 映射）。
+    var currentValueTicks: [Double] = []
 
     // MARK: - X 轴视口状态（手势缩放/平移）
     /// 全量 X 域（render 时从 model 记录；手势窗口的 clamp 边界）。
@@ -84,9 +90,11 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
     /// 两个约束各管一段：小数据量按倍数防过度放大（4 点 × 10 倍），
     /// 大数据量按类目数保证放大到底能看清单柱（1440 点 → 一屏 12 柱）。
     /// （曾误用 max 导致倍数限制在大数据量下永远压制类目下限，下限失效。）
+    /// 水平图 X 轴是数值轴：类目数下限无意义，仅按最大倍数约束。
     private var minimumXSpan: Double {
         let fullSpan = fullXRange.upperBound - fullXRange.lowerBound
         let byZoom = fullSpan / max(maximumXAxisZoomScale, 1)
+        if isHorizontalValueAxis { return byZoom }
         return min(byZoom, Double(minimumXAxisCategories))
     }
 
@@ -146,6 +154,8 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
     }
 
     /// 可见类目索引范围（部分可见即计入；子类据此跳过视口外元素的 layer 创建）。
+    /// 仅对垂直图有意义（类目在 X、参与手势缩放）；水平图类目在 Y（不参与手势、
+    /// 恒全量可见），水平子类（Bar）无需此裁剪。
     var visibleCategoryRange: Range<Int> {
         CartesianGeometry.visibleCategoryRange(viewport: currentViewport,
                                                count: currentModel?.maxPointCount ?? 0)
@@ -182,19 +192,24 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
             backgroundLayer.isHidden = true
         }
 
-        // 2) viewport（y：显式或 nice，始终数据驱动；x：手势窗口优先，否则全量）
+        // 2) viewport（值域：显式或 nice，始终数据驱动；X 轴：手势窗口优先，否则全量）
         currentViewport = makeViewport(model: model)
 
-        // 3) 布局（需要 y 刻度最宽文本宽度）
-        currentYTicks = currentViewport.yMin == currentViewport.yMax
-            ? [] : makeYTicks(model: model, domain: currentViewport.yDomain)
-        let yTickWidth = currentYTicks.map { textSize(AxisRenderer.format($0), font: cartTheme.tickLabelFont).width }.max() ?? 0
+        // 3) 值轴刻度 + 布局（左侧标签宽度：水平图量类目标签、垂直图量值刻度文本；
+        //    底部标签高度两种方向同为刻度字体行高）
+        let valueDomainDegenerate = isHorizontalValueAxis
+            ? currentViewport.xMin == currentViewport.xMax
+            : currentViewport.yMin == currentViewport.yMax
+        currentValueTicks = valueDomainDegenerate ? [] : makeValueTicks(model: model)
+        let leadingLabelWidth: CGFloat = isHorizontalValueAxis
+            ? model.categoryLabels.map { textSize($0, font: cartTheme.tickLabelFont).width }.max() ?? 0
+            : currentValueTicks.map { textSize(AxisRenderer.format($0), font: cartTheme.tickLabelFont).width }.max() ?? 0
         let xTickHeight = textSize("0", font: cartTheme.tickLabelFont).height
         let titleHeight = model.title.map { textSize($0, font: cartTheme.titleFont).height } ?? 0
         currentPlotFrame = CartesianGeometry.layout(
             bounds: context.bounds,
             contentInset: cartTheme.contentInset,
-            yAxisTickLabelWidth: yTickWidth,
+            yAxisTickLabelWidth: leadingLabelWidth,
             xAxisTickLabelHeight: xTickHeight,
             axisLabelGap: cartTheme.axisLabelGap,
             titleHeight: titleHeight)
@@ -202,8 +217,9 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
         // 4) 网格 + 轴 + 标题（挂在 series 之下）。
         // 空数据也画空坐标系（规格：防御式兜底），只是跳过 series 绘制。
         rootLayer.addSublayer(GridRenderer.makeGridLayer(
-            yTicks: currentYTicks, categoryCount: model.maxPointCount,
-            viewport: currentViewport, plotFrame: currentPlotFrame, theme: cartTheme))
+            valueTicks: currentValueTicks, categoryCount: model.maxPointCount,
+            viewport: currentViewport, plotFrame: currentPlotFrame, theme: cartTheme,
+            isHorizontalValueAxis: isHorizontalValueAxis))
         rootLayer.addSublayer(AxisRenderer.makeAxisLinesLayer(
             plotFrame: currentPlotFrame, theme: cartTheme))
         addTickLabels(model: model, theme: cartTheme)
@@ -250,13 +266,26 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
     // MARK: - 私有
     private func makeViewport(model: CartesianChartModel) -> CartesianViewport {
         let count = max(model.maxPointCount, 1)
-        // x：类目域 -0.5...n-0.5（点 i 落 band 中心）。显式 min/max 覆盖。
-        let xMin = model.xAxis.min ?? -0.5
-        let xMax = model.xAxis.max ?? Double(count - 1) + 0.5
-        fullXRange = min(xMin, xMax)...max(xMin, xMax)
+        // 类目域：-0.5...n-0.5（点 i 落 band 中心）。显式 min/max 覆盖。
+        // 垂直图落 X 轴，水平图（条形图）落 Y 轴——轴配置按"值轴/类目轴"语义
+        // （model.yAxis = 值轴、model.xAxis = 类目轴）与方向无关。
+        let catMin = model.xAxis.min ?? -0.5
+        let catMax = model.xAxis.max ?? Double(count - 1) + 0.5
+        let fullCategory = min(catMin, catMax)...max(catMin, catMax)
 
-        // 手势窗口优先（clamp 到全量域内、span 在 [最小可见跨度, 全量] 内；
-        // 数据变化后旧窗口可能失效，此处兜底防止越界/过窄）
+        // 值域：显式 min/max 同显式时直接用；否则 nice scale（显式端单独生效时与自动端合并）。
+        // 注意：显式端与自动刻度不对齐时，首/末刻度与轴线间会有空隙（显式端优先的语义，与 Highcharts 一致）。
+        let bounds = model.dataBounds ?? (min: 0, max: 1)
+        let scale = NiceScaleGenerator.generate(
+            dataMin: model.yAxis.min ?? bounds.min,
+            dataMax: model.yAxis.max ?? bounds.max)
+        let valLo = model.yAxis.min ?? scale.min
+        let valHi = model.yAxis.max ?? scale.max
+        let fullValue = min(valLo, valHi)...max(valLo, valHi)
+
+        // 手势窗口只作用于 X 轴：垂直图缩放类目域、水平图缩放数值域。
+        // Y 轴始终数据驱动（垂直图 = 值域，水平图 = 类目域），不参与手势。
+        fullXRange = isHorizontalValueAxis ? fullValue : fullCategory
         var effectiveX = fullXRange
         if let user = userXRange {
             let fullSpan = fullXRange.upperBound - fullXRange.lowerBound
@@ -266,26 +295,27 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
             effectiveX = lo...(lo + span)
         }
 
-        // y：显式 min/max 同显式时直接用；否则 nice scale（显式端单独生效时与自动端合并）。
-        // 注意：显式端与自动刻度不对齐时，首/末刻度与轴线间会有空隙（显式端优先的语义，与 Highcharts 一致）。
-        // y 域永远数据驱动——X 轴手势缩放/平移不影响 y 域（Y 轴固定）。
-        let bounds = model.dataBounds ?? (min: 0, max: 1)
-        let scale = NiceScaleGenerator.generate(
-            dataMin: model.yAxis.min ?? bounds.min,
-            dataMax: model.yAxis.max ?? bounds.max)
-        let yMin = model.yAxis.min ?? scale.min
-        let yMax = model.yAxis.max ?? scale.max
-        return CartesianViewport(xMin: effectiveX.lowerBound, xMax: effectiveX.upperBound, yMin: yMin, yMax: yMax)
+        return isHorizontalValueAxis
+            ? CartesianViewport(xMin: effectiveX.lowerBound, xMax: effectiveX.upperBound,
+                                yMin: fullCategory.lowerBound, yMax: fullCategory.upperBound)
+            : CartesianViewport(xMin: effectiveX.lowerBound, xMax: effectiveX.upperBound,
+                                yMin: fullValue.lowerBound, yMax: fullValue.upperBound)
     }
 
-    /// y 刻度：显式 tickInterval（须显式 min/max）从 min 步进；否则 nice scale ticks。
+    /// 值轴刻度：显式 tickInterval（须显式 min/max）从 min 步进；否则 nice scale ticks。
+    /// 水平图值轴在 X：自动刻度按**生效 X 窗口**生成（缩放/平移时刻度跟随）；
+    /// 垂直图值轴在 Y：Y 恒全量，按数据边界生成。
     /// 结果过滤到生效值域内（显式 0...95 时 nice 化出的 100 不得越界画线）。
-    private func makeYTicks(model: CartesianChartModel, domain: ClosedRange<Double>) -> [Double] {
+    private func makeValueTicks(model: CartesianChartModel) -> [Double] {
+        let domain = isHorizontalValueAxis ? currentViewport.xDomain : currentViewport.yDomain
         let ticks: [Double]
         if let interval = model.yAxis.tickInterval,
            let lo = model.yAxis.min, let hi = model.yAxis.max, interval > 0 {
             let count = Int(((hi - lo) / interval).rounded())
             ticks = (0...max(count, 0)).map { lo + Double($0) * interval }
+        } else if isHorizontalValueAxis {
+            ticks = NiceScaleGenerator.generate(dataMin: domain.lowerBound,
+                                                dataMax: domain.upperBound).ticks
         } else {
             let bounds = model.dataBounds ?? (min: 0, max: 1)
             ticks = NiceScaleGenerator.generate(
@@ -297,12 +327,21 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
 
     private func addTickLabels(model: CartesianChartModel, theme: CartesianChartTheme) {
         guard let view = hostView else { return }
-        tickLabels.append(contentsOf: AxisRenderer.makeYTickLabels(
-            ticks: currentYTicks, viewport: currentViewport,
-            plotFrame: currentPlotFrame, theme: theme))
-        tickLabels.append(contentsOf: AxisRenderer.makeCategoryLabels(
-            labels: model.categoryLabels, viewport: currentViewport,
-            plotFrame: currentPlotFrame, theme: theme))
+        if isHorizontalValueAxis {
+            tickLabels.append(contentsOf: AxisRenderer.makeBottomValueTickLabels(
+                ticks: currentValueTicks, viewport: currentViewport,
+                plotFrame: currentPlotFrame, theme: theme))
+            tickLabels.append(contentsOf: AxisRenderer.makeLeftCategoryLabels(
+                labels: model.categoryLabels, viewport: currentViewport,
+                plotFrame: currentPlotFrame, theme: theme))
+        } else {
+            tickLabels.append(contentsOf: AxisRenderer.makeYTickLabels(
+                ticks: currentValueTicks, viewport: currentViewport,
+                plotFrame: currentPlotFrame, theme: theme))
+            tickLabels.append(contentsOf: AxisRenderer.makeCategoryLabels(
+                labels: model.categoryLabels, viewport: currentViewport,
+                plotFrame: currentPlotFrame, theme: theme))
+        }
         tickLabels.forEach { view.addSubview($0) }
     }
 

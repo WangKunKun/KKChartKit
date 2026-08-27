@@ -20,10 +20,18 @@ final class SwiftFunctionProjectTests: XCTestCase {
 
     func testExample() throws {
         // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
+        // Any test you write for XCTest can be annotated as throws or async.
+        // Mark your test async to await the results of assertions afterwards.
+    }
+
+    /// 框架级 DEBUG 自检（ChartSelfTest，随 App 启动也会跑一遍；此处供命令行/CI 验证）。
+    func testChartSelfTest() {
+        ChartSelfTest.runAll()
+    }
+
+    /// 条形图水平轴系渲染契约（docs/todo-bar-axis-fix.md 验收）。
+    func testBarHorizontalAxis() {
+        ChartSelfTest.runHorizontalAxisSelfTest()
     }
 
     func testPerformanceExample() throws {

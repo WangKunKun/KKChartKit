@@ -6,6 +6,10 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
 
     // MARK: - Override
 
+    /// 水平图：值域落 X（底部数值刻度、竖网格线、捏合缩放数值轴），
+    /// 类目域落 Y（左侧类目标签、横网格线）。viewport 语义随之对调。
+    public override var isHorizontalValueAxis: Bool { true }
+
     /// 子类实现：绘制 series
     ///
     /// 性能设计：与 ColumnChartRenderer 对称——每系列条形合并为 ≤2 个
@@ -130,8 +134,11 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
             isHorizontal: true
         )
 
-        // 1. 类目在 Y 轴（恒全量）：屏幕点 → y 值 → 最近类目中心
-        let yValue = CartesianGeometry.value(at: point, viewport: currentViewport, plotFrame: currentPlotFrame).y
+        // 1. 类目在 Y 轴（恒全量）：屏幕点 → 类目值 → 最近类目中心
+        //    （用水平图专用映射：类目 0 在顶部，与 barRect/标签/网格同一方向）
+        let yValue = CartesianGeometry.horizontalCategory(atY: point.y,
+                                                          viewport: currentViewport,
+                                                          plotFrame: currentPlotFrame)
         let categoryIndex = Int(yValue.rounded())
 
         guard categoryIndex >= 0 && categoryIndex < model.maxPointCount else { return nil }

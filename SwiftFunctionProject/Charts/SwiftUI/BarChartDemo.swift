@@ -21,9 +21,7 @@ struct BarChartDemo: View {
 
     // —— 缩放功能测试 ——
     @State private var isZoomEnabled = true
-    /// 类目轴（Y 轴）时间轴模式：按实际数据量把 24h 均分到每个点。
-    /// 注意：条形图轴系渲染待修（docs/todo-bar-axis-fix.md），当前类目标签显示位置错乱，
-    /// 数据链路先就位，轴系修复后显示自然正确。
+    /// 类目轴（Y 轴，左侧标签）时间轴模式：按实际数据量把 24h 均分到每个点。
     @State private var useTimeAxis = false
 
     var body: some View {

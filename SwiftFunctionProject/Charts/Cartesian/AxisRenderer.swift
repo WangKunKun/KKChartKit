@@ -74,6 +74,65 @@ enum AxisRenderer {
         return out
     }
 
+    /// 生成底部数值刻度 labels（水平图：值轴在 X）。
+    ///
+    /// 每个刻度水平居中于其值沿 X 轴的映射位置，贴 plot 底缘外侧；
+    /// 值刻度数量由 nice scale 控制（约 ≤6 个），无需抽稀。
+    /// 返回未加 superview 的 UILabel 数组，调用方负责挂载与清理。
+    static func makeBottomValueTickLabels(ticks: [Double],
+                                           viewport: CartesianViewport,
+                                           plotFrame: CGRect,
+                                           theme: CartesianChartTheme) -> [UILabel] {
+        ticks.map { tick in
+            let lbl = UILabel()
+            lbl.text = format(tick)
+            lbl.textColor = theme.tickLabelColor
+            lbl.font = theme.tickLabelFont
+            lbl.sizeToFit()
+            let x = CartesianGeometry.point(x: tick, y: 0,
+                                            viewport: viewport, plotFrame: plotFrame).x
+            lbl.center = CGPoint(x: x,
+                                 y: plotFrame.maxY + theme.axisLabelGap + lbl.bounds.height / 2)
+            return lbl
+        }
+    }
+
+    /// 生成左侧类目标签（水平图：类目轴在 Y）。
+    ///
+    /// 与底部类目标签同一策略：每个标签垂直居中于所属类目中心
+    /// （类目 i 沿 Y 映射，类目 0 在顶部），右对齐贴 plot 左缘外侧；
+    /// 槽高不足时按标签实测高度自适应抽稀（绝对索引取模保证稳定——
+    /// 水平图 Y 轴不参与手势，抽稀只在类目极多时生效，如 1440 条）。
+    /// 返回未加 superview 的 UILabel 数组，调用方负责挂载与清理。
+    static func makeLeftCategoryLabels(labels: [String],
+                                        viewport: CartesianViewport,
+                                        plotFrame: CGRect,
+                                        theme: CartesianChartTheme) -> [UILabel] {
+        guard !labels.isEmpty else { return [] }
+        let fontAttrs: [NSAttributedString.Key: Any] = [.font: theme.tickLabelFont]
+        let maxLabelHeight = labels.map { ($0 as NSString).size(withAttributes: fontAttrs).height }.max() ?? 0
+        // 槽高按类目轴跨度（Y）计算；categoryLabelStride 的数学对高度维度同样适用
+        let slotHeight = plotFrame.height / CGFloat(max(viewport.ySpan, 1e-9))
+        let stride = CartesianGeometry.categoryLabelStride(labelWidth: maxLabelHeight,
+                                                           slotWidth: slotHeight)
+
+        var out: [UILabel] = []
+        for (i, text) in labels.enumerated() where i % stride == 0 {
+            let lbl = UILabel()
+            lbl.text = text
+            lbl.textColor = theme.tickLabelColor
+            lbl.font = theme.tickLabelFont
+            lbl.sizeToFit()
+            // 类目 0 在顶部（与 barRect 同一映射，见 horizontalCategoryY）
+            let y = CartesianGeometry.horizontalCategoryY(category: Double(i),
+                                                          viewport: viewport, plotFrame: plotFrame)
+            lbl.center = CGPoint(x: plotFrame.minX - theme.axisLabelGap - lbl.bounds.width / 2,
+                                 y: y)
+            out.append(lbl)
+        }
+        return out
+    }
+
     /// 刻度文本：去尾零（80.0 → "80"；0.2 → "0.2"；-0.0 → "0"）。
     /// ≥100 的非整数 %g 会产生科学计数法（123.456 → "1.2e+02"），退化为固定 1 位小数。
     static func format(_ value: Double) -> String {

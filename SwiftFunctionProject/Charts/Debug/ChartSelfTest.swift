@@ -714,7 +714,123 @@ public enum ChartSelfTest {
         assert(!((RadarChartRenderer() as HYMChartRenderer) is HYMChartXAxisZoomable),
                "RadarChartRenderer should NOT conform to HYMChartXAxisZoomable")
 
+        // —— 条形图水平轴系（值轴在 X、类目轴在 Y；渲染级契约，todo-bar-axis-fix）——
+        runHorizontalAxisSelfTest()
+
         print("✅ ChartSelfTest passed")
+    }
+
+    /// 条形图（水平图）轴系渲染契约：
+    /// viewport 域交换（X=值域、Y=类目域）、底部数值刻度、左侧类目标签、
+    /// 网格方向对调、X 数值轴缩放时刻度跟随窗口。
+    static func runHorizontalAxisSelfTest() {
+        // —— 纯函数：底部数值刻度 / 左侧类目标签 / 水平网格 ——
+        let hVP = CartesianViewport(xMin: 0, xMax: 100, yMin: -0.5, yMax: 3.5)
+        let hPlot = CGRect(x: 50, y: 20, width: 250, height: 160)
+        let hTicks: [Double] = [0, 20, 40, 60, 80, 100]
+
+        let bottomTicks = AxisRenderer.makeBottomValueTickLabels(
+            ticks: hTicks, viewport: hVP, plotFrame: hPlot, theme: CartesianChartTheme())
+        assert(bottomTicks.count == 6, "底部数值刻度应有 6 个，got \(bottomTicks.count)")
+        for (i, lbl) in bottomTicks.enumerated() {
+            let cx = CartesianGeometry.point(x: hTicks[i], y: 0, viewport: hVP, plotFrame: hPlot).x
+            assert(abs(lbl.center.x - cx) < 0.001,
+                   "底部刻度 \(hTicks[i]) 应对齐值位置 \(cx)，got \(lbl.center.x)")
+            assert(lbl.center.y > hPlot.maxY, "底部刻度应在 plot 下方，got \(lbl.center.y)")
+        }
+
+        let leftCats = AxisRenderer.makeLeftCategoryLabels(
+            labels: ["A", "B", "C", "D"], viewport: hVP, plotFrame: hPlot, theme: CartesianChartTheme())
+        assert(leftCats.count == 4, "左侧类目标签应有 4 个，got \(leftCats.count)")
+        for (i, lbl) in leftCats.enumerated() {
+            // 类目 0 在顶部（自上而下映射，与 barRect 同向）
+            let cy = CartesianGeometry.horizontalCategoryY(category: Double(i),
+                                                           viewport: hVP, plotFrame: hPlot)
+            assert(abs(lbl.center.y - cy) < 0.001,
+                   "左侧类目 \(i) 应对齐类目中心 y=\(cy)，got \(lbl.center.y)")
+            assert(lbl.frame.maxX <= hPlot.minX + 0.001,
+                   "左侧类目标签右缘不得侵入 plot，got \(lbl.frame.maxX) vs \(hPlot.minX)")
+        }
+        assert(leftCats[0].center.y < leftCats[1].center.y
+               && leftCats[0].center.y < hPlot.midY
+               && leftCats[3].center.y > hPlot.midY,
+               "类目 0 应在最顶部（首行在上半区、末行在下半区），got \(leftCats.map { $0.center.y })")
+
+        // 显式开启两种网格线（默认主题竖线为关），验证方向映射本身
+        var hGridTheme = CartesianChartTheme()
+        hGridTheme.showsVerticalGridlines = true
+        hGridTheme.showsHorizontalGridlines = true
+        let hGrid = GridRenderer.makeGridLayer(
+            valueTicks: hTicks, categoryCount: 4, viewport: hVP,
+            plotFrame: hPlot, theme: hGridTheme, isHorizontalValueAxis: true)
+        var hGridMoves = 0
+        hGrid.path?.applyWithBlock { elem in
+            if elem.pointee.type == .moveToPoint { hGridMoves += 1 }
+        }
+        // 竖线 6 条（值刻度）+ 横线 4 条（类目；槽高 40 > 最小间距，无抽稀）
+        assert(hGridMoves == 10, "水平网格应有 6 竖(值刻度) + 4 横(类目) = 10 条线，got \(hGridMoves)")
+
+        // —— 渲染级：BarChartRenderer 端到端 ——
+        let barRenderer = BarChartRenderer()
+        let host = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        barRenderer.mount(into: host)
+        barRenderer.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "s", data: [20, 40, 60, 80])]),
+            theme: CartesianChartTheme(),
+            context: HYMChartRenderContext(bounds: host.bounds, center: host.center))
+        let plot = barRenderer.currentPlotFrame
+        let vp = barRenderer.currentViewport
+
+        // 1) viewport 域交换：X = 值域（[20...80] → nice 0...80 步长 20），Y = 类目域 -0.5...3.5
+        assert(abs(vp.xMin) < 0.001 && abs(vp.xMax - 80) < 0.001,
+               "水平图 X 域应为值域 0...80，got \(vp.xDomain)")
+        assert(abs(vp.yMin - (-0.5)) < 0.001 && abs(vp.yMax - 3.5) < 0.001,
+               "水平图 Y 域应为类目域 -0.5...3.5，got \(vp.yDomain)")
+
+        // 2) 底部 = 数值刻度："80" 对齐 plot 右缘、位于底缘下方
+        let labels = host.subviews.compactMap { $0 as? UILabel }
+        guard let tickMax = labels.first(where: { $0.text == "80" && $0.center.y > plot.maxY }) else {
+            assertionFailure("底部应有数值刻度 80，got \(labels.map { ($0.text ?? "") + "@(\($0.center.x), \($0.center.y))" })")
+            return
+        }
+        assert(abs(tickMax.center.x - plot.maxX) < 1.0,
+               "刻度 80 应对齐 plot 右缘 \(plot.maxX)，got \(tickMax.center.x)")
+
+        // 3) 左侧 = 类目标签："1"（类目 0）贴左缘、垂直对齐首行类目中心（顶部）
+        guard let cat1 = labels.first(where: { $0.text == "1" }) else {
+            assertionFailure("左侧应有类目标签 1，got \(labels.map { $0.text ?? "" })")
+            return
+        }
+        assert(cat1.center.x < plot.minX,
+               "类目标签应在 plot 左侧，got \(cat1.center.x) vs \(plot.minX)")
+        let slotHeight = plot.height / 4
+        assert(abs(cat1.center.y - (plot.minY + 0.5 * slotHeight)) < 1.0,
+               "类目 1 应对齐首行类目中心，got \(cat1.center.y)")
+
+        // 3.5) 命中对齐：点击首行条形中部（类目 0、值 20 → 零轴到 plot 中点间）
+        let tapY = CartesianGeometry.horizontalCategoryY(category: 0,
+                                                         viewport: barRenderer.currentViewport,
+                                                         plotFrame: plot)
+        let tapX = plot.minX + plot.width * 0.125   // 值 20 在 0...80 域的 1/4 处，条形中段
+        if let hit = barRenderer.hitTest(CGPoint(x: tapX, y: tapY)) as? BarHitTarget {
+            assert(hit.categoryIndex == 0 && hit.seriesIndex == 0,
+                   "点击首行条形应命中类目 0，got cat=\(hit.categoryIndex) series=\(hit.seriesIndex)")
+            assert(abs(hit.value - 20) < 0.001, "命中值应为 20，got \(hit.value)")
+        } else {
+            assertionFailure("点击首行条形中部应命中 (\(tapX), \(tapY))")
+        }
+
+        // 4) X 数值轴缩放：窗口减半（右缘锚定 → 40...80），刻度跟随窗口、类目域恒定
+        barRenderer.zoomXAxis(factor: 2, anchorScreenX: plot.maxX)
+        assert(abs(barRenderer.currentViewport.xMin - 40) < 0.001
+               && abs(barRenderer.currentViewport.xMax - 80) < 0.001,
+               "捏合后值域窗口应为 40...80，got \(barRenderer.currentViewport.xDomain)")
+        assert(abs(barRenderer.currentViewport.yMin - (-0.5)) < 0.001,
+               "类目域不应随手势变化，got \(barRenderer.currentViewport.yDomain)")
+        assert(barRenderer.currentValueTicks.allSatisfy { $0 >= 40 - 1e-9 && $0 <= 80 + 1e-9 },
+               "缩放后数值刻度须落在生效窗口内，got \(barRenderer.currentValueTicks)")
+        assert(barRenderer.currentValueTicks.contains(80),
+               "右缘刻度 80 应保留，got \(barRenderer.currentValueTicks)")
     }
 
     /// 比较 UIColor RGB 分量（UIColor == 受色彩空间/精度影响不可靠，一律比分量）。

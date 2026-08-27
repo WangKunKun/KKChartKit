@@ -245,6 +245,26 @@ public enum CartesianGeometry {
         }
     }
 
+    /// 水平图类目 → 屏幕 Y（类目 0 在顶部，自上而下映射）。
+    ///
+    /// 与 `point` 的 Y 方向相反（`point` 的值域向上）：条形图的类目轴是离散
+    /// 序列轴，阅读顺序自上而下（Highcharts 同款）。条形（`barRect`）、
+    /// 左侧类目标签、横网格线与命中测试必须共用本映射，保证相互对齐。
+    public static func horizontalCategoryY(category: Double,
+                                           viewport: CartesianViewport,
+                                           plotFrame: CGRect) -> CGFloat {
+        let t = (category - viewport.yMin) / max(viewport.ySpan, 1e-9)
+        return plotFrame.minY + CGFloat(t) * plotFrame.height
+    }
+
+    /// 水平图屏幕 Y → 类目（`horizontalCategoryY` 的逆映射）。
+    public static func horizontalCategory(atY y: CGFloat,
+                                          viewport: CartesianViewport,
+                                          plotFrame: CGRect) -> Double {
+        let t = Double((y - plotFrame.minY) / max(plotFrame.height, 1e-9))
+        return viewport.yMin + t * viewport.ySpan
+    }
+
     /// 零轴位置（坐标轴的 0 点在 plot 区域中的位置）
     /// - Parameters:
     ///   - viewport: 值域视口

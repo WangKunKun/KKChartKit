@@ -1,8 +1,33 @@
-# 待办任务：条形图（Bar）轴系渲染修复
+# 条形图（Bar）轴系渲染修复
 
-> 创建：2026-08-27 · 状态：**待修复** · 优先级：中（功能可用性缺陷，Bar 图当前轴信息错误）
+> 创建：2026-08-27 · 状态：**已修复（2026-08-27）** · 优先级：中（功能可用性缺陷）
 
-## 问题描述
+## 修复记录（2026-08-27）
+
+按下方评审方案实施，并在实现中发现两处方案之外的必要补充：
+
+1. `CartesianRendererBase` 新增 `isHorizontalValueAxis` 方向开关（`BarChartRenderer` 返回
+   `true`），`makeViewport` 为水平图交换域语义：**X = 值域（nice scale）、Y = 类目域**。
+   手势窗口仍只作用于 X 轴——对条形图即缩放/平移数值轴，与缩放重构语义衔接。
+   （原方案未涉及：此前 `makeViewport` 从未交换过域，而 `barRect` 一直按交换语义写，
+   两者错位是轴错乱与条形越界的共同根因。）
+2. 轴编排/布局按方向分支：水平图数值刻度画底部（`makeBottomValueTickLabels`）、类目标签
+   画左侧（`makeLeftCategoryLabels`，高度自适应抽稀）；左侧布局宽度改量类目标签。
+   水平图数值刻度按**生效 X 窗口**生成，缩放/平移时刻度跟随。
+3. `GridRenderer.makeGridLayer` 增加 `isHorizontalValueAxis` 分支：竖线按数值刻度、横线按
+   类目中心（密度抽稀 24pt，1440 类目不叠成色带）。
+4. **补充：水平类目轴方向统一**。`point()` 的 Y 映射是"值向上"，会把类目 0 映射到底部，
+   与 `barRect` 约定的"类目 0 在顶部"（Highcharts 风格）相反，导致标签/网格与条形错位、
+   命中点错条。新增 `CartesianGeometry.horizontalCategoryY / horizontalCategory(atY:)`
+   （自上而下映射），左侧标签、横网格线、`seriesHitTest` 三处统一使用。
+5. `minimumXSpan`：水平图 X 轴是数值轴，类目数下限无意义，仅按最大倍数约束。
+6. BarChartDemo 数据点滑块范围已在先前提交（41af940）扩到 2...1440，本次无需改动。
+
+验证：TDD（ChartSelfTest 新增 `runHorizontalAxisSelfTest` 纯函数 + 渲染级断言，XCTest 入口
+`testBarHorizontalAxis` / `testChartSelfTest` 全绿）；Bar / Bar 负值 / Column / Line 四张
+渲染快照目检通过（Column/Line 无回归）。
+
+## 问题描述（原始记录）
 
 条形图（水平图）的轴/网格渲染没有按图表方向分支，复用了垂直图（Column/Line）的绘制逻辑，
 导致轴系信息错乱。截图诊断已确认以下三个现象：
