@@ -28,9 +28,26 @@ struct LineChartDemo: View {
     @State private var insetRight = 12.0
     @State private var backgroundCornerRadius = 0.0
 
+    // —— 连接形态 / 交互（阶段 1 新增）——
+    @State private var connectionStyle: LineConnectionStyle = .straight
+    @State private var isZoomEnabled = true
+    @State private var minimumVisibleCategories = 12.0
+    /// X 轴时间轴模式：按实际数据量把 24h 均分到每个点（288 点 = 5 分钟/点，1440 点 = 1 分钟/点）
+    @State private var useTimeAxis = true
+
     var body: some View {
         VStack(spacing: 0) {
-            LineChart(model: currentModel, theme: currentTheme)
+            LineChart(model: currentModel,
+                      theme: currentTheme,
+                      onHit: { target, gesture in
+                          let timeTag = useTimeAxis
+                              ? "（\(ChartDemoPanel.timeLabel(at: target.index, count: pointCount))）"
+                              : ""
+                          print("🎯 点击数据点：第 \(target.index + 1) 个点\(timeTag) · "
+                                + "系列 \(target.seriesIndex + 1) · 值 = \(target.value) · 手势 = \(gesture)")
+                      },
+                      isZoomEnabled: isZoomEnabled,
+                      minimumVisibleCategories: Int(minimumVisibleCategories))
                 .frame(height: 280)
                 .padding(.horizontal)
                 .padding(.top, 8)
@@ -46,7 +63,8 @@ struct LineChartDemo: View {
     private var currentModel: CartesianChartModel {
         CartesianChartModel(
             title: title.isEmpty ? nil : title,
-            series: [CartesianSeriesElement(name: "2026", data: data)])
+            series: [CartesianSeriesElement(name: "2026", data: data)],
+            xAxis: CartesianAxisModel(kind: .category(labels: useTimeAxis ? ChartDemoPanel.timeLabels(count: pointCount) : [])))
     }
 
     private var currentTheme: CartesianChartTheme {
@@ -61,6 +79,7 @@ struct LineChartDemo: View {
         t.gridLineWidth = gridLineWidth
         t.axisLineWidth = axisLineWidth
         t.axisLabelGap = axisLabelGap
+        t.lineConnectionStyle = connectionStyle
         t.contentInset = UIEdgeInsets(top: insetTop, left: insetLeft,
                                        bottom: insetBottom, right: insetRight)
         return t
@@ -71,7 +90,7 @@ struct LineChartDemo: View {
             .textField(label: "标题", value: $title),
             .slider(label: "数据点数", value: Binding(
                 get: { Double(pointCount) },
-                set: { pointCount = Int($0) }), range: 2...30, step: 1),
+                set: { pointCount = Int($0) }), range: 2...1440, step: 1),
             .button(label: "🎲 随机重生成数据") {
                 data = Self.randomData(count: pointCount)
             },
@@ -81,6 +100,11 @@ struct LineChartDemo: View {
                 get: { Double(theme.lineWidth) },
                 set: { theme.lineWidth = CGFloat($0) }), range: 0.5...8, step: 0.5),
             .color(label: "系列颜色", value: $seriesColor),
+            .picker(label: "连接形态",
+                    selection: Binding(
+                        get: { connectionStyle.rawValue },
+                        set: { connectionStyle = LineConnectionStyle(rawValue: $0) ?? .straight }),
+                    options: LineConnectionStyle.allCases.map { $0.rawValue }),
         ])
         let pointSection = ChartDemoPanel.DemoSection(title: "数据点", items: [
             .toggle(label: "显示数据点", value: $theme.showsPoints),
@@ -89,6 +113,11 @@ struct LineChartDemo: View {
                 set: { theme.pointRadius = CGFloat($0) }), range: 1...10, step: 0.5),
             .toggle(label: "自定义点颜色", value: $pointColorOn),
             .color(label: "点颜色", value: $pointColor),
+        ])
+        let interactionSection = ChartDemoPanel.DemoSection(title: "交互", items: [
+            .toggle(label: "启用缩放（X轴捏合/平移，双击重置）", value: $isZoomEnabled),
+            .slider(label: "放大下限（最小可见类目数）", value: $minimumVisibleCategories, range: 2...24, step: 1),
+            .toggle(label: "24小时时间轴（按数据量均分）", value: $useTimeAxis),
         ])
         let gridSection = ChartDemoPanel.DemoSection(title: "网格与轴", items: [
             .toggle(label: "横向网格", value: $theme.showsHorizontalGridlines),
@@ -115,7 +144,7 @@ struct LineChartDemo: View {
             .toggle(label: "入场动画", value: $theme.showsEntranceAnimation),
             .toggle(label: "点击弹窗", value: $theme.showsTooltipOnHit),
         ])
-        return ChartDemoPanel(sections: [dataSection, lineSection, pointSection, gridSection, overallSection])
+        return ChartDemoPanel(sections: [dataSection, lineSection, interactionSection, pointSection, gridSection, overallSection])
     }
 
     static func randomData(count: Int) -> [Double] {

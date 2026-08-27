@@ -3,6 +3,9 @@ import UIKit
 /// 网格线组件：按刻度生成横/竖网格 CAShapeLayer（由 CartesianRendererBase 编排挂载）。
 enum GridRenderer {
 
+    /// 竖线最小视觉间距（pt）：槽宽小于此值时按倍数抽稀（大数据量防叠成色带）。
+    private static let minimumVerticalGridSpacing: CGFloat = 24
+
     /// 生成网格层。横线 = 每个 y 刻度一条；竖线 = 每个类目中心一条。
     /// - Parameters:
     ///   - yTicks: y 轴刻度值序列
@@ -25,7 +28,12 @@ enum GridRenderer {
             }
         }
         if theme.showsVerticalGridlines {
-            for c in 0..<categoryCount {
+            // 视口驱动 + 密度抽稀：只为可见类目画竖线；槽宽小于最小视觉间距时
+            // 隔 N 取 1（绝对索引取模，平移稳定），避免千条亚像素线叠成色带。
+            let slotWidth = plotFrame.width / CGFloat(max(viewport.xSpan, 1e-9))
+            let stride = max(1, Int(ceil(minimumVerticalGridSpacing / max(slotWidth, 1e-9))))
+            for c in CartesianGeometry.visibleCategoryRange(viewport: viewport, count: categoryCount)
+            where c % stride == 0 {
                 let x = CartesianGeometry.point(x: Double(c), y: 0,
                                                 viewport: viewport, plotFrame: plotFrame).x
                 path.move(to: CGPoint(x: x, y: plotFrame.minY))

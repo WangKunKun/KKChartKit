@@ -407,13 +407,77 @@ public enum ChartSelfTest {
         // 逆映射 roundtrip
         let back = CartesianGeometry.value(at: p0, viewport: vpG, plotFrame: plot)
         assert(abs(back.x - 0) < 0.001 && abs(back.y - 50) < 0.001, "roundtrip wrong: \(back)")
-        // 类目 label 抽样
-        assert(CartesianGeometry.categoryLabelStride(count: 8) == 1, "8 cats stride 1")
-        assert(CartesianGeometry.categoryLabelStride(count: 30) == 3, "30 cats stride 3")
-        // 边界：恰等于 maxLabels 不抽样；maxLabels 非法（≤0）回退 1
-        assert(CartesianGeometry.categoryLabelStride(count: 10) == 1, "10 cats at boundary stride 1")
-        assert(CartesianGeometry.categoryLabelStride(count: 11) == 2, "11 cats stride 2")
-        assert(CartesianGeometry.categoryLabelStride(count: 5, maxLabels: 0) == 1, "invalid maxLabels fallback 1")
+        // 类目 label 抽稀（宽度自适应）：短标签全显示；标签宽超过槽宽才隔 N 取 1
+        assert(CartesianGeometry.categoryLabelStride(labelWidth: 10, slotWidth: 24) == 1,
+               "narrow labels in wide slots → stride 1")
+        assert(CartesianGeometry.categoryLabelStride(labelWidth: 10, slotWidth: 6) == 3,
+               "wide labels → stride ceil((10+4)/6)=3")
+        assert(CartesianGeometry.categoryLabelStride(labelWidth: 20, slotWidth: 24) == 1,
+               "label+gap == slotWidth fits → stride 1")
+        assert(CartesianGeometry.categoryLabelStride(labelWidth: 30, slotWidth: 24) == 2,
+               "month-like labels → stride 2")
+        assert(CartesianGeometry.categoryLabelStride(labelWidth: 10, slotWidth: 0) == 1,
+               "invalid slotWidth fallback 1")
+
+        // —— CartesianGeometry.steppedScreenPoints / appendSmoothCurve ——
+        let sp = [CGPoint(x: 0, y: 10), CGPoint(x: 10, y: 30), CGPoint(x: 20, y: 20)]
+        // straight/smooth 原样返回
+        assert(CartesianGeometry.steppedScreenPoints(sp, style: .straight) == sp, "straight should return as-is")
+        assert(CartesianGeometry.steppedScreenPoints(sp, style: .smooth) == sp, "smooth returns raw points (curve at path level)")
+        // stepAfter：保持前值水平前进到下一 x，再垂直跳变
+        let after = CartesianGeometry.steppedScreenPoints(sp, style: .stepAfter)
+        assert(after == [CGPoint(x: 0, y: 10), CGPoint(x: 10, y: 10), CGPoint(x: 10, y: 30),
+                         CGPoint(x: 20, y: 30), CGPoint(x: 20, y: 20)],
+               "stepAfter wrong: \(after)")
+        // stepBefore：先垂直跳到新值，再水平前进
+        let before = CartesianGeometry.steppedScreenPoints(sp, style: .stepBefore)
+        assert(before == [CGPoint(x: 0, y: 10), CGPoint(x: 0, y: 30), CGPoint(x: 10, y: 30),
+                          CGPoint(x: 10, y: 20), CGPoint(x: 20, y: 20)],
+               "stepBefore wrong: \(before)")
+        // stepCenter：垂直段在中点
+        let center = CartesianGeometry.steppedScreenPoints(sp, style: .stepCenter)
+        assert(center == [CGPoint(x: 0, y: 10), CGPoint(x: 5, y: 10), CGPoint(x: 5, y: 30), CGPoint(x: 10, y: 30),
+                          CGPoint(x: 15, y: 30), CGPoint(x: 15, y: 20), CGPoint(x: 20, y: 20)],
+               "stepCenter wrong: \(center)")
+        // 单点/空序列防御
+        assert(CartesianGeometry.steppedScreenPoints([CGPoint(x: 1, y: 1)], style: .stepAfter).count == 1, "single point as-is")
+        // 平滑曲线：两点退化直线；三点起有曲线段（path 元素数 = 1 move + 2 curve）
+        let twoPtPath = UIBezierPath()
+        twoPtPath.move(to: CGPoint(x: 0, y: 0))
+        CartesianGeometry.appendSmoothCurve(to: twoPtPath, points: [CGPoint(x: 0, y: 0), CGPoint(x: 10, y: 10)])
+        assert(!twoPtPath.isEmpty, "2-point smooth should degrade to a line")
+        let threePtPath = UIBezierPath()
+        threePtPath.move(to: sp[0])
+        CartesianGeometry.appendSmoothCurve(to: threePtPath, points: sp)
+        assert(!threePtPath.isEmpty, "3-point smooth should produce curve segments")
+
+        // —— X 轴标签与柱子组中心对齐契约 ——
+        // 每个显示的标签必须正对所属类目中心（柱子组中心）：12 类目全量视口下
+        // 全部 12 个短标签显示且 center.x == 类目中心映射（曾有双重偏移/抽稀错位回归）。
+        do {
+            let alignVP = CartesianViewport(xMin: -0.5, xMax: 11.5, yMin: 0, yMax: 100)
+            let alignPlot = CGRect(x: 50, y: 40, width: 264, height: 160)
+            let alignLabels = Array(1...12).map { String($0) }
+            let made = AxisRenderer.makeCategoryLabels(labels: alignLabels,
+                                                       viewport: alignVP,
+                                                       plotFrame: alignPlot,
+                                                       theme: CartesianChartTheme())
+            assert(made.count == 12, "12 short labels should all show, got \(made.count)")
+            for (idx, lbl) in made.enumerated() {
+                let center = CartesianGeometry.point(x: Double(idx), y: 0,
+                                                     viewport: alignVP, plotFrame: alignPlot).x
+                assert(abs(lbl.center.x - center) < 0.001,
+                       "label \(idx) center should align to category center \(center), got \(lbl.center.x)")
+            }
+            // 长标签（如月份）槽宽不足 → 抽稀，但显示的仍须对齐各自类目中心
+            let monthLabels = (1...12).map { "\($0)月" }
+            let monthMade = AxisRenderer.makeCategoryLabels(labels: monthLabels,
+                                                            viewport: alignVP,
+                                                            plotFrame: alignPlot,
+                                                            theme: CartesianChartTheme())
+            assert(monthMade.count < 12, "wide month labels should be thinned, got \(monthMade.count)")
+            assert(monthMade.count >= 4, "thinned labels should keep reasonable density, got \(monthMade.count)")
+        }
 
         // —— CartesianGeometry.zeroAxisPosition ——
         let zpVP = CartesianViewport(xMin: -0.5, xMax: 2.5, yMin: 0, yMax: 100)
@@ -457,6 +521,59 @@ public enum ChartSelfTest {
         let emptyStacked = CartesianGeometry.stackedValues(series: [])
         assert(emptyStacked.isEmpty, "空 series 应返回空数组")
 
+        // —— CartesianGeometry.zoomedXRange / pannedXRange / visibleCategoryRange ——
+        let fullX = -0.5...3.5   // 4 类目全量域
+        // 中心锚点放大 2 倍：span 4→2，窗口围绕锚点 1.5
+        let zr = CartesianGeometry.zoomedXRange(from: fullX, factor: 2, anchorValue: 1.5,
+                                                fullDomain: fullX, minSpan: 2, maxSpan: 4)
+        assert(abs(zr.lowerBound - 0.5) < 1e-9 && abs(zr.upperBound - 2.5) < 1e-9,
+               "center zoom 2x should be 0.5...2.5, got \(zr)")
+        // 放大到 minSpan（倍数无限制时按最小跨度收敛）
+        let zrMin = CartesianGeometry.zoomedXRange(from: fullX, factor: 4, anchorValue: 1.5,
+                                                   fullDomain: fullX, minSpan: 1, maxSpan: 4)
+        assert(abs(zrMin.upperBound - zrMin.lowerBound - 1) < 1e-9, "factor beyond minSpan should clamp span")
+        // 超量继续放大：span 不再小于 minSpan
+        let zrOver = CartesianGeometry.zoomedXRange(from: zrMin, factor: 10, anchorValue: 1.5,
+                                                    fullDomain: fullX, minSpan: 1, maxSpan: 4)
+        assert(abs(zrOver.upperBound - zrOver.lowerBound - 1) < 1e-9, "over-zoom should clamp to minSpan")
+        // 缩小 factor<1 但不允许超过全量：回全量
+        let zrOut = CartesianGeometry.zoomedXRange(from: zr, factor: 0.1, anchorValue: 1.5,
+                                                   fullDomain: fullX, minSpan: 2, maxSpan: 4)
+        assert(zrOut == fullX, "zoom-out should clamp back to full domain, got \(zrOut)")
+        // 边界锚点：窗口不越出全量域
+        let zrEdge = CartesianGeometry.zoomedXRange(from: fullX, factor: 2, anchorValue: -0.5,
+                                                    fullDomain: fullX, minSpan: 2, maxSpan: 4)
+        assert(zrEdge.lowerBound == fullX.lowerBound && abs(zrEdge.upperBound - 1.5) < 1e-9,
+               "edge anchor should clamp to lower bound, got \(zrEdge)")
+        // 大数据量场景：minSpan 按类目数约束（1440 点放大到底可见 2 类目）
+        let bigX = -0.5...1439.5
+        let bigZoomed = CartesianGeometry.zoomedXRange(from: bigX, factor: 1000, anchorValue: 700,
+                                                       fullDomain: bigX, minSpan: 2, maxSpan: 1440)
+        assert(abs(bigZoomed.upperBound - bigZoomed.lowerBound - 2) < 1e-9,
+               "1440 cats should bottom out at 2-category span, got \(bigZoomed)")
+        // 平移：半幅右滑 → 窗口左移一半 span，clamp 到下界
+        let pr = CartesianGeometry.pannedXRange(from: zr, screenDeltaX: 100, plotWidth: 200,
+                                                fullDomain: fullX)
+        assert(abs(pr.lowerBound - (-0.5)) < 1e-9 && abs(pr.upperBound - 1.5) < 1e-9,
+               "pan right by half width should clamp to domain start, got \(pr)")
+        // 平移中段不触边界：窗口整体平移 span/2
+        let prMid = CartesianGeometry.pannedXRange(from: 1.0...3.0, screenDeltaX: -50, plotWidth: 200,
+                                                   fullDomain: fullX)
+        assert(abs(prMid.lowerBound - 1.5) < 1e-9 && abs(prMid.upperBound - 3.5) < 1e-9,
+               "mid pan should shift range by span/2, got \(prMid)")
+        // 可见类目：全量视口 = 0..<count
+        let vrFull = CartesianGeometry.visibleCategoryRange(
+            viewport: CartesianViewport(xMin: -0.5, xMax: 3.5, yMin: 0, yMax: 1), count: 4)
+        assert(vrFull == 0..<4, "full viewport should show all, got \(vrFull)")
+        // 放大视口 0.3...2.3：类目 0/1/2 可见（band 与视口相交即计入），类目 3 不相交
+        let vrZoom = CartesianGeometry.visibleCategoryRange(
+            viewport: CartesianViewport(xMin: 0.3, xMax: 2.3, yMin: 0, yMax: 1), count: 4)
+        assert(vrZoom == 0..<3, "zoomed viewport should show 0..<3, got \(vrZoom)")
+        // 窄视口 1.2...1.8：类目 1、2 的 band 都与视口相交（2 的 band [1.5,2.5) 左缘入视口）
+        let vrNarrow = CartesianGeometry.visibleCategoryRange(
+            viewport: CartesianViewport(xMin: 1.2, xMax: 1.8, yMin: 0, yMax: 1), count: 4)
+        assert(vrNarrow == 1..<3, "narrow viewport should show 1..<3, got \(vrNarrow)")
+
         // —— CartesianGeometry.columnRect ——
         let colVP = CartesianViewport(xMin: -0.5, xMax: 2.5, yMin: 0, yMax: 100)
         let colPlot = CGRect(x: 50, y: 40, width: 200, height: 160)
@@ -466,7 +583,6 @@ public enum ChartSelfTest {
         let posRect = CartesianGeometry.columnRect(
             dataPoint: 80,
             categoryIndex: 1,
-            categoryCount: 3,
             viewport: colVP,
             plotArea: colPlot,
             theme: colTheme,
@@ -481,7 +597,6 @@ public enum ChartSelfTest {
         let negRect = CartesianGeometry.columnRect(
             dataPoint: -60,
             categoryIndex: 1,
-            categoryCount: 3,
             viewport: negVP,
             plotArea: colPlot,
             theme: colTheme,
@@ -506,7 +621,6 @@ public enum ChartSelfTest {
         let posBar = CartesianGeometry.barRect(
             dataPoint: 70,
             categoryIndex: 1,
-            categoryCount: 3,
             viewport: barVP,
             plotArea: colPlot,
             theme: colTheme,
@@ -521,7 +635,6 @@ public enum ChartSelfTest {
         let negBar = CartesianGeometry.barRect(
             dataPoint: -50,
             categoryIndex: 1,
-            categoryCount: 3,
             viewport: negBarVP,
             plotArea: colPlot,
             theme: colTheme,
@@ -563,6 +676,20 @@ public enum ChartSelfTest {
         // 点附近 ±8pt 命中；远处不命中
         assert(lineRenderer.hitTest(CGPoint(x: p1.x + 8, y: p1.y)) != nil, "±8pt should hit")
         assert(lineRenderer.hitTest(CGPoint(x: 5, y: 5)) == nil, "far corner should miss")
+
+        // —— HYMChartXAxisZoomable conformance 契约 ——
+        // 手势链路依赖 `renderer as? HYMChartXAxisZoomable` 能力检查：
+        // 方法都实现了但类声明漏写 conformance 时 `as?` 静默失败（编译不报错），手势全部无效。
+        // 此处断言所有轴系子类确实遵循协议。
+        assert((lineRenderer as HYMChartRenderer) is HYMChartXAxisZoomable,
+               "LineChartRenderer should conform to HYMChartXAxisZoomable")
+        assert((ColumnChartRenderer() as HYMChartRenderer) is HYMChartXAxisZoomable,
+               "ColumnChartRenderer should conform to HYMChartXAxisZoomable")
+        assert((BarChartRenderer() as HYMChartRenderer) is HYMChartXAxisZoomable,
+               "BarChartRenderer should conform to HYMChartXAxisZoomable")
+        // 雷达图不遵循（能力协议按需实现）
+        assert(!((RadarChartRenderer() as HYMChartRenderer) is HYMChartXAxisZoomable),
+               "RadarChartRenderer should NOT conform to HYMChartXAxisZoomable")
 
         print("✅ ChartSelfTest passed")
     }

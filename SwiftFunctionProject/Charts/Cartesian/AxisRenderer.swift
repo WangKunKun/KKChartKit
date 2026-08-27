@@ -38,16 +38,30 @@ enum AxisRenderer {
         }
     }
 
-    /// 生成 x 轴类目 labels（居中于类目中心、贴 plot 底缘外侧；超 10 个类目隔 N 显示）。
+    /// 生成 x 轴类目 labels（居中于类目中心、贴 plot 底缘外侧）。
+    ///
+    /// 视口驱动：只为**可见类目**生成标签；每个标签正对所属类目中心
+    /// （即柱子组中心，缩放后跟随视口重排）；抽稀步长按**标签实测宽度**自适应
+    /// （短标签全显示，放不下才隔 N 取 1，用绝对索引取模保证平移不闪跳）。
+    /// 标签的 y 位置恒定（Y 轴不参与手势）。
     static func makeCategoryLabels(labels: [String],
                                    viewport: CartesianViewport,
                                    plotFrame: CGRect,
                                    theme: CartesianChartTheme) -> [UILabel] {
-        let stride = CartesianGeometry.categoryLabelStride(count: labels.count)
+        let visible = CartesianGeometry.visibleCategoryRange(viewport: viewport, count: labels.count)
+        guard !visible.isEmpty else { return [] }
+
+        // 最宽标签 + 槽宽 → 自适应步长（12 个短数字标签可全显示）
+        let fontAttrs: [NSAttributedString.Key: Any] = [.font: theme.tickLabelFont]
+        let maxLabelWidth = visible.map { (labels[$0] as NSString).size(withAttributes: fontAttrs).width }.max() ?? 0
+        let slotWidth = plotFrame.width / CGFloat(max(viewport.xSpan, 1e-9))
+        let stride = CartesianGeometry.categoryLabelStride(labelWidth: maxLabelWidth,
+                                                           slotWidth: slotWidth)
+
         var out: [UILabel] = []
-        for (i, text) in labels.enumerated() where i % stride == 0 {
+        for i in visible where i % stride == 0 {
             let lbl = UILabel()
-            lbl.text = text
+            lbl.text = labels[i]
             lbl.textColor = theme.tickLabelColor
             lbl.font = theme.tickLabelFont
             lbl.sizeToFit()

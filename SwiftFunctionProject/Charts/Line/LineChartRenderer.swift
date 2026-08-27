@@ -34,6 +34,8 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
     public override func drawSeries(model: CartesianChartModel,
                                     theme: CartesianChartTheme,
                                     plotFrame: CGRect) {
+        // 清空旧内容（render 与动画/手势的逐帧重画共用本方法，必须先清后画）
+        seriesLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
         lastPointFrames.removeAll()
         lineLayers.removeAll()
 
@@ -41,14 +43,28 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
             guard !element.data.isEmpty else { continue }
             let color = element.color ?? theme.seriesColor
 
-            // 折线 path
-            let path = UIBezierPath()
-            for (i, v) in element.data.enumerated() {
-                let p = screenPoint(x: Double(i), y: v)
-                i == 0 ? path.move(to: p) : path.addLine(to: p)
+            // 数据点屏幕坐标（命中 frame 按数据点，与阶梯形态无关）
+            let screenPts = element.data.enumerated().map { (i, v) -> CGPoint in
+                screenPoint(x: Double(i), y: v)
+            }
+            for (i, p) in screenPts.enumerated() {
                 let r = max(hitRadius, theme.pointRadius)   // 命中半径 ≥ 视觉点半径
                 lastPointFrames.append((s, i,
                     CGRect(x: p.x - r, y: p.y - r, width: r * 2, height: r * 2)))
+            }
+
+            // 折线 path（连接形态在此应用：直线/阶梯 = 过渡点折线，曲线 = Catmull-Rom；
+            // 视口外的点也连线，保证可见段两侧的线形完整，溢出部分由 seriesLayer 裁剪）
+            let path = UIBezierPath()
+            if theme.lineConnectionStyle == .smooth {
+                guard let first = screenPts.first else { continue }
+                path.move(to: first)
+                CartesianGeometry.appendSmoothCurve(to: path, points: screenPts)
+            } else {
+                let pathPts = CartesianGeometry.steppedScreenPoints(screenPts, style: theme.lineConnectionStyle)
+                for (i, p) in pathPts.enumerated() {
+                    i == 0 ? path.move(to: p) : path.addLine(to: p)
+                }
             }
             let line = CAShapeLayer()
             line.path = path.cgPath
@@ -57,13 +73,12 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
             line.lineWidth = theme.lineWidth
             line.lineJoin = .round
             line.lineCap = .round
-            rootLayer.addSublayer(line)
+            seriesLayer.addSublayer(line)
             lineLayers.append(line)
 
-            // 数据点
+            // 数据点（画在原始数据点位置，与阶梯形态无关）
             if theme.showsPoints {
-                for (i, v) in element.data.enumerated() {
-                    let p = screenPoint(x: Double(i), y: v)
+                for p in screenPts {
                     let dot = CALayer()
                     dot.frame = CGRect(x: p.x - theme.pointRadius, y: p.y - theme.pointRadius,
                                        width: theme.pointRadius * 2, height: theme.pointRadius * 2)
@@ -71,7 +86,7 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
                     dot.backgroundColor = (theme.pointColor ?? color).cgColor
                     dot.borderColor = UIColor.white.cgColor
                     dot.borderWidth = 1
-                    rootLayer.addSublayer(dot)
+                    seriesLayer.addSublayer(dot)
                 }
             }
         }
@@ -91,7 +106,7 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
     }
 
     // MARK: - 弹窗锚点（数据点正方形 frame，上下避让）
-    public func tooltipAnchor(for target: HYMChartHitTarget) -> HYMChartTooltipAnchor? {
+    public override func tooltipAnchor(for target: HYMChartHitTarget) -> HYMChartTooltipAnchor? {
         guard let t = target as? LineHitTarget,
               currentTheme?.showsTooltipOnHit == true,
               let hit = lastPointFrames.first(where: { $0.series == t.seriesIndex && $0.index == t.index })
@@ -99,7 +114,7 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
         return HYMChartTooltipAnchor(frame: hit.frame, preferredPlacements: [.top, .bottom])
     }
 
-    public func hitFrame(for target: HYMChartHitTarget) -> CGRect? {
+    public override func hitFrame(for target: HYMChartHitTarget) -> CGRect? {
         guard let t = target as? LineHitTarget,
               let hit = lastPointFrames.first(where: { $0.series == t.seriesIndex && $0.index == t.index })
         else { return nil }

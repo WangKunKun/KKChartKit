@@ -7,24 +7,28 @@ public struct ColumnChart: View {
     private let playsAnimationOnAppear: Bool
     private let onHit: ((ColumnHitTarget, HYMChartGesture) -> Void)?
     private let isZoomEnabled: Bool
+    private let minimumVisibleCategories: Int
 
     public init(model: CartesianChartModel,
                 theme: CartesianChartTheme = CartesianChartTheme(),
                 playsAnimationOnAppear: Bool = true,
                 onHit: ((ColumnHitTarget, HYMChartGesture) -> Void)? = nil,
-                isZoomEnabled: Bool = false) {
+                isZoomEnabled: Bool = false,
+                minimumVisibleCategories: Int = 12) {
         self.model = model
         self.theme = theme
         self.playsAnimationOnAppear = playsAnimationOnAppear
         self.onHit = onHit
         self.isZoomEnabled = isZoomEnabled
+        self.minimumVisibleCategories = minimumVisibleCategories
     }
 
     public var body: some View {
         ColumnChartRepresentable(model: model, theme: theme,
                                playsAnimationOnAppear: playsAnimationOnAppear,
                                onHit: onHit,
-                               isZoomEnabled: isZoomEnabled)
+                               isZoomEnabled: isZoomEnabled,
+                               minimumVisibleCategories: minimumVisibleCategories)
     }
 }
 
@@ -34,19 +38,22 @@ public struct ColumnChartRepresentable: UIViewRepresentable {
     private let playsAnimationOnAppear: Bool
     public let onHit: ((ColumnHitTarget, HYMChartGesture) -> Void)?
     private let isZoomEnabled: Bool
+    private let minimumVisibleCategories: Int
 
-    public init(model: CartesianChartModel, theme: CartesianChartTheme, playsAnimationOnAppear: Bool, onHit: ((ColumnHitTarget, HYMChartGesture) -> Void)?, isZoomEnabled: Bool) {
+    public init(model: CartesianChartModel, theme: CartesianChartTheme, playsAnimationOnAppear: Bool, onHit: ((ColumnHitTarget, HYMChartGesture) -> Void)?, isZoomEnabled: Bool, minimumVisibleCategories: Int) {
         self.model = model
         self.theme = theme
         self.playsAnimationOnAppear = playsAnimationOnAppear
         self.onHit = onHit
         self.isZoomEnabled = isZoomEnabled
+        self.minimumVisibleCategories = minimumVisibleCategories
     }
 
     public func makeUIView(context: Context) -> HYMChartView<ColumnChartRenderer> {
         let chart = HYMChartView<ColumnChartRenderer>(frame: .zero)
         chart.showsTooltipOnHit = true
         chart.isZoomEnabled = isZoomEnabled
+        chart.minimumVisibleCategories = minimumVisibleCategories
         chart.onHit = { target, gesture in
             if let h = target as? ColumnHitTarget { onHit?(h, gesture) }
         }

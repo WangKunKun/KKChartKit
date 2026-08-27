@@ -21,10 +21,22 @@ struct ColumnChartDemo: View {
 
     // —— 缩放功能测试 ——
     @State private var isZoomEnabled = true
+    @State private var minimumVisibleCategories = 12.0
+    /// X 轴时间轴模式：按实际数据量把 24h 均分到每个点（288 点 = 5 分钟/点，1440 点 = 1 分钟/点）
+    @State private var useTimeAxis = true
 
     var body: some View {
         VStack(spacing: 0) {
-            ColumnChart(model: currentModel, theme: currentTheme, isZoomEnabled: isZoomEnabled)
+            ColumnChart(model: currentModel, theme: currentTheme,
+                        onHit: { target, gesture in
+                            let timeTag = useTimeAxis
+                                ? "（\(ChartDemoPanel.timeLabel(at: target.categoryIndex, count: pointCount))）"
+                                : ""
+                            print("🎯 点击柱子：第 \(target.categoryIndex + 1) 个类目\(timeTag) · "
+                                  + "系列 \(target.seriesIndex + 1) · 值 = \(target.value) · 手势 = \(gesture)")
+                        },
+                        isZoomEnabled: isZoomEnabled,
+                        minimumVisibleCategories: Int(minimumVisibleCategories))
                 .frame(height: 280)
                 .padding(.horizontal)
                 .padding(.top, 8)
@@ -57,6 +69,7 @@ struct ColumnChartDemo: View {
         return CartesianChartModel(
             title: title.isEmpty ? nil : title,
             series: series,
+            xAxis: CartesianAxisModel(kind: .category(labels: useTimeAxis ? ChartDemoPanel.timeLabels(count: pointCount) : [])),
             stacking: stacking == .none ? nil : stacking
         )
     }
@@ -88,7 +101,7 @@ struct ColumnChartDemo: View {
         let dataSection = ChartDemoPanel.DemoSection(title: "数据", items: [
             .textField(label: "标题", value: $title),
             .stepper(label: "系列数量", value: seriesCountBinding, step: 1),
-            .slider(label: "数据点数", value: pointCountBinding, range: 2...12, step: 1),
+            .slider(label: "数据点数", value: pointCountBinding, range: 2...1440, step: 1),
             .button(label: "🎲 随机重生成数据") {
                 regenerateData()
             },
@@ -113,10 +126,14 @@ struct ColumnChartDemo: View {
         let animationSection = ChartDemoPanel.DemoSection(title: "动画与交互", items: [
             .toggle(label: "入场动画", value: $theme.showsColumnEntranceAnimation),
             .toggle(label: "点击弹窗", value: $theme.showsTooltipOnHit),
-            .toggle(label: "启用缩放（测试中）", value: $isZoomEnabled),
+            .toggle(label: "启用缩放（X轴捏合/平移，双击重置）", value: $isZoomEnabled),
+            .slider(label: "放大下限（最小可见类目数）", value: $minimumVisibleCategories, range: 2...24, step: 1),
+        ])
+        let xAxisSection = ChartDemoPanel.DemoSection(title: "X 轴", items: [
+            .toggle(label: "24小时时间轴（按数据量均分）", value: $useTimeAxis),
         ])
 
-        return ChartDemoPanel(sections: [dataSection, columnSection, stackSection, animationSection])
+        return ChartDemoPanel(sections: [dataSection, xAxisSection, columnSection, stackSection, animationSection])
     }
 
     private func regenerateData() {

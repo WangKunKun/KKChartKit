@@ -33,18 +33,27 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     /// 设置后内置 tooltip 自动不显示（见 `updateTooltip` 互斥）。
     public var onHitLocated: ((HYMChartHitContext?, HYMChartGesture) -> Void)?
 
-    /// 缩放手势启用（默认 false，阶段 4 功能）
+    /// 缩放手势启用（默认 false）。仅 X 轴（宽度方向）参与缩放/平移，
+    /// Y 轴视口始终由数据驱动；renderer 需实现 `HYMChartXAxisZoomable`。
     public var isZoomEnabled: Bool = false {
       didSet {
         zoomGesture.isEnabled = isZoomEnabled
         panGesture.isEnabled = isZoomEnabled
+        doubleTapGesture.isEnabled = isZoomEnabled
       }
     }
 
-    /// 最小缩放级别（防止缩放过小，默认 1.0 = 100%）
+    /// 最小缩放级别。当前实现固定语义 1.0（不可缩小超过全量数据），预留扩展。
     public var minimumZoomScale: CGFloat = 1.0
-    /// 最大缩放级别（防止缩放过大，默认 10.0 = 1000%）
-    public var maximumZoomScale: CGFloat = 10.0
+    /// 最大缩放级别（默认 10.0）。同步为 renderer 的最小可视 X 跨度。
+    public var maximumZoomScale: CGFloat = 10.0 {
+      didSet { xAxisZoomable?.maximumXAxisZoomScale = maximumZoomScale }
+    }
+    /// 最小可见类目数（放大下限，默认 12；≥ 2）。与 `maximumZoomScale` 共同约束，取更宽松者
+    /// （小数据量按倍数防过度放大，大数据量按类目数保证"放大到底能看清单柱"）。
+    public var minimumVisibleCategories: Int = 12 {
+      didSet { xAxisZoomable?.minimumXAxisCategories = max(2, minimumVisibleCategories) }
+    }
 
     /// 命中弹窗的「内容 view」提供者（外部自定义弹窗的便利模式）。
     ///
@@ -56,15 +65,18 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     /// 弹窗控制器（首次显示时懒创建）。
     private var tooltipController: HYMChartTooltipController?
 
-    // MARK: - 缩放状态
-    private var currentZoomScale: CGFloat = 1.0
-    private var zoomAnchorPoint: CGPoint = .zero
+    // MARK: - X 轴视口手势状态
+    /// 当前 renderer 若实现 `HYMChartXAxisZoomable`（轴系图表）则支持 X 视口手势；
+    /// 雷达图/热力图等未实现协议时所有手势自动无效。
+    private var xAxisZoomable: HYMChartXAxisZoomable? { renderer as? HYMChartXAxisZoomable }
+    /// 捏合增量基准（上一帧 gr.scale；增量比值连续复合 = 手势累计，跨手势天然续接）。
+    private var lastPinchScale: CGFloat = 1.0
+    /// 平移增量基准（上一帧累计 translation.x，差值即本次增量，无累计漂移）。
+    private var lastPanTranslationX: CGFloat = 0
+
     private lazy var zoomGesture = UIPinchGestureRecognizer(target: self, action: #selector(onPinch(_:)))
     private lazy var panGesture = UIPanGestureRecognizer(target: self, action: #selector(onPan(_:)))
     private lazy var doubleTapGesture = UITapGestureRecognizer(target: self, action: #selector(onDoubleTap(_:)))
-
-    /// 平移偏移量（内容滚动）
-    private var contentOffset: CGPoint = .zero
 
     // MARK: - Renderer
     private let renderer: Renderer
@@ -98,10 +110,13 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     }
 
     // MARK: - 公开 API
-    /// 配置并刷新（model + theme 一起传入）
+    /// 配置并刷新（model + theme 一起传入）。
+    ///
+    /// 外部数据/主题变化会重置 X 轴视口到全量（手势缩放状态不跨数据更新保留）。
     public func configure(model: Renderer.Model, theme: Renderer.Theme) {
         self.model = model
         self.theme = theme
+        xAxisZoomable?.resetXAxisViewport()
         setNeedsLayout()
     }
 
@@ -154,7 +169,18 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
                 }
                 self.renderer.updateEntranceAnimation(progress: progress)
             },
-            completion: { })
+            completion: { [weak self] in
+                // 终态精确化：DisplayLink 最后一帧可能停在 0.99x（柱高/透明度差一丝），
+                // 收尾强制推到 1，避免与后续手势的"定格到完成态"产生可见跳变。
+                guard let self else { return }
+                CATransaction.begin()
+                CATransaction.setDisableActions(true)
+                for l in animatable {
+                    l.opacity = 1
+                }
+                self.renderer.updateEntranceAnimation(progress: 1)
+                CATransaction.commit()
+            })
     }
 
     // MARK: - 触摸命中
@@ -194,128 +220,66 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         }
     }
 
-    // MARK: - 缩放手势（物理缩放）
+    // MARK: - X 轴视口手势（viewport 驱动：只改 X 视口，Y 轴恒定）
+    /// 捏合缩放 X 视口：增量倍率连续复合，捏合中心（跟手锚点）保持不动。
     @objc private func onPinch(_ gr: UIPinchGestureRecognizer) {
-        guard isZoomEnabled else { return }
+        guard isZoomEnabled, let zoomable = xAxisZoomable else { return }
 
         switch gr.state {
         case .began:
-            zoomAnchorPoint = gr.location(in: self)
-            currentZoomScale = 1.0
-
+            finishEntranceAnimationIfNeeded()
+            lastPinchScale = 1.0
         case .changed:
-            let scale = gr.scale
-            // 限制缩放范围
-            let boundedScale = min(max(scale, minimumZoomScale), maximumZoomScale)
-
-            // 应用物理缩放（以锚点为中心）
-            applyPhysicalZoom(scale: boundedScale, anchor: zoomAnchorPoint)
-
-        case .ended, .cancelled:
-            // 更新当前缩放比例
-            currentZoomScale = gr.scale
-
+            // 增量倍率 = 本帧 scale / 上帧 scale：连续复合即手势累计效果，
+            // 且跨手势天然续接（第二次捏合从当前视口继续，无快照、无漂移）。
+            let factor = gr.scale / max(lastPinchScale, 1e-9)
+            lastPinchScale = gr.scale
+            zoomable.zoomXAxis(factor: factor, anchorScreenX: gr.location(in: self).x)
         default:
             break
         }
     }
 
-    /// 应用物理缩放（使用 UIView transform）
-    private func applyPhysicalZoom(scale: CGFloat, anchor: CGPoint) {
-        // 计算缩放后的新 scale
-        let newScale = scale
-
-        // 计算锚点相对于视图中心的位置
-        let anchorRelativeToCenter = CGPoint(
-            x: anchor.x - bounds.midX,
-            y: anchor.y - bounds.midY
-        )
-
-        // 计算缩放后的位置调整（保持锚点不动）
-        let positionAdjustment = CGPoint(
-            x: anchorRelativeToCenter.x * (newScale - 1.0) / newScale,
-            y: anchorRelativeToCenter.y * (newScale - 1.0) / newScale
-        )
-
-        // 应用视图级别的 transform（缩放整个图表）
-        CATransaction.begin()
-        CATransaction.setDisableActions(true)
-        layer.transform = CATransform3DMakeScale(newScale, newScale, 1.0)
-        layer.position = CGPoint(
-            x: bounds.midX - positionAdjustment.x,
-            y: bounds.midY - positionAdjustment.y
-        )
-        CATransaction.commit()
-
-        // 通过 renderer 应用内容平移
-        renderer.applyPhysicalZoomAndPan(scale: newScale, contentOffset: contentOffset, bounds: bounds)
-
-        currentZoomScale = newScale
-    }
-
-    // MARK: - 平移手势
+    /// 单指左右平移 X 视口（每帧取 translation 差值作增量，clamp 到全量域）。
     @objc private func onPan(_ gr: UIPanGestureRecognizer) {
-        guard isZoomEnabled else { return }
+        guard isZoomEnabled, let zoomable = xAxisZoomable else { return }
 
         switch gr.state {
         case .began:
-            // 记录起始位置
-            break
-
+            finishEntranceAnimationIfNeeded()
+            lastPanTranslationX = 0
         case .changed:
-            let translation = gr.translation(in: self)
-
-            // 只允许X轴平移（左右滑动）
-            // 计算缩放调整后的平移量
-            let adjustedTranslation = CGPoint(
-                x: translation.x / currentZoomScale,
-                y: 0  // Y轴不平移
-            )
-
-            // 更新contentOffset
-            contentOffset = CGPoint(
-                x: max(0, adjustedTranslation.x),
-                y: 0
-            )
-
-            // 应用平移（只平移X轴内容）
-            applyPan()
-
-        case .ended, .cancelled:
-            break
-
+            let total = gr.translation(in: self).x
+            let delta = total - lastPanTranslationX
+            lastPanTranslationX = total
+            guard delta != 0 else { return }
+            zoomable.panXAxis(screenDeltaX: delta)
         default:
             break
         }
     }
 
-    /// 应用平移（内容滚动）
-    private func applyPan() {
-        // 限制平移范围（不能平移超出内容）
-        let maxOffset = max(0, (bounds.width * currentZoomScale) - bounds.width)
-        contentOffset.x = min(contentOffset.x, maxOffset)
-
-        // 通过 renderer 应用平移
-        renderer.applyPhysicalZoomAndPan(scale: currentZoomScale, contentOffset: contentOffset, bounds: bounds)
+    /// 双击重置 X 视口到全量数据。
+    @objc private func onDoubleTap(_ gr: UITapGestureRecognizer) {
+        guard isZoomEnabled, let zoomable = xAxisZoomable else { return }
+        zoomable.resetXAxisViewport()
     }
 
-    /// 双击重置缩放和平移
-    @objc private func onDoubleTap(_ gr: UITapGestureRecognizer) {
-        guard isZoomEnabled else { return }
-
-        // 重置缩放和平移状态
-        currentZoomScale = 1.0
-        contentOffset = .zero
-
-        // 通过 renderer 重置缩放和平移
-        renderer.applyPhysicalZoomAndPan(scale: 1.0, contentOffset: .zero, bounds: bounds)
-
-        // 重置视图层的 transform
+    /// 手势开始前的统一收尾：
+    /// 1. 入场动画仍在播放则立即定格到完成态——**全部包进禁动画事务瞬变**。
+    ///    opacity 若停在中间值（动画被打断），事务外恢复 1 会触发 0.25s 隐式
+    ///    渐显动画，整个图表半透明渐变，视觉即"手势开始瞬间的当前状态残影"；
+    /// 2. 立即隐藏 tooltip（弹窗锚点属于旧视口；带动画淡出会在原位悬 0.15s，
+    ///    与平移中的内容错开形成"残影"——必须无动画瞬隐）。
+    private func finishEntranceAnimationIfNeeded() {
+        animator.stop()
+        pendingAnimation = false
         CATransaction.begin()
         CATransaction.setDisableActions(true)
-        layer.transform = CATransform3DIdentity
-        layer.position = CGPoint(x: bounds.midX, y: bounds.midY)
+        renderer.animatableLayers.forEach { $0.opacity = 1 }
+        renderer.updateEntranceAnimation(progress: 1)
         CATransaction.commit()
+        tooltipController?.hide(animated: false)
     }
 
     // MARK: - Tooltip

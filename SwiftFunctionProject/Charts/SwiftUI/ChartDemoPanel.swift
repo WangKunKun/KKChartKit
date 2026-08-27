@@ -74,3 +74,21 @@ struct ChartDemoPanel: View {
         }
     }
 }
+
+// MARK: - Demo 共享工具（X 轴时间标签）
+
+extension ChartDemoPanel {
+
+    /// 24 小时时间轴标签（demo 共享）：把 24h 均分到 count 个点。
+    /// 288 点 = 每 5 分钟一刻度、1440 点 = 每 1 分钟一刻度；任意数据量通用。
+    static func timeLabels(count: Int) -> [String] {
+        (0..<max(count, 0)).map { timeLabel(at: $0, count: count) }
+    }
+
+    /// 单个索引的时间标签（"HH:mm"）。
+    static func timeLabel(at index: Int, count: Int) -> String {
+        guard count > 0 else { return "" }
+        let minutes = Int(round(Double(index) / Double(count) * 24 * 60))
+        return String(format: "%02d:%02d", (minutes / 60) % 24, minutes % 60)
+    }
+}

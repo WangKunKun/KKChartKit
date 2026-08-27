@@ -7,12 +7,18 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
     // MARK: - Override
 
     /// 子类实现：绘制 series
+    ///
+    /// 性能设计：与 ColumnChartRenderer 对称——每系列条形合并为 ≤2 个
+    /// CAShapeLayer 的复合 path（正值色 + 负值覆盖色），大数据量不掉帧。
     public override func drawSeries(
         model: CartesianChartModel,
         theme: CartesianChartTheme,
         plotFrame: CGRect
     ) {
         guard !model.series.isEmpty else { return }
+
+        // 清空旧条形（render 与动画/手势的逐帧重画共用本方法，必须先清后画）
+        seriesLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
 
         // 1. 计算零轴位置（X 轴）
         let zeroX = CartesianGeometry.zeroAxisPosition(
@@ -29,13 +35,19 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
             dataToDraw = model.series.map { $0.data }
         }
 
-        // 3. 遍历每个系列
+        // 3. 遍历每个系列（类目在 Y 轴、恒全量可见，无需裁剪；
+        //    条形长度沿 X 数值轴，视口缩放由 seriesLayer 裁剪兜底）
+        let seriesCount = model.stacking == .normal ? 1 : model.series.count
         for (seriesIndex, oneSeries) in dataToDraw.enumerated() {
             let baseColor = model.series[seriesIndex].color ?? theme.seriesColor
+            let negativeColor = model.series[seriesIndex].negativeColor ?? baseColor
 
-            // 4. 遍历每个数据点，计算条形并绘制
+            var positivePath = UIBezierPath()
+            var negativePath = UIBezierPath()   // 仅负值色独立时才单独成层
+            var separatorPath = UIBezierPath()  // 堆叠分隔线（同色同宽合并）
+
             for (index, value) in oneSeries.enumerated() {
-                // 计算基准值（堆叠模式下使用前一系列的累计值）
+                // 基准值（堆叠模式下使用前一系列的累计值）
                 let baselineValue: Double?
                 if model.stacking == .normal && seriesIndex > 0 {
                     baselineValue = dataToDraw[seriesIndex - 1][index]
@@ -43,12 +55,9 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
                     baselineValue = nil
                 }
 
-                // 计算动画后的矩形（不堆叠时传入系列索引和数量）
-                let seriesCount = model.stacking == .normal ? 1 : model.series.count
                 var rect = CartesianGeometry.barRect(
                     dataPoint: value,
                     categoryIndex: index,
-                    categoryCount: model.maxPointCount,
                     viewport: currentViewport,
                     plotArea: plotFrame,
                     theme: theme,
@@ -57,27 +66,56 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
                     seriesIndex: model.stacking == .normal ? 0 : seriesIndex,
                     seriesCount: seriesCount
                 )
-
-                // 应用入场动画
                 rect = animatedRect(from: rect, zeroX: zeroX, progress: currentAnimationProgress)
 
-                // 负值颜色覆盖
-                let color: UIColor
-                if let negColor = model.series[seriesIndex].negativeColor, value < 0 {
-                    color = negColor
+                // 圆角方向：正值左侧圆角（从零轴向右）、负值右侧圆角
+                let corners: UIRectCorner = rect.minX >= zeroX
+                    ? [.topLeft, .bottomLeft]
+                    : [.topRight, .bottomRight]
+                let barPath = UIBezierPath(
+                    roundedRect: rect, byRoundingCorners: corners,
+                    cornerRadii: CGSize(width: theme.columnCornerRadius, height: theme.columnCornerRadius))
+
+                if value < 0, negativeColor != baseColor {
+                    negativePath.append(barPath)
                 } else {
-                    color = baseColor
+                    positivePath.append(barPath)
                 }
 
-                // 绘制条形
-                drawBar(rect: rect, color: color, zeroX: zeroX, in: rootLayer, theme: theme)
-
-                // 如果堆叠且非最后系列，绘制分隔线
-                if model.stacking == .normal && seriesIndex < model.series.count - 1 {
-                    drawStackSeparator(at: rect.maxX, in: rootLayer, plotArea: plotFrame, theme: theme)
+                // 堆叠且非最后系列：记录分隔线 x
+                if model.stacking == .normal, seriesIndex < model.series.count - 1 {
+                    separatorPath.move(to: CGPoint(x: rect.maxX, y: plotFrame.minY))
+                    separatorPath.addLine(to: CGPoint(x: rect.maxX, y: plotFrame.maxY))
                 }
             }
+
+            if !positivePath.isEmpty {
+                seriesLayer.addSublayer(makeBarLayer(path: positivePath, color: baseColor, theme: theme))
+            }
+            if !negativePath.isEmpty {
+                seriesLayer.addSublayer(makeBarLayer(path: negativePath, color: negativeColor, theme: theme))
+            }
+            if !separatorPath.isEmpty, let separatorColor = theme.stackSeparatorColor {
+                let line = CAShapeLayer()
+                line.path = separatorPath.cgPath
+                line.strokeColor = separatorColor.cgColor
+                line.fillColor = nil
+                line.lineWidth = theme.stackSeparatorWidth
+                seriesLayer.addSublayer(line)
+            }
         }
+    }
+
+    /// 条形复合 path → 填充层（带可选边框）。
+    private func makeBarLayer(path: UIBezierPath, color: UIColor, theme: CartesianChartTheme) -> CAShapeLayer {
+        let layer = CAShapeLayer()
+        layer.path = path.cgPath
+        layer.fillColor = color.cgColor
+        if let borderColor = theme.columnBorderColor {
+            layer.strokeColor = borderColor.cgColor
+            layer.lineWidth = theme.columnBorderWidth
+        }
+        return layer
     }
 
     /// 子类实现：命中测试
@@ -92,9 +130,9 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
             isHorizontal: true
         )
 
-        // 1. 确定 categoryIndex（point.y 落在哪个 slot）
-        let slotHeight = currentPlotFrame.height / CGFloat(model.maxPointCount)
-        let categoryIndex = Int((point.y - currentPlotFrame.minY) / slotHeight)
+        // 1. 类目在 Y 轴（恒全量）：屏幕点 → y 值 → 最近类目中心
+        let yValue = CartesianGeometry.value(at: point, viewport: currentViewport, plotFrame: currentPlotFrame).y
+        let categoryIndex = Int(yValue.rounded())
 
         guard categoryIndex >= 0 && categoryIndex < model.maxPointCount else { return nil }
 
@@ -104,15 +142,17 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
             : model.series.map { $0.data }
 
         for (seriesIndex, oneSeries) in dataToCheck.enumerated() {
+            guard categoryIndex < oneSeries.count else { continue }
             let value = oneSeries[categoryIndex]
             let rect = CartesianGeometry.barRect(
                 dataPoint: value,
                 categoryIndex: categoryIndex,
-                categoryCount: model.maxPointCount,
                 viewport: currentViewport,
                 plotArea: currentPlotFrame,
                 theme: theme,
-                zeroX: zeroX
+                zeroX: zeroX,
+                seriesIndex: model.stacking == .normal ? 0 : seriesIndex,
+                seriesCount: model.stacking == .normal ? 1 : model.series.count
             )
 
             if rect.contains(point) {
@@ -123,44 +163,29 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
         return nil
     }
 
+    // MARK: - 弹窗锚点（命中条形 rect，上下避让）
+    public override func tooltipAnchor(for target: HYMChartHitTarget) -> HYMChartTooltipAnchor? {
+        guard let t = target as? BarHitTarget,
+              let model = currentModel,
+              let theme = currentTheme as? CartesianChartTheme,
+              theme.showsTooltipOnHit else { return nil }
+
+        // 与 hitTest 同源几何：非堆叠多系列时定位到具体系列的子槽
+        let zeroX = CartesianGeometry.zeroAxisPosition(
+            viewport: currentViewport, plotArea: currentPlotFrame, isHorizontal: true)
+        let rect = CartesianGeometry.barRect(
+            dataPoint: t.value,
+            categoryIndex: t.categoryIndex,
+            viewport: currentViewport,
+            plotArea: currentPlotFrame,
+            theme: theme,
+            zeroX: zeroX,
+            seriesIndex: model.stacking == .normal ? 0 : t.seriesIndex,
+            seriesCount: model.stacking == .normal ? 1 : model.series.count)
+        return HYMChartTooltipAnchor(frame: rect, preferredPlacements: [.top, .bottom])
+    }
+
     // MARK: - Private
-
-    /// 绘制单个条形
-    private func drawBar(rect: CGRect, color: UIColor, zeroX: CGFloat, in layer: CALayer, theme: CartesianChartTheme) {
-        // 水平版本：左右圆角
-        let corners: UIRectCorner = rect.minX >= zeroX
-            ? [.topLeft, .bottomLeft]    // 正值：左侧圆角（从零轴向右）
-            : [.topRight, .bottomRight]  // 负值：右侧圆角（从零轴向左）
-
-        let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: theme.columnCornerRadius, height: theme.columnCornerRadius))
-
-        let shapeLayer = CAShapeLayer()
-        shapeLayer.path = path.cgPath
-        shapeLayer.fillColor = color.cgColor
-
-        // 边框
-        if let borderColor = theme.columnBorderColor {
-            shapeLayer.strokeColor = borderColor.cgColor
-            shapeLayer.lineWidth = theme.columnBorderWidth
-        }
-
-        layer.addSublayer(shapeLayer)
-    }
-
-    /// 绘制堆叠分隔线（垂直线）
-    private func drawStackSeparator(at x: CGFloat, in layer: CALayer, plotArea: CGRect, theme: CartesianChartTheme) {
-        guard let separatorColor = theme.stackSeparatorColor else { return }
-
-        let path = UIBezierPath()
-        path.move(to: CGPoint(x: x, y: plotArea.minY))
-        path.addLine(to: CGPoint(x: x, y: plotArea.maxY))
-
-        let lineLayer = CAShapeLayer()
-        lineLayer.path = path.cgPath
-        lineLayer.strokeColor = separatorColor.cgColor
-        lineLayer.lineWidth = theme.stackSeparatorWidth
-        layer.addSublayer(lineLayer)
-    }
 
     /// 计算动画过程中的矩形（堆叠模式下从基准线开始生长）
     private func animatedRect(from rect: CGRect, zeroX: CGFloat, progress: Double) -> CGRect {

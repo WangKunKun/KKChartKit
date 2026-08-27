@@ -55,14 +55,6 @@ public protocol HYMChartRenderer: AnyObject {
     func tooltipAnchor(for target: HYMChartHitTarget) -> HYMChartTooltipAnchor?
     /// 命中单元的几何 frame（view 坐标系），供外部自定义弹窗定位；独立于 tooltip 开关。默认 nil。
     func hitFrame(for target: HYMChartHitTarget) -> CGRect?
-
-    // —— 缩放和平移能力（阶段 4）——
-    /// 应用物理缩放和平移（用于外部手势控制）
-    /// - Parameters:
-    ///   - scale: 缩放比例
-    ///   - contentOffset: 内容偏移（用于平移滚动）
-    ///   - bounds: 视图边界（renderer 需要知道以计算中心点）
-    func applyPhysicalZoomAndPan(scale: CGFloat, contentOffset: CGPoint, bounds: CGRect)
 }
 
 /// 默认实现：交互与逐帧回调为可选；不关心的图表无需实现这些方法
@@ -72,5 +64,44 @@ public extension HYMChartRenderer {
     func updateEntranceAnimation(progress: Double) {}
     func tooltipAnchor(for target: HYMChartHitTarget) -> HYMChartTooltipAnchor? { nil }
     func hitFrame(for target: HYMChartHitTarget) -> CGRect? { nil }
-    func applyPhysicalZoomAndPan(scale: CGFloat, contentOffset: CGPoint, bounds: CGRect) {}
+}
+
+/// X 轴视口缩放能力（轴系图表专属；雷达图/热力图等不实现即自动不支持）。
+///
+/// 交互模型：**只有 X 轴（宽度方向）参与缩放/平移，Y 轴视口始终由数据驱动**。
+/// 通用容器 `HYMChartView` 识别手势后以增量方式调用本协议；
+/// 实现方（`CartesianRendererBase`）只修改 viewport 的 x 域并整体重布局，
+/// 由此 Y 轴刻度/横网格/零轴天然固定，柱体/折线/竖网格/X 标签天然跟随。
+public protocol HYMChartXAxisZoomable: HYMChartRenderer {
+    /// 当前 X 轴视口（值域）；未缩放时等于 `fullXAxisDomain`。
+    var xAxisViewport: ClosedRange<Double> { get }
+    /// 全量 X 域（缩放/平移的 clamp 边界）。
+    var fullXAxisDomain: ClosedRange<Double> { get }
+    /// 当前 X 轴缩放倍率（全量跨度 / 当前跨度；未缩放时 1）。
+    var xAxisZoomScale: CGFloat { get }
+    /// 最大放大倍数（与 `minimumXAxisCategories` 共同约束放大下限，取更保守者）。
+    var maximumXAxisZoomScale: CGFloat { get set }
+    /// 最小可见类目数（放大下限：视口跨度不小于该数量的类目；默认 12）。
+    /// 固定倍数上限对大数据量无意义（1440 点 × 10 倍仍一屏 144 类目），
+    /// 按类目数约束才能保证"放大到底一定能看清单根柱子"。
+    var minimumXAxisCategories: Int { get set }
+
+    /// 增量缩放 X 视口。
+    ///
+    /// 每次调用以**当前视口**为基础乘 `factor`（>1 放大、<1 缩小），
+    /// `anchorScreenX`（view 坐标系）处的数据点保持在原地不动——
+    /// 连续调用的复合即累计效果，调用方无需维护快照。
+    /// - Parameters:
+    ///   - factor: 本次增量倍率（UIPinchGestureRecognizer 两帧间 scale 的比值）
+    ///   - anchorScreenX: 缩放锚点的屏幕 x（通常取捏合中心）
+    func zoomXAxis(factor: CGFloat, anchorScreenX: CGFloat)
+
+    /// 增量平移 X 视口。
+    ///
+    /// - Parameter screenDeltaX: 本次屏幕位移（px，右滑为正 → 视口左移看后面数据）。
+    ///   与 `zoomXAxis` 同为增量语义，连续调用自动复合。
+    func panXAxis(screenDeltaX: CGFloat)
+
+    /// 重置视口到全量数据（双击等场景）。
+    func resetXAxisViewport()
 }

@@ -89,9 +89,12 @@ public final class HYMChartTooltipController {
     }
 
     /// 隐藏弹窗。
-    public func hide() {
+    /// - Parameter animated: 是否播放淡出动画。**手势接管（缩放/平移开始）时必须传 false**：
+    ///   弹窗锚点属于旧视口，带动画淡出期间它会悬在原位，与正在平移的内容错开，
+    ///   视觉上就是"残影"。
+    public func hide(animated: Bool = true) {
         guard !tooltip.isHidden else { return }
-        if theme.showsAnimation {
+        if animated, theme.showsAnimation {
             UIView.animate(withDuration: 0.15, delay: 0, options: [],
                            animations: {
                 self.tooltip.alpha = 0
@@ -101,7 +104,11 @@ public final class HYMChartTooltipController {
                 self.tooltip.transform = .identity
             })
         } else {
+            // 立即隐藏：中断进行中的淡入/淡出并复位状态
+            tooltip.layer.removeAllAnimations()
             tooltip.isHidden = true
+            tooltip.alpha = 1
+            tooltip.transform = .identity
         }
     }
 

@@ -6,21 +6,29 @@ public struct LineChart: View {
     private let theme: CartesianChartTheme
     private let playsAnimationOnAppear: Bool
     private let onHit: ((LineHitTarget, HYMChartGesture) -> Void)?
+    private let isZoomEnabled: Bool
+    private let minimumVisibleCategories: Int
 
     public init(model: CartesianChartModel,
                 theme: CartesianChartTheme = CartesianChartTheme(),
                 playsAnimationOnAppear: Bool = true,
-                onHit: ((LineHitTarget, HYMChartGesture) -> Void)? = nil) {
+                onHit: ((LineHitTarget, HYMChartGesture) -> Void)? = nil,
+                isZoomEnabled: Bool = false,
+                minimumVisibleCategories: Int = 12) {
         self.model = model
         self.theme = theme
         self.playsAnimationOnAppear = playsAnimationOnAppear
         self.onHit = onHit
+        self.isZoomEnabled = isZoomEnabled
+        self.minimumVisibleCategories = minimumVisibleCategories
     }
 
     public var body: some View {
         LineChartRepresentable(model: model, theme: theme,
                                playsAnimationOnAppear: playsAnimationOnAppear,
-                               onHit: onHit)
+                               onHit: onHit,
+                               isZoomEnabled: isZoomEnabled,
+                               minimumVisibleCategories: minimumVisibleCategories)
     }
 }
 
@@ -29,10 +37,14 @@ private struct LineChartRepresentable: UIViewRepresentable {
     let theme: CartesianChartTheme
     let playsAnimationOnAppear: Bool
     let onHit: ((LineHitTarget, HYMChartGesture) -> Void)?
+    let isZoomEnabled: Bool
+    let minimumVisibleCategories: Int
 
     func makeUIView(context: Context) -> HYMChartView<LineChartRenderer> {
         let chart = HYMChartView<LineChartRenderer>(frame: .zero)
         chart.showsTooltipOnHit = true
+        chart.isZoomEnabled = isZoomEnabled
+        chart.minimumVisibleCategories = minimumVisibleCategories
         chart.onHit = { target, gesture in
             if let h = target as? LineHitTarget { onHit?(h, gesture) }
         }

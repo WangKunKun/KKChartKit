@@ -113,7 +113,7 @@ struct BarChartDemo: View {
         let animationSection = ChartDemoPanel.DemoSection(title: "动画与交互", items: [
             .toggle(label: "入场动画", value: $theme.showsColumnEntranceAnimation),
             .toggle(label: "点击弹窗", value: $theme.showsTooltipOnHit),
-            .toggle(label: "启用缩放（测试中）", value: $isZoomEnabled),
+            .toggle(label: "启用缩放（X轴捏合/平移，双击重置）", value: $isZoomEnabled),
         ])
 
         return ChartDemoPanel(sections: [dataSection, barSection, stackSection, animationSection])
