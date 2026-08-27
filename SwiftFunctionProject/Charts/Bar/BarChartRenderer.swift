@@ -43,7 +43,8 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
                     baselineValue = nil
                 }
 
-                // 计算动画后的矩形
+                // 计算动画后的矩形（不堆叠时传入系列索引和数量）
+                let seriesCount = model.stacking == .normal ? 1 : model.series.count
                 var rect = CartesianGeometry.barRect(
                     dataPoint: value,
                     categoryIndex: index,
@@ -52,7 +53,9 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
                     plotArea: plotFrame,
                     theme: theme,
                     zeroX: zeroX,
-                    baselineValue: baselineValue
+                    baselineValue: baselineValue,
+                    seriesIndex: model.stacking == .normal ? 0 : seriesIndex,
+                    seriesCount: seriesCount
                 )
 
                 // 应用入场动画

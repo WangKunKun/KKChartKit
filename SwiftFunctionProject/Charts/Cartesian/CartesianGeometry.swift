@@ -136,6 +136,8 @@ public enum CartesianGeometry {
     ///   - theme: 主题配置（间距、圆角等）
     ///   - zeroY: 零轴 Y 坐标
     ///   - baselineValue: 基准值（堆叠模式下使用，nil 表示从零轴开始）
+    ///   - seriesIndex: 系列索引（不堆叠模式下使用，0-based，默认 0）
+    ///   - seriesCount: 系列总数（不堆叠模式下使用，默认 1）
     /// - Returns: 柱体的 CGRect（minY/maxY 根据 zeroY 自动确定方向）
     public static func columnRect(
         dataPoint: Double,
@@ -145,14 +147,18 @@ public enum CartesianGeometry {
         plotArea: CGRect,
         theme: CartesianChartTheme,
         zeroY: CGFloat,
-        baselineValue: Double? = nil
+        baselineValue: Double? = nil,
+        seriesIndex: Int = 0,
+        seriesCount: Int = 1
     ) -> CGRect {
-        // 1. 计算柱体宽度
+        // 1. 计算柱体宽度（考虑多系列并排）
         let slotWidth = plotArea.width / CGFloat(categoryCount)
-        let columnWidth = slotWidth * theme.columnWidthRatio
+        let subSlotWidth = slotWidth / CGFloat(seriesCount)  // 每个 series 的子槽宽度
+        let columnWidth = subSlotWidth * theme.columnWidthRatio
 
-        // 2. 计算 X 位置（居中对齐）
-        let columnX = plotArea.minX + CGFloat(categoryIndex) * slotWidth + (slotWidth - columnWidth) / 2
+        // 2. 计算 X 位置（考虑系列偏移）
+        let seriesOffset = CGFloat(seriesIndex) * subSlotWidth  // 系列偏移
+        let columnX = plotArea.minX + CGFloat(categoryIndex) * slotWidth + seriesOffset + (subSlotWidth - columnWidth) / 2
 
         // 3. 计算数据点对应的 Y 坐标（使用现有的 point 函数）
         let valueY = point(x: Double(categoryIndex), y: dataPoint, viewport: viewport, plotFrame: plotArea).y
@@ -187,6 +193,8 @@ public enum CartesianGeometry {
     ///   - theme: 主题配置（间距、圆角等）
     ///   - zeroX: 零轴 X 坐标
     ///   - baselineValue: 基准值（堆叠模式下使用，nil 表示从零轴开始）
+    ///   - seriesIndex: 系列索引（不堆叠模式下使用，0-based，默认 0）
+    ///   - seriesCount: 系列总数（不堆叠模式下使用，默认 1）
     /// - Returns: 条形的 CGRect（minX/maxX 根据 zeroX 自动确定方向）
     public static func barRect(
         dataPoint: Double,
@@ -196,14 +204,18 @@ public enum CartesianGeometry {
         plotArea: CGRect,
         theme: CartesianChartTheme,
         zeroX: CGFloat,
-        baselineValue: Double? = nil
+        baselineValue: Double? = nil,
+        seriesIndex: Int = 0,
+        seriesCount: Int = 1
     ) -> CGRect {
-        // 1. 计算条形高度
+        // 1. 计算条形高度（考虑多系列并排）
         let slotHeight = plotArea.height / CGFloat(categoryCount)
-        let barHeight = slotHeight * theme.columnWidthRatio
+        let subSlotHeight = slotHeight / CGFloat(seriesCount)  // 每个 series 的子槽高度
+        let barHeight = subSlotHeight * theme.columnWidthRatio
 
-        // 2. 计算 Y 位置（居中对齐）
-        let barY = plotArea.minY + CGFloat(categoryIndex) * slotHeight + (slotHeight - barHeight) / 2
+        // 2. 计算 Y 位置（考虑系列偏移）
+        let seriesOffset = CGFloat(seriesIndex) * subSlotHeight  // 系列偏移
+        let barY = plotArea.minY + CGFloat(categoryIndex) * slotHeight + seriesOffset + (subSlotHeight - barHeight) / 2
 
         // 3. 计算数据点对应的 X 坐标（使用现有的 point 函数）
         // 注意：水平图的 X 轴对应数值，Y 轴对应类目
