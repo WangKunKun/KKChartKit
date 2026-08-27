@@ -498,6 +498,42 @@ public enum ChartSelfTest {
         let secondColumnX = colPlot.minX + colPlot.width / 3 * 1 + (colPlot.width / 3 * 0.2) / 2
         assert(abs(posRect.minX - secondColumnX) < 0.001, "柱体 X 位置应正确")
 
+        // —— CartesianGeometry.barRect ——
+        let barVP = CartesianViewport(xMin: 0, xMax: 100, yMin: -0.5, yMax: 2.5)
+        let barZeroX = CartesianGeometry.zeroAxisPosition(viewport: barVP, plotArea: colPlot, isHorizontal: true)
+
+        // 正值条测试
+        let posBar = CartesianGeometry.barRect(
+            dataPoint: 70,
+            categoryIndex: 1,
+            categoryCount: 3,
+            viewport: barVP,
+            plotArea: colPlot,
+            theme: colTheme,
+            zeroX: barZeroX
+        )
+        assert(posBar.minX >= barZeroX, "正值条应在零轴右侧")
+        assert(abs(posBar.minX - barZeroX) < 0.001, "正值条左侧应接触零轴")
+
+        // 负值条测试
+        let negBarVP = CartesianViewport(xMin: -100, xMax: 0, yMin: -0.5, yMax: 2.5)
+        let negBarZeroX = CartesianGeometry.zeroAxisPosition(viewport: negBarVP, plotArea: colPlot, isHorizontal: true)
+        let negBar = CartesianGeometry.barRect(
+            dataPoint: -50,
+            categoryIndex: 1,
+            categoryCount: 3,
+            viewport: negBarVP,
+            plotArea: colPlot,
+            theme: colTheme,
+            zeroX: negBarZeroX
+        )
+        assert(negBar.maxX <= negBarZeroX, "负值条应在零轴左侧")
+        assert(abs(negBar.maxX - negBarZeroX) < 0.001, "负值条右侧应接触零轴")
+
+        // 条形高度测试
+        let expectedHeight = colPlot.height / 3 * 0.8
+        assert(abs(posBar.height - expectedHeight) < 0.001, "条高应按比例计算")
+
         // —— AxisRenderer.format 刻度文本 ——
         assert(AxisRenderer.format(80.0) == "80", "80.0 should format to '80'")
         assert(AxisRenderer.format(0.2) == "0.2", "0.2 should format to '0.2'")

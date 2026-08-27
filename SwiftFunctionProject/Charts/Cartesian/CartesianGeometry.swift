@@ -166,4 +166,46 @@ public enum CartesianGeometry {
             return CGRect(x: columnX, y: zeroY, width: columnWidth, height: height)
         }
     }
+
+    /// 单个条形位置（水平图）
+    /// - Parameters:
+    ///   - dataPoint: 数据点值
+    ///   - categoryIndex: 类目索引（0-based，计算条形在 plot 中的 Y 位置）
+    ///   - categoryCount: 类目总数（计算条形高度）
+    ///   - viewport: 值域视口
+    ///   - plotArea: plot 区域
+    ///   - theme: 主题配置（间距、圆角等）
+    ///   - zeroX: 零轴 X 坐标
+    /// - Returns: 条形的 CGRect（minX/maxX 根据 zeroX 自动确定方向）
+    public static func barRect(
+        dataPoint: Double,
+        categoryIndex: Int,
+        categoryCount: Int,
+        viewport: CartesianViewport,
+        plotArea: CGRect,
+        theme: CartesianChartTheme,
+        zeroX: CGFloat
+    ) -> CGRect {
+        // 1. 计算条形高度
+        let slotHeight = plotArea.height / CGFloat(categoryCount)
+        let barHeight = slotHeight * theme.columnWidthRatio
+
+        // 2. 计算 Y 位置（居中对齐）
+        let barY = plotArea.minY + CGFloat(categoryIndex) * slotHeight + (slotHeight - barHeight) / 2
+
+        // 3. 计算数据点对应的 X 坐标（使用现有的 point 函数）
+        // 注意：水平图的 X 轴对应数值，Y 轴对应类目
+        let valueX = point(x: dataPoint, y: Double(categoryIndex), viewport: viewport, plotFrame: plotArea).x
+
+        // 4. 根据正负值确定矩形
+        if dataPoint >= 0 {
+            // 正值：从 zeroX 向右到 valueX
+            let width = valueX - zeroX
+            return CGRect(x: zeroX, y: barY, width: width, height: barHeight)
+        } else {
+            // 负值：从 valueX 向左到 zeroX
+            let width = zeroX - valueX
+            return CGRect(x: valueX, y: barY, width: width, height: barHeight)
+        }
+    }
 }
