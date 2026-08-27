@@ -2,7 +2,7 @@ import Foundation
 import UIKit
 
 /// 堆叠配置（阶段 1：普通堆叠 + 扩展点预留）
-public enum StackConfig {
+public enum StackConfig: Equatable {
     /// 不堆叠（默认）
     case none
     /// 普通堆叠（阶段 1 实现）
