@@ -1,6 +1,18 @@
 import Foundation
 import UIKit
 
+/// 堆叠配置（阶段 1：普通堆叠 + 扩展点预留）
+public enum StackConfig {
+    /// 不堆叠（默认）
+    case none
+    /// 普通堆叠（阶段 1 实现）
+    case normal
+    /// 百分比堆叠（预留，阶段 X）
+    case percent
+    /// 分组堆叠（预留，阶段 X）
+    case grouped(groupCount: Int)
+}
+
 /// 轴类型。阶段 0 仅实现 `.category` 的渲染；`.value` 为阶段 5 散点图预留。
 public enum CartesianAxisKind {
     /// 类目轴。`labels` 为空时自动生成数字标签 "1"..."n"（n = 最长 series 点数）。
@@ -34,11 +46,14 @@ public struct CartesianSeriesElement {
     public var data: [Double]
     /// nil → 用主题默认系列色。
     public var color: UIColor?
+    /// 负值数据点的覆盖颜色（nil = 使用 color）
+    public var negativeColor: UIColor?
 
-    public init(name: String, data: [Double], color: UIColor? = nil) {
+    public init(name: String, data: [Double], color: UIColor? = nil, negativeColor: UIColor? = nil) {
         self.name = name
         self.data = data
         self.color = color
+        self.negativeColor = negativeColor
     }
 }
 
@@ -48,15 +63,19 @@ public struct CartesianChartModel: HYMChartModel {
     public var series: [CartesianSeriesElement]
     public var xAxis: CartesianAxisModel
     public var yAxis: CartesianAxisModel
+    /// 堆叠配置（nil = 不堆叠）
+    public var stacking: StackConfig?
 
     public init(title: String? = nil,
                 series: [CartesianSeriesElement],
                 xAxis: CartesianAxisModel = CartesianAxisModel(kind: .category(labels: [])),
-                yAxis: CartesianAxisModel = CartesianAxisModel(kind: .value)) {
+                yAxis: CartesianAxisModel = CartesianAxisModel(kind: .value),
+                stacking: StackConfig? = nil) {
         self.title = title
         self.series = series
         self.xAxis = xAxis
         self.yAxis = yAxis
+        self.stacking = stacking
     }
 
     /// 最长 series 的点数（类目数）。
