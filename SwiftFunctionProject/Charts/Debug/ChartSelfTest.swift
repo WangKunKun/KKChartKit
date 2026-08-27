@@ -415,6 +415,27 @@ public enum ChartSelfTest {
         assert(CartesianGeometry.categoryLabelStride(count: 11) == 2, "11 cats stride 2")
         assert(CartesianGeometry.categoryLabelStride(count: 5, maxLabels: 0) == 1, "invalid maxLabels fallback 1")
 
+        // —— CartesianGeometry.zeroAxisPosition ——
+        let zpVP = CartesianViewport(xMin: -0.5, xMax: 2.5, yMin: 0, yMax: 100)
+        let zpPlot = CGRect(x: 50, y: 40, width: 200, height: 160)
+        let zY = CartesianGeometry.zeroAxisPosition(viewport: zpVP, plotArea: zpPlot, isHorizontal: false)
+        assert(abs(zY - zpPlot.maxY) < 0.001, "全正数据零轴应在底部")
+
+        let znVP = CartesianViewport(xMin: -0.5, xMax: 2.5, yMin: -100, yMax: 0)
+        let znPlot = CGRect(x: 50, y: 40, width: 200, height: 160)
+        let znY = CartesianGeometry.zeroAxisPosition(viewport: znVP, plotArea: znPlot, isHorizontal: false)
+        assert(abs(znY - znPlot.minY) < 0.001, "全负数据零轴应在顶部")
+
+        let zmVP = CartesianViewport(xMin: -0.5, xMax: 2.5, yMin: -50, yMax: 100)
+        let zmPlot = CGRect(x: 50, y: 40, width: 200, height: 160)
+        let zmY = CartesianGeometry.zeroAxisPosition(viewport: zmVP, plotArea: zmPlot, isHorizontal: false)
+        assert(zmY > zpPlot.minY && zmY < zpPlot.maxY, "混合数据零轴应在内部")
+
+        // 水平版本测试
+        let zhVP = CartesianViewport(xMin: 0, xMax: 100, yMin: -0.5, yMax: 2.5)
+        let zX = CartesianGeometry.zeroAxisPosition(viewport: zhVP, plotArea: zpPlot, isHorizontal: true)
+        assert(abs(zX - zpPlot.minX) < 0.001, "水平图全正值域零轴应在左侧")
+
         // —— AxisRenderer.format 刻度文本 ——
         assert(AxisRenderer.format(80.0) == "80", "80.0 should format to '80'")
         assert(AxisRenderer.format(0.2) == "0.2", "0.2 should format to '0.2'")

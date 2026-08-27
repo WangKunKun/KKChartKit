@@ -49,4 +49,44 @@ public enum CartesianGeometry {
         guard count > maxLabels, maxLabels > 0 else { return 1 }
         return Int(ceil(Double(count) / Double(maxLabels)))
     }
+
+    /// 零轴位置（坐标轴的 0 点在 plot 区域中的位置）
+    /// - Parameters:
+    ///   - viewport: 值域视口
+    ///   - plotArea: plot 区域
+    ///   - isHorizontal: 是否水平图表（Bar 图的 Y 轴对应数值轴）
+    /// - Returns: 零轴在 plotArea 中的坐标（垂直图返回 Y，水平图返回 X）
+    public static func zeroAxisPosition(
+        viewport: CartesianViewport,
+        plotArea: CGRect,
+        isHorizontal: Bool = false
+    ) -> CGFloat {
+        if isHorizontal {
+            // 水平图（Bar）：返回 X 坐标
+            if viewport.xMin >= 0 {
+                // 全正值域，零轴在左侧
+                return plotArea.minX
+            } else if viewport.xMax <= 0 {
+                // 全负值域，零轴在右侧
+                return plotArea.maxX
+            } else {
+                // 混合值域，零轴在内部（插值计算）
+                let ratio = -viewport.xMin / (viewport.xMax - viewport.xMin)
+                return plotArea.minX + plotArea.width * ratio
+            }
+        } else {
+            // 垂直图（Column）：返回 Y 坐标
+            if viewport.yMin >= 0 {
+                // 全正值域，零轴在底部
+                return plotArea.maxY
+            } else if viewport.yMax <= 0 {
+                // 全负值域，零轴在顶部
+                return plotArea.minY
+            } else {
+                // 混合值域，零轴在内部（插值计算）
+                let ratio = -viewport.yMin / (viewport.yMax - viewport.yMin)
+                return plotArea.maxY - plotArea.height * ratio
+            }
+        }
+    }
 }
