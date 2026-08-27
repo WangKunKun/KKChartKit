@@ -29,6 +29,16 @@ struct ContentView: View {
                         LineChartDemo()
                     }
                 }
+                Section("柱状图") {
+                    NavigationLink("柱状图 demo（实时属性面板）") {
+                        ColumnChartDemo()
+                    }
+                }
+                Section("条形图") {
+                    NavigationLink("条形图 demo（实时属性面板）") {
+                        BarChartDemo()
+                    }
+                }
                 Section("OC demo") {
                     NavigationLink("蛛网图 + 热力图（OC）") {
                         OCChartDemoHost()
