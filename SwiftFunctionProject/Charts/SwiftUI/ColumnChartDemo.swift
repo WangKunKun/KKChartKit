@@ -31,8 +31,8 @@ struct ColumnChartDemo: View {
         }
         .background(Color(.systemGroupedBackground))
         .navigationTitle("柱状图 demo")
-        .onChange(of: pointCount) { regenerateData() }
-        .onChange(of: seriesCount) { regenerateData() }
+        .onChange(of: pointCount) { _ in regenerateData() }
+        .onChange(of: seriesCount) { _ in regenerateData() }
     }
 
     private var currentModel: CartesianChartModel {

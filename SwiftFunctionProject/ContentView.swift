@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        NavigationStack {
+        NavigationView {
             List {
                 Section("雷达图") {
                     NavigationLink("默认主题 demo") {
