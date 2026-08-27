@@ -39,6 +39,30 @@ public struct CartesianChartTheme: HYMChartTheme {
     public var showsEntranceAnimation: Bool
     public var showsTooltipOnHit: Bool
 
+    // ===== 柱体外观 =====
+    /// 柱体宽度比例（0.1 ~ 1.0，默认 0.8 = 80% 宽度，20% 间距）
+    public var columnWidthRatio: CGFloat
+
+    /// 柱体圆角半径（默认 4）
+    public var columnCornerRadius: CGFloat
+
+    /// 柱体边框颜色（nil = 无边框）
+    public var columnBorderColor: UIColor?
+
+    /// 柱体边框宽度（默认 1）
+    public var columnBorderWidth: CGFloat
+
+    // ===== 堆叠样式 =====
+    /// 堆叠柱体间的分隔线颜色（nil = 无分隔线）
+    public var stackSeparatorColor: UIColor?
+
+    /// 堆叠柱体间的分隔线宽度（默认 1）
+    public var stackSeparatorWidth: CGFloat
+
+    // ===== 动画配置 =====
+    /// 柱状图入场动画：柱体从零轴升起（默认 true）
+    public var showsColumnEntranceAnimation: Bool
+
     public init(
         backgroundColor: UIColor? = nil,
         backgroundCornerRadius: CGFloat = 0,
@@ -60,7 +84,14 @@ public struct CartesianChartTheme: HYMChartTheme {
         pointRadius: CGFloat = 3,
         pointColor: UIColor? = nil,
         showsEntranceAnimation: Bool = true,
-        showsTooltipOnHit: Bool = true
+        showsTooltipOnHit: Bool = true,
+        columnWidthRatio: CGFloat = 0.8,
+        columnCornerRadius: CGFloat = 4,
+        columnBorderColor: UIColor? = nil,
+        columnBorderWidth: CGFloat = 1,
+        stackSeparatorColor: UIColor? = nil,
+        stackSeparatorWidth: CGFloat = 1,
+        showsColumnEntranceAnimation: Bool = true
     ) {
         self.backgroundColor = backgroundColor
         self.backgroundCornerRadius = max(0, backgroundCornerRadius)
@@ -83,5 +114,12 @@ public struct CartesianChartTheme: HYMChartTheme {
         self.pointColor = pointColor
         self.showsEntranceAnimation = showsEntranceAnimation
         self.showsTooltipOnHit = showsTooltipOnHit
+        self.columnWidthRatio = max(0.1, min(1.0, columnWidthRatio))
+        self.columnCornerRadius = max(0, columnCornerRadius)
+        self.columnBorderColor = columnBorderColor
+        self.columnBorderWidth = max(0, columnBorderWidth)
+        self.stackSeparatorColor = stackSeparatorColor
+        self.stackSeparatorWidth = max(0, stackSeparatorWidth)
+        self.showsColumnEntranceAnimation = showsColumnEntranceAnimation
     }
 }
