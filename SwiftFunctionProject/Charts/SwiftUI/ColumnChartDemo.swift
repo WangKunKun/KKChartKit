@@ -39,7 +39,7 @@ struct ColumnChartDemo: View {
         let series = (0..<seriesCount).map { index in
             CartesianSeriesElement(
                 name: "系列\(index + 1)",
-                data: data[index],
+                data: index < data.count ? data[index] : Self.randomData(count: pointCount),
                 color: seriesColors[index % seriesColors.count]
             )
         }
