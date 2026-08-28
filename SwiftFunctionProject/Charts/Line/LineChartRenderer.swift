@@ -106,10 +106,11 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
                 gradient.frame = plotFrame
                 // 坐标系对齐（与 seriesLayer 同技巧）：mask 的 path 是 view 绝对坐标
                 gradient.bounds.origin = plotFrame.origin
-                gradient.colors = (theme.areaGradientColors ?? [
+                // colors 必须用 CGColor：直接传 UIColor 数组在某些渲染路径（离屏/无分辨上下文）不出色
+                gradient.colors = (theme.areaGradientColors?.map { $0.cgColor }) ?? [
                     color.withAlphaComponent(0.35).cgColor,
                     color.withAlphaComponent(0.04).cgColor
-                ])
+                ]
                 gradient.startPoint = CGPoint(x: 0.5, y: 0)
                 gradient.endPoint = CGPoint(x: 0.5, y: 1)
 

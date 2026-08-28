@@ -6,7 +6,10 @@ struct LineChartDemo: View {
     // —— Model 可调项 ——
     @State private var title = "月度营收（万元）"
     @State private var pointCount = 8
-    @State private var data: [Double] = Self.randomData(count: 8)
+    @State private var data: [[Double]] = (0..<1).map { _ in Self.randomData(count: 8) }
+    /// 多系列：每系列独立数据集与颜色（堆叠/双轴都基于这些真实系列）
+    @State private var seriesCount = 1
+    @State private var seriesColors: [UIColor] = [.systemBlue, .systemGreen, .systemOrange, .systemPurple]
 
     // —— Theme 可调项（覆盖全部可调属性；UIColor 项拆出 @State 便于 ColorPicker 绑定）——
     @State private var theme = CartesianChartTheme()
@@ -72,7 +75,8 @@ struct LineChartDemo: View {
         }
         .background(Color(.systemGroupedBackground))
         .navigationTitle("折线图 demo")
-        .onChange(of: pointCount) { data = Self.randomData(count: $0) }
+        .onChange(of: pointCount) { _ in regenerateData() }
+        .onChange(of: seriesCount) { _ in regenerateData() }
     }
 
     private var currentModel: CartesianChartModel {
@@ -82,21 +86,13 @@ struct LineChartDemo: View {
         if usePercentFormatter { y.labelFormatter = { "\(Int($0))%" } }
 
         let stacking: StackConfig? = stackingMode == "普通堆叠" ? .normal : nil
-        var series: [CartesianSeriesElement]
-        if dualAxisOn {
-            // 温度（左轴）+ 湿度（右轴）
-            series = [
-                CartesianSeriesElement(name: "温度(℃)", data: data.map { ($0 / 10 + 5).rounded() },
-                                       color: .systemOrange),
-                CartesianSeriesElement(name: "湿度(%)", data: data, color: .systemBlue, yAxisIndex: 1)
-            ]
-        } else if stacking == .normal {
-            series = [
-                CartesianSeriesElement(name: "系列1", data: data.map { $0 * 0.6 }, color: .systemBlue),
-                CartesianSeriesElement(name: "系列2", data: data.map { $0 * 0.4 }, color: .systemGreen)
-            ]
-        } else {
-            series = [CartesianSeriesElement(name: "2026", data: data)]
+        // 真实多系列：按面板系列数量取数据集；末系列在双轴模式下绑右轴
+        let series = (0..<seriesCount).map { i in
+            CartesianSeriesElement(
+                name: "系列\(i + 1)",
+                data: i < data.count ? data[i] : Self.randomData(count: pointCount),
+                color: seriesColors[i % seriesColors.count],
+                yAxisIndex: (dualAxisOn && i == seriesCount - 1) ? 1 : 0)
         }
 
         var secondary: CartesianAxisModel?
@@ -130,7 +126,8 @@ struct LineChartDemo: View {
         // 堆叠默认联动开面积（分层展示更直观；可关成纯累计折线）
         let areaOn = showsArea || (stackingMode == "普通堆叠" && stackedAreaOn)
         t.showsArea = areaOn
-        if areaOn {
+        if areaOn, seriesCount == 1 {
+            // 单系列：面板系列色 + 浓度可控；多系列留给渲染器按各系列色派生渐变（分层颜色独立）
             t.areaGradientColors = [
                 seriesColor.withAlphaComponent(areaTopAlpha),
                 seriesColor.withAlphaComponent(0.04)
@@ -144,11 +141,14 @@ struct LineChartDemo: View {
     private var panel: ChartDemoPanel {
         let dataSection = ChartDemoPanel.DemoSection(title: "数据", items: [
             .textField(label: "标题", value: $title),
+            .stepper(label: "系列数量（多数据集）", value: Binding(
+                get: { Double(seriesCount) },
+                set: { seriesCount = min(max(Int($0), 1), 4) }), step: 1),
             .slider(label: "数据点数", value: Binding(
                 get: { Double(pointCount) },
                 set: { pointCount = Int($0) }), range: 2...1440, step: 1),
             .button(label: "🎲 随机重生成数据") {
-                data = Self.randomData(count: pointCount)
+                regenerateData()
             },
         ])
         let lineSection = ChartDemoPanel.DemoSection(title: "线条", items: [
@@ -163,7 +163,7 @@ struct LineChartDemo: View {
                     options: LineConnectionStyle.allCases.map { $0.rawValue }),
         ])
         let axisSection = ChartDemoPanel.DemoSection(title: "轴系", items: [
-            .toggle(label: "双轴（温度左轴 / 湿度右轴）", value: $dualAxisOn),
+            .toggle(label: "双轴（末系列绑右轴）", value: $dualAxisOn),
             .picker(label: "堆叠模式", selection: $stackingMode, options: ["不堆叠", "普通堆叠"]),
             .toggle(label: "堆叠时面积分层", value: $stackedAreaOn),
             .toggle(label: "自定义刻度数量", value: $tickCountOn),
@@ -218,5 +218,9 @@ struct LineChartDemo: View {
 
     static func randomData(count: Int) -> [Double] {
         (0..<count).map { _ in Double.random(in: 10...100).rounded() }
+    }
+
+    private func regenerateData() {
+        data = (0..<seriesCount).map { _ in Self.randomData(count: pointCount) }
     }
 }
