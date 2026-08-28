@@ -207,27 +207,32 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     // MARK: - 触摸命中（tap 与拖拽滑动选中共用）
     @objc private func onTap(_ gr: UITapGestureRecognizer) {
         let p = gr.location(in: self)
-        // 整列命中（shared tooltip）：优先于逐点命中，点在绘图区外自动回落。
-        // 自动档（nil）：单系列（整列只有一条数据）回落逐点+吸附，多系列才整列。
-        if let shared = (renderer as? HYMChartSharedHitProvider)?.sharedHit(at: p) {
-            let entryCount = (shared.target as? CartesianSharedHitTarget)?.entries.count ?? 0
-            let useShared = isSharedTooltipOnTapEnabled ?? (entryCount > 1)
-            if useShared {
-                renderer.applySelection(shared.target)
-                onHit?(shared.target, .tap)
-                // popup / onHitLocated 模式沿用逐点 target 的外部链路；shared 组合文本走内置 tooltip
-                if popupContentProvider == nil && onHitLocated == nil {
-                    if let text = shared.target.tooltipText {
-                        ensureTooltipController().show(anchor: shared.anchor.frame, text: text,
-                                                       in: bounds, preferred: shared.anchor.preferredPlacements)
-                    } else {
-                        tooltipController?.hide()
-                    }
-                }
-                return
+        if handleSharedIfActive(at: p, gesture: .tap) { return }
+        handleHit(at: p, gesture: .tap)
+    }
+
+    /// 整列命中（shared tooltip）：优先于逐点命中，点在绘图区外自动回落。
+    /// 自动档（nil）：单系列（整列只有一条数据）回落逐点+吸附，多系列才整列。
+    /// tap 与滑动选中（drag）共用：drag 更新不重播淡入（弹窗跟手逐列移动，不闪动）。
+    private func handleSharedIfActive(at p: CGPoint, gesture: HYMChartGesture) -> Bool {
+        guard let shared = (renderer as? HYMChartSharedHitProvider)?.sharedHit(at: p) else { return false }
+        let entryCount = (shared.target as? CartesianSharedHitTarget)?.entries.count ?? 0
+        let useShared = isSharedTooltipOnTapEnabled ?? (entryCount > 1)
+        guard useShared else { return false }
+        renderer.applySelection(shared.target)
+        onHit?(shared.target, gesture)
+        // popup / onHitLocated 模式沿用逐点 target 的外部链路；shared 组合文本走内置 tooltip
+        if popupContentProvider == nil && onHitLocated == nil {
+            if let text = shared.target.tooltipText {
+                ensureTooltipController().show(anchor: shared.anchor.frame, text: text,
+                                               in: bounds,
+                                               preferred: shared.anchor.preferredPlacements,
+                                               animated: gesture != .drag)
+            } else {
+                tooltipController?.hide()
             }
         }
-        handleHit(at: p, gesture: .tap)
+        return true
     }
 
     /// 命中分发：选中 + onHit 回调 + 三层弹窗 fallback（popup > onHitLocated > 内置 tooltip）。
@@ -257,7 +262,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
                 onHitLocated?(ctx, gesture)
                 tooltipController?.hide()
             } else {                                   // ③ 内置 text tooltip
-                updateTooltip(for: target)
+                updateTooltip(for: target, animated: gesture != .drag)
             }
         } else {
             // 未命中：按激活模式镜像处理（popup 模式不触发 onHitLocated，与命中分支对称）
@@ -304,7 +309,10 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
             panIsHighlightMode = isHighlightPerDragEnabled && fullyZoomedOut
         case .changed:
             if panIsHighlightMode {
-                handleHit(at: gr.location(in: self), gesture: .drag)
+                let loc = gr.location(in: self)
+                if !handleSharedIfActive(at: loc, gesture: .drag) {
+                    handleHit(at: loc, gesture: .drag)
+                }
                 return
             }
             let total = gr.translation(in: self).x
@@ -405,7 +413,8 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     }
 
     /// 命中后更新 tooltip：开关关 / 无文本 / 无锚点 → 隐藏；否则显示。
-    private func updateTooltip(for target: HYMChartHitTarget?) {
+    /// - Parameter animated: false = 已可见的跟手移动更新（滑动选中），不重播淡入。
+    private func updateTooltip(for target: HYMChartHitTarget?, animated: Bool = true) {
         if onHitLocated != nil { tooltipController?.hide(); return }   // 外部接管弹窗 → 跳过内置
         guard showsTooltipOnHit else { tooltipController?.hide(); return }
         guard let target,
@@ -415,7 +424,8 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
             return
         }
         ensureTooltipController().show(anchor: anchor.frame, text: text,
-                                       in: bounds, preferred: anchor.preferredPlacements)
+                                       in: bounds, preferred: anchor.preferredPlacements,
+                                       animated: animated)
     }
 
     deinit {

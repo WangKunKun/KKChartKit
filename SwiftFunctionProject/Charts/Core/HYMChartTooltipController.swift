@@ -22,9 +22,11 @@ public final class HYMChartTooltipController {
     ///   - text: 显示文本
     ///   - container: 可显示区域（host 坐标系）
     ///   - preferred: 偏好方向序列
+    /// - Parameter animated: false 时跳过淡入动画（弹窗已可见、滑动选中逐列移动的跟手更新）。
     public func show(anchor: CGRect, text: String,
                      in container: CGRect,
-                     preferred: [HYMChartTooltipPlacement]) {
+                     preferred: [HYMChartTooltipPlacement],
+                     animated: Bool = true) {
         guard let host = host else { return }
         tooltip.configure(text: text, theme: theme)
         let size = tooltip.sizeThatFits(CGSize(width: theme.maxWidth, height: .greatestFiniteMagnitude))
@@ -39,7 +41,9 @@ public final class HYMChartTooltipController {
         tooltip.applyArrow(placement: r.placement, arrowX: r.arrowX)
         tooltip.layoutIfNeeded()
 
-        if theme.showsAnimation {
+        // 已可见的移动更新（如滑动选中）不重播淡入，避免逐点闪动
+        let playsEntrance = theme.showsAnimation && animated && tooltip.isHidden
+        if playsEntrance {
             tooltip.alpha = 0
             tooltip.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
             tooltip.isHidden = false
