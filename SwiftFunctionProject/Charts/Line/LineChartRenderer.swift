@@ -92,10 +92,15 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
                 if model.stacking == .normal,
                    let p = model.series[..<s].indices
                     .last(where: { model.series[$0].effectiveYAxisIndex == axisIdx }) {
-                    let prevPts = dataToDraw[p].enumerated().map { (i, v) in
+                    // 下边界必须与前一累计线的**绘制路径**重合（阶梯形态用阶梯折点），
+                    // 否则半透明层错位叠加。阶梯/直线折点序列倒序回走 = 同一几何形状。
+                    let prevData = dataToDraw[p].enumerated().map { (i, v) in
                         screenPoint(x: Double(i), y: v, yAxisIndex: axisIdx)
                     }
-                    for pp in prevPts.reversed() { areaPath.addLine(to: pp) }
+                    let prevPathPts = theme.lineConnectionStyle == .smooth
+                        ? prevData
+                        : CartesianGeometry.steppedScreenPoints(prevData, style: theme.lineConnectionStyle)
+                    for pp in prevPathPts.reversed() { areaPath.addLine(to: pp) }
                 } else {
                     areaPath.addLine(to: CGPoint(x: last.x, y: zeroY))
                     areaPath.addLine(to: CGPoint(x: first.x, y: zeroY))
