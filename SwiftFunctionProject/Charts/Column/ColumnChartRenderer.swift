@@ -76,13 +76,31 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
                 )
                 rect = animatedRect(from: rect, zeroY: seriesZeroY, progress: currentAnimationProgress)
 
-                // 圆角方向：正值顶部圆角、负值底部圆角；子路径独立圆角
-                let corners: UIRectCorner = rect.minY < seriesZeroY
-                    ? [.topLeft, .topRight]
-                    : [.bottomLeft, .bottomRight]
+                // 圆角方向：正值顶部圆角、负值底部圆角；子路径独立圆角。
+                // 堆叠时只有链**末端段**保留圆角（正链最上段顶圆角、负链最下段底圆角），
+                // 中间段直角——整根堆叠柱看起来是一个连续柱体而非逐段圆角。
+                let corners: UIRectCorner
+                if model.stacking == .normal {
+                    // 同轴同符号链上方还有非零段 → 本段是中间段，不圆角
+                    let hasSegmentAbove = model.series[(seriesIndex + 1)...].contains { s2 in
+                        guard s2.effectiveYAxisIndex == axisIdx,
+                              index < s2.data.count, abs(s2.data[index]) > 1e-9 else { return false }
+                        return (s2.data[index] >= 0) == (value >= 0)
+                    }
+                    corners = hasSegmentAbove
+                        ? []
+                        : (value >= 0 ? [.topLeft, .topRight] : [.bottomLeft, .bottomRight])
+                } else {
+                    corners = rect.minY < seriesZeroY
+                        ? [.topLeft, .topRight]
+                        : [.bottomLeft, .bottomRight]
+                }
+                let cornerRadius = corners.isEmpty
+                    ? 0
+                    : theme.columnCornerRadius
                 let columnPath = UIBezierPath(
                     roundedRect: rect, byRoundingCorners: corners,
-                    cornerRadii: CGSize(width: theme.columnCornerRadius, height: theme.columnCornerRadius))
+                    cornerRadii: CGSize(width: cornerRadius, height: cornerRadius))
 
                 if value < 0, negativeColor != baseColor {
                     negativePath.append(columnPath)
@@ -245,4 +263,7 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
                                value: value,
                                yAxisIndex: model.series[seriesIndex].effectiveYAxisIndex)
     }
+
+    /// DEBUG 自检辅助：seriesLayer 子层（圆角曲线数量断言用）。
+    func seriesLayerSublayersForTesting() -> [CALayer] { seriesLayer.sublayers ?? [] }
 }

@@ -956,6 +956,62 @@ public enum ChartSelfTest {
             series: [CartesianSeriesElement(name: "a", data: [10, 20]),
                      CartesianSeriesElement(name: "b", data: [5, 15])])
         assert(allPos == [[10, 20], [15, 35]], "全非负时应保持链式累计，got \(allPos)")
+
+        // 5) 堆叠圆角：只有链末段（正链最上段）带圆角，中间段直角——
+        //    统计 seriesLayer 各 path 的曲线元素数：3 类目 × 顶段 2 个圆角曲线 = 6
+        let stackCornerRenderer = ColumnChartRenderer()
+        let stackCornerHost = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        stackCornerRenderer.mount(into: stackCornerHost)
+        stackCornerRenderer.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, 20, 30]),
+                     CartesianSeriesElement(name: "b", data: [5, 15, 25])],
+            stacking: .normal),
+                                  theme: CartesianChartTheme(),
+                                  context: HYMChartRenderContext(bounds: stackCornerHost.bounds,
+                                                                 center: stackCornerHost.center))
+        do {
+            var perLayer: [Int] = []
+            for layer in stackCornerRenderer.seriesLayerSublayersForTesting() {
+                var c = 0
+                (layer as? CAShapeLayer)?.path?.applyWithBlock { elem in
+                    if elem.pointee.type == .addCurveToPoint || elem.pointee.type == .addQuadCurveToPoint { c += 1 }
+                }
+                perLayer.append(c)
+            }
+            print("🧪 stack corner curves per layer: \(perLayer), total \(perLayer.reduce(0, +))")
+        }
+        // UIKit 每 2 圆角矩形产生 6 条曲线元素（多段三次逼近），断言改为按层：
+        // 堆叠时只有顶段所在层有圆角曲线，中间段层为 0
+        let roundedLayerCount = stackCornerRenderer.seriesLayerSublayersForTesting()
+            .filter { layer in
+                var c = 0
+                (layer as? CAShapeLayer)?.path?.applyWithBlock { elem in
+                    if elem.pointee.type == .addCurveToPoint || elem.pointee.type == .addQuadCurveToPoint { c += 1 }
+                }
+                return c > 0
+            }.count
+        assert(roundedLayerCount == 1,
+               "堆叠时应只有顶段 1 个层带圆角，got \(roundedLayerCount)")
+        // 非堆叠对照：每根柱独立圆角 → 2 系列 × 3 类目 × 2 = 12
+        let plainCornerRenderer = ColumnChartRenderer()
+        let plainCornerHost = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        plainCornerRenderer.mount(into: plainCornerHost)
+        plainCornerRenderer.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, 20, 30]),
+                     CartesianSeriesElement(name: "b", data: [5, 15, 25])]),
+                                   theme: CartesianChartTheme(),
+                                   context: HYMChartRenderContext(bounds: plainCornerHost.bounds,
+                                                                  center: plainCornerHost.center))
+        let plainRoundedLayerCount = plainCornerRenderer.seriesLayerSublayersForTesting()
+            .filter { layer in
+                var c = 0
+                (layer as? CAShapeLayer)?.path?.applyWithBlock { elem in
+                    if elem.pointee.type == .addCurveToPoint || elem.pointee.type == .addQuadCurveToPoint { c += 1 }
+                }
+                return c > 0
+            }.count
+        assert(plainRoundedLayerCount == 2,
+               "非堆叠两个系列层都应有圆角，got \(plainRoundedLayerCount)")
     }
 
     /// 堆叠折线：累计线位置正确；面积分层（第 2 系列面积下边界 = 第 1 系列累计线）；命中报累计值。
