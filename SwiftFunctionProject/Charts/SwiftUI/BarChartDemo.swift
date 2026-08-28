@@ -19,6 +19,12 @@ struct BarChartDemo: View {
     @State private var stackSeparatorOn = false
     @State private var stackSeparatorColor = UIColor.white
 
+    // —— 值轴刻度自定义（Bar 的 X 数值轴）——
+    @State private var tickCountOn = false
+    @State private var tickCount = 6.0
+    @State private var useTickPositions = false
+    @State private var usePercentFormatter = false
+
     // —— 缩放功能测试 ——
     @State private var isZoomEnabled = true
     /// 类目轴（Y 轴，左侧标签）时间轴模式：按实际数据量把 24h 均分到每个点。
@@ -64,10 +70,17 @@ struct BarChartDemo: View {
             }
         }()
 
+        // 值轴刻度自定义（Bar 的值轴在 X，底部刻度）
+        var y = CartesianAxisModel(kind: .value)
+        if tickCountOn { y.tickCount = Int(tickCount) }
+        if useTickPositions { y.tickPositions = [0, 25, 60, 100] }
+        if usePercentFormatter { y.labelFormatter = { "\(Int($0))%" } }
+
         return CartesianChartModel(
             title: title.isEmpty ? nil : title,
             series: series,
             xAxis: CartesianAxisModel(kind: .category(labels: useTimeAxis ? ChartDemoPanel.timeLabels(count: pointCount) : [])),
+            yAxis: y,
             stacking: stacking == .none ? nil : stacking
         )
     }
@@ -121,6 +134,13 @@ struct BarChartDemo: View {
             .color(label: "分隔线颜色", value: $stackSeparatorColor),
         ])
 
+        let axisSection = ChartDemoPanel.DemoSection(title: "值轴刻度", items: [
+            .toggle(label: "自定义刻度数量", value: $tickCountOn),
+            .slider(label: "刻度数量", value: $tickCount, range: 2...12, step: 1),
+            .toggle(label: "显式刻度位置（0/25/60/100）", value: $useTickPositions),
+            .toggle(label: "刻度文本加 %", value: $usePercentFormatter),
+        ])
+
         let animationSection = ChartDemoPanel.DemoSection(title: "动画与交互", items: [
             .toggle(label: "入场动画", value: $theme.showsColumnEntranceAnimation),
             .toggle(label: "点击弹窗", value: $theme.showsTooltipOnHit),
@@ -130,7 +150,7 @@ struct BarChartDemo: View {
             .toggle(label: "24小时时间轴（按数据量均分）", value: $useTimeAxis),
         ])
 
-        return ChartDemoPanel(sections: [dataSection, xAxisSection, barSection, stackSection, animationSection])
+        return ChartDemoPanel(sections: [dataSection, xAxisSection, axisSection, barSection, stackSection, animationSection])
     }
 
     private func regenerateData() {

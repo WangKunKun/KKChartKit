@@ -43,6 +43,8 @@ struct LineChartDemo: View {
     // —— 双轴 / 堆叠 / 刻度自定义 ——
     @State private var dualAxisOn = false
     @State private var stackingMode = "不堆叠"
+    /// 堆叠模式下是否叠加面积分层展示（默认开，可关成纯累计折线）
+    @State private var stackedAreaOn = true
     @State private var tickCountOn = false
     @State private var tickCount = 6.0
     @State private var useTickPositions = false
@@ -125,8 +127,8 @@ struct LineChartDemo: View {
         t.axisLineWidth = axisLineWidth
         t.axisLabelGap = axisLabelGap
         t.lineConnectionStyle = connectionStyle
-        // 堆叠默认联动开面积（分层展示更直观；面板仍可手动关）
-        let areaOn = showsArea || stackingMode == "普通堆叠"
+        // 堆叠默认联动开面积（分层展示更直观；可关成纯累计折线）
+        let areaOn = showsArea || (stackingMode == "普通堆叠" && stackedAreaOn)
         t.showsArea = areaOn
         if areaOn {
             t.areaGradientColors = [
@@ -163,6 +165,7 @@ struct LineChartDemo: View {
         let axisSection = ChartDemoPanel.DemoSection(title: "轴系", items: [
             .toggle(label: "双轴（温度左轴 / 湿度右轴）", value: $dualAxisOn),
             .picker(label: "堆叠模式", selection: $stackingMode, options: ["不堆叠", "普通堆叠"]),
+            .toggle(label: "堆叠时面积分层", value: $stackedAreaOn),
             .toggle(label: "自定义刻度数量", value: $tickCountOn),
             .slider(label: "刻度数量", value: $tickCount, range: 2...12, step: 1),
             .toggle(label: "显式刻度位置（0/30/60/100）", value: $useTickPositions),
