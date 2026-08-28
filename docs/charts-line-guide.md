@@ -186,6 +186,48 @@ public enum CartesianAxisKind {
 
 ---
 
+## 双值轴
+
+温度挂左轴、湿度挂右轴：系列用 `yAxisIndex` 声明绑定，`secondaryYAxis` 配置次轴（独立值域与刻度，右侧显示）。两轴命中弹窗自动带 `(右轴)` 标记。
+
+```swift
+let model = CartesianChartModel(
+    series: [
+        CartesianSeriesElement(name: "温度(℃)", data: [5, 15, 25, 20, 10], color: .systemOrange),
+        CartesianSeriesElement(name: "湿度(%)", data: [40, 70, 90, 60, 30], color: .systemBlue, yAxisIndex: 1)
+    ],
+    secondaryYAxis: CartesianAxisModel(kind: .value, min: 0, max: 100))
+```
+
+- `yAxisIndex`：0 = 主轴（左），1 = 次轴（右）；其余值回落主轴
+- 次轴网格默认关闭，`secondaryYAxis.showsGridlines = true` 可开启
+- 次轴负值零轴按次轴值域独立计算
+
+## 堆叠与面积
+
+`stacking: .normal` 时折线画累计值（按轴分组累计，双轴不混叠）；配合 `showsArea` 得到分层面积图——系列 i 的面积从同轴前一累计线填到自己累计线，每系列独立颜色渐变。命中报累计值（与柱状图一致）。
+
+```swift
+var theme = CartesianChartTheme()
+theme.showsArea = true
+let model = CartesianChartModel(
+    series: [CartesianSeriesElement(name: "系列1", data: [20, 40, 30], color: .systemBlue),
+             CartesianSeriesElement(name: "系列2", data: [10, 20, 15], color: .systemGreen)],
+    stacking: .normal)
+```
+
+## 刻度自定义
+
+值轴刻度四档优先级：`tickPositions`（显式位置）> `tickInterval`（须配显式 min/max）> `tickCount`（目标数量，nice scale）> 自动（默认 6）。`labelFormatter` 只改文本不影响位置；域外刻度自动过滤。
+
+```swift
+var y = CartesianAxisModel(kind: .value, tickCount: 3)          // 目标 3 条刻度
+y.labelFormatter = { "\(Int($0))%" }                            // 刻度文本加 %
+y.tickPositions = [0, 30, 60, 100]                              // 完全显式刻度（最高优先）
+```
+
+---
+
 ## 阶段 0 边界
 
 **已实现**（阶段 0）：

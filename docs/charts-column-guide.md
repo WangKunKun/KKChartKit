@@ -154,6 +154,23 @@ let series = [
 // 堆叠时：收入向上，支出向下，零轴在中间
 ```
 
+### 双值轴
+
+末系列可绑定右轴（独立值域与刻度）；堆叠链按轴分组——同 `yAxisIndex` 的系列才互相累计，跨轴不混叠，可组合出「主轴堆叠 + 次轴独立柱」：
+
+```swift
+let model = CartesianChartModel(
+    series: [
+        CartesianSeriesElement(name: "系列1", data: [30, 50, 20], color: .systemBlue),
+        CartesianSeriesElement(name: "系列2", data: [20, 30, 25], color: .systemGreen),
+        CartesianSeriesElement(name: "目标", data: [60, 40, 70], color: .systemOrange, yAxisIndex: 1)
+    ],
+    secondaryYAxis: CartesianAxisModel(kind: .value, min: 0, max: 100),
+    stacking: .normal)   // 系列1/2 主轴堆叠，目标系列按次轴独立
+```
+
+命中弹窗的 `ColumnHitTarget.yAxisIndex` 标记所属轴。
+
 ---
 
 ## 负值处理

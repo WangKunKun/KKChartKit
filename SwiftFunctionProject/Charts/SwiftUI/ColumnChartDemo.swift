@@ -18,6 +18,8 @@ struct ColumnChartDemo: View {
     @State private var stackingMode = "不堆叠"
     @State private var stackSeparatorOn = false
     @State private var stackSeparatorColor = UIColor.white
+    /// 双轴：末系列绑右轴
+    @State private var dualAxisOn = false
 
     // —— 缩放功能测试 ——
     @State private var isZoomEnabled = true
@@ -55,7 +57,8 @@ struct ColumnChartDemo: View {
             CartesianSeriesElement(
                 name: "系列\(index + 1)",
                 data: index < data.count ? data[index] : Self.randomData(count: pointCount),
-                color: seriesColors[index % seriesColors.count]
+                color: seriesColors[index % seriesColors.count],
+                yAxisIndex: (dualAxisOn && index == seriesCount - 1) ? 1 : 0
             )
         }
         let stacking: StackConfig? = {
@@ -66,10 +69,18 @@ struct ColumnChartDemo: View {
             }
         }()
 
+        var secondary: CartesianAxisModel?
+        if dualAxisOn {
+            var s = CartesianAxisModel(kind: .value)
+            s.labelFormatter = { "\(Int($0))†" }
+            secondary = s
+        }
+
         return CartesianChartModel(
             title: title.isEmpty ? nil : title,
             series: series,
             xAxis: CartesianAxisModel(kind: .category(labels: useTimeAxis ? ChartDemoPanel.timeLabels(count: pointCount) : [])),
+            secondaryYAxis: secondary,
             stacking: stacking == .none ? nil : stacking
         )
     }
@@ -119,6 +130,7 @@ struct ColumnChartDemo: View {
 
         let stackSection = ChartDemoPanel.DemoSection(title: "堆叠", items: [
             .picker(label: "堆叠模式", selection: $stackingMode, options: ["不堆叠", "普通堆叠"]),
+            .toggle(label: "双轴（末系列绑右轴）", value: $dualAxisOn),
             .toggle(label: "分隔线", value: $stackSeparatorOn),
             .color(label: "分隔线颜色", value: $stackSeparatorColor),
         ])

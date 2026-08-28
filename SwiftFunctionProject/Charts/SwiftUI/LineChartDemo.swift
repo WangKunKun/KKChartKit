@@ -40,6 +40,14 @@ struct LineChartDemo: View {
     /// 面积渐变顶部浓度（自动派生渐变的起始透明度）
     @State private var areaTopAlpha = 0.35
 
+    // —— 双轴 / 堆叠 / 刻度自定义 ——
+    @State private var dualAxisOn = false
+    @State private var stackingMode = "不堆叠"
+    @State private var tickCountOn = false
+    @State private var tickCount = 6.0
+    @State private var useTickPositions = false
+    @State private var usePercentFormatter = false
+
     var body: some View {
         VStack(spacing: 0) {
             LineChart(model: currentModel,
@@ -66,10 +74,42 @@ struct LineChartDemo: View {
     }
 
     private var currentModel: CartesianChartModel {
-        CartesianChartModel(
+        var y = CartesianAxisModel(kind: .value)
+        if tickCountOn { y.tickCount = Int(tickCount) }
+        if useTickPositions { y.tickPositions = [0, 30, 60, 100] }
+        if usePercentFormatter { y.labelFormatter = { "\(Int($0))%" } }
+
+        let stacking: StackConfig? = stackingMode == "普通堆叠" ? .normal : nil
+        var series: [CartesianSeriesElement]
+        if dualAxisOn {
+            // 温度（左轴）+ 湿度（右轴）
+            series = [
+                CartesianSeriesElement(name: "温度(℃)", data: data.map { ($0 / 10 + 5).rounded() },
+                                       color: .systemOrange),
+                CartesianSeriesElement(name: "湿度(%)", data: data, color: .systemBlue, yAxisIndex: 1)
+            ]
+        } else if stacking == .normal {
+            series = [
+                CartesianSeriesElement(name: "系列1", data: data.map { $0 * 0.6 }, color: .systemBlue),
+                CartesianSeriesElement(name: "系列2", data: data.map { $0 * 0.4 }, color: .systemGreen)
+            ]
+        } else {
+            series = [CartesianSeriesElement(name: "2026", data: data)]
+        }
+
+        var secondary: CartesianAxisModel?
+        if dualAxisOn {
+            var s = CartesianAxisModel(kind: .value, min: 0, max: 100)
+            s.labelFormatter = { "\(Int($0))%" }
+            secondary = s
+        }
+        return CartesianChartModel(
             title: title.isEmpty ? nil : title,
-            series: [CartesianSeriesElement(name: "2026", data: data)],
-            xAxis: CartesianAxisModel(kind: .category(labels: useTimeAxis ? ChartDemoPanel.timeLabels(count: pointCount) : [])))
+            series: series,
+            xAxis: CartesianAxisModel(kind: .category(labels: useTimeAxis ? ChartDemoPanel.timeLabels(count: pointCount) : [])),
+            yAxis: y,
+            secondaryYAxis: secondary,
+            stacking: stacking)
     }
 
     private var currentTheme: CartesianChartTheme {
@@ -85,8 +125,10 @@ struct LineChartDemo: View {
         t.axisLineWidth = axisLineWidth
         t.axisLabelGap = axisLabelGap
         t.lineConnectionStyle = connectionStyle
-        t.showsArea = showsArea
-        if showsArea {
+        // 堆叠默认联动开面积（分层展示更直观；面板仍可手动关）
+        let areaOn = showsArea || stackingMode == "普通堆叠"
+        t.showsArea = areaOn
+        if areaOn {
             t.areaGradientColors = [
                 seriesColor.withAlphaComponent(areaTopAlpha),
                 seriesColor.withAlphaComponent(0.04)
@@ -117,6 +159,14 @@ struct LineChartDemo: View {
                         get: { connectionStyle.rawValue },
                         set: { connectionStyle = LineConnectionStyle(rawValue: $0) ?? .straight }),
                     options: LineConnectionStyle.allCases.map { $0.rawValue }),
+        ])
+        let axisSection = ChartDemoPanel.DemoSection(title: "轴系", items: [
+            .toggle(label: "双轴（温度左轴 / 湿度右轴）", value: $dualAxisOn),
+            .picker(label: "堆叠模式", selection: $stackingMode, options: ["不堆叠", "普通堆叠"]),
+            .toggle(label: "自定义刻度数量", value: $tickCountOn),
+            .slider(label: "刻度数量", value: $tickCount, range: 2...12, step: 1),
+            .toggle(label: "显式刻度位置（0/30/60/100）", value: $useTickPositions),
+            .toggle(label: "刻度文本加 %", value: $usePercentFormatter),
         ])
         let areaSection = ChartDemoPanel.DemoSection(title: "面积填充", items: [
             .toggle(label: "填充折线下方区域（面积图）", value: $showsArea),
@@ -160,7 +210,7 @@ struct LineChartDemo: View {
             .toggle(label: "入场动画", value: $theme.showsEntranceAnimation),
             .toggle(label: "点击弹窗", value: $theme.showsTooltipOnHit),
         ])
-        return ChartDemoPanel(sections: [dataSection, lineSection, areaSection, interactionSection, pointSection, gridSection, overallSection])
+        return ChartDemoPanel(sections: [dataSection, axisSection, lineSection, areaSection, interactionSection, pointSection, gridSection, overallSection])
     }
 
     static func randomData(count: Int) -> [Double] {

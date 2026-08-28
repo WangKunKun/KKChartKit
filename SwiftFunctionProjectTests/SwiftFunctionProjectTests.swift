@@ -34,6 +34,8 @@ final class SwiftFunctionProjectTests: XCTestCase {
         ChartSelfTest.runHorizontalAxisSelfTest()
     }
 
+
+
     func testPerformanceExample() throws {
         // This is an example of a performance test case.
         self.measure {
