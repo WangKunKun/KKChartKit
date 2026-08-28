@@ -717,7 +717,75 @@ public enum ChartSelfTest {
         // —— 条形图水平轴系（值轴在 X、类目轴在 Y；渲染级契约，todo-bar-axis-fix）——
         runHorizontalAxisSelfTest()
 
+        // —— 值轴刻度自定义（tickCount / tickPositions / labelFormatter）——
+        runTickCustomizationSelfTest()
+
         print("✅ ChartSelfTest passed")
+    }
+
+    /// 值轴刻度四档优先级：tickPositions > tickInterval > tickCount > 自动；labelFormatter 文本。
+    static func runTickCustomizationSelfTest() {
+        let dom = 0.0...100.0
+        let bounds = (min: 0.0, max: 100.0)
+
+        // 1) 显式位置最高优先（不规则刻度 0/25/60/100 原样返回，域内过滤）
+        let posAxis = CartesianAxisModel(kind: .value, tickPositions: [0, 25, 60, 100])
+        assert(ValueTickGenerator.ticks(axis: posAxis, domain: dom, dataBounds: bounds,
+                                        generatesFromDomain: false) == [0, 25, 60, 100],
+               "tickPositions 应原样生效")
+        // 域外刻度被过滤
+        let posOut = CartesianAxisModel(kind: .value, tickPositions: [-20, 0, 50, 120])
+        assert(ValueTickGenerator.ticks(axis: posOut, domain: dom, dataBounds: bounds,
+                                        generatesFromDomain: false) == [0, 50],
+               "域外 tickPositions 应被过滤")
+
+        // 2) tickInterval 须配显式 min/max（现状规则）：0...100 步长 25
+        let intAxis = CartesianAxisModel(kind: .value, min: 0, max: 100, tickInterval: 25)
+        assert(ValueTickGenerator.ticks(axis: intAxis, domain: dom, dataBounds: bounds,
+                                        generatesFromDomain: false) == [0, 25, 50, 75, 100],
+               "tickInterval 应按现状规则步进")
+
+        // 3) tickCount 驱动 nice scale：(3,97) + count 3 → 步长 50 → [0,50,100]
+        let cntAxis = CartesianAxisModel(kind: .value, tickCount: 3)
+        let byCount = ValueTickGenerator.ticks(axis: cntAxis, domain: dom,
+                                               dataBounds: (min: 3, max: 97),
+                                               generatesFromDomain: false)
+        assert(byCount == [0, 50, 100], "tickCount=3 应出 3 条刻度，got \(byCount)")
+
+        // 4) 自动默认 6（现状）：(3,97) → 0...100 步长 20
+        let autoAxis = CartesianAxisModel(kind: .value)
+        let byAuto = ValueTickGenerator.ticks(axis: autoAxis, domain: dom,
+                                              dataBounds: (min: 3, max: 97),
+                                              generatesFromDomain: false)
+        assert(byAuto == [0, 20, 40, 60, 80, 100], "自动应保持默认 6 档，got \(byAuto)")
+
+        // 5) generatesFromDomain（水平图 X 窗口）：按窗口 50...100 生成并过滤
+        let hAxis = CartesianAxisModel(kind: .value)
+        let hTicks = ValueTickGenerator.ticks(axis: hAxis, domain: 50...100,
+                                              dataBounds: bounds, generatesFromDomain: true)
+        assert(hTicks.allSatisfy { $0 >= 50 && $0 <= 100 } && hTicks.last == 100,
+               "窗口生成应落在域内且含右缘，got \(hTicks)")
+
+        // 6) 刻度文本：formatter 优先，否则内置格式
+        assert(AxisRenderer.tickText(80, formatter: nil) == "80", "默认文本应为去尾零格式")
+        assert(AxisRenderer.tickText(80, formatter: { "\(Int($0))%" }) == "80%", "formatter 应生效")
+
+        // 7) 渲染级：labelFormatter 接入左侧刻度（80 → "80%"）
+        do {
+            let r = ColumnChartRenderer()
+            let host = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+            r.mount(into: host)
+            var y = CartesianAxisModel(kind: .value)
+            y.labelFormatter = { "\(Int($0))℃" }
+            r.render(model: CartesianChartModel(
+                series: [CartesianSeriesElement(name: "s", data: [20, 60])],
+                yAxis: y),
+                     theme: CartesianChartTheme(),
+                     context: HYMChartRenderContext(bounds: host.bounds, center: host.center))
+            let texts = host.subviews.compactMap { ($0 as? UILabel)?.text }
+            assert(texts.contains("60℃"),
+                   "左侧刻度应使用 formatter 文本，got \(texts)")
+        }
     }
 
     /// 条形图（水平图）轴系渲染契约：

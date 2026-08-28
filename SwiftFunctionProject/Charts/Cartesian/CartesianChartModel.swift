@@ -30,13 +30,27 @@ public struct CartesianAxisModel {
     public var max: Double?
     /// 显式刻度步长；nil = 自动（nice step）。显式时须与 min/max 同显式，否则忽略。
     public var tickInterval: Double?
+    /// 目标刻度数量（nice scale 依据；实际 ±1~2。nil = 默认 6）。
+    public var tickCount: Int?
+    /// 完全显式刻度值（最高优先级；域外值被过滤）。类目轴忽略。
+    public var tickPositions: [Double]?
+    /// 刻度文本自定义（nil = 内置去尾零格式）。
+    public var labelFormatter: ((Double) -> String)?
+    /// 该轴是否画网格（nil = 主轴跟随 theme、次轴默认关）。
+    public var showsGridlines: Bool?
 
     public init(kind: CartesianAxisKind,
-                min: Double? = nil, max: Double? = nil, tickInterval: Double? = nil) {
+                min: Double? = nil, max: Double? = nil, tickInterval: Double? = nil,
+                tickCount: Int? = nil, tickPositions: [Double]? = nil,
+                labelFormatter: ((Double) -> String)? = nil, showsGridlines: Bool? = nil) {
         self.kind = kind
         self.min = min
         self.max = max
         self.tickInterval = tickInterval
+        self.tickCount = tickCount
+        self.tickPositions = tickPositions
+        self.labelFormatter = labelFormatter
+        self.showsGridlines = showsGridlines
     }
 }
 

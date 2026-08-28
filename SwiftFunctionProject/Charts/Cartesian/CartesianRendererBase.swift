@@ -200,10 +200,14 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
         let valueDomainDegenerate = isHorizontalValueAxis
             ? currentViewport.xMin == currentViewport.xMax
             : currentViewport.yMin == currentViewport.yMax
-        currentValueTicks = valueDomainDegenerate ? [] : makeValueTicks(model: model)
+        currentValueTicks = valueDomainDegenerate ? []
+            : makeValueTicks(axis: model.yAxis,
+                             domain: isHorizontalValueAxis ? currentViewport.xDomain : currentViewport.yDomain,
+                             bounds: model.dataBounds)
         let leadingLabelWidth: CGFloat = isHorizontalValueAxis
             ? model.categoryLabels.map { textSize($0, font: cartTheme.tickLabelFont).width }.max() ?? 0
-            : currentValueTicks.map { textSize(AxisRenderer.format($0), font: cartTheme.tickLabelFont).width }.max() ?? 0
+            : currentValueTicks.map { textSize(AxisRenderer.tickText($0, formatter: model.yAxis.labelFormatter),
+                                               font: cartTheme.tickLabelFont).width }.max() ?? 0
         let xTickHeight = textSize("0", font: cartTheme.tickLabelFont).height
         let titleHeight = model.title.map { textSize($0, font: cartTheme.titleFont).height } ?? 0
         currentPlotFrame = CartesianGeometry.layout(
@@ -306,23 +310,11 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
     /// 水平图值轴在 X：自动刻度按**生效 X 窗口**生成（缩放/平移时刻度跟随）；
     /// 垂直图值轴在 Y：Y 恒全量，按数据边界生成。
     /// 结果过滤到生效值域内（显式 0...95 时 nice 化出的 100 不得越界画线）。
-    private func makeValueTicks(model: CartesianChartModel) -> [Double] {
-        let domain = isHorizontalValueAxis ? currentViewport.xDomain : currentViewport.yDomain
-        let ticks: [Double]
-        if let interval = model.yAxis.tickInterval,
-           let lo = model.yAxis.min, let hi = model.yAxis.max, interval > 0 {
-            let count = Int(((hi - lo) / interval).rounded())
-            ticks = (0...max(count, 0)).map { lo + Double($0) * interval }
-        } else if isHorizontalValueAxis {
-            ticks = NiceScaleGenerator.generate(dataMin: domain.lowerBound,
-                                                dataMax: domain.upperBound).ticks
-        } else {
-            let bounds = model.dataBounds ?? (min: 0, max: 1)
-            ticks = NiceScaleGenerator.generate(
-                dataMin: model.yAxis.min ?? bounds.min,
-                dataMax: model.yAxis.max ?? bounds.max).ticks
-        }
-        return ticks.filter { $0 >= domain.lowerBound - 1e-9 && $0 <= domain.upperBound + 1e-9 }
+    private func makeValueTicks(axis: CartesianAxisModel,
+                                domain: ClosedRange<Double>,
+                                bounds: (min: Double, max: Double)?) -> [Double] {
+        ValueTickGenerator.ticks(axis: axis, domain: domain, dataBounds: bounds,
+                                 generatesFromDomain: isHorizontalValueAxis)
     }
 
     private func addTickLabels(model: CartesianChartModel, theme: CartesianChartTheme) {
@@ -330,14 +322,16 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
         if isHorizontalValueAxis {
             tickLabels.append(contentsOf: AxisRenderer.makeBottomValueTickLabels(
                 ticks: currentValueTicks, viewport: currentViewport,
-                plotFrame: currentPlotFrame, theme: theme))
+                plotFrame: currentPlotFrame, theme: theme,
+                formatter: model.yAxis.labelFormatter))
             tickLabels.append(contentsOf: AxisRenderer.makeLeftCategoryLabels(
                 labels: model.categoryLabels, viewport: currentViewport,
                 plotFrame: currentPlotFrame, theme: theme))
         } else {
             tickLabels.append(contentsOf: AxisRenderer.makeYTickLabels(
                 ticks: currentValueTicks, viewport: currentViewport,
-                plotFrame: currentPlotFrame, theme: theme))
+                plotFrame: currentPlotFrame, theme: theme,
+                formatter: model.yAxis.labelFormatter))
             tickLabels.append(contentsOf: AxisRenderer.makeCategoryLabels(
                 labels: model.categoryLabels, viewport: currentViewport,
                 plotFrame: currentPlotFrame, theme: theme))

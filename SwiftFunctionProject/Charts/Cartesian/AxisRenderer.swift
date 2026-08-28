@@ -23,10 +23,11 @@ enum AxisRenderer {
     static func makeYTickLabels(ticks: [Double],
                                 viewport: CartesianViewport,
                                 plotFrame: CGRect,
-                                theme: CartesianChartTheme) -> [UILabel] {
+                                theme: CartesianChartTheme,
+                                formatter: ((Double) -> String)? = nil) -> [UILabel] {
         ticks.map { tick in
             let lbl = UILabel()
-            lbl.text = format(tick)
+            lbl.text = tickText(tick, formatter: formatter)
             lbl.textColor = theme.tickLabelColor
             lbl.font = theme.tickLabelFont
             lbl.sizeToFit()
@@ -82,10 +83,11 @@ enum AxisRenderer {
     static func makeBottomValueTickLabels(ticks: [Double],
                                            viewport: CartesianViewport,
                                            plotFrame: CGRect,
-                                           theme: CartesianChartTheme) -> [UILabel] {
+                                           theme: CartesianChartTheme,
+                                           formatter: ((Double) -> String)? = nil) -> [UILabel] {
         ticks.map { tick in
             let lbl = UILabel()
-            lbl.text = format(tick)
+            lbl.text = tickText(tick, formatter: formatter)
             lbl.textColor = theme.tickLabelColor
             lbl.font = theme.tickLabelFont
             lbl.sizeToFit()
@@ -131,6 +133,11 @@ enum AxisRenderer {
             out.append(lbl)
         }
         return out
+    }
+
+    /// 刻度文本：formatter 优先，否则内置去尾零格式。
+    static func tickText(_ tick: Double, formatter: ((Double) -> String)?) -> String {
+        formatter?(tick) ?? format(tick)
     }
 
     /// 刻度文本：去尾零（80.0 → "80"；0.2 → "0.2"；-0.0 → "0"）。
