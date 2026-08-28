@@ -21,12 +21,7 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
         // 清空旧柱体（render 与动画/手势的逐帧重画共用本方法，必须先清后画）
         seriesLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
 
-        // 1. 计算零轴位置
-        let zeroY = CartesianGeometry.zeroAxisPosition(
-            viewport: currentViewport,
-            plotArea: plotFrame,
-            isHorizontal: false
-        )
+        // 1. 计算零轴位置（次轴系列在循环内按所属值域另算）
 
         // 2. 如果堆叠，计算累计值
         let dataToDraw: [[Double]]
@@ -44,6 +39,10 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
         for (seriesIndex, oneSeries) in dataToDraw.enumerated() {
             let baseColor = model.series[seriesIndex].color ?? theme.seriesColor
             let negativeColor = model.series[seriesIndex].negativeColor ?? baseColor
+            let axisIdx = model.series[seriesIndex].effectiveYAxisIndex
+            let seriesZeroY = CartesianGeometry.zeroAxisPosition(
+                viewport: currentViewport, plotArea: plotFrame, isHorizontal: false,
+                valueDomain: axisIdx == 1 ? currentSecondaryYDomain : nil)
 
             var positivePath = UIBezierPath()
             var negativePath = UIBezierPath()   // 仅负值色独立时才单独成层
@@ -64,17 +63,18 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
                     dataPoint: value,
                     categoryIndex: index,
                     viewport: currentViewport,
+                    valueDomain: axisIdx == 1 ? currentSecondaryYDomain : nil,
                     plotArea: plotFrame,
                     theme: theme,
-                    zeroY: zeroY,
+                    zeroY: seriesZeroY,
                     baselineValue: baselineValue,
                     seriesIndex: model.stacking == .normal ? 0 : seriesIndex,
                     seriesCount: seriesCount
                 )
-                rect = animatedRect(from: rect, zeroY: zeroY, progress: currentAnimationProgress)
+                rect = animatedRect(from: rect, zeroY: seriesZeroY, progress: currentAnimationProgress)
 
                 // 圆角方向：正值顶部圆角、负值底部圆角；子路径独立圆角
-                let corners: UIRectCorner = rect.minY < zeroY
+                let corners: UIRectCorner = rect.minY < seriesZeroY
                     ? [.topLeft, .topRight]
                     : [.bottomLeft, .bottomRight]
                 let columnPath = UIBezierPath(
@@ -129,12 +129,6 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
         guard let theme = currentTheme as? CartesianChartTheme else { return nil }
         guard !model.series.isEmpty else { return nil }
 
-        let zeroY = CartesianGeometry.zeroAxisPosition(
-            viewport: currentViewport,
-            plotArea: currentPlotFrame,
-            isHorizontal: false
-        )
-
         // 1. 视口驱动反推类目索引：屏幕点 → x 值 → 最近类目中心
         //    （缩放/平移后与绘制同源，天然一致）
         let xValue = CartesianGeometry.value(at: point, viewport: currentViewport, plotFrame: currentPlotFrame).x
@@ -150,19 +144,25 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
         for (seriesIndex, oneSeries) in dataToCheck.enumerated() {
             guard categoryIndex < oneSeries.count else { continue }
             let value = oneSeries[categoryIndex]
+            let axisIdx = model.series[seriesIndex].effectiveYAxisIndex
+            let seriesZeroY = CartesianGeometry.zeroAxisPosition(
+                viewport: currentViewport, plotArea: currentPlotFrame, isHorizontal: false,
+                valueDomain: axisIdx == 1 ? currentSecondaryYDomain : nil)
             let rect = CartesianGeometry.columnRect(
                 dataPoint: value,
                 categoryIndex: categoryIndex,
                 viewport: currentViewport,
+                valueDomain: axisIdx == 1 ? currentSecondaryYDomain : nil,
                 plotArea: currentPlotFrame,
                 theme: theme,
-                zeroY: zeroY,
+                zeroY: seriesZeroY,
                 seriesIndex: model.stacking == .normal ? 0 : seriesIndex,
                 seriesCount: model.stacking == .normal ? 1 : model.series.count
             )
 
             if rect.contains(point) {
-                return ColumnHitTarget(seriesIndex: seriesIndex, categoryIndex: categoryIndex, value: value)
+                return ColumnHitTarget(seriesIndex: seriesIndex, categoryIndex: categoryIndex,
+                                       value: value, yAxisIndex: axisIdx)
             }
         }
 

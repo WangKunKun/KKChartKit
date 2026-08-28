@@ -726,7 +726,63 @@ public enum ChartSelfTest {
         // —— 双值轴渲染（右侧刻度、独立值域、次轴网格）——
         runDualAxisRenderSelfTest()
 
+        // —— 双轴系列映射与命中 ——
+        runDualAxisSeriesSelfTest()
+
         print("✅ ChartSelfTest passed")
+    }
+
+    /// 次轴系列按次轴域映射：同一数值、不同轴 → 不同屏幕高度；命中 target 带轴索引。
+    static func runDualAxisSeriesSelfTest() {
+        let r = LineChartRenderer()
+        let host = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        r.mount(into: host)
+        var sec = CartesianAxisModel(kind: .value, min: 0, max: 100)
+        sec.tickPositions = [0, 50, 100]
+        let model = CartesianChartModel(
+            series: [CartesianSeriesElement(name: "温度", data: [15, 25]),
+                     CartesianSeriesElement(name: "湿度", data: [15, 25], yAxisIndex: 1)],
+            secondaryYAxis: sec)
+        r.render(model: model, theme: CartesianChartTheme(),
+                 context: HYMChartRenderContext(bounds: host.bounds, center: host.center))
+        let plot = r.currentPlotFrame
+
+        // 1) 主轴系列：25 按主轴域（nice 0...25）映到 plot 顶部
+        let pMain = r.testScreenPoint(series: 0, index: 1)
+        let expectedMain = plot.maxY - plot.height
+                * (25.0 / max(r.currentViewport.yMax - r.currentViewport.yMin, 1e-9))
+        assert(abs(pMain.y - expectedMain) < 1.0,
+               "主轴系列应按主轴域映射，got \(pMain.y) vs \(expectedMain)")
+        // 2) 次轴系列：25 在域 0...100 → 底部起 1/4 高度
+        let pSec = r.testScreenPoint(series: 1, index: 1)
+        assert(abs(pSec.y - (plot.maxY - plot.height * 0.25)) < 1.0,
+               "次轴系列应按次轴域映射到 1/4 高度，got \(pSec.y)")
+
+        // 3) 命中 target 带 yAxisIndex
+        if let hit = r.hitTest(pSec) as? LineHitTarget {
+            assert(hit.yAxisIndex == 1, "次轴系列命中应带 yAxisIndex=1，got \(hit.yAxisIndex)")
+            assert(abs(hit.value - 25) < 0.001, "命中值应为原始值 25")
+        } else {
+            assertionFailure("次轴数据点应可命中")
+        }
+
+        // 4) Column 双轴负值零轴：次轴域 -50...50、值 -25 → 柱在零轴（半高）下方
+        let c = ColumnChartRenderer()
+        let hostC = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        c.mount(into: hostC)
+        var secNeg = CartesianAxisModel(kind: .value, min: -50, max: 50)
+        secNeg.tickPositions = [-50, 0, 50]
+        c.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "s", data: [-25], yAxisIndex: 1)],
+            secondaryYAxis: secNeg),
+                 theme: CartesianChartTheme(),
+                 context: HYMChartRenderContext(bounds: hostC.bounds, center: hostC.center))
+        let plotC = c.currentPlotFrame
+        if let hitC = c.hitTest(CGPoint(x: plotC.midX, y: plotC.midY + plotC.height * 0.2)) as? ColumnHitTarget {
+            assert(hitC.yAxisIndex == 1, "次轴柱命中应带 yAxisIndex=1")
+        } else {
+            assertionFailure("次轴负值柱（零轴下方）应可命中")
+        }
     }
 
     /// 双轴渲染契约：两轴值域独立、右侧让宽并画右侧刻度、次轴网格默认关。

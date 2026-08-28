@@ -7,15 +7,20 @@ public struct LineHitTarget: HYMChartHitTarget {
     public let seriesIndex: Int
     /// 命中数据点的值。
     public let value: Double
+    /// 绑定的值轴（0 = 主轴/左，1 = 次轴/右）。
+    public let yAxisIndex: Int
     public let tooltipText: String?
 
-    public init(seriesIndex: Int, index: Int, value: Double, label: String?) {
+    public init(seriesIndex: Int, index: Int, value: Double, label: String?, yAxisIndex: Int = 0) {
         self.seriesIndex = seriesIndex
         self.index = index
         self.value = value
+        self.yAxisIndex = yAxisIndex
         let name = label ?? "series \(seriesIndex)"
         self.identifier = "\(name):\(index)"
-        self.tooltipText = "\(name) · \(AxisRenderer.format(value))"
+        var text = "\(name) · \(AxisRenderer.format(value))"
+        if yAxisIndex == 1 { text += " (右轴)" }
+        self.tooltipText = text
     }
 }
 
@@ -39,17 +44,19 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
         lastPointFrames.removeAll()
         lineLayers.removeAll()
 
-        // 零轴（面积填充的闭合边界；Y 轴数据驱动，缩放中恒定）
-        let zeroY = CartesianGeometry.zeroAxisPosition(
-            viewport: currentViewport, plotArea: plotFrame, isHorizontal: false)
-
         for (s, element) in model.series.enumerated() {
             guard !element.data.isEmpty else { continue }
             let color = element.color ?? theme.seriesColor
+            let axisIdx = element.effectiveYAxisIndex
+
+            // 零轴（面积填充的闭合边界；按系列所属值域计算，双轴负值各自正确）
+            let zeroY = CartesianGeometry.zeroAxisPosition(
+                viewport: currentViewport, plotArea: plotFrame, isHorizontal: false,
+                valueDomain: axisIdx == 1 ? currentSecondaryYDomain : nil)
 
             // 数据点屏幕坐标（命中 frame 按数据点，与阶梯形态无关）
             let screenPts = element.data.enumerated().map { (i, v) -> CGPoint in
-                screenPoint(x: Double(i), y: v)
+                screenPoint(x: Double(i), y: v, yAxisIndex: axisIdx)
             }
             for (i, p) in screenPts.enumerated() {
                 let r = max(hitRadius, theme.pointRadius)   // 命中半径 ≥ 视觉点半径
@@ -130,7 +137,8 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
             let value = model.series[hit.series].data[hit.index]
             return LineHitTarget(seriesIndex: hit.series, index: hit.index,
                                  value: value,
-                                 label: model.series[hit.series].name)
+                                 label: model.series[hit.series].name,
+                                 yAxisIndex: model.series[hit.series].effectiveYAxisIndex)
         }
         return nil
     }
@@ -164,6 +172,7 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
               series < model.series.count, index < model.series[series].data.count else {
             return .zero
         }
-        return screenPoint(x: Double(index), y: model.series[series].data[index])
+        return screenPoint(x: Double(index), y: model.series[series].data[index],
+                           yAxisIndex: model.series[series].effectiveYAxisIndex)
     }
 }

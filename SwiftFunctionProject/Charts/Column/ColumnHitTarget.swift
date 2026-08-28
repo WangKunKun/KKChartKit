@@ -6,11 +6,14 @@ public struct ColumnHitTarget: HYMChartHitTarget {
     public let seriesIndex: Int
     public let categoryIndex: Int
     public let value: Double
+    /// 绑定的值轴（0 = 主轴/左，1 = 次轴/右）。
+    public let yAxisIndex: Int
 
-    public init(seriesIndex: Int, categoryIndex: Int, value: Double) {
+    public init(seriesIndex: Int, categoryIndex: Int, value: Double, yAxisIndex: Int = 0) {
         self.seriesIndex = seriesIndex
         self.categoryIndex = categoryIndex
         self.value = value
+        self.yAxisIndex = yAxisIndex
     }
 
     // MARK: - HYMChartHitTarget
