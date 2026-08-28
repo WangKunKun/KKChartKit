@@ -723,7 +723,60 @@ public enum ChartSelfTest {
         // —— 双轴/堆叠模型与几何纯函数 ——
         runDualAxisGeometrySelfTest()
 
+        // —— 双值轴渲染（右侧刻度、独立值域、次轴网格）——
+        runDualAxisRenderSelfTest()
+
         print("✅ ChartSelfTest passed")
+    }
+
+    /// 双轴渲染契约：两轴值域独立、右侧让宽并画右侧刻度、次轴网格默认关。
+    static func runDualAxisRenderSelfTest() {
+        let r = ColumnChartRenderer()
+        let host = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        r.mount(into: host)
+        // 主轴：温度 0...30；次轴：湿度 0...100（显式域，formatter 加 %）
+        var sec = CartesianAxisModel(kind: .value, min: 0, max: 100)
+        sec.labelFormatter = { "\(Int($0))%" }
+        let model = CartesianChartModel(
+            series: [CartesianSeriesElement(name: "温度", data: [5, 15, 25]),
+                     CartesianSeriesElement(name: "湿度", data: [40, 70, 90], yAxisIndex: 1)],
+            secondaryYAxis: sec)
+        r.render(model: model, theme: CartesianChartTheme(),
+                 context: HYMChartRenderContext(bounds: host.bounds, center: host.center))
+        let plot = r.currentPlotFrame
+
+        // 1) 主轴域只由 axis0 系列决定（5...25 → nice 0...25）
+        assert(abs(r.currentViewport.yMin) < 0.001 && abs(r.currentViewport.yMax - 25) < 0.001,
+               "主轴域应为 0...25，got \(r.currentViewport.yDomain)")
+        // 2) 次轴域独立（显式 0...100）
+        assert(r.currentSecondaryYDomain == 0...100,
+               "次轴域应为显式 0...100，got \(String(describing: r.currentSecondaryYDomain))")
+        assert(!r.currentSecondaryValueTicks.isEmpty, "次轴刻度不应为空")
+
+        // 3) 右侧让宽：plot 右缘远离 view 右缘（右侧刻度列存在）
+        assert(host.bounds.maxX - plot.maxX > 20,
+               "右侧应为次轴刻度让宽，plot.maxX=\(plot.maxX)")
+
+        // 4) 右侧刻度存在且带 formatter 文本、位于 plot 右侧
+        let labels = host.subviews.compactMap { $0 as? UILabel }
+        let pct = labels.first { $0.text == "100%" }
+        assert(pct != nil, "右侧应有刻度文本 100%，got \(labels.map { $0.text ?? "" })")
+        if let p = pct {
+            assert(p.center.x > plot.maxX, "右侧刻度应在 plot 右侧，got \(p.center.x)")
+        }
+
+        // 5) 单轴回归：secondaryYAxis 为 nil 时次轴状态为空、无右侧让宽
+        let single = ColumnChartRenderer()
+        let host2 = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        single.mount(into: host2)
+        single.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "s", data: [5, 15, 25])]),
+                      theme: CartesianChartTheme(),
+                      context: HYMChartRenderContext(bounds: host2.bounds, center: host2.center))
+        assert(single.currentSecondaryYDomain == nil && single.currentSecondaryValueTicks.isEmpty,
+               "单轴时次轴状态应为空")
+        assert(single.currentPlotFrame.maxX > plot.maxX,
+               "单轴 plot 应比双轴更靠右（无右轴让宽）")
     }
 
     /// 双轴分组边界、按轴堆叠、几何函数 domain 参数。

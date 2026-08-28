@@ -5,12 +5,18 @@ enum AxisRenderer {
 
     /// 生成轴线层：plot 区左边线（y 轴）+ 底边线（x 轴）。
     static func makeAxisLinesLayer(plotFrame: CGRect,
-                                   theme: CartesianChartTheme) -> CAShapeLayer {
+                                   theme: CartesianChartTheme,
+                                   showsRightAxis: Bool = false) -> CAShapeLayer {
         let layer = CAShapeLayer()
         let path = UIBezierPath()
         path.move(to: CGPoint(x: plotFrame.minX, y: plotFrame.minY))
         path.addLine(to: CGPoint(x: plotFrame.minX, y: plotFrame.maxY))
         path.addLine(to: CGPoint(x: plotFrame.maxX, y: plotFrame.maxY))
+        if showsRightAxis {
+            // 双值轴：补画右缘竖线
+            path.move(to: CGPoint(x: plotFrame.maxX, y: plotFrame.minY))
+            path.addLine(to: CGPoint(x: plotFrame.maxX, y: plotFrame.maxY))
+        }
         layer.path = path.cgPath
         layer.strokeColor = theme.axisLineColor.cgColor
         layer.fillColor = nil
@@ -73,6 +79,29 @@ enum AxisRenderer {
             out.append(lbl)
         }
         return out
+    }
+
+    /// 生成右侧数值刻度 labels（双值轴的次轴）：左对齐贴 plot 右缘外侧。
+    /// y 位置按次轴独立值域（`secondaryDomain`）映射。
+    static func makeRightValueTickLabels(ticks: [Double],
+                                         viewport: CartesianViewport,
+                                         plotFrame: CGRect,
+                                         theme: CartesianChartTheme,
+                                         formatter: ((Double) -> String)? = nil,
+                                         secondaryDomain: ClosedRange<Double>? = nil) -> [UILabel] {
+        ticks.map { tick in
+            let lbl = UILabel()
+            lbl.text = tickText(tick, formatter: formatter)
+            lbl.textColor = theme.tickLabelColor
+            lbl.font = theme.tickLabelFont
+            lbl.sizeToFit()
+            let y = CartesianGeometry.point(x: 0, y: tick,
+                                            viewport: viewport, plotFrame: plotFrame,
+                                            yDomain: secondaryDomain).y
+            lbl.center = CGPoint(x: plotFrame.maxX + theme.axisLabelGap + lbl.bounds.width / 2,
+                                 y: y)
+            return lbl
+        }
     }
 
     /// 生成底部数值刻度 labels（水平图：值轴在 X）。

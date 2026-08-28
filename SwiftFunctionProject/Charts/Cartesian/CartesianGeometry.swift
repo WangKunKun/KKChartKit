@@ -13,11 +13,13 @@ public enum CartesianGeometry {
                               yAxisTickLabelWidth: CGFloat,
                               xAxisTickLabelHeight: CGFloat,
                               axisLabelGap: CGFloat,
-                              titleHeight: CGFloat) -> CGRect {
+                              titleHeight: CGFloat,
+                              rightAxisLabelWidth: CGFloat = 0) -> CGRect {
         let x = bounds.minX + contentInset.left + yAxisTickLabelWidth + axisLabelGap
         let y = bounds.minY + contentInset.top + titleHeight + axisLabelGap
         let w = max(0, bounds.width - contentInset.left - contentInset.right
-                        - yAxisTickLabelWidth - axisLabelGap)
+                        - yAxisTickLabelWidth - axisLabelGap
+                        - rightAxisLabelWidth - (rightAxisLabelWidth > 0 ? axisLabelGap : 0))
         let h = max(0, bounds.height - contentInset.top - contentInset.bottom
                         - titleHeight - axisLabelGap - xAxisTickLabelHeight - axisLabelGap)
         return CGRect(x: x, y: y, width: w, height: h)

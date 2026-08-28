@@ -46,6 +46,10 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
     var lastContext: HYMChartRenderContext?
     /// 当前值轴刻度（网格与值轴 label 同源；垂直图沿 Y 映射、水平图沿 X 映射）。
     var currentValueTicks: [Double] = []
+    /// 次值轴（右）生效域；nil = 无次轴（单轴现状）。垂直图专用。
+    var currentSecondaryYDomain: ClosedRange<Double>?
+    /// 次值轴刻度（网格与右侧 label 同源）。
+    var currentSecondaryValueTicks: [Double] = []
 
     // MARK: - X 轴视口状态（手势缩放/平移）
     /// 全量 X 域（render 时从 model 记录；手势窗口的 clamp 边界）。
@@ -195,6 +199,26 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
         // 2) viewport（值域：显式或 nice，始终数据驱动；X 轴：手势窗口优先，否则全量）
         currentViewport = makeViewport(model: model)
 
+        // 2.5) 次值轴（仅垂直图；Bar 水平图忽略并提示）
+        if let secondary = model.secondaryYAxis {
+            if isHorizontalValueAxis {
+                assertionFailure("Bar（水平图）暂不支持 secondaryYAxis，将忽略")
+                currentSecondaryYDomain = nil
+                currentSecondaryValueTicks = []
+            } else {
+                let bounds = model.dataBounds(yAxisIndex: 1)
+                let domain = makeValueDomain(axis: secondary, bounds: bounds)
+                currentSecondaryYDomain = domain
+                currentSecondaryValueTicks = domain.lowerBound == domain.upperBound
+                    ? []
+                    : ValueTickGenerator.ticks(axis: secondary, domain: domain,
+                                               dataBounds: bounds, generatesFromDomain: false)
+            }
+        } else {
+            currentSecondaryYDomain = nil
+            currentSecondaryValueTicks = []
+        }
+
         // 3) 值轴刻度 + 布局（左侧标签宽度：水平图量类目标签、垂直图量值刻度文本；
         //    底部标签高度两种方向同为刻度字体行高）
         let valueDomainDegenerate = isHorizontalValueAxis
@@ -210,22 +234,36 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
                                                font: cartTheme.tickLabelFont).width }.max() ?? 0
         let xTickHeight = textSize("0", font: cartTheme.tickLabelFont).height
         let titleHeight = model.title.map { textSize($0, font: cartTheme.titleFont).height } ?? 0
+        let rightAxisLabelWidth: CGFloat = currentSecondaryYDomain == nil ? 0 :
+            currentSecondaryValueTicks.map {
+                textSize(AxisRenderer.tickText($0, formatter: model.secondaryYAxis?.labelFormatter),
+                         font: cartTheme.tickLabelFont).width }.max() ?? 0
         currentPlotFrame = CartesianGeometry.layout(
             bounds: context.bounds,
             contentInset: cartTheme.contentInset,
             yAxisTickLabelWidth: leadingLabelWidth,
             xAxisTickLabelHeight: xTickHeight,
             axisLabelGap: cartTheme.axisLabelGap,
-            titleHeight: titleHeight)
+            titleHeight: titleHeight,
+            rightAxisLabelWidth: rightAxisLabelWidth)
 
         // 4) 网格 + 轴 + 标题（挂在 series 之下）。
         // 空数据也画空坐标系（规格：防御式兜底），只是跳过 series 绘制。
+        // 次轴网格默认关；轴级 showsGridlines 开启时才传入 ticks。
+        var secondaryGridTicks: [Double] = []
+        if currentSecondaryYDomain != nil,
+           model.secondaryYAxis?.showsGridlines == true {
+            secondaryGridTicks = currentSecondaryValueTicks
+        }
         rootLayer.addSublayer(GridRenderer.makeGridLayer(
             valueTicks: currentValueTicks, categoryCount: model.maxPointCount,
             viewport: currentViewport, plotFrame: currentPlotFrame, theme: cartTheme,
-            isHorizontalValueAxis: isHorizontalValueAxis))
+            isHorizontalValueAxis: isHorizontalValueAxis,
+            secondaryValueTicks: secondaryGridTicks,
+            secondaryYDomain: currentSecondaryYDomain))
         rootLayer.addSublayer(AxisRenderer.makeAxisLinesLayer(
-            plotFrame: currentPlotFrame, theme: cartTheme))
+            plotFrame: currentPlotFrame, theme: cartTheme,
+            showsRightAxis: currentSecondaryYDomain != nil))
         addTickLabels(model: model, theme: cartTheme)
         addTitleLabel(model: model, theme: cartTheme)
 
@@ -263,11 +301,25 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
 
     // MARK: - 便捷（子类用）
     /// 值 → 屏幕（view 坐标系），用当前 viewport/plotFrame；须在 render 之后调用。
-    func screenPoint(x: Double, y: Double) -> CGPoint {
-        CartesianGeometry.point(x: x, y: y, viewport: currentViewport, plotFrame: currentPlotFrame)
+    /// 按系列绑定的值轴选域：0 = 主轴 viewport.yDomain，1 = 次轴域。
+    func screenPoint(x: Double, y: Double, yAxisIndex: Int = 0) -> CGPoint {
+        CartesianGeometry.point(x: x, y: y, viewport: currentViewport,
+                                plotFrame: currentPlotFrame,
+                                yDomain: yAxisIndex == 1 ? currentSecondaryYDomain : nil)
     }
 
     // MARK: - 私有
+    /// 由轴配置 + 绑定系列边界算值域（显式 min/max 优先，否则 nice scale）。
+    private func makeValueDomain(axis: CartesianAxisModel,
+                                 bounds: (min: Double, max: Double)?) -> ClosedRange<Double> {
+        let b = bounds ?? (min: 0, max: 1)
+        let scale = NiceScaleGenerator.generate(dataMin: axis.min ?? b.min,
+                                                dataMax: axis.max ?? b.max)
+        let lo = axis.min ?? scale.min
+        let hi = axis.max ?? scale.max
+        return min(lo, hi)...max(lo, hi)
+    }
+
     private func makeViewport(model: CartesianChartModel) -> CartesianViewport {
         let count = max(model.maxPointCount, 1)
         // 类目域：-0.5...n-0.5（点 i 落 band 中心）。显式 min/max 覆盖。
@@ -279,13 +331,7 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
 
         // 值域：显式 min/max 同显式时直接用；否则 nice scale（显式端单独生效时与自动端合并）。
         // 注意：显式端与自动刻度不对齐时，首/末刻度与轴线间会有空隙（显式端优先的语义，与 Highcharts 一致）。
-        let bounds = model.dataBounds(yAxisIndex: 0) ?? (min: 0, max: 1)
-        let scale = NiceScaleGenerator.generate(
-            dataMin: model.yAxis.min ?? bounds.min,
-            dataMax: model.yAxis.max ?? bounds.max)
-        let valLo = model.yAxis.min ?? scale.min
-        let valHi = model.yAxis.max ?? scale.max
-        let fullValue = min(valLo, valHi)...max(valLo, valHi)
+        let fullValue = makeValueDomain(axis: model.yAxis, bounds: model.dataBounds(yAxisIndex: 0))
 
         // 手势窗口只作用于 X 轴：垂直图缩放类目域、水平图缩放数值域。
         // Y 轴始终数据驱动（垂直图 = 值域，水平图 = 类目域），不参与手势。
@@ -332,6 +378,13 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
                 ticks: currentValueTicks, viewport: currentViewport,
                 plotFrame: currentPlotFrame, theme: theme,
                 formatter: model.yAxis.labelFormatter))
+            if let secondary = model.secondaryYAxis, !isHorizontalValueAxis {
+                tickLabels.append(contentsOf: AxisRenderer.makeRightValueTickLabels(
+                    ticks: currentSecondaryValueTicks, viewport: currentViewport,
+                    plotFrame: currentPlotFrame, theme: theme,
+                    formatter: secondary.labelFormatter,
+                    secondaryDomain: currentSecondaryYDomain))
+            }
             tickLabels.append(contentsOf: AxisRenderer.makeCategoryLabels(
                 labels: model.categoryLabels, viewport: currentViewport,
                 plotFrame: currentPlotFrame, theme: theme))

@@ -18,7 +18,9 @@ enum GridRenderer {
                               viewport: CartesianViewport,
                               plotFrame: CGRect,
                               theme: CartesianChartTheme,
-                              isHorizontalValueAxis: Bool = false) -> CAShapeLayer {
+                              isHorizontalValueAxis: Bool = false,
+                              secondaryValueTicks: [Double] = [],
+                              secondaryYDomain: ClosedRange<Double>? = nil) -> CAShapeLayer {
         if isHorizontalValueAxis {
             return makeHorizontalGridLayer(valueTicks: valueTicks, categoryCount: categoryCount,
                                            viewport: viewport, plotFrame: plotFrame, theme: theme)
@@ -31,6 +33,14 @@ enum GridRenderer {
             for tick in valueTicks {
                 let y = CartesianGeometry.point(x: 0, y: tick,
                                                 viewport: viewport, plotFrame: plotFrame).y
+                path.move(to: CGPoint(x: plotFrame.minX, y: y))
+                path.addLine(to: CGPoint(x: plotFrame.maxX, y: y))
+            }
+            // 次轴网格线（默认关；轴级 showsGridlines 开启时才传入 ticks）
+            for tick in secondaryValueTicks {
+                let y = CartesianGeometry.point(x: 0, y: tick, viewport: viewport,
+                                                plotFrame: plotFrame,
+                                                yDomain: secondaryYDomain).y
                 path.move(to: CGPoint(x: plotFrame.minX, y: y))
                 path.addLine(to: CGPoint(x: plotFrame.maxX, y: y))
             }
