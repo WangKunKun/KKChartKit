@@ -42,6 +42,8 @@ struct LineChartDemo: View {
     @State private var decelerationOn = true
     @State private var highlightPerDragOn = true
     @State private var rubberBandOn = true
+    /// 点击按 X 类目弹整列数据（shared tooltip）
+    @State private var sharedTooltipOn = true
 
     // —— 面积填充（面积图形态）——
     @State private var showsArea = false
@@ -77,7 +79,8 @@ struct LineChartDemo: View {
                       minimumVisibleCategories: Int(minimumVisibleCategories),
                       isDragDecelerationEnabled: decelerationOn,
                       isHighlightPerDragEnabled: highlightPerDragOn,
-                      isRubberBandEnabled: rubberBandOn)
+                      isRubberBandEnabled: rubberBandOn,
+                      isSharedTooltipOnTapEnabled: sharedTooltipOn)
                 .frame(height: 280)
                 .padding(.horizontal)
                 .padding(.top, 8)
@@ -218,6 +221,7 @@ struct LineChartDemo: View {
             .toggle(label: "滑动选中（全量视图拖拽=划过高亮）", value: $highlightPerDragOn),
             .toggle(label: "边界橡皮筋（越界回弹）", value: $rubberBandOn),
             .slider(label: "放大下限（最小可见类目数）", value: $minimumVisibleCategories, range: 2...24, step: 1),
+            .toggle(label: "点击弹整列数据（按 X 类目取所有系列）", value: $sharedTooltipOn),
             .toggle(label: "24小时时间轴（按数据量均分）", value: $useTimeAxis),
         ])
         let gridSection = ChartDemoPanel.DemoSection(title: "网格与轴", items: [

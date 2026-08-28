@@ -1,5 +1,43 @@
 import UIKit
 
+/// 整列命中 target（shared tooltip）：某 X 类目下所有系列的数据组合。
+public struct CartesianSharedHitTarget: HYMChartHitTarget {
+    public struct Entry {
+        /// 系列序号
+        public let seriesIndex: Int
+        public let name: String
+        /// 该列的数据值（堆叠模式下为原始值，非累计）
+        public let value: Double
+        /// 是否绑右轴（弹窗标注用）
+        public let isSecondaryAxis: Bool
+    }
+
+    /// 类目索引
+    public let categoryIndex: Int
+    /// 该类目下所有有值系列（锯齿数据集缺值系列被跳过）
+    public let entries: [Entry]
+    /// 十字线 x（view 坐标；锚点用）
+    public let crosshairX: CGFloat
+
+    public init(categoryIndex: Int, entries: [Entry], crosshairX: CGFloat) {
+        self.categoryIndex = categoryIndex
+        self.entries = entries
+        self.crosshairX = crosshairX
+    }
+
+    // MARK: - HYMChartHitTarget
+    public let kind = "sharedColumn"
+    public var identifier: String { "sharedColumn:\(categoryIndex)" }
+    public var index: Int { categoryIndex }
+    public var tooltipText: String? {
+        entries.map { entry in
+            var text = "\(entry.name): \(AxisRenderer.format(entry.value))"
+            if entry.isSecondaryAxis { text += " (右轴)" }
+            return text
+        }.joined(separator: "\n")
+    }
+}
+
 /// 轴系图表渲染基类（模板方法）。
 ///
 /// 统一编排：背景 → 值域(nice scale) → viewport → plot 布局 → 网格 → 轴 → 标题
@@ -433,5 +471,61 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
 
     private func textSize(_ s: String, font: UIFont) -> CGSize {
         (s as NSString).size(withAttributes: [.font: font])
+    }
+}
+
+// MARK: - 整列命中（shared tooltip）
+extension CartesianRendererBase: HYMChartSharedHitProvider {
+
+    /// 点击按类目取整列：X 位置四舍五入到最近类目，组合所有有值系列。
+    /// 点在 plot 区外（±8pt 宽容）返回 nil，由容器回落到逐点命中。
+    public func sharedHit(at point: CGPoint) -> (target: any HYMChartHitTarget,
+                                                 anchor: HYMChartTooltipAnchor)? {
+        guard let model = currentModel, currentPlotFrame.width > 0, currentPlotFrame.height > 0,
+              model.maxPointCount > 0 else { return nil }
+        guard currentPlotFrame.insetBy(dx: -8, dy: -8).contains(point) else { return nil }
+
+        let categoryIndex: Int
+        if isHorizontalValueAxis {
+            // 水平图（Bar）：类目在 Y
+            let cat = CartesianGeometry.horizontalCategory(
+                atY: point.y, viewport: currentViewport, plotFrame: currentPlotFrame)
+            categoryIndex = Int(cat.rounded())
+        } else {
+            let x = CartesianGeometry.value(at: point, viewport: currentViewport,
+                                            plotFrame: currentPlotFrame).x
+            categoryIndex = Int(x.rounded())
+        }
+        guard categoryIndex >= 0, categoryIndex < model.maxPointCount else { return nil }
+
+        var entries: [CartesianSharedHitTarget.Entry] = []
+        for (i, s) in model.series.enumerated() where categoryIndex < s.data.count {
+            let isSecondary = s.effectiveYAxisIndex == 1
+            entries.append(CartesianSharedHitTarget.Entry(seriesIndex: i, name: s.name,
+                                                          value: s.data[categoryIndex],
+                                                          isSecondaryAxis: isSecondary))
+        }
+        guard !entries.isEmpty else { return nil }
+
+        // 十字线锚点：垂直图为过类目中心的竖细带，水平图为横细带（弹窗在其上/下定位）
+        let band: CGRect
+        if isHorizontalValueAxis {
+            let y = CartesianGeometry.horizontalCategoryY(category: Double(categoryIndex),
+                                                          viewport: currentViewport,
+                                                          plotFrame: currentPlotFrame)
+            band = CGRect(x: currentPlotFrame.minX, y: y - 1,
+                          width: currentPlotFrame.width, height: 2)
+        } else {
+            let x = CartesianGeometry.point(x: Double(categoryIndex), y: 0,
+                                            viewport: currentViewport,
+                                            plotFrame: currentPlotFrame).x
+            band = CGRect(x: x - 1, y: currentPlotFrame.minY,
+                          width: 2, height: currentPlotFrame.height)
+        }
+        let target = CartesianSharedHitTarget(categoryIndex: categoryIndex,
+                                              entries: entries,
+                                              crosshairX: band.midX)
+        return (target, HYMChartTooltipAnchor(frame: band,
+                                               preferredPlacements: [.top, .bottom]))
     }
 }

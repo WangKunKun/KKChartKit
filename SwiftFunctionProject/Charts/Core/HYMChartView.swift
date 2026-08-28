@@ -63,6 +63,10 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     public var isHighlightPerDragEnabled: Bool = true
     /// 把视口拖出边界时的橡皮筋越界 + 松手回弹（默认开）。
     public var isRubberBandEnabled: Bool = true
+    /// 点击按 X 类目取**整列**数据（shared tooltip，Highcharts 同款；默认关）。
+    /// 开启后点击绘图区任意位置弹窗展示该列所有系列的值；关则维持逐点命中。
+    /// 仅对实现了 `HYMChartSharedHitProvider` 的 renderer（轴系图表）生效。
+    public var isSharedTooltipOnTapEnabled: Bool = false
 
     /// 命中弹窗的「内容 view」提供者（外部自定义弹窗的便利模式）。
     ///
@@ -201,7 +205,24 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
 
     // MARK: - 触摸命中（tap 与拖拽滑动选中共用）
     @objc private func onTap(_ gr: UITapGestureRecognizer) {
-        handleHit(at: gr.location(in: self), gesture: .tap)
+        let p = gr.location(in: self)
+        // 整列命中（shared tooltip）：优先于逐点命中，点在绘图区外自动回落
+        if isSharedTooltipOnTapEnabled,
+           let shared = (renderer as? HYMChartSharedHitProvider)?.sharedHit(at: p) {
+            renderer.applySelection(shared.target)
+            onHit?(shared.target, .tap)
+            // popup / onHitLocated 模式沿用逐点 target 的外部链路；shared 组合文本走内置 tooltip
+            if popupContentProvider == nil && onHitLocated == nil {
+                if let text = shared.target.tooltipText {
+                    ensureTooltipController().show(anchor: shared.anchor.frame, text: text,
+                                                   in: bounds, preferred: shared.anchor.preferredPlacements)
+                } else {
+                    tooltipController?.hide()
+                }
+            }
+            return
+        }
+        handleHit(at: p, gesture: .tap)
     }
 
     /// 命中分发：选中 + onHit 回调 + 三层弹窗 fallback（popup > onHitLocated > 内置 tooltip）。

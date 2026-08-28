@@ -756,7 +756,62 @@ public enum ChartSelfTest {
         // —— 正负分开堆叠（上下镜像）——
         runSignSeparatedStackingSelfTest()
 
+        // —— 整列命中（shared tooltip）——
+        runSharedHitSelfTest()
+
         print("✅ ChartSelfTest passed")
+    }
+
+    /// 点击按 X 类目取整列：任意 x 归到最近类目，弹窗文本含所有系列值；绘图区外回落。
+    static func runSharedHitSelfTest() {
+        let r = LineChartRenderer()
+        let host = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        r.mount(into: host)
+        r.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, 20, 30]),
+                     CartesianSeriesElement(name: "b", data: [5, 15, 25], yAxisIndex: 1)],
+            secondaryYAxis: CartesianAxisModel(kind: .value, min: 0, max: 100)),
+                  theme: CartesianChartTheme(),
+                  context: HYMChartRenderContext(bounds: host.bounds, center: host.center))
+        let plot = r.currentPlotFrame
+
+        // 点在类目 1 的带内任意高度（避开数据点也可）→ 归到类目 1，两系列值都在文本里
+        let tapY = plot.minY + plot.height * 0.3
+        let cat1x = CartesianGeometry.point(x: 1, y: 0, viewport: r.currentViewport,
+                                            plotFrame: plot).x
+        if let hit = r.sharedHit(at: CGPoint(x: cat1x + 3, y: tapY)) {
+            let t = hit.target as! CartesianSharedHitTarget
+            assert(t.categoryIndex == 1, "应归到最近类目 1，got \(t.categoryIndex)")
+            assert(t.entries.count == 2, "两个系列都应有值，got \(t.entries)")
+            assert(t.entries[0].value == 20 && t.entries[1].value == 15,
+                   "类目 1 各系列值应为 20/15，got \(t.entries)")
+            assert(t.entries[1].isSecondaryAxis, "次轴系列应标注")
+            assert(hit.target.tooltipText?.contains("b: 15") == true,
+                   "组合文本应含各系列值，got \(String(describing: hit.target.tooltipText))")
+            assert(hit.anchor.frame.minX < plot.maxX && hit.anchor.frame.minX > plot.minX,
+                   "锚点十字线应在 plot 内")
+        } else {
+            assertionFailure("绘图区内点击应产生整列命中")
+        }
+
+        // 绘图区外（左上角标签区）→ nil（回落逐点命中）
+        assert(r.sharedHit(at: CGPoint(x: 2, y: 2)) == nil, "plot 外应返回 nil")
+
+        // 锯齿数据集：短系列缺值被跳过
+        let jag = LineChartRenderer()
+        jag.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, 20, 30]),
+                     CartesianSeriesElement(name: "b", data: [5])]),
+                   theme: CartesianChartTheme(),
+                   context: HYMChartRenderContext(bounds: host.bounds, center: host.center))
+        if let hit2 = jag.sharedHit(at: CGPoint(x: jag.currentPlotFrame.midX,
+                                                y: jag.currentPlotFrame.midY)) {
+            let t2 = hit2.target as! CartesianSharedHitTarget
+            assert(t2.entries.allSatisfy { $0.seriesIndex == 0 || t2.categoryIndex == 0 },
+                   "短系列在缺值类目应被跳过，got \(t2.entries)")
+        } else {
+            assertionFailure("锯齿数据集也应可整列命中")
+        }
     }
 
     /// 符号分组堆叠：正链从 0 向上、负链从 0 向下（Highcharts 同款）；面积/柱基准贴所属链。

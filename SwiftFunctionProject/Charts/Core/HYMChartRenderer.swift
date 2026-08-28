@@ -120,3 +120,11 @@ public protocol HYMChartXAxisZoomable: HYMChartRenderer {
     /// 重置视口到全量数据（双击等场景）。
     func resetXAxisViewport()
 }
+
+/// 整列命中（shared tooltip）提供者：点击按类目取该 X 位置**所有系列**的数据。
+/// 实现者返回组合好的 target（tooltipText 已含各系列值）与弹窗锚点。
+public protocol HYMChartSharedHitProvider: HYMChartRenderer {
+    /// - Returns: 该点的整列命中；nil = 不支持/点在绘图区外（回落到逐点命中）
+    func sharedHit(at point: CGPoint) -> (target: any HYMChartHitTarget,
+                                          anchor: HYMChartTooltipAnchor)?
+}
