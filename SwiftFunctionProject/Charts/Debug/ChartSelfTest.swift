@@ -790,6 +790,9 @@ public enum ChartSelfTest {
                    "组合文本应含各系列值，got \(String(describing: hit.target.tooltipText))")
             assert(hit.anchor.frame.minX < plot.maxX && hit.anchor.frame.minX > plot.minX,
                    "锚点十字线应在 plot 内")
+            // 锚点应在触点位置（跟手弹窗），而非固定在 plot 顶部
+            assert(abs(hit.anchor.frame.minY - tapY) < 2,
+                   "锚点 y 应在触点处，got \(hit.anchor.frame.minY) vs \(tapY)")
         } else {
             assertionFailure("绘图区内点击应产生整列命中")
         }

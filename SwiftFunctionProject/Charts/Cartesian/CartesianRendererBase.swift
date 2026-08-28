@@ -521,20 +521,19 @@ extension CartesianRendererBase: HYMChartSharedHitProvider {
         }
         guard !entries.isEmpty else { return nil }
 
-        // 十字线锚点：垂直图为过类目中心的竖细带，水平图为横细带（弹窗在其上/下定位）
+        // 锚点在触点位置（弹窗跟手出现，而非固定在图表顶部/底部）：
+        // 垂直图 x 对齐类目中心、水平图 y 对齐类目行中心
         let band: CGRect
         if isHorizontalValueAxis {
             let y = CartesianGeometry.horizontalCategoryY(category: Double(categoryIndex),
                                                           viewport: currentViewport,
                                                           plotFrame: currentPlotFrame)
-            band = CGRect(x: currentPlotFrame.minX, y: y - 1,
-                          width: currentPlotFrame.width, height: 2)
+            band = CGRect(x: point.x - 1, y: y - 1, width: 2, height: 2)
         } else {
             let x = CartesianGeometry.point(x: Double(categoryIndex), y: 0,
                                             viewport: currentViewport,
                                             plotFrame: currentPlotFrame).x
-            band = CGRect(x: x - 1, y: currentPlotFrame.minY,
-                          width: 2, height: currentPlotFrame.height)
+            band = CGRect(x: x - 1, y: point.y - 1, width: 2, height: 2)
         }
         let target = CartesianSharedHitTarget(categoryIndex: categoryIndex,
                                               entries: entries,
