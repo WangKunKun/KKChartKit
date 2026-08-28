@@ -94,7 +94,7 @@ struct LineChartDemo: View {
             y.labelFormatter = { AxisRenderer.format(abs($0)) }
         }
 
-        let stacking: StackConfig? = (stackingMode == "普通堆叠" || mirrorStackOn) ? .normal : nil
+        let stacking: StackConfig? = stackingMode == "普通堆叠" ? .normal : nil
         // 真实多系列：按面板系列数量取数据集；末系列在双轴模式下绑右轴；
         // 镜像模式下末系列取负（正链从 0 向上、负链从 0 向下的上下两组形态）
         let series = (0..<seriesCount).map { i in
@@ -142,7 +142,7 @@ struct LineChartDemo: View {
         t.axisLabelGap = axisLabelGap
         t.lineConnectionStyle = connectionStyle
         // 堆叠默认联动开面积（分层展示更直观；可关成纯累计折线）
-        let stacked = stackingMode == "普通堆叠" || mirrorStackOn
+        let stacked = stackingMode == "普通堆叠"
         let areaOn = showsArea || (stacked && stackedAreaOn)
         t.showsArea = areaOn
         if areaOn, seriesCount == 1 {
@@ -185,7 +185,7 @@ struct LineChartDemo: View {
             .toggle(label: "双轴（末系列绑右轴）", value: $dualAxisOn),
             .picker(label: "堆叠模式", selection: $stackingMode, options: ["不堆叠", "普通堆叠"]),
             .toggle(label: "堆叠时面积分层", value: $stackedAreaOn),
-            .toggle(label: "上下镜像（末系列取负，正上负下）", value: $mirrorStackOn),
+            .toggle(label: "上下镜像（末系列取负，与堆叠无关）", value: $mirrorStackOn),
             .toggle(label: "自定义刻度数量", value: $tickCountOn),
             .slider(label: "刻度数量", value: $tickCount, range: 2...12, step: 1),
             .toggle(label: "显式刻度位置（0/30/60/100）", value: $useTickPositions),
