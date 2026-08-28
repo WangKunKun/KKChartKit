@@ -87,7 +87,12 @@ struct LineChartDemo: View {
         var y = CartesianAxisModel(kind: .value)
         if tickCountOn { y.tickCount = Int(tickCount) }
         if useTickPositions { y.tickPositions = [0, 30, 60, 100] }
-        if usePercentFormatter { y.labelFormatter = { "\(Int($0))%" } }
+        if usePercentFormatter {
+            y.labelFormatter = { "\(Int($0))%" }
+        } else if mirrorStackOn {
+            // 镜像形态：Y 轴刻度显示绝对值（下方负值域看起来也是正数，AAChartKit 惯用手法）
+            y.labelFormatter = { AxisRenderer.format(abs($0)) }
+        }
 
         let stacking: StackConfig? = (stackingMode == "普通堆叠" || mirrorStackOn) ? .normal : nil
         // 真实多系列：按面板系列数量取数据集；末系列在双轴模式下绑右轴；
