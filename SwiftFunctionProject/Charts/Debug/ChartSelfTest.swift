@@ -732,7 +732,76 @@ public enum ChartSelfTest {
         // —— 折线/面积堆叠 ——
         runLineStackingSelfTest()
 
+        // —— 正负分开堆叠（上下镜像）——
+        runSignSeparatedStackingSelfTest()
+
         print("✅ ChartSelfTest passed")
+    }
+
+    /// 符号分组堆叠：正链从 0 向上、负链从 0 向下（Highcharts 同款）；面积/柱基准贴所属链。
+    static func runSignSeparatedStackingSelfTest() {
+        // 1) 纯函数：正负各走各链，不混合
+        let pos = CartesianSeriesElement(name: "a", data: [100, 50])
+        let neg = CartesianSeriesElement(name: "b", data: [-30, -20])
+        let pos2 = CartesianSeriesElement(name: "c", data: [10, 10])
+        let r = CartesianGeometry.stackedValuesByAxis(series: [pos, neg, pos2])
+        assert(r[0] == [100, 50], "首正系列 = 原值")
+        assert(r[1] == [-30, -20], "负系列应从 0 向下累计，不与正链混合，got \(r[1])")
+        assert(r[2] == [110, 60], "第二正系列接正链：100+10, 50+10，got \(r[2])")
+
+        // 2) 渲染级（折线）：负系列点在零轴下方、正系列在上方
+        let lr = LineChartRenderer()
+        let host = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        lr.mount(into: host)
+        var theme = CartesianChartTheme()
+        theme.showsArea = true
+        lr.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "收入", data: [40, 60], color: .systemBlue),
+                     CartesianSeriesElement(name: "支出", data: [-30, -20], color: .systemOrange)],
+            stacking: .normal),
+                  theme: theme,
+                  context: HYMChartRenderContext(bounds: host.bounds, center: host.center))
+        let zeroY = CartesianGeometry.zeroAxisPosition(
+            viewport: lr.currentViewport, plotArea: lr.currentPlotFrame, isHorizontal: false)
+        let pPos = lr.testScreenPoint(series: 0, index: 0)
+        let pNeg = lr.testScreenPoint(series: 1, index: 0)
+        assert(pPos.y < zeroY - 1, "正值系列应在零轴上方，got \(pPos.y) vs zero \(zeroY)")
+        assert(pNeg.y > zeroY + 1, "负值系列应在零轴下方（镜像），got \(pNeg.y) vs zero \(zeroY)")
+
+        // 3) 渲染级（柱状）：负系列柱在零轴下方且可命中
+        let cr = ColumnChartRenderer()
+        let hostC = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        cr.mount(into: hostC)
+        cr.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "收入", data: [60, 40]),
+                     CartesianSeriesElement(name: "支出", data: [-30, -25])],
+            stacking: .normal),
+                  theme: CartesianChartTheme(),
+                  context: HYMChartRenderContext(bounds: hostC.bounds, center: hostC.center))
+        let plotC = cr.currentPlotFrame
+        let zeroC = CartesianGeometry.zeroAxisPosition(
+            viewport: cr.currentViewport, plotArea: plotC, isHorizontal: false)
+        // 与 seriesHitTest 同源几何：负系列（index 1）柱 rect = 零轴 → 累计值
+        let negCum = CartesianGeometry.stackedValuesByAxis(series: [
+            CartesianSeriesElement(name: "收入", data: [60, 40]),
+            CartesianSeriesElement(name: "支出", data: [-30, -25])])[1][0]
+        let negRect = CartesianGeometry.columnRect(
+            dataPoint: negCum, categoryIndex: 0, viewport: cr.currentViewport,
+            plotArea: plotC, theme: CartesianChartTheme(), zeroY: zeroC,
+            seriesIndex: 0, seriesCount: 1)
+        assert(negRect.midY > zeroC + 1, "负值堆叠柱应在零轴下方，got \(negRect) vs zero \(zeroC)")
+        if let hit = cr.hitTest(CGPoint(x: negRect.midX, y: negRect.midY)) as? ColumnHitTarget {
+            assert(hit.seriesIndex == 1 && hit.value < 0,
+                   "零轴下方应命中负值系列（累计 \(negCum)），got series=\(hit.seriesIndex) value=\(hit.value)")
+        } else {
+            assertionFailure("负值堆叠柱（零轴下方）应可命中")
+        }
+
+        // 4) 全非负数据回归：与旧链式求和一致（既有断言依赖）
+        let allPos = CartesianGeometry.stackedValuesByAxis(
+            series: [CartesianSeriesElement(name: "a", data: [10, 20]),
+                     CartesianSeriesElement(name: "b", data: [5, 15])])
+        assert(allPos == [[10, 20], [15, 35]], "全非负时应保持链式累计，got \(allPos)")
     }
 
     /// 堆叠折线：累计线位置正确；面积分层（第 2 系列面积下边界 = 第 1 系列累计线）；命中报累计值。

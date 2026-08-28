@@ -207,6 +207,15 @@ let model = CartesianChartModel(
 
 `stacking: .normal` 时折线画累计值（按轴分组累计，双轴不混叠）；配合 `showsArea` 得到分层面积图——系列 i 的面积从同轴前一累计线填到自己累计线，每系列独立颜色渐变。命中报累计值（与柱状图一致）。
 
+**正负分开堆叠（上下镜像）**：正值点只与正值累计（从 0 向上），负值点只与负值累计（从 0 向下）——收入/支出、人口金字塔等上下两组形态，与 AAChartKit/Highcharts 同款语义：
+
+```swift
+let model = CartesianChartModel(
+    series: [CartesianSeriesElement(name: "收入", data: [40, 60, 50], color: .systemBlue),
+             CartesianSeriesElement(name: "支出", data: [-30, -50, -20], color: .systemOrange)],
+    stacking: .normal)   // 收入向上叠、支出向下叠，面积在 0 线两侧分层
+```
+
 ```swift
 var theme = CartesianChartTheme()
 theme.showsArea = true

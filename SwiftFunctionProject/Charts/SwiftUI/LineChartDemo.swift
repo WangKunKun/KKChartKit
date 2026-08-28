@@ -46,6 +46,8 @@ struct LineChartDemo: View {
     // —— 双轴 / 堆叠 / 刻度自定义 ——
     @State private var dualAxisOn = false
     @State private var stackingMode = "不堆叠"
+    /// 上下镜像（正负分开堆叠）：末系列取负，正链从 0 向上、负链从 0 向下
+    @State private var mirrorStackOn = false
     /// 堆叠模式下是否叠加面积分层展示（默认开，可关成纯累计折线）
     @State private var stackedAreaOn = true
     @State private var tickCountOn = false
@@ -87,14 +89,17 @@ struct LineChartDemo: View {
         if useTickPositions { y.tickPositions = [0, 30, 60, 100] }
         if usePercentFormatter { y.labelFormatter = { "\(Int($0))%" } }
 
-        let stacking: StackConfig? = stackingMode == "普通堆叠" ? .normal : nil
-        // 真实多系列：按面板系列数量取数据集；末系列在双轴模式下绑右轴
+        let stacking: StackConfig? = (stackingMode == "普通堆叠" || mirrorStackOn) ? .normal : nil
+        // 真实多系列：按面板系列数量取数据集；末系列在双轴模式下绑右轴；
+        // 镜像模式下末系列取负（正链从 0 向上、负链从 0 向下的上下两组形态）
         let series = (0..<seriesCount).map { i in
-            CartesianSeriesElement(
+            let isLast = i == seriesCount - 1
+            let rawData = i < data.count ? data[i] : Self.randomData(count: pointCount)
+            return CartesianSeriesElement(
                 name: "系列\(i + 1)",
-                data: i < data.count ? data[i] : Self.randomData(count: pointCount),
+                data: (mirrorStackOn && isLast) ? rawData.map { -$0 } : rawData,
                 color: seriesColors[i % seriesColors.count],
-                yAxisIndex: (dualAxisOn && i == seriesCount - 1) ? 1 : 0)
+                yAxisIndex: (dualAxisOn && isLast) ? 1 : 0)
         }
 
         var secondary: CartesianAxisModel?
@@ -132,7 +137,8 @@ struct LineChartDemo: View {
         t.axisLabelGap = axisLabelGap
         t.lineConnectionStyle = connectionStyle
         // 堆叠默认联动开面积（分层展示更直观；可关成纯累计折线）
-        let areaOn = showsArea || (stackingMode == "普通堆叠" && stackedAreaOn)
+        let stacked = stackingMode == "普通堆叠" || mirrorStackOn
+        let areaOn = showsArea || (stacked && stackedAreaOn)
         t.showsArea = areaOn
         if areaOn, seriesCount == 1 {
             // 单系列：面板系列色 + 浓度可控；多系列留给渲染器按各系列色派生渐变（分层颜色独立）
@@ -174,6 +180,7 @@ struct LineChartDemo: View {
             .toggle(label: "双轴（末系列绑右轴）", value: $dualAxisOn),
             .picker(label: "堆叠模式", selection: $stackingMode, options: ["不堆叠", "普通堆叠"]),
             .toggle(label: "堆叠时面积分层", value: $stackedAreaOn),
+            .toggle(label: "上下镜像（末系列取负，正上负下）", value: $mirrorStackOn),
             .toggle(label: "自定义刻度数量", value: $tickCountOn),
             .slider(label: "刻度数量", value: $tickCount, range: 2...12, step: 1),
             .toggle(label: "显式刻度位置（0/30/60/100）", value: $useTickPositions),

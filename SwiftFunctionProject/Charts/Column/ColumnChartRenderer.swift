@@ -51,12 +51,13 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
             for index in visible where index < oneSeries.count {
                 let value = oneSeries[index]
 
-                // 基准值（堆叠模式下使用同轴前一系列的累计值）
+                // 基准值（堆叠）：同符号链前累计 = 自身累计 − 自身原值（正链贴零轴向上、
+                // 负链贴零轴向下；与 Highcharts 正负分开堆叠一致）。基准 ≈ 0 → 从零轴起。
                 let baselineValue: Double?
-                if model.stacking == .normal,
-                   let p = model.series[..<seriesIndex].indices
-                    .last(where: { model.series[$0].effectiveYAxisIndex == axisIdx }) {
-                    baselineValue = dataToDraw[p][index]
+                if model.stacking == .normal {
+                    let base = value - (index < model.series[seriesIndex].data.count
+                                        ? model.series[seriesIndex].data[index] : 0)
+                    baselineValue = abs(base) < 1e-9 ? nil : base
                 } else {
                     baselineValue = nil
                 }

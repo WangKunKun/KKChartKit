@@ -348,20 +348,35 @@ public enum CartesianGeometry {
     }
 
     /// 按值轴分组的链式累计（双轴堆叠：跨轴不混叠）；返回与输入同序。
-    /// 系列 i 的累计 = 自身数据 + 同轴（effectiveYAxisIndex 相同）前一系列的累计；
-    /// 短系列补 0 对齐到最长长度。全主轴时与 `stackedValues` 结果完全一致。
+    /// **符号分组**（Highcharts 同款）：同轴内正值点只与正值累计、负值点只与负值累计，
+    /// 正链从 0 向上、负链从 0 向下——形成上下镜像（收支对比/人口金字塔形态）。
+    /// 系列 i 在点 j 的累计 = 同轴同符号链在 j 的前累计 + 自身值；
+    /// 短系列补 0 对齐到最长长度。全主轴全非负时与 `stackedValues` 结果完全一致。
     public static func stackedValuesByAxis(series: [CartesianSeriesElement]) -> [[Double]] {
         guard !series.isEmpty else { return [] }
         let maxLength = series.map { $0.data.count }.max() ?? 0
         guard maxLength > 0 else { return [] }
-        var running: [Int: [Double]] = [:]
+        var runningPositive: [Int: [Double]] = [:]
+        var runningNegative: [Int: [Double]] = [:]
         var out: [[Double]] = []
         for s in series {
             let axis = s.effectiveYAxisIndex
-            var cum = running[axis] ?? [Double](repeating: 0, count: maxLength)
             let padded = s.data + [Double](repeating: 0, count: max(0, maxLength - s.data.count))
-            cum = zip(cum, padded).map { $0 + $1 }
-            running[axis] = cum
+            let zeros = [Double](repeating: 0, count: maxLength)
+            let pos = runningPositive[axis] ?? zeros
+            let neg = runningNegative[axis] ?? zeros
+            var cum = [Double](repeating: 0, count: maxLength)
+            for j in 0..<maxLength {
+                // 逐点按符号入链：v ≥ 0 归正链（0 视为正，与 Highcharts 一致）
+                cum[j] = padded[j] >= 0 ? pos[j] + padded[j] : neg[j] + padded[j]
+            }
+            var newPos = pos
+            var newNeg = neg
+            for j in 0..<maxLength where padded[j] != 0 {
+                if padded[j] > 0 { newPos[j] = cum[j] } else { newNeg[j] = cum[j] }
+            }
+            runningPositive[axis] = newPos
+            runningNegative[axis] = newNeg
             out.append(cum)
         }
         return out

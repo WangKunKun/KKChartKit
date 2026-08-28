@@ -89,17 +89,18 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
             // 堆叠时分层：系列 i 面积下边界 = 同轴前一系列的累计线（层层叠高、颜色不互覆）。
             if theme.showsArea, let first = screenPts.first, let last = screenPts.last {
                 let areaPath = UIBezierPath(cgPath: path.cgPath)
-                if model.stacking == .normal,
-                   let p = model.series[..<s].indices
-                    .last(where: { model.series[$0].effectiveYAxisIndex == axisIdx }) {
-                    // 下边界必须与前一累计线的**绘制路径**重合（阶梯形态用阶梯折点），
-                    // 否则半透明层错位叠加。阶梯/直线折点序列倒序回走 = 同一几何形状。
-                    let prevData = dataToDraw[p].enumerated().map { (i, v) in
+                if model.stacking == .normal {
+                    // 下边界 = 同符号链基准（自身累计 − 自身原值，逐点）：正链首系列 = 0（零轴），
+                    // 负链同理从 0 向下。须与折线连接形态一致（阶梯用阶梯折点），
+                    // 否则半透明层错位叠加；折点序列倒序回走 = 同一几何形状。
+                    let padded = element.data + [Double](repeating: 0, count: max(0, values.count - element.data.count))
+                    let base = zip(values, padded).map { $0 - $1 }
+                    let baseData = base.enumerated().map { (i, v) in
                         screenPoint(x: Double(i), y: v, yAxisIndex: axisIdx)
                     }
                     let prevPathPts = theme.lineConnectionStyle == .smooth
-                        ? prevData
-                        : CartesianGeometry.steppedScreenPoints(prevData, style: theme.lineConnectionStyle)
+                        ? baseData
+                        : CartesianGeometry.steppedScreenPoints(baseData, style: theme.lineConnectionStyle)
                     for pp in prevPathPts.reversed() { areaPath.addLine(to: pp) }
                 } else {
                     areaPath.addLine(to: CGPoint(x: last.x, y: zeroY))
