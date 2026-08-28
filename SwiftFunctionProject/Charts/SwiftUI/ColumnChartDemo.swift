@@ -12,6 +12,10 @@ struct ColumnChartDemo: View {
     @State private var theme = CartesianChartTheme()
     @State private var seriesColors: [UIColor] = [.systemBlue, .systemGreen, .systemOrange]
     @State private var columnWidthRatio = 0.8
+    /// 组内相邻柱间距（nil = 自动跟随柱宽余量；滑条 0 = 自动）
+    @State private var columnInnerSpacing = 0.0
+    /// 相邻类目组之间间距占槽宽比例
+    @State private var columnGroupSpacing = 0.0
     @State private var columnCornerRadius = 4.0
     @State private var columnBorderOn = false
     @State private var columnBorderColor = UIColor.black
@@ -120,6 +124,8 @@ struct ColumnChartDemo: View {
     private var currentTheme: CartesianChartTheme {
         var t = theme
         t.columnWidthRatio = columnWidthRatio
+        t.columnInnerSpacingRatio = columnInnerSpacing >= 0.01 ? columnInnerSpacing : nil
+        t.columnGroupSpacingRatio = columnGroupSpacing
         t.columnCornerRadius = columnCornerRadius
         if columnBorderOn {
             t.columnBorderColor = columnBorderColor
@@ -155,6 +161,8 @@ struct ColumnChartDemo: View {
 
         let columnSection = ChartDemoPanel.DemoSection(title: "柱体外观", items: [
             .slider(label: "柱体宽度比例", value: $columnWidthRatio, range: 0.3...1.0, step: 0.05),
+            .slider(label: "组内柱间距（0=自动）", value: $columnInnerSpacing, range: 0...0.5, step: 0.05),
+            .slider(label: "组间距（组间空隙比例）", value: $columnGroupSpacing, range: 0...0.5, step: 0.05),
             .slider(label: "圆角半径", value: $columnCornerRadius, range: 0...10, step: 1),
             .toggle(label: "边框", value: $columnBorderOn),
             .color(label: "边框颜色", value: $columnBorderColor),

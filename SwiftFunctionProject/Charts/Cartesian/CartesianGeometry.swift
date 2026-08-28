@@ -435,10 +435,34 @@ public enum CartesianGeometry {
         let subSlotWidth = slotWidth / CGFloat(seriesCount)  // 每个 series 的子槽宽度
         let columnWidth = subSlotWidth * theme.columnWidthRatio
 
-        // 2. X 位置：类目中心经视口映射（缩放/平移自动跟随），再定位到系列子槽
-        let seriesOffset = CGFloat(seriesIndex) * subSlotWidth  // 系列偏移
+        // 2. 组内间距：nil = 柱宽余量（1 - ratio，旧行为）；显式设置则独立可调
+        //    （clamp 到组不超槽：n×柱宽 + (n-1)×间距 ≤ 槽宽）
+        let innerGap: CGFloat
+        if let ratio = theme.columnInnerSpacingRatio {
+            let fit = seriesCount > 1
+                ? (slotWidth - columnWidth * CGFloat(seriesCount)) / CGFloat(seriesCount - 1)
+                : 0
+            innerGap = min(ratio * subSlotWidth, max(0, fit))
+        } else {
+            innerGap = subSlotWidth - columnWidth
+        }
+
+        // 3. X 位置：类目中心经视口映射（缩放/平移自动跟随）；组区域两侧留组间距，
+        //    组内柱按（柱宽 + 间距）排布后整体居中；组放不下时柱与间距等比收窄
+        let groupRegion = slotWidth * (1 - theme.columnGroupSpacingRatio)
+        var barWidth = columnWidth
+        var gap = innerGap
+        let count = CGFloat(max(seriesCount, 1))
+        let desired = barWidth * count + gap * CGFloat(max(seriesCount - 1, 0))
+        if desired > groupRegion, desired > 0 {
+            let scale = groupRegion / desired
+            barWidth *= scale
+            gap *= scale
+        }
+        let groupWidth = barWidth * count + gap * CGFloat(max(seriesCount - 1, 0))
         let centerX = point(x: Double(categoryIndex), y: 0, viewport: viewport, plotFrame: plotArea).x
-        let columnX = centerX - slotWidth / 2 + seriesOffset + (subSlotWidth - columnWidth) / 2
+        let groupStart = centerX - groupRegion / 2 + (groupRegion - groupWidth) / 2
+        let columnX = groupStart + CGFloat(seriesIndex) * (barWidth + gap)
 
         // 3. 计算数据点对应的 Y 坐标（使用现有的 point 函数）
         let valueY = point(x: Double(categoryIndex), y: dataPoint, viewport: viewport,
@@ -457,11 +481,11 @@ public enum CartesianGeometry {
         if dataPoint >= 0 {
             // 正值：从基准线向上到 valueY
             let height = startY - valueY
-            return CGRect(x: columnX, y: valueY, width: columnWidth, height: height)
+            return CGRect(x: columnX, y: valueY, width: barWidth, height: height)
         } else {
             // 负值：从 valueY 向下到基准线
             let height = valueY - startY
-            return CGRect(x: columnX, y: startY, width: columnWidth, height: height)
+            return CGRect(x: columnX, y: startY, width: barWidth, height: height)
         }
     }
 

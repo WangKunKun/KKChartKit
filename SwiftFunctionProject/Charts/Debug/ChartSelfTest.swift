@@ -657,6 +657,57 @@ public enum ChartSelfTest {
         let secondColumnX = colPlot.minX + colPlot.width / 3 * 1 + (colPlot.width / 3 * 0.2) / 2
         assert(abs(posRect.minX - secondColumnX) < 0.001, "柱体 X 位置应正确")
 
+        // —— 柱间距自定义（组内间距 / 组间距；默认值必须与旧行为逐点一致）——
+        // 双系列默认布局（老行为）：每柱居子槽中心，组内间隙 = 子槽 × (1-ratio)
+        let twoVP = CartesianViewport(xMin: -0.5, xMax: 1.5, yMin: 0, yMax: 100)
+        let twoSlot = colPlot.width / 2
+        let twoSub = twoSlot / 2
+        let r0 = CartesianGeometry.columnRect(dataPoint: 50, categoryIndex: 0, viewport: twoVP,
+                                               plotArea: colPlot, theme: colTheme,
+                                               zeroY: colPlot.maxY, seriesIndex: 0, seriesCount: 2)
+        let r1 = CartesianGeometry.columnRect(dataPoint: 50, categoryIndex: 0, viewport: twoVP,
+                                               plotArea: colPlot, theme: colTheme,
+                                               zeroY: colPlot.maxY, seriesIndex: 1, seriesCount: 2)
+        let oldX0 = colPlot.minX + (twoSub - twoSub * 0.8) / 2
+        let oldX1 = colPlot.minX + twoSub + (twoSub - twoSub * 0.8) / 2
+        assert(abs(r0.minX - oldX0) < 0.001 && abs(r1.minX - oldX1) < 0.001,
+               "默认（nil 内距）双系列布局应与旧行为一致，got \(r0.minX) vs \(oldX0)")
+
+        // 组内间距显式 0：两柱紧贴（组整体居中）
+        var tGap0 = colTheme
+        tGap0.columnInnerSpacingRatio = 0
+        let g0 = CartesianGeometry.columnRect(dataPoint: 50, categoryIndex: 0, viewport: twoVP,
+                                              plotArea: colPlot, theme: tGap0,
+                                              zeroY: colPlot.maxY, seriesIndex: 0, seriesCount: 2)
+        let g1 = CartesianGeometry.columnRect(dataPoint: 50, categoryIndex: 0, viewport: twoVP,
+                                              plotArea: colPlot, theme: tGap0,
+                                              zeroY: colPlot.maxY, seriesIndex: 1, seriesCount: 2)
+        assert(abs(g1.minX - g0.maxX) < 0.001, "组内间距 0 时相邻柱应紧贴，got \(g0) \(g1)")
+
+        // 组内间距显式 0.5：间隙 = 0.5 × 子槽，但柱宽优先（clamp 到组恰好放满：80+20=100）
+        var tGapH = colTheme
+        tGapH.columnInnerSpacingRatio = 0.5
+        let h0 = CartesianGeometry.columnRect(dataPoint: 50, categoryIndex: 0, viewport: twoVP,
+                                              plotArea: colPlot, theme: tGapH,
+                                              zeroY: colPlot.maxY, seriesIndex: 0, seriesCount: 2)
+        let h1 = CartesianGeometry.columnRect(dataPoint: 50, categoryIndex: 0, viewport: twoVP,
+                                              plotArea: colPlot, theme: tGapH,
+                                              zeroY: colPlot.maxY, seriesIndex: 1, seriesCount: 2)
+        let fitGap = (twoSlot - twoSub * 0.8 * 2) / 1   // 柱宽不变前提下的最大间隙
+        assert(abs((h1.minX - h0.maxX) - fitGap) < 0.001,
+               "组内间距 0.5 应为柱宽优先的 clamp 值，got \(h1.minX - h0.maxX) vs \(fitGap)")
+        assert(abs(h0.width - twoSub * 0.8) < 0.001, "柱宽不应受组内间距影响")
+
+        // 组间距 0.5：组区域收窄一半并居中（单系列下柱中心不变）
+        var tGroup = colTheme
+        tGroup.columnGroupSpacingRatio = 0.5
+        let grp = CartesianGeometry.columnRect(dataPoint: 50, categoryIndex: 0, viewport: twoVP,
+                                               plotArea: colPlot, theme: tGroup,
+                                               zeroY: colPlot.maxY, seriesIndex: 0, seriesCount: 1)
+        let catCenter = CartesianGeometry.point(x: 0, y: 0, viewport: twoVP, plotFrame: colPlot).x
+        assert(abs(grp.midX - catCenter) < 0.001, "组间距下柱仍应居类目中心，got \(grp.midX) vs \(catCenter)")
+        assert(grp.width < twoSlot, "组间距应使柱变窄（组区域收窄），got \(grp.width)")
+
         // —— CartesianGeometry.barRect ——
         let barVP = CartesianViewport(xMin: 0, xMax: 100, yMin: -0.5, yMax: 2.5)
         let barZeroX = CartesianGeometry.zeroAxisPosition(viewport: barVP, plotArea: colPlot, isHorizontal: true)

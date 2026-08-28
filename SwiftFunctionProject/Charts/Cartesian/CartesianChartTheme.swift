@@ -69,6 +69,11 @@ public struct CartesianChartTheme: HYMChartTheme {
     // ===== 柱体外观 =====
     /// 柱体宽度比例（0.1 ~ 1.0，默认 0.8 = 80% 宽度，20% 间距）
     public var columnWidthRatio: CGFloat
+    /// 组间距：相邻类目组之间空隙占槽宽的比例（0...0.5；0 = 组占满槽位，现状）。
+    public var columnGroupSpacingRatio: CGFloat
+    /// 组内相邻柱间距占子槽宽的比例。nil = 自动 = 柱宽余量（1 - columnWidthRatio，现状）；
+    /// 设值后组内间距独立可调，柱宽仍由 columnWidthRatio 决定（超槽自动 clamp）。
+    public var columnInnerSpacingRatio: CGFloat?
 
     /// 柱体圆角半径（默认 4）
     public var columnCornerRadius: CGFloat
@@ -116,6 +121,8 @@ public struct CartesianChartTheme: HYMChartTheme {
         showsEntranceAnimation: Bool = true,
         showsTooltipOnHit: Bool = true,
         columnWidthRatio: CGFloat = 0.8,
+        columnGroupSpacingRatio: CGFloat = 0,
+        columnInnerSpacingRatio: CGFloat? = nil,
         columnCornerRadius: CGFloat = 4,
         columnBorderColor: UIColor? = nil,
         columnBorderWidth: CGFloat = 1,
@@ -148,6 +155,8 @@ public struct CartesianChartTheme: HYMChartTheme {
         self.showsEntranceAnimation = showsEntranceAnimation
         self.showsTooltipOnHit = showsTooltipOnHit
         self.columnWidthRatio = max(0.1, min(1.0, columnWidthRatio))
+        self.columnGroupSpacingRatio = max(0, min(0.5, columnGroupSpacingRatio))
+        self.columnInnerSpacingRatio = columnInnerSpacingRatio.map { max(0, min(0.5, $0)) }
         self.columnCornerRadius = max(0, columnCornerRadius)
         self.columnBorderColor = columnBorderColor
         self.columnBorderWidth = max(0, columnBorderWidth)
