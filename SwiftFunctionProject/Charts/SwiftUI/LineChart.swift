@@ -8,19 +8,28 @@ public struct LineChart: View {
     private let onHit: ((LineHitTarget, HYMChartGesture) -> Void)?
     private let isZoomEnabled: Bool
     private let minimumVisibleCategories: Int
+    private let isDragDecelerationEnabled: Bool
+    private let isHighlightPerDragEnabled: Bool
+    private let isRubberBandEnabled: Bool
 
     public init(model: CartesianChartModel,
                 theme: CartesianChartTheme = CartesianChartTheme(),
                 playsAnimationOnAppear: Bool = true,
                 onHit: ((LineHitTarget, HYMChartGesture) -> Void)? = nil,
                 isZoomEnabled: Bool = false,
-                minimumVisibleCategories: Int = 12) {
+                minimumVisibleCategories: Int = 12,
+                isDragDecelerationEnabled: Bool = true,
+                isHighlightPerDragEnabled: Bool = true,
+                isRubberBandEnabled: Bool = true) {
         self.model = model
         self.theme = theme
         self.playsAnimationOnAppear = playsAnimationOnAppear
         self.onHit = onHit
         self.isZoomEnabled = isZoomEnabled
         self.minimumVisibleCategories = minimumVisibleCategories
+        self.isDragDecelerationEnabled = isDragDecelerationEnabled
+        self.isHighlightPerDragEnabled = isHighlightPerDragEnabled
+        self.isRubberBandEnabled = isRubberBandEnabled
     }
 
     public var body: some View {
@@ -28,7 +37,10 @@ public struct LineChart: View {
                                playsAnimationOnAppear: playsAnimationOnAppear,
                                onHit: onHit,
                                isZoomEnabled: isZoomEnabled,
-                               minimumVisibleCategories: minimumVisibleCategories)
+                               minimumVisibleCategories: minimumVisibleCategories,
+                               isDragDecelerationEnabled: isDragDecelerationEnabled,
+                               isHighlightPerDragEnabled: isHighlightPerDragEnabled,
+                               isRubberBandEnabled: isRubberBandEnabled)
     }
 }
 
@@ -39,12 +51,18 @@ private struct LineChartRepresentable: UIViewRepresentable {
     let onHit: ((LineHitTarget, HYMChartGesture) -> Void)?
     let isZoomEnabled: Bool
     let minimumVisibleCategories: Int
+    let isDragDecelerationEnabled: Bool
+    let isHighlightPerDragEnabled: Bool
+    let isRubberBandEnabled: Bool
 
     func makeUIView(context: Context) -> HYMChartView<LineChartRenderer> {
         let chart = HYMChartView<LineChartRenderer>(frame: .zero)
         chart.showsTooltipOnHit = true
         chart.isZoomEnabled = isZoomEnabled
         chart.minimumVisibleCategories = minimumVisibleCategories
+        chart.isDragDecelerationEnabled = isDragDecelerationEnabled
+        chart.isHighlightPerDragEnabled = isHighlightPerDragEnabled
+        chart.isRubberBandEnabled = isRubberBandEnabled
         chart.onHit = { target, gesture in
             if let h = target as? LineHitTarget { onHit?(h, gesture) }
         }

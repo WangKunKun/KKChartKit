@@ -597,6 +597,27 @@ public enum ChartSelfTest {
             viewport: CartesianViewport(xMin: 1.2, xMax: 1.8, yMin: 0, yMax: 1), count: 4)
         assert(vrNarrow == 1..<3, "narrow viewport should show 1..<3, got \(vrNarrow)")
 
+        // —— pannedXRange 橡皮筋（越界阻尼 + 余量上限；硬模式行为不变）——
+        let rbFull = 0.0...100.0
+        // 硬模式回归：窗口=全量域、再往左推 → 原地不动
+        assert(CartesianGeometry.pannedXRange(from: rbFull, screenDeltaX: 100, plotWidth: 200,
+                                              fullDomain: rbFull) == rbFull,
+               "硬 clamp 模式贴边推动应原地不动")
+        // 橡皮筋：同上推动 100px（值 50）→ 贴边阻尼 0.4 → 越界 20，余量上限 25
+        let rb = CartesianGeometry.pannedXRange(from: rbFull, screenDeltaX: 100, plotWidth: 200,
+                                                fullDomain: rbFull, overshootMargin: 25)
+        assert(abs(rb.lowerBound - (-20)) < 1e-9 && abs(rb.upperBound - 80) < 1e-9,
+               "橡皮筋越界应为 -20...80（阻尼 0.4），got \(rb)")
+        // 余量上限：巨大位移也越不过 25
+        let rbMax = CartesianGeometry.pannedXRange(from: rbFull, screenDeltaX: 10000, plotWidth: 200,
+                                                   fullDomain: rbFull, overshootMargin: 25)
+        assert(abs(rbMax.lowerBound - (-25)) < 1e-9, "越界不得超出余量 25，got \(rbMax)")
+        // 域内正常平移不受阻尼影响
+        let rbMid = CartesianGeometry.pannedXRange(from: 25.0...75.0, screenDeltaX: 100, plotWidth: 200,
+                                                   fullDomain: rbFull, overshootMargin: 25)
+        assert(abs(rbMid.lowerBound) < 1e-9 && abs(rbMid.upperBound - 50) < 1e-9,
+               "域内平移不受橡皮筋影响，got \(rbMid)")
+
         // —— CartesianGeometry.columnRect ——
         let colVP = CartesianViewport(xMin: -0.5, xMax: 2.5, yMin: 0, yMax: 100)
         let colPlot = CGRect(x: 50, y: 40, width: 200, height: 160)

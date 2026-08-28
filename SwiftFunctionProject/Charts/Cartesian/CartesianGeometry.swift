@@ -4,6 +4,9 @@ import UIKit
 /// 轴系图表几何纯函数（plot 布局、值↔屏幕映射；DEBUG 自检覆盖）。
 public enum CartesianGeometry {
 
+    /// 橡皮筋越界余量占全量跨度的比例（拖出边界的手感上限）。
+    public static let rubberBandMarginRatio = 0.25
+
     /// 计算 plot 区（网格 + series 绘制区）frame。
     ///
     /// 布局模型：内容 inset → 顶部让出标题 → 左侧让出 y 刻度 label → 底部让出 x 刻度 label。
@@ -109,26 +112,44 @@ public enum CartesianGeometry {
 
     /// 平移 X 视口窗口（屏幕像素 → 值域偏移），并 clamp 到全量域。
     ///
+    /// 橡皮筋模式（`overshootMargin` > 0）：窗口贴着全量域边缘继续推时，
+    /// 位移按 `rubberDamping` 阻尼衰减（越界部分走不动了），且允许越界至多
+    /// `overshootMargin`（值域单位）——松手后由调用方回弹。
     /// - Parameters:
     ///   - range: 平移前的窗口
     ///   - screenDeltaX: 屏幕位移（px，右滑为正 → 内容右移 → 窗口左移看更早数据）
     ///   - plotWidth: plot 区宽度（像素↔值域换算基准）
-    ///   - fullDomain: 全量域
+    ///   - fullDomain: 全量域（窗口不得越出）
+    ///   - overshootMargin: 橡皮筋越界余量（值域单位；0 = 硬 clamp，旧行为）
+    ///   - rubberDamping: 越界方向的位移阻尼（0...1，默认 0.4）
     public static func pannedXRange(from range: ClosedRange<Double>,
                                     screenDeltaX: CGFloat,
                                     plotWidth: CGFloat,
-                                    fullDomain: ClosedRange<Double>) -> ClosedRange<Double> {
+                                    fullDomain: ClosedRange<Double>,
+                                    overshootMargin: Double = 0,
+                                    rubberDamping: Double = 0.4) -> ClosedRange<Double> {
         let span = range.upperBound - range.lowerBound
         guard span > 0, plotWidth > 0 else { return fullDomain }
-        let offset = Double(screenDeltaX) / Double(plotWidth) * span
+        var offset = Double(screenDeltaX) / Double(plotWidth) * span
+
+        // 贴边继续推：越界方向位移阻尼（视口已在边缘且仍往外推时）
+        if overshootMargin > 0 {
+            let atLowerEdge = range.lowerBound <= fullDomain.lowerBound + 1e-9 && offset > 0
+            let atUpperEdge = range.upperBound >= fullDomain.upperBound - 1e-9 && offset < 0
+            if atLowerEdge || atUpperEdge { offset *= min(max(rubberDamping, 0), 1) }
+        }
+
         var lo = range.lowerBound - offset
         var hi = range.upperBound - offset
-        if lo < fullDomain.lowerBound {
-            lo = fullDomain.lowerBound
+        // clamp：硬模式收紧在 fullDomain；橡皮筋模式放宽到 ±overshootMargin
+        let lowerBound = fullDomain.lowerBound - overshootMargin
+        let upperBound = fullDomain.upperBound + overshootMargin
+        if lo < lowerBound {
+            lo = lowerBound
             hi = lo + span
         }
-        if hi > fullDomain.upperBound {
-            hi = fullDomain.upperBound
+        if hi > upperBound {
+            hi = upperBound
             lo = hi - span
         }
         return lo...hi

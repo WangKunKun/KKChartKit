@@ -55,6 +55,15 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
       didSet { xAxisZoomable?.minimumXAxisCategories = max(2, minimumVisibleCategories) }
     }
 
+    // MARK: - 手势体验增强（参照 Charts/AAChartKit 交互惯例）
+    /// 拖拽松手后的惯性减速（默认开）。
+    public var isDragDecelerationEnabled: Bool = true
+    /// 全量视口（未缩放）时拖拽自动变为「滑动选中」：手指划过逐个高亮数据点（默认开）。
+    /// 已缩放/平移过的图表拖拽仍是移动视口。
+    public var isHighlightPerDragEnabled: Bool = true
+    /// 把视口拖出边界时的橡皮筋越界 + 松手回弹（默认开）。
+    public var isRubberBandEnabled: Bool = true
+
     /// 命中弹窗的「内容 view」提供者（外部自定义弹窗的便利模式）。
     ///
     /// 设了它：SDK 命中时调用获取内容 view，套统一外壳(背景/圆角/箭头)，
@@ -73,6 +82,12 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     private var lastPinchScale: CGFloat = 1.0
     /// 平移增量基准（上一帧累计 translation.x，差值即本次增量，无累计漂移）。
     private var lastPanTranslationX: CGFloat = 0
+    /// 当前 pan 的模式（拖视口 / 全量视图下滑动选中）。
+    private var panIsHighlightMode = false
+    /// 惯性减速/回弹动画专用（与入场动画的 animator 分开，互不干扰）。
+    private let decelAnimator = HYMChartValueAnimator()
+    /// 减速消费进度（上一帧 ease-out 进度，差值即本帧位移占比）。
+    private var lastDecelProgress: Double = 0
 
     private lazy var zoomGesture = UIPinchGestureRecognizer(target: self, action: #selector(onPinch(_:)))
     private lazy var panGesture = UIPanGestureRecognizer(target: self, action: #selector(onPan(_:)))
@@ -114,6 +129,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     ///
     /// 外部数据/主题变化会重置 X 轴视口到全量（手势缩放状态不跨数据更新保留）。
     public func configure(model: Renderer.Model, theme: Renderer.Theme) {
+        stopDeceleration()
         self.model = model
         self.theme = theme
         xAxisZoomable?.resetXAxisViewport()
@@ -183,19 +199,23 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
             })
     }
 
-    // MARK: - 触摸命中
+    // MARK: - 触摸命中（tap 与拖拽滑动选中共用）
     @objc private func onTap(_ gr: UITapGestureRecognizer) {
-        let p = gr.location(in: self)
-        let target = renderer.hitTest(p)
+        handleHit(at: gr.location(in: self), gesture: .tap)
+    }
+
+    /// 命中分发：选中 + onHit 回调 + 三层弹窗 fallback（popup > onHitLocated > 内置 tooltip）。
+    private func handleHit(at point: CGPoint, gesture: HYMChartGesture) {
+        let target = renderer.hitTest(point)
         renderer.applySelection(target)
 
         if let target {
-            onHit?(target, .tap)                       // 始终：命中事件通知
+            onHit?(target, gesture)                      // 始终：命中事件通知
 
             let ctx = HYMChartHitContext(
                 target: target,
                 frame: renderer.hitFrame(for: target) ?? .zero,
-                location: p)
+                location: point)
 
             if popupContentProvider != nil {           // ① popup 模式（最高优先）
                 if let cv = popupContentProvider?(ctx),
@@ -206,7 +226,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
                     tooltipController?.hide()
                 }
             } else if onHitLocated != nil {            // ② onHitLocated 外部全权
-                onHitLocated?(ctx, .tap)
+                onHitLocated?(ctx, gesture)
                 tooltipController?.hide()
             } else {                                   // ③ 内置 text tooltip
                 updateTooltip(for: target)
@@ -215,7 +235,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
             // 未命中：按激活模式镜像处理（popup 模式不触发 onHitLocated，与命中分支对称）
             tooltipController?.hide()
             if popupContentProvider == nil, onHitLocated != nil {
-                onHitLocated?(nil, .tap)
+                onHitLocated?(nil, gesture)
             }
         }
     }
@@ -240,23 +260,88 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         }
     }
 
-    /// 单指左右平移 X 视口（每帧取 translation 差值作增量，clamp 到全量域）。
+    /// 单指左右手势：
+    /// - 图表处于全量视口（未缩放/平移过）且开启滑动选中 → 「滑动选中」模式：手指划过逐个高亮数据点；
+    /// - 否则 → 拖移 X 视口（橡皮筋可越界），松手时惯性减速 / 回弹。
     @objc private func onPan(_ gr: UIPanGestureRecognizer) {
         guard isZoomEnabled, let zoomable = xAxisZoomable else { return }
 
         switch gr.state {
         case .began:
             finishEntranceAnimationIfNeeded()
+            stopDeceleration()
             lastPanTranslationX = 0
+            // 全量视口时拖视口无意义（clamp 后原地不动）→ 自动切换为滑动选中
+            let fullyZoomedOut = zoomable.xAxisZoomScale <= 1.0001
+            panIsHighlightMode = isHighlightPerDragEnabled && fullyZoomedOut
         case .changed:
+            if panIsHighlightMode {
+                handleHit(at: gr.location(in: self), gesture: .drag)
+                return
+            }
             let total = gr.translation(in: self).x
             let delta = total - lastPanTranslationX
             lastPanTranslationX = total
             guard delta != 0 else { return }
-            zoomable.panXAxis(screenDeltaX: delta)
+            zoomable.panXAxis(screenDeltaX: delta, allowsRubberBand: isRubberBandEnabled)
+        case .ended, .cancelled:
+            guard !panIsHighlightMode else { return }
+            if isRubberBandEnabled, zoomable.isXAxisOvershooting {
+                reboundXAxis(zoomable)         // 越界 → 回弹优先（不叠加惯性）
+            } else if isDragDecelerationEnabled, gr.state == .ended {
+                startDeceleration(zoomable, velocity: gr.velocity(in: self).x)
+            }
         default:
             break
         }
+    }
+
+    /// 惯性减速：松手速度经指数衰减继续平移视口（ease-out 驱动，视口顶到边界即停）。
+    private func startDeceleration(_ zoomable: HYMChartXAxisZoomable, velocity: CGFloat) {
+        let speedThreshold: CGFloat = 200          // px/s 以下视为轻拖，不减速
+        guard velocity > speedThreshold || velocity < -speedThreshold else { return }
+        let timeConstant: Double = 0.35            // 衰减时间常数（秒）：总位移 ≈ v₀ × τ
+        let totalDistance = Double(velocity) * timeConstant
+        lastDecelProgress = 0
+        decelAnimator.startEaseOut(duration: 0.7,
+            handler: { [weak self] progress in
+                guard let self else { return }
+                let delta = totalDistance * (progress - self.lastDecelProgress)
+                self.lastDecelProgress = progress
+                let before = zoomable.xAxisViewport
+                zoomable.panXAxis(screenDeltaX: CGFloat(delta))
+                // 视口已顶到边界（无变化）→ 提前结束
+                if zoomable.xAxisViewport == before {
+                    self.decelAnimator.stop()
+                }
+            },
+            completion: { [weak self] in self?.stopDeceleration() })
+    }
+
+    /// 橡皮筋回弹：从当前越界视口 ease-out 插值回全量域内的钳制位置。
+    private func reboundXAxis(_ zoomable: HYMChartXAxisZoomable) {
+        let full = zoomable.fullXAxisDomain
+        let start = zoomable.xAxisViewport
+        let span = start.upperBound - start.lowerBound
+        // 目标：越界侧贴回全量域边缘
+        let targetLo: Double
+        if start.lowerBound < full.lowerBound { targetLo = full.lowerBound }
+        else { targetLo = min(start.lowerBound, full.upperBound - span) }
+        lastDecelProgress = 0
+        decelAnimator.startEaseOut(duration: 0.25,
+            handler: { [weak self] progress in
+                guard let self else { return }
+                let t = progress - self.lastDecelProgress
+                self.lastDecelProgress = progress
+                let lo = start.lowerBound + (targetLo - start.lowerBound) * t
+                zoomable.setXAxisViewport(lo...(lo + span))
+            },
+            completion: { [weak self] in self?.stopDeceleration() })
+    }
+
+    /// 停止惯性/回弹（新手势开始、configure 重置时调用）。
+    private func stopDeceleration() {
+        decelAnimator.stop()
     }
 
     /// 双击重置 X 视口到全量数据。
@@ -273,6 +358,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     ///    与平移中的内容错开形成"残影"——必须无动画瞬隐）。
     private func finishEntranceAnimationIfNeeded() {
         animator.stop()
+        decelAnimator.stop()
         pendingAnimation = false
         CATransaction.begin()
         CATransaction.setDisableActions(true)
@@ -306,6 +392,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
 
     deinit {
         animator.stop()                       // 打破 displayLink ↔ animator 循环
+        decelAnimator.stop()
         tooltipController?.removeFromSuperview()
         renderer.unmount(from: self)          // 清理 layer/子视图
     }

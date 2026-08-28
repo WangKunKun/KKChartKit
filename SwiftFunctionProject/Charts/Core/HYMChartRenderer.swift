@@ -102,6 +102,21 @@ public protocol HYMChartXAxisZoomable: HYMChartRenderer {
     ///   与 `zoomXAxis` 同为增量语义，连续调用自动复合。
     func panXAxis(screenDeltaX: CGFloat)
 
+    /// 增量平移 X 视口（橡皮筋变体）。
+    ///
+    /// `allowsRubberBand` 为 true 时允许把视口拖出全量域一段距离（阻尼衰减，
+    /// 越界余量上限为全量跨度的 25%），供松手回弹；false 与 `panXAxis` 一致。
+    func panXAxis(screenDeltaX: CGFloat, allowsRubberBand: Bool)
+
+    /// 直接设置 X 视口（值域）。
+    ///
+    /// 钳制到全量域 ± 橡皮筋余量内。用于程序化定位与回弹动画的逐帧插值，
+    /// 常规手势请用增量接口。
+    func setXAxisViewport(_ range: ClosedRange<Double>)
+
+    /// 当前视口是否越出了全量域（橡皮筋拖拽中）。
+    var isXAxisOvershooting: Bool { get }
+
     /// 重置视口到全量数据（双击等场景）。
     func resetXAxisViewport()
 }

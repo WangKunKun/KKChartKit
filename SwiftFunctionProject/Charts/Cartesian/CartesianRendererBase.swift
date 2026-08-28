@@ -131,11 +131,34 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
     }
 
     public func panXAxis(screenDeltaX: CGFloat) {
+        panXAxis(screenDeltaX: screenDeltaX, allowsRubberBand: false)
+    }
+
+    /// 橡皮筋平移：越界方向阻尼 + 允许拖出全量域至多 25% 跨度（松手由容器回弹）。
+    public func panXAxis(screenDeltaX: CGFloat, allowsRubberBand: Bool) {
+        let margin = allowsRubberBand
+            ? (fullXRange.upperBound - fullXRange.lowerBound) * CartesianGeometry.rubberBandMarginRatio
+            : 0
         applyUserXRange(CartesianGeometry.pannedXRange(
             from: currentViewport.xDomain,
             screenDeltaX: screenDeltaX,
             plotWidth: currentPlotFrame.width,
-            fullDomain: fullXRange))
+            fullDomain: fullXRange,
+            overshootMargin: margin))
+    }
+
+    /// 直接设置 X 视口（回弹动画逐帧插值用）：钳制到全量域 ± 橡皮筋余量。
+    public func setXAxisViewport(_ range: ClosedRange<Double>) {
+        let margin = (fullXRange.upperBound - fullXRange.lowerBound) * CartesianGeometry.rubberBandMarginRatio
+        let lo = min(max(range.lowerBound, fullXRange.lowerBound - margin), fullXRange.upperBound)
+        let hi = max(min(range.upperBound, fullXRange.upperBound + margin), fullXRange.lowerBound)
+        applyUserXRange(min(lo, hi)...max(lo, hi))
+    }
+
+    /// 当前视口是否越出全量域（橡皮筋拖拽中，松手须回弹）。
+    public var isXAxisOvershooting: Bool {
+        currentViewport.xMin < fullXRange.lowerBound - 1e-9
+            || currentViewport.xMax > fullXRange.upperBound + 1e-9
     }
 
     public func resetXAxisViewport() {
@@ -340,8 +363,11 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
         if let user = userXRange {
             let fullSpan = fullXRange.upperBound - fullXRange.lowerBound
             let span = min(max(user.upperBound - user.lowerBound, minimumXSpan), fullSpan)
-            var lo = min(max(user.lowerBound, fullXRange.lowerBound), fullXRange.upperBound - span)
-            lo = max(lo, fullXRange.lowerBound)
+            // clamp 域放宽到全量域 ± 橡皮筋余量：越界窗口（拖拽回弹前）也可渲染
+            let rubberMargin = fullSpan * CartesianGeometry.rubberBandMarginRatio
+            var lo = min(max(user.lowerBound, fullXRange.lowerBound - rubberMargin),
+                         fullXRange.upperBound + rubberMargin - span)
+            lo = max(lo, fullXRange.lowerBound - rubberMargin)
             effectiveX = lo...(lo + span)
         }
 

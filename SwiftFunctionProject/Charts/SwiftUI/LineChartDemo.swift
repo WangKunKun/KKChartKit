@@ -38,6 +38,11 @@ struct LineChartDemo: View {
     /// X 轴时间轴模式：按实际数据量把 24h 均分到每个点（288 点 = 5 分钟/点，1440 点 = 1 分钟/点）
     @State private var useTimeAxis = true
 
+    // —— 手势体验增强（惯性减速 / 滑动选中 / 橡皮筋）——
+    @State private var decelerationOn = true
+    @State private var highlightPerDragOn = true
+    @State private var rubberBandOn = true
+
     // —— 面积填充（面积图形态）——
     @State private var showsArea = false
     /// 面积渐变顶部浓度（自动派生渐变的起始透明度）
@@ -69,7 +74,10 @@ struct LineChartDemo: View {
                                 + "系列 \(target.seriesIndex + 1) · 值 = \(target.value) · 手势 = \(gesture)")
                       },
                       isZoomEnabled: isZoomEnabled,
-                      minimumVisibleCategories: Int(minimumVisibleCategories))
+                      minimumVisibleCategories: Int(minimumVisibleCategories),
+                      isDragDecelerationEnabled: decelerationOn,
+                      isHighlightPerDragEnabled: highlightPerDragOn,
+                      isRubberBandEnabled: rubberBandOn)
                 .frame(height: 280)
                 .padding(.horizontal)
                 .padding(.top, 8)
@@ -206,6 +214,9 @@ struct LineChartDemo: View {
         ])
         let interactionSection = ChartDemoPanel.DemoSection(title: "交互", items: [
             .toggle(label: "启用缩放（X轴捏合/平移，双击重置）", value: $isZoomEnabled),
+            .toggle(label: "拖拽惯性减速", value: $decelerationOn),
+            .toggle(label: "滑动选中（全量视图拖拽=划过高亮）", value: $highlightPerDragOn),
+            .toggle(label: "边界橡皮筋（越界回弹）", value: $rubberBandOn),
             .slider(label: "放大下限（最小可见类目数）", value: $minimumVisibleCategories, range: 2...24, step: 1),
             .toggle(label: "24小时时间轴（按数据量均分）", value: $useTimeAxis),
         ])

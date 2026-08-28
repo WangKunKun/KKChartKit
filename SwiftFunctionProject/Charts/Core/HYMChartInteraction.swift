@@ -4,6 +4,8 @@ import CoreGraphics
 /// 交互手势类型（预留扩展）
 public enum HYMChartGesture {
     case tap
+    /// 拖拽（全量视口下的"滑动选中"：手指划过逐个高亮数据点）
+    case drag
     // 预留扩展：longPress 等
 }
 
