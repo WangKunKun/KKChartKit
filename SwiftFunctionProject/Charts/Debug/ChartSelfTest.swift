@@ -326,11 +326,11 @@ public enum ChartSelfTest {
             series: [CartesianSeriesElement(name: "a", data: [3.0, 97.0]),
                      CartesianSeriesElement(name: "b", data: [-5.0])])
         assert(cartModel.maxPointCount == 2, "maxPointCount should be 2, got \(cartModel.maxPointCount)")
-        let db = cartModel.dataBounds!
+        let db = cartModel.dataBounds()!
         assert(abs(db.min - (-5.0)) < 0.001 && abs(db.max - 97.0) < 0.001,
                "dataBounds should be (-5, 97), got \(String(describing: db))")
         // 空 series → nil
-        assert(CartesianChartModel(series: []).dataBounds == nil, "empty series should have nil bounds")
+        assert(CartesianChartModel(series: []).dataBounds() == nil, "empty series should have nil bounds")
         // 类目标签：显式优先，空 → 自动数字 1...n
         assert(CartesianChartModel(series: []).categoryLabels == [],
                "empty categories should be []")
@@ -720,7 +720,75 @@ public enum ChartSelfTest {
         // —— 值轴刻度自定义（tickCount / tickPositions / labelFormatter）——
         runTickCustomizationSelfTest()
 
+        // —— 双轴/堆叠模型与几何纯函数 ——
+        runDualAxisGeometrySelfTest()
+
         print("✅ ChartSelfTest passed")
+    }
+
+    /// 双轴分组边界、按轴堆叠、几何函数 domain 参数。
+    static func runDualAxisGeometrySelfTest() {
+        // 1) yAxisIndex clamp：越界回落 0/1
+        let s0 = CartesianSeriesElement(name: "a", data: [1])
+        assert(s0.effectiveYAxisIndex == 0, "默认绑主轴")
+        assert(CartesianSeriesElement(name: "b", data: [1], yAxisIndex: 1).effectiveYAxisIndex == 1,
+               "1 绑次轴")
+        assert(CartesianSeriesElement(name: "c", data: [1], yAxisIndex: 7).effectiveYAxisIndex == 0,
+               "越界回落主轴")
+
+        // 2) dataBounds(yAxisIndex:) 分组（堆叠按轴分组累计）
+        let mA = CartesianSeriesElement(name: "a", data: [10, 40])
+        let mB = CartesianSeriesElement(name: "b", data: [20, 30], yAxisIndex: 1)
+        let dual = CartesianChartModel(series: [mA, mB], secondaryYAxis: CartesianAxisModel(kind: .value))
+        assert(dual.dataBounds(yAxisIndex: 0)!.min == 10 && dual.dataBounds(yAxisIndex: 0)!.max == 40,
+               "主轴组边界只含 axis0 系列")
+        assert(dual.dataBounds(yAxisIndex: 1)!.min == 20 && dual.dataBounds(yAxisIndex: 1)!.max == 30,
+               "次轴组边界只含 axis1 系列")
+        assert(CartesianChartModel(series: [mA]).dataBounds(yAxisIndex: 1) == nil,
+               "无绑定系列且无显式域 → nil")
+        // 单轴堆叠回归：dataBounds(yAxisIndex: 0) 与旧 dataBounds 语义一致
+        let stacked2 = CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, 20, 30]),
+                     CartesianSeriesElement(name: "b", data: [5, 15, 25])],
+            stacking: .normal)
+        let sb = stacked2.dataBounds(yAxisIndex: 0)!
+        assert(sb.min == 10 && sb.max == 55, "堆叠边界应为累计值 10...55，got \(sb)")
+
+        // 3) stackedValuesByAxis：跨轴不混叠、组内链式累计、与输入同序
+        let r = CartesianGeometry.stackedValuesByAxis(series: [mA, mB, mA])
+        assert(r[0] == [10, 40], "系列0（axis0 首个）= 原值")
+        assert(r[1] == [20, 30], "系列1（axis1 首个）= 原值，不与 axis0 混叠")
+        assert(r[2] == [20, 80], "系列2（axis0 第二个）= 10+10, 40+40")
+        // 全 0 轴时与 stackedValues 一致
+        let allZero = CartesianGeometry.stackedValuesByAxis(
+            series: [CartesianSeriesElement(name: "a", data: [10, 20, 30]),
+                     CartesianSeriesElement(name: "b", data: [5, 15, 25])])
+        assert(allZero == CartesianGeometry.stackedValues(
+            series: [CartesianSeriesElement(name: "a", data: [10, 20, 30]),
+                     CartesianSeriesElement(name: "b", data: [5, 15, 25])]),
+               "全主轴时应与 stackedValues 完全一致")
+
+        // 4) point yDomain 参数：同一 y 值在不同域上映到不同高度，nil = 现状
+        let vp = CartesianViewport(xMin: -0.5, xMax: 1.5, yMin: 0, yMax: 100)
+        let plot = CGRect(x: 0, y: 0, width: 100, height: 100)
+        let pMain = CartesianGeometry.point(x: 0, y: 50, viewport: vp, plotFrame: plot)
+        let pNil = CartesianGeometry.point(x: 0, y: 50, viewport: vp, plotFrame: plot, yDomain: nil)
+        assert(pMain == pNil, "yDomain nil 应等于现状")
+        let pSec = CartesianGeometry.point(x: 0, y: 50, viewport: vp, plotFrame: plot,
+                                           yDomain: 0...1000)
+        assert(abs(pSec.y - 95) < 0.001, "次轴域 0...1000 时 y=50 应在 95%（底部起 5% 高），got \(pSec.y)")
+
+        // 5) zeroAxisPosition valueDomain：混合域次轴零轴位置正确
+        let zSec = CartesianGeometry.zeroAxisPosition(
+            viewport: vp, plotArea: plot, isHorizontal: false, valueDomain: -100...100)
+        assert(abs(zSec - 50) < 0.001, "次轴 -100...100 零轴应在半高，got \(zSec)")
+
+        // 6) columnRect valueDomain：次轴系列的柱高按次轴域映射
+        let secRect = CartesianGeometry.columnRect(
+            dataPoint: 50, categoryIndex: 0, viewport: vp, valueDomain: 0...1000,
+            plotArea: plot, theme: CartesianChartTheme(), zeroY: 100)
+        assert(abs(secRect.maxY - 100) < 0.001 && abs(secRect.height - 5) < 0.001,
+               "50/1000 域柱高应为 plot 高的 1/20，got \(secRect)")
     }
 
     /// 值轴刻度四档优先级：tickPositions > tickInterval > tickCount > 自动；labelFormatter 文本。

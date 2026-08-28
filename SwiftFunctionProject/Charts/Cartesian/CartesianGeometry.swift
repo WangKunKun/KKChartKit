@@ -27,9 +27,11 @@ public enum CartesianGeometry {
     /// 类目模式下数据点 x 取索引值（域 -0.5...n-0.5 时点落在 band 中心）。
     public static func point(x: Double, y: Double,
                              viewport: CartesianViewport,
-                             plotFrame: CGRect) -> CGPoint {
+                             plotFrame: CGRect,
+                             yDomain: ClosedRange<Double>? = nil) -> CGPoint {
+        let domain = yDomain ?? viewport.yDomain
         let tx = (x - viewport.xMin) / max(viewport.xSpan, 1e-9)
-        let ty = (y - viewport.yMin) / max(viewport.ySpan, 1e-9)
+        let ty = (y - domain.lowerBound) / max(domain.upperBound - domain.lowerBound, 1e-9)
         return CGPoint(x: plotFrame.minX + tx * plotFrame.width,
                        y: plotFrame.maxY - ty * plotFrame.height)
     }
@@ -274,10 +276,11 @@ public enum CartesianGeometry {
     public static func zeroAxisPosition(
         viewport: CartesianViewport,
         plotArea: CGRect,
-        isHorizontal: Bool = false
+        isHorizontal: Bool = false,
+        valueDomain: ClosedRange<Double>? = nil
     ) -> CGFloat {
         if isHorizontal {
-            // 水平图（Bar）：返回 X 坐标
+            // 水平图（Bar）：返回 X 坐标（Bar 无次轴，不域参数化）
             if viewport.xMin >= 0 {
                 // 全正值域，零轴在左侧
                 return plotArea.minX
@@ -290,16 +293,17 @@ public enum CartesianGeometry {
                 return plotArea.minX + plotArea.width * ratio
             }
         } else {
-            // 垂直图（Column）：返回 Y 坐标
-            if viewport.yMin >= 0 {
+            // 垂直图（Column/Line）：返回 Y 坐标（valueDomain 供次轴系列使用）
+            let d = valueDomain ?? viewport.yDomain
+            if d.lowerBound >= 0 {
                 // 全正值域，零轴在底部
                 return plotArea.maxY
-            } else if viewport.yMax <= 0 {
+            } else if d.upperBound <= 0 {
                 // 全负值域，零轴在顶部
                 return plotArea.minY
             } else {
                 // 混合值域，零轴在内部（插值计算）
-                let ratio = -viewport.yMin / (viewport.yMax - viewport.yMin)
+                let ratio = -d.lowerBound / (d.upperBound - d.lowerBound)
                 return plotArea.maxY - plotArea.height * ratio
             }
         }
@@ -341,6 +345,26 @@ public enum CartesianGeometry {
         return stacked
     }
 
+    /// 按值轴分组的链式累计（双轴堆叠：跨轴不混叠）；返回与输入同序。
+    /// 系列 i 的累计 = 自身数据 + 同轴（effectiveYAxisIndex 相同）前一系列的累计；
+    /// 短系列补 0 对齐到最长长度。全主轴时与 `stackedValues` 结果完全一致。
+    public static func stackedValuesByAxis(series: [CartesianSeriesElement]) -> [[Double]] {
+        guard !series.isEmpty else { return [] }
+        let maxLength = series.map { $0.data.count }.max() ?? 0
+        guard maxLength > 0 else { return [] }
+        var running: [Int: [Double]] = [:]
+        var out: [[Double]] = []
+        for s in series {
+            let axis = s.effectiveYAxisIndex
+            var cum = running[axis] ?? [Double](repeating: 0, count: maxLength)
+            let padded = s.data + [Double](repeating: 0, count: max(0, maxLength - s.data.count))
+            cum = zip(cum, padded).map { $0 + $1 }
+            running[axis] = cum
+            out.append(cum)
+        }
+        return out
+    }
+
     /// 单个柱体位置（垂直图）。
     ///
     /// X 定位与槽宽均由 `viewport` 驱动：视口放大时柱体变宽并跟随视口
@@ -360,6 +384,7 @@ public enum CartesianGeometry {
         dataPoint: Double,
         categoryIndex: Int,
         viewport: CartesianViewport,
+        valueDomain: ClosedRange<Double>? = nil,
         plotArea: CGRect,
         theme: CartesianChartTheme,
         zeroY: CGFloat,
@@ -378,12 +403,14 @@ public enum CartesianGeometry {
         let columnX = centerX - slotWidth / 2 + seriesOffset + (subSlotWidth - columnWidth) / 2
 
         // 3. 计算数据点对应的 Y 坐标（使用现有的 point 函数）
-        let valueY = point(x: Double(categoryIndex), y: dataPoint, viewport: viewport, plotFrame: plotArea).y
+        let valueY = point(x: Double(categoryIndex), y: dataPoint, viewport: viewport,
+                           plotFrame: plotArea, yDomain: valueDomain).y
 
         // 4. 计算基准 Y 坐标（堆叠模式下使用）
         let startY: CGFloat
         if let baseline = baselineValue {
-            startY = point(x: Double(categoryIndex), y: baseline, viewport: viewport, plotFrame: plotArea).y
+            startY = point(x: Double(categoryIndex), y: baseline, viewport: viewport,
+                            plotFrame: plotArea, yDomain: valueDomain).y
         } else {
             startY = zeroY
         }

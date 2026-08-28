@@ -203,7 +203,7 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
         currentValueTicks = valueDomainDegenerate ? []
             : makeValueTicks(axis: model.yAxis,
                              domain: isHorizontalValueAxis ? currentViewport.xDomain : currentViewport.yDomain,
-                             bounds: model.dataBounds)
+                             bounds: model.dataBounds(yAxisIndex: 0))
         let leadingLabelWidth: CGFloat = isHorizontalValueAxis
             ? model.categoryLabels.map { textSize($0, font: cartTheme.tickLabelFont).width }.max() ?? 0
             : currentValueTicks.map { textSize(AxisRenderer.tickText($0, formatter: model.yAxis.labelFormatter),
@@ -279,7 +279,7 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
 
         // 值域：显式 min/max 同显式时直接用；否则 nice scale（显式端单独生效时与自动端合并）。
         // 注意：显式端与自动刻度不对齐时，首/末刻度与轴线间会有空隙（显式端优先的语义，与 Highcharts 一致）。
-        let bounds = model.dataBounds ?? (min: 0, max: 1)
+        let bounds = model.dataBounds(yAxisIndex: 0) ?? (min: 0, max: 1)
         let scale = NiceScaleGenerator.generate(
             dataMin: model.yAxis.min ?? bounds.min,
             dataMax: model.yAxis.max ?? bounds.max)

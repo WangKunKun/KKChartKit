@@ -62,12 +62,18 @@ public struct CartesianSeriesElement {
     public var color: UIColor?
     /// 负值数据点的覆盖颜色（nil = 使用 color）
     public var negativeColor: UIColor?
+    /// 绑定哪个值轴（0 = 主轴/左，1 = 次轴/右；Bar 水平图仅支持主轴）。
+    public var yAxisIndex: Int
+    /// clamp 后的有效轴索引（仅 1 绑次轴，其余——含越界——回落主轴 0）。
+    public var effectiveYAxisIndex: Int { yAxisIndex == 1 ? 1 : 0 }
 
-    public init(name: String, data: [Double], color: UIColor? = nil, negativeColor: UIColor? = nil) {
+    public init(name: String, data: [Double], color: UIColor? = nil, negativeColor: UIColor? = nil,
+                yAxisIndex: Int = 0) {
         self.name = name
         self.data = data
         self.color = color
         self.negativeColor = negativeColor
+        self.yAxisIndex = yAxisIndex
     }
 }
 
@@ -77,6 +83,8 @@ public struct CartesianChartModel: HYMChartModel {
     public var series: [CartesianSeriesElement]
     public var xAxis: CartesianAxisModel
     public var yAxis: CartesianAxisModel
+    /// 次值轴（右）。nil = 单轴（现状）。Bar（水平图）暂不支持，传了会被忽略（DEBUG 断言）。
+    public var secondaryYAxis: CartesianAxisModel?
     /// 堆叠配置（nil = 不堆叠）
     public var stacking: StackConfig?
 
@@ -84,11 +92,13 @@ public struct CartesianChartModel: HYMChartModel {
                 series: [CartesianSeriesElement],
                 xAxis: CartesianAxisModel = CartesianAxisModel(kind: .category(labels: [])),
                 yAxis: CartesianAxisModel = CartesianAxisModel(kind: .value),
+                secondaryYAxis: CartesianAxisModel? = nil,
                 stacking: StackConfig? = nil) {
         self.title = title
         self.series = series
         self.xAxis = xAxis
         self.yAxis = yAxis
+        self.secondaryYAxis = secondaryYAxis
         self.stacking = stacking
     }
 
@@ -97,16 +107,17 @@ public struct CartesianChartModel: HYMChartModel {
         series.map { $0.data.count }.max() ?? 0
     }
 
-    /// 所有 series 数据的全局 (min, max)；任一有效数据都没有时为 nil。
-    /// 堆叠模式下使用累计值计算边界，确保 Y 轴刻度尺适应堆叠后的数据范围。
-    public var dataBounds: (min: Double, max: Double)? {
+    /// 指定值轴的绑定系列全局 (min, max)；堆叠模式下按轴分组累计后取边界。
+    /// 任一有效数据都没有时为 nil。轴无绑定系列时：显式 min/max 由渲染层兜底，此处返回 nil。
+    public func dataBounds(yAxisIndex: Int = 0) -> (min: Double, max: Double)? {
+        let group = series.filter { $0.effectiveYAxisIndex == yAxisIndex }
+        guard !group.isEmpty else { return nil }
         let dataToUse: [[Double]]
         if stacking == .normal {
-            dataToUse = CartesianGeometry.stackedValues(series: series)
+            dataToUse = CartesianGeometry.stackedValuesByAxis(series: group)
         } else {
-            dataToUse = series.map { $0.data }
+            dataToUse = group.map { $0.data }
         }
-
         let flat = dataToUse.flatMap { $0 }
         guard let lo = flat.min(), let hi = flat.max() else { return nil }
         return (lo, hi)
