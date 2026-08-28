@@ -729,7 +729,48 @@ public enum ChartSelfTest {
         // —— 双轴系列映射与命中 ——
         runDualAxisSeriesSelfTest()
 
+        // —— 折线/面积堆叠 ——
+        runLineStackingSelfTest()
+
         print("✅ ChartSelfTest passed")
+    }
+
+    /// 堆叠折线：累计线位置正确；面积分层（第 2 系列面积下边界 = 第 1 系列累计线）；命中报累计值。
+    static func runLineStackingSelfTest() {
+        let r = LineChartRenderer()
+        let host = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        r.mount(into: host)
+        var theme = CartesianChartTheme()
+        theme.showsArea = true
+        let model = CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [20, 40]),
+                     CartesianSeriesElement(name: "b", data: [10, 20])],
+            stacking: .normal)
+        r.render(model: model, theme: theme,
+                 context: HYMChartRenderContext(bounds: host.bounds, center: host.center))
+        let plot = r.currentPlotFrame
+        // 域 = 累计边界 (10...60) → nice 0...60
+        assert(abs(r.currentViewport.yMax - 60) < 0.001,
+               "堆叠域应按累计值 0...60，got \(r.currentViewport.yDomain)")
+
+        // 系列 1（上层）在 index1 的累计值 = 40+20 = 60 → 顶部
+        let top = r.testScreenPoint(series: 1, index: 1)
+        assert(abs(top.y - plot.minY) < 1.0, "累计 60 应在 plot 顶部，got \(top.y)")
+        // 系列 0 在 index1 = 40 → 底部起 2/3 高
+        let mid = r.testScreenPoint(series: 0, index: 1)
+        assert(abs(mid.y - (plot.maxY - plot.height * (40.0 / 60.0))) < 1.0,
+               "系列0 累计 40 应按 40/60 映射，got \(mid.y)")
+
+        // 命中报累计值（与柱状一致）：点系列1 index1 → 60
+        if let hit = r.hitTest(top) as? LineHitTarget {
+            assert(abs(hit.value - 60) < 0.001, "堆叠命中应报累计值 60，got \(hit.value)")
+        } else {
+            assertionFailure("堆叠折线顶层点应可命中")
+        }
+
+        // 面积分层：两个系列 → 两层面积渐变
+        let seriesLayers = r.seriesLayerSublayersForTesting()
+        assert(seriesLayers.count { $0 is CAGradientLayer } == 2, "两层面积渐变")
     }
 
     /// 次轴系列按次轴域映射：同一数值、不同轴 → 不同屏幕高度；命中 target 带轴索引。

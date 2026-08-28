@@ -44,10 +44,16 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
         lastPointFrames.removeAll()
         lineLayers.removeAll()
 
+        // 堆叠：按轴分组链式累计（跨轴不混叠）；非堆叠用原值
+        let dataToDraw: [[Double]] = model.stacking == .normal
+            ? CartesianGeometry.stackedValuesByAxis(series: model.series)
+            : model.series.map { $0.data }
+
         for (s, element) in model.series.enumerated() {
             guard !element.data.isEmpty else { continue }
             let color = element.color ?? theme.seriesColor
             let axisIdx = element.effectiveYAxisIndex
+            let values = dataToDraw[s]
 
             // 零轴（面积填充的闭合边界；按系列所属值域计算，双轴负值各自正确）
             let zeroY = CartesianGeometry.zeroAxisPosition(
@@ -55,7 +61,7 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
                 valueDomain: axisIdx == 1 ? currentSecondaryYDomain : nil)
 
             // 数据点屏幕坐标（命中 frame 按数据点，与阶梯形态无关）
-            let screenPts = element.data.enumerated().map { (i, v) -> CGPoint in
+            let screenPts = values.enumerated().map { (i, v) -> CGPoint in
                 screenPoint(x: Double(i), y: v, yAxisIndex: axisIdx)
             }
             for (i, p) in screenPts.enumerated() {
@@ -80,10 +86,20 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
 
             // 面积填充（面积图形态）：折线 path 闭合到零轴 → CAGradientLayer + mask。
             // 先于线添加（线压在面积上）；渐变自上而下（近线浓 → 近零轴淡）。
+            // 堆叠时分层：系列 i 面积下边界 = 同轴前一系列的累计线（层层叠高、颜色不互覆）。
             if theme.showsArea, let first = screenPts.first, let last = screenPts.last {
                 let areaPath = UIBezierPath(cgPath: path.cgPath)
-                areaPath.addLine(to: CGPoint(x: last.x, y: zeroY))
-                areaPath.addLine(to: CGPoint(x: first.x, y: zeroY))
+                if model.stacking == .normal,
+                   let p = model.series[..<s].indices
+                    .last(where: { model.series[$0].effectiveYAxisIndex == axisIdx }) {
+                    let prevPts = dataToDraw[p].enumerated().map { (i, v) in
+                        screenPoint(x: Double(i), y: v, yAxisIndex: axisIdx)
+                    }
+                    for pp in prevPts.reversed() { areaPath.addLine(to: pp) }
+                } else {
+                    areaPath.addLine(to: CGPoint(x: last.x, y: zeroY))
+                    areaPath.addLine(to: CGPoint(x: first.x, y: zeroY))
+                }
                 areaPath.close()
 
                 let gradient = CAGradientLayer()
@@ -134,7 +150,13 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
         guard let model = currentModel else { return nil }
         // 后面的 series 画在上层 → 倒序先查
         for hit in lastPointFrames.reversed() where hit.frame.contains(point) {
-            let value = model.series[hit.series].data[hit.index]
+            // 堆叠时命中报累计值（与柱状现状对齐）
+            let value: Double
+            if model.stacking == .normal {
+                value = CartesianGeometry.stackedValuesByAxis(series: model.series)[hit.series][hit.index]
+            } else {
+                value = model.series[hit.series].data[hit.index]
+            }
             return LineHitTarget(seriesIndex: hit.series, index: hit.index,
                                  value: value,
                                  label: model.series[hit.series].name,
@@ -172,7 +194,17 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
               series < model.series.count, index < model.series[series].data.count else {
             return .zero
         }
-        return screenPoint(x: Double(index), y: model.series[series].data[index],
+        // 堆叠模式返回累计值位置（与绘制同源）
+        let value: Double
+        if model.stacking == .normal {
+            value = CartesianGeometry.stackedValuesByAxis(series: model.series)[series][index]
+        } else {
+            value = model.series[series].data[index]
+        }
+        return screenPoint(x: Double(index), y: value,
                            yAxisIndex: model.series[series].effectiveYAxisIndex)
     }
+
+    /// DEBUG 自检辅助：seriesLayer 子层（面积渐变层数量断言用）。
+    func seriesLayerSublayersForTesting() -> [CALayer] { seriesLayer.sublayers ?? [] }
 }

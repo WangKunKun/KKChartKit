@@ -23,10 +23,10 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
 
         // 1. 计算零轴位置（次轴系列在循环内按所属值域另算）
 
-        // 2. 如果堆叠，计算累计值
+        // 2. 如果堆叠，计算累计值（按轴分组：跨轴不混叠）
         let dataToDraw: [[Double]]
         if model.stacking == .normal {
-            dataToDraw = CartesianGeometry.stackedValues(series: model.series)
+            dataToDraw = CartesianGeometry.stackedValuesByAxis(series: model.series)
         } else {
             dataToDraw = model.series.map { $0.data }
         }
@@ -51,10 +51,12 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
             for index in visible where index < oneSeries.count {
                 let value = oneSeries[index]
 
-                // 基准值（堆叠模式下使用前一系列的累计值）
+                // 基准值（堆叠模式下使用同轴前一系列的累计值）
                 let baselineValue: Double?
-                if model.stacking == .normal && seriesIndex > 0 {
-                    baselineValue = dataToDraw[seriesIndex - 1][index]
+                if model.stacking == .normal,
+                   let p = model.series[..<seriesIndex].indices
+                    .last(where: { model.series[$0].effectiveYAxisIndex == axisIdx }) {
+                    baselineValue = dataToDraw[p][index]
                 } else {
                     baselineValue = nil
                 }
@@ -87,8 +89,9 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
                     positivePath.append(columnPath)
                 }
 
-                // 堆叠且非最后系列：记录分隔线 y
-                if model.stacking == .normal, seriesIndex < model.series.count - 1 {
+                // 堆叠且非同轴最后一个系列：记录分隔线 y
+                if model.stacking == .normal,
+                   model.series[(seriesIndex + 1)...].contains(where: { $0.effectiveYAxisIndex == axisIdx }) {
                     separatorPath.move(to: CGPoint(x: plotFrame.minX, y: rect.maxY))
                     separatorPath.addLine(to: CGPoint(x: plotFrame.maxX, y: rect.maxY))
                 }
@@ -138,7 +141,7 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
 
         // 2. 确定系列索引（堆叠时需要判断 point.y 落在哪个柱体段）
         let dataToCheck = model.stacking == .normal
-            ? CartesianGeometry.stackedValues(series: model.series)
+            ? CartesianGeometry.stackedValuesByAxis(series: model.series)
             : model.series.map { $0.data }
 
         for (seriesIndex, oneSeries) in dataToCheck.enumerated() {
