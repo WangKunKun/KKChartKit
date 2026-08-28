@@ -20,6 +20,20 @@ struct ColumnChartDemo: View {
     @State private var stackSeparatorColor = UIColor.white
     /// 双轴：末系列绑右轴
     @State private var dualAxisOn = false
+    /// 上下镜像：末系列取负（正链向上、负链向下，与堆叠独立）
+    @State private var mirrorStackOn = false
+    /// 首末柱贴边（类目域 0...n-1）
+    @State private var edgePointsOn = false
+    // —— 值轴刻度自定义 ——
+    @State private var tickCountOn = false
+    @State private var tickCount = 6.0
+    @State private var useTickPositions = false
+    @State private var usePercentFormatter = false
+    // —— 手势体验增强 ——
+    @State private var decelerationOn = true
+    @State private var highlightPerDragOn = true
+    @State private var rubberBandOn = true
+    @State private var sharedTooltipOn = true
 
     // —— 缩放功能测试 ——
     @State private var isZoomEnabled = true
@@ -38,7 +52,11 @@ struct ColumnChartDemo: View {
                                   + "系列 \(target.seriesIndex + 1) · 值 = \(target.value) · 手势 = \(gesture)")
                         },
                         isZoomEnabled: isZoomEnabled,
-                        minimumVisibleCategories: Int(minimumVisibleCategories))
+                        minimumVisibleCategories: Int(minimumVisibleCategories),
+                        isDragDecelerationEnabled: decelerationOn,
+                        isHighlightPerDragEnabled: highlightPerDragOn,
+                        isRubberBandEnabled: rubberBandOn,
+                        isSharedTooltipOnTapEnabled: sharedTooltipOn)
                 .frame(height: 280)
                 .padding(.horizontal)
                 .padding(.top, 8)
@@ -54,11 +72,13 @@ struct ColumnChartDemo: View {
 
     private var currentModel: CartesianChartModel {
         let series = (0..<seriesCount).map { index in
-            CartesianSeriesElement(
+            let isLast = index == seriesCount - 1
+            let rawData = index < data.count ? data[index] : Self.randomData(count: pointCount)
+            return CartesianSeriesElement(
                 name: "系列\(index + 1)",
-                data: index < data.count ? data[index] : Self.randomData(count: pointCount),
+                data: (mirrorStackOn && isLast) ? rawData.map { -$0 } : rawData,
                 color: seriesColors[index % seriesColors.count],
-                yAxisIndex: (dualAxisOn && index == seriesCount - 1) ? 1 : 0
+                yAxisIndex: (dualAxisOn && isLast) ? 1 : 0
             )
         }
         let stacking: StackConfig? = {
@@ -76,10 +96,22 @@ struct ColumnChartDemo: View {
             secondary = s
         }
 
+        var y = CartesianAxisModel(kind: .value)
+        if tickCountOn { y.tickCount = Int(tickCount) }
+        if useTickPositions { y.tickPositions = [0, 25, 50, 100] }
+        if usePercentFormatter { y.labelFormatter = { "\(Int($0))%" } }
+        else if mirrorStackOn { y.labelFormatter = { AxisRenderer.format(abs($0)) } }
+
+        var x = CartesianAxisModel(kind: .category(labels: useTimeAxis ? ChartDemoPanel.timeLabels(count: pointCount) : []))
+        if edgePointsOn, pointCount > 1 {
+            x.min = 0
+            x.max = Double(pointCount - 1)
+        }
         return CartesianChartModel(
             title: title.isEmpty ? nil : title,
             series: series,
-            xAxis: CartesianAxisModel(kind: .category(labels: useTimeAxis ? ChartDemoPanel.timeLabels(count: pointCount) : [])),
+            xAxis: x,
+            yAxis: y,
             secondaryYAxis: secondary,
             stacking: stacking == .none ? nil : stacking
         )
@@ -131,8 +163,22 @@ struct ColumnChartDemo: View {
         let stackSection = ChartDemoPanel.DemoSection(title: "堆叠", items: [
             .picker(label: "堆叠模式", selection: $stackingMode, options: ["不堆叠", "普通堆叠"]),
             .toggle(label: "双轴（末系列绑右轴）", value: $dualAxisOn),
+            .toggle(label: "上下镜像（末系列取负，与堆叠无关）", value: $mirrorStackOn),
             .toggle(label: "分隔线", value: $stackSeparatorOn),
             .color(label: "分隔线颜色", value: $stackSeparatorColor),
+        ])
+        let axisSection = ChartDemoPanel.DemoSection(title: "值轴刻度", items: [
+            .toggle(label: "自定义刻度数量", value: $tickCountOn),
+            .slider(label: "刻度数量", value: $tickCount, range: 2...12, step: 1),
+            .toggle(label: "显式刻度位置（0/25/50/100）", value: $useTickPositions),
+            .toggle(label: "刻度文本加 %", value: $usePercentFormatter),
+            .toggle(label: "首末柱贴边（类目域 0...n-1）", value: $edgePointsOn),
+        ])
+        let gestureSection = ChartDemoPanel.DemoSection(title: "手势", items: [
+            .toggle(label: "拖拽惯性减速", value: $decelerationOn),
+            .toggle(label: "滑动选中（全量视图拖拽=划过高亮）", value: $highlightPerDragOn),
+            .toggle(label: "边界橡皮筋（越界回弹）", value: $rubberBandOn),
+            .toggle(label: "点击弹整列数据（按 X 类目取所有系列）", value: $sharedTooltipOn),
         ])
 
         let animationSection = ChartDemoPanel.DemoSection(title: "动画与交互", items: [
@@ -145,7 +191,7 @@ struct ColumnChartDemo: View {
             .toggle(label: "24小时时间轴（按数据量均分）", value: $useTimeAxis),
         ])
 
-        return ChartDemoPanel(sections: [dataSection, xAxisSection, columnSection, stackSection, animationSection])
+        return ChartDemoPanel(sections: [dataSection, xAxisSection, columnSection, stackSection, axisSection, gestureSection, animationSection])
     }
 
     private func regenerateData() {

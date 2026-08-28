@@ -24,6 +24,13 @@ struct BarChartDemo: View {
     @State private var tickCount = 6.0
     @State private var useTickPositions = false
     @State private var usePercentFormatter = false
+    /// 上下镜像：末系列取负（条形向左为负链）
+    @State private var mirrorStackOn = false
+    // —— 手势体验增强 ——
+    @State private var decelerationOn = true
+    @State private var highlightPerDragOn = true
+    @State private var rubberBandOn = true
+    @State private var sharedTooltipOn = true
 
     // —— 缩放功能测试 ——
     @State private var isZoomEnabled = true
@@ -40,7 +47,11 @@ struct BarChartDemo: View {
                          print("🎯 点击条形：第 \(target.categoryIndex + 1) 个类目\(timeTag) · "
                                + "系列 \(target.seriesIndex + 1) · 值 = \(target.value) · 手势 = \(gesture)")
                      },
-                     isZoomEnabled: isZoomEnabled)
+                     isZoomEnabled: isZoomEnabled,
+                     isDragDecelerationEnabled: decelerationOn,
+                     isHighlightPerDragEnabled: highlightPerDragOn,
+                     isRubberBandEnabled: rubberBandOn,
+                     isSharedTooltipOnTapEnabled: sharedTooltipOn)
                 .frame(height: 280)
                 .padding(.horizontal)
                 .padding(.top, 8)
@@ -56,9 +67,11 @@ struct BarChartDemo: View {
 
     private var currentModel: CartesianChartModel {
         let series = (0..<seriesCount).map { index in
-            CartesianSeriesElement(
+            let isLast = index == seriesCount - 1
+            let rawData = index < data.count ? data[index] : Self.randomData(count: pointCount)
+            return CartesianSeriesElement(
                 name: "系列\(index + 1)",
-                data: index < data.count ? data[index] : Self.randomData(count: pointCount),
+                data: (mirrorStackOn && isLast) ? rawData.map { -$0 } : rawData,
                 color: seriesColors[index % seriesColors.count]
             )
         }
@@ -74,7 +87,11 @@ struct BarChartDemo: View {
         var y = CartesianAxisModel(kind: .value)
         if tickCountOn { y.tickCount = Int(tickCount) }
         if useTickPositions { y.tickPositions = [0, 25, 60, 100] }
-        if usePercentFormatter { y.labelFormatter = { "\(Int($0))%" } }
+        if usePercentFormatter {
+            y.labelFormatter = { "\(Int($0))%" }
+        } else if mirrorStackOn {
+            y.labelFormatter = { AxisRenderer.format(abs($0)) }
+        }
 
         return CartesianChartModel(
             title: title.isEmpty ? nil : title,
@@ -139,6 +156,13 @@ struct BarChartDemo: View {
             .slider(label: "刻度数量", value: $tickCount, range: 2...12, step: 1),
             .toggle(label: "显式刻度位置（0/25/60/100）", value: $useTickPositions),
             .toggle(label: "刻度文本加 %", value: $usePercentFormatter),
+            .toggle(label: "左右镜像（末系列取负，与堆叠无关）", value: $mirrorStackOn),
+        ])
+        let gestureSection = ChartDemoPanel.DemoSection(title: "手势", items: [
+            .toggle(label: "拖拽惯性减速", value: $decelerationOn),
+            .toggle(label: "滑动选中（全量视图拖拽=划过整行高亮）", value: $highlightPerDragOn),
+            .toggle(label: "边界橡皮筋（越界回弹）", value: $rubberBandOn),
+            .toggle(label: "点击弹整行数据（按类目取所有系列）", value: $sharedTooltipOn),
         ])
 
         let animationSection = ChartDemoPanel.DemoSection(title: "动画与交互", items: [
@@ -150,7 +174,7 @@ struct BarChartDemo: View {
             .toggle(label: "24小时时间轴（按数据量均分）", value: $useTimeAxis),
         ])
 
-        return ChartDemoPanel(sections: [dataSection, xAxisSection, axisSection, barSection, stackSection, animationSection])
+        return ChartDemoPanel(sections: [dataSection, xAxisSection, axisSection, gestureSection, barSection, stackSection, animationSection])
     }
 
     private func regenerateData() {

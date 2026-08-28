@@ -8,19 +8,31 @@ public struct BarChart: View {
     private let onHit: ((BarHitTarget, HYMChartGesture) -> Void)?
     private let isZoomEnabled: Bool
     private let minimumVisibleCategories: Int
+    private let isDragDecelerationEnabled: Bool
+    private let isHighlightPerDragEnabled: Bool
+    private let isRubberBandEnabled: Bool
+    private let isSharedTooltipOnTapEnabled: Bool?
 
     public init(model: CartesianChartModel,
                 theme: CartesianChartTheme = CartesianChartTheme(),
                 playsAnimationOnAppear: Bool = true,
                 onHit: ((BarHitTarget, HYMChartGesture) -> Void)? = nil,
                 isZoomEnabled: Bool = false,
-                minimumVisibleCategories: Int = 12) {
+                minimumVisibleCategories: Int = 12,
+                isDragDecelerationEnabled: Bool = true,
+                isHighlightPerDragEnabled: Bool = true,
+                isRubberBandEnabled: Bool = true,
+                isSharedTooltipOnTapEnabled: Bool? = nil) {
         self.model = model
         self.theme = theme
         self.playsAnimationOnAppear = playsAnimationOnAppear
         self.onHit = onHit
         self.isZoomEnabled = isZoomEnabled
         self.minimumVisibleCategories = minimumVisibleCategories
+        self.isDragDecelerationEnabled = isDragDecelerationEnabled
+        self.isHighlightPerDragEnabled = isHighlightPerDragEnabled
+        self.isRubberBandEnabled = isRubberBandEnabled
+        self.isSharedTooltipOnTapEnabled = isSharedTooltipOnTapEnabled
     }
 
     public var body: some View {
@@ -28,7 +40,11 @@ public struct BarChart: View {
                                playsAnimationOnAppear: playsAnimationOnAppear,
                                onHit: onHit,
                                isZoomEnabled: isZoomEnabled,
-                               minimumVisibleCategories: minimumVisibleCategories)
+                               minimumVisibleCategories: minimumVisibleCategories,
+                               isDragDecelerationEnabled: isDragDecelerationEnabled,
+                               isHighlightPerDragEnabled: isHighlightPerDragEnabled,
+                               isRubberBandEnabled: isRubberBandEnabled,
+                               isSharedTooltipOnTapEnabled: isSharedTooltipOnTapEnabled)
     }
 }
 
@@ -39,14 +55,26 @@ public struct BarChartRepresentable: UIViewRepresentable {
     public let onHit: ((BarHitTarget, HYMChartGesture) -> Void)?
     private let isZoomEnabled: Bool
     private let minimumVisibleCategories: Int
+    private let isDragDecelerationEnabled: Bool
+    private let isHighlightPerDragEnabled: Bool
+    private let isRubberBandEnabled: Bool
+    private let isSharedTooltipOnTapEnabled: Bool?
 
-    public init(model: CartesianChartModel, theme: CartesianChartTheme, playsAnimationOnAppear: Bool, onHit: ((BarHitTarget, HYMChartGesture) -> Void)?, isZoomEnabled: Bool, minimumVisibleCategories: Int) {
+    public init(model: CartesianChartModel, theme: CartesianChartTheme, playsAnimationOnAppear: Bool, onHit: ((BarHitTarget, HYMChartGesture) -> Void)?, isZoomEnabled: Bool, minimumVisibleCategories: Int,
+                isDragDecelerationEnabled: Bool,
+                isHighlightPerDragEnabled: Bool,
+                isRubberBandEnabled: Bool,
+                isSharedTooltipOnTapEnabled: Bool?) {
         self.model = model
         self.theme = theme
         self.playsAnimationOnAppear = playsAnimationOnAppear
         self.onHit = onHit
         self.isZoomEnabled = isZoomEnabled
         self.minimumVisibleCategories = minimumVisibleCategories
+        self.isDragDecelerationEnabled = isDragDecelerationEnabled
+        self.isHighlightPerDragEnabled = isHighlightPerDragEnabled
+        self.isRubberBandEnabled = isRubberBandEnabled
+        self.isSharedTooltipOnTapEnabled = isSharedTooltipOnTapEnabled
     }
 
     public func makeUIView(context: Context) -> HYMChartView<BarChartRenderer> {
@@ -54,6 +82,10 @@ public struct BarChartRepresentable: UIViewRepresentable {
         chart.showsTooltipOnHit = true
         chart.isZoomEnabled = isZoomEnabled
         chart.minimumVisibleCategories = minimumVisibleCategories
+        chart.isDragDecelerationEnabled = isDragDecelerationEnabled
+        chart.isHighlightPerDragEnabled = isHighlightPerDragEnabled
+        chart.isRubberBandEnabled = isRubberBandEnabled
+        chart.isSharedTooltipOnTapEnabled = isSharedTooltipOnTapEnabled
         chart.onHit = { target, gesture in
             if let h = target as? BarHitTarget { onHit?(h, gesture) }
         }
