@@ -11,7 +11,7 @@ public struct LineChart: View {
     private let isDragDecelerationEnabled: Bool
     private let isHighlightPerDragEnabled: Bool
     private let isRubberBandEnabled: Bool
-    private let isSharedTooltipOnTapEnabled: Bool
+    private let isSharedTooltipOnTapEnabled: Bool?
 
     public init(model: CartesianChartModel,
                 theme: CartesianChartTheme = CartesianChartTheme(),
@@ -22,7 +22,7 @@ public struct LineChart: View {
                 isDragDecelerationEnabled: Bool = true,
                 isHighlightPerDragEnabled: Bool = true,
                 isRubberBandEnabled: Bool = true,
-                isSharedTooltipOnTapEnabled: Bool = false) {
+                isSharedTooltipOnTapEnabled: Bool? = nil) {
         self.model = model
         self.theme = theme
         self.playsAnimationOnAppear = playsAnimationOnAppear
@@ -58,7 +58,7 @@ private struct LineChartRepresentable: UIViewRepresentable {
     let isDragDecelerationEnabled: Bool
     let isHighlightPerDragEnabled: Bool
     let isRubberBandEnabled: Bool
-    let isSharedTooltipOnTapEnabled: Bool
+    let isSharedTooltipOnTapEnabled: Bool?
 
     func makeUIView(context: Context) -> HYMChartView<LineChartRenderer> {
         let chart = HYMChartView<LineChartRenderer>(frame: .zero)

@@ -361,6 +361,10 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
     public func hitFrame(for target: HYMChartHitTarget) -> CGRect? { nil }
 
     // MARK: - 便捷（子类用）
+    /// 由子类把吸附结果包装成各自的 HitTarget（Line/Column/Bar 的 target 类型不同）。
+    open func makeHitTarget(seriesIndex: Int, categoryIndex: Int, value: Double)
+        -> (any HYMChartHitTarget)? { nil }
+
     /// 值 → 屏幕（view 坐标系），用当前 viewport/plotFrame；须在 render 之后调用。
     /// 按系列绑定的值轴选域：0 = 主轴 viewport.yDomain，1 = 次轴域。
     func screenPoint(x: Double, y: Double, yAxisIndex: Int = 0) -> CGPoint {
@@ -474,17 +478,14 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
     }
 }
 
-// MARK: - 整列命中（shared tooltip）
-extension CartesianRendererBase: HYMChartSharedHitProvider {
+// MARK: - 命中辅助（整列/吸附共用）
+extension CartesianRendererBase {
 
-    /// 点击按类目取整列：X 位置四舍五入到最近类目，组合所有有值系列。
-    /// 点在 plot 区外（±8pt 宽容）返回 nil，由容器回落到逐点命中。
-    public func sharedHit(at point: CGPoint) -> (target: any HYMChartHitTarget,
-                                                 anchor: HYMChartTooltipAnchor)? {
+    /// 触点 → 最近类目索引（垂直图按 X 值、水平图按 Y 类目）；plot 区（±8pt）外或无类目 → nil。
+    func categoryIndex(at point: CGPoint) -> Int? {
         guard let model = currentModel, currentPlotFrame.width > 0, currentPlotFrame.height > 0,
               model.maxPointCount > 0 else { return nil }
         guard currentPlotFrame.insetBy(dx: -8, dy: -8).contains(point) else { return nil }
-
         let categoryIndex: Int
         if isHorizontalValueAxis {
             // 水平图（Bar）：类目在 Y
@@ -497,6 +498,19 @@ extension CartesianRendererBase: HYMChartSharedHitProvider {
             categoryIndex = Int(x.rounded())
         }
         guard categoryIndex >= 0, categoryIndex < model.maxPointCount else { return nil }
+        return categoryIndex
+    }
+}
+
+// MARK: - 整列命中（shared tooltip）
+extension CartesianRendererBase: HYMChartSharedHitProvider {
+
+    /// 点击按类目取整列：X 位置四舍五入到最近类目，组合所有有值系列。
+    /// 点在 plot 区外（±8pt 宽容）返回 nil，由容器回落到逐点命中。
+    public func sharedHit(at point: CGPoint) -> (target: any HYMChartHitTarget,
+                                                 anchor: HYMChartTooltipAnchor)? {
+        guard let model = currentModel,
+              let categoryIndex = categoryIndex(at: point) else { return nil }
 
         var entries: [CartesianSharedHitTarget.Entry] = []
         for (i, s) in model.series.enumerated() where categoryIndex < s.data.count {
@@ -528,4 +542,28 @@ extension CartesianRendererBase: HYMChartSharedHitProvider {
         return (target, HYMChartTooltipAnchor(frame: band,
                                                preferredPlacements: [.top, .bottom]))
     }
+}
+
+// MARK: - 吸附命中（横向最近类目 → 离触点最近的系列点）
+extension CartesianRendererBase: HYMChartSnapHitProvider {
+
+    /// 点击没落在数据点上时的兜底：先归到最近类目，再在该列各系列点中
+    /// 取屏幕距离最近者（"永远有反馈"，DGCharts 同款语义）。
+    public func snapHit(at point: CGPoint) -> (any HYMChartHitTarget)? {
+        guard let model = currentModel,
+              let categoryIndex = categoryIndex(at: point) else { return nil }
+        var best: (series: Int, value: Double, dist: CGFloat)?
+        for (i, s) in model.series.enumerated() where categoryIndex < s.data.count {
+            let v = s.data[categoryIndex]
+            let p = isHorizontalValueAxis
+                ? screenPoint(x: v, y: Double(categoryIndex))
+                : screenPoint(x: Double(categoryIndex), y: v,
+                              yAxisIndex: s.effectiveYAxisIndex)
+            let d = hypot(p.x - point.x, p.y - point.y)
+            if best == nil || d < best!.dist { best = (i, v, d) }
+        }
+        guard let b = best else { return nil }
+        return makeHitTarget(seriesIndex: b.series, categoryIndex: categoryIndex, value: b.value)
+    }
+
 }

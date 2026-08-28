@@ -812,6 +812,30 @@ public enum ChartSelfTest {
         } else {
             assertionFailure("锯齿数据集也应可整列命中")
         }
+
+        // 吸附命中：点空（远离数据点）→ 横向最近类目上最近的系列点，永远有反馈
+        let snap = LineChartRenderer()
+        let hostS = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        snap.mount(into: hostS)
+        snap.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "低值", data: [10, 20, 30]),
+                     CartesianSeriesElement(name: "高值", data: [60, 80, 90])]),
+                   theme: CartesianChartTheme(),
+                   context: HYMChartRenderContext(bounds: hostS.bounds, center: hostS.center))
+        let plotS = snap.currentPlotFrame
+        // 点在类目 1 上方的空白处（两系列都够不着）→ 吸附到屏幕距离更近的"高值"
+        let cat1 = CartesianGeometry.point(x: 1, y: 0, viewport: snap.currentViewport,
+                                           plotFrame: plotS).x
+        assert(snap.hitTest(CGPoint(x: cat1, y: plotS.minY + 5)) == nil,
+               "空白处逐点命中应为 nil（吸附前提）")
+        if let t = snap.snapHit(at: CGPoint(x: cat1, y: plotS.minY + 5)) as? LineHitTarget {
+            assert(t.seriesIndex == 1 && t.index == 1 && t.value == 80,
+                   "应吸附到类目 1 屏幕距离最近的高值系列 80，got series=\(t.seriesIndex) value=\(t.value)")
+        } else {
+            assertionFailure("空白处点击应吸附到最近数据点")
+        }
+        // plot 区外不吸附
+        assert(snap.snapHit(at: CGPoint(x: 2, y: 2)) == nil, "plot 外不应吸附")
     }
 
     /// 符号分组堆叠：正链从 0 向上、负链从 0 向下（Highcharts 同款）；面积/柱基准贴所属链。

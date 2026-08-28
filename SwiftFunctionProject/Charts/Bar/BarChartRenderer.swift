@@ -233,4 +233,10 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
             drawSeries(model: model, theme: theme, plotFrame: currentPlotFrame)
         }
     }
+
+    /// 吸附命中 → BarHitTarget（水平图按最近类目行取条形值）。
+    public override func makeHitTarget(seriesIndex: Int, categoryIndex: Int, value: Double)
+        -> (any HYMChartHitTarget)? {
+        BarHitTarget(seriesIndex: seriesIndex, categoryIndex: categoryIndex, value: value)
+    }
 }

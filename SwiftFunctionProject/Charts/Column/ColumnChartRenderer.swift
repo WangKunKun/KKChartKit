@@ -236,4 +236,13 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
             drawSeries(model: model, theme: theme, plotFrame: currentPlotFrame)
         }
     }
+
+    /// 吸附命中 → ColumnHitTarget（含轴索引）。
+    public override func makeHitTarget(seriesIndex: Int, categoryIndex: Int, value: Double)
+        -> (any HYMChartHitTarget)? {
+        guard let model = currentModel, seriesIndex < model.series.count else { return nil }
+        return ColumnHitTarget(seriesIndex: seriesIndex, categoryIndex: categoryIndex,
+                               value: value,
+                               yAxisIndex: model.series[seriesIndex].effectiveYAxisIndex)
+    }
 }

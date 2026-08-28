@@ -214,4 +214,14 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
 
     /// DEBUG 自检辅助：seriesLayer 子层（面积渐变层数量断言用）。
     func seriesLayerSublayersForTesting() -> [CALayer] { seriesLayer.sublayers ?? [] }
+
+    /// 吸附命中 → LineHitTarget（含轴索引，弹窗带右轴标记）。
+    public override func makeHitTarget(seriesIndex: Int, categoryIndex: Int, value: Double)
+        -> (any HYMChartHitTarget)? {
+        guard let model = currentModel, seriesIndex < model.series.count else { return nil }
+        let element = model.series[seriesIndex]
+        return LineHitTarget(seriesIndex: seriesIndex, index: categoryIndex,
+                             value: value, label: element.name,
+                             yAxisIndex: element.effectiveYAxisIndex)
+    }
 }

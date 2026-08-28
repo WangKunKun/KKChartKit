@@ -128,3 +128,10 @@ public protocol HYMChartSharedHitProvider: HYMChartRenderer {
     func sharedHit(at point: CGPoint) -> (target: any HYMChartHitTarget,
                                           anchor: HYMChartTooltipAnchor)?
 }
+
+/// 吸附命中提供者：点击没落在任何数据点上时，吸附到**横向最近类目**上离触点
+/// 最近的系列数据点（DGCharts 同款"永远有反馈"语义）。
+public protocol HYMChartSnapHitProvider: HYMChartRenderer {
+    /// - Returns: 吸附到的数据点 target；nil = 点在绘图区外（无吸附对象）
+    func snapHit(at point: CGPoint) -> (any HYMChartHitTarget)?
+}
