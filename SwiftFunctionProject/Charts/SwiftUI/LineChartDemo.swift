@@ -52,6 +52,8 @@ struct LineChartDemo: View {
     @State private var tickCount = 6.0
     @State private var useTickPositions = false
     @State private var usePercentFormatter = false
+    /// 首末点贴边：类目域压到 0...n-1（默认 -0.5...n-0.5，点居槽位中心）
+    @State private var edgePointsOn = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -101,10 +103,16 @@ struct LineChartDemo: View {
             s.labelFormatter = { "\(Int($0))%" }
             secondary = s
         }
+        var x = CartesianAxisModel(kind: .category(labels: useTimeAxis ? ChartDemoPanel.timeLabels(count: pointCount) : []))
+        if edgePointsOn, pointCount > 1 {
+            // 类目域压到 0...n-1：首点贴左缘、末点贴右缘（Highcharts pointPlacement:"on" 同款形态）
+            x.min = 0
+            x.max = Double(pointCount - 1)
+        }
         return CartesianChartModel(
             title: title.isEmpty ? nil : title,
             series: series,
-            xAxis: CartesianAxisModel(kind: .category(labels: useTimeAxis ? ChartDemoPanel.timeLabels(count: pointCount) : [])),
+            xAxis: x,
             yAxis: y,
             secondaryYAxis: secondary,
             stacking: stacking)
@@ -170,6 +178,7 @@ struct LineChartDemo: View {
             .slider(label: "刻度数量", value: $tickCount, range: 2...12, step: 1),
             .toggle(label: "显式刻度位置（0/30/60/100）", value: $useTickPositions),
             .toggle(label: "刻度文本加 %", value: $usePercentFormatter),
+            .toggle(label: "首末点贴边（类目域 0...n-1）", value: $edgePointsOn),
         ])
         let areaSection = ChartDemoPanel.DemoSection(title: "面积填充", items: [
             .toggle(label: "填充折线下方区域（面积图）", value: $showsArea),
