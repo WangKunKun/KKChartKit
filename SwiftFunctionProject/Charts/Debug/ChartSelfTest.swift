@@ -837,7 +837,68 @@ public enum ChartSelfTest {
         // —— 橡皮筋越界余量（窗口相对口径）——
         runRubberBandMarginSelfTest()
 
+        // —— 堆叠 + 平滑 + 面积（下边界倒序曲线，层间无露白/叠色）——
+        runSmoothStackedAreaSelfTest()
+
         print("✅ ChartSelfTest passed")
+    }
+
+    /// 堆叠平滑面积：下边界 = 前一层平滑曲线的倒序回走（旧实现为直连线，
+    /// 层间曲线拱起处露白、下凹处叠色）。
+    static func runSmoothStackedAreaSelfTest() {
+        // 1) 纯几何：倒序曲线与正向曲线元素数相同、终点回到首点、包围盒一致
+        let pts = [CGPoint(x: 0, y: 100), CGPoint(x: 50, y: 40),
+                   CGPoint(x: 100, y: 60), CGPoint(x: 150, y: 10)]
+        func counts(_ path: UIBezierPath) -> (curves: Int, end: CGPoint, bbox: CGRect) {
+            var c = 0
+            var end = CGPoint.zero
+            var bbox = CGRect.null
+            path.cgPath.applyWithBlock { e in
+                let el = e.pointee
+                if el.type == .addCurveToPoint { c += 1 }
+                // 曲线元素 points = [控制点1, 控制点2, 终点]；线/移动 = [终点]
+                let idx = el.type == .addCurveToPoint ? 2 : 0
+                end = CGPoint(x: el.points[idx].x, y: el.points[idx].y)
+                bbox = bbox.union(CGRect(origin: end, size: .zero))
+            }
+            return (c, end, bbox)
+        }
+        let fwd = UIBezierPath()
+        fwd.move(to: pts[0])
+        CartesianGeometry.appendSmoothCurve(to: fwd, points: pts)
+        let rev = UIBezierPath()
+        rev.move(to: pts[pts.count - 1])
+        CartesianGeometry.appendSmoothCurveReversed(to: rev, points: pts)
+        let f = counts(fwd), r = counts(rev)
+        assert(f.curves == 3 && r.curves == 3, "正/反向各 3 段三次曲线，got \(f.curves)/\(r.curves)")
+        assert(abs(r.end.x - pts[0].x) < 1e-6 && abs(r.end.y - pts[0].y) < 1e-6,
+               "倒序回走终点 = 首点，got \(r.end)")
+        assert(abs(r.bbox.minX - f.bbox.minX) < 1e-6 && abs(r.bbox.maxX - f.bbox.maxX) < 1e-6,
+               "倒序曲线 x 范围与正向一致")
+
+        // 2) 渲染级：两系列堆叠 + 平滑 + 面积 → 第 2 系列的 mask 曲线数 = 2×(n-1)
+        //    （正向 n-1 + 倒序下边界 n-1；旧实现的下边界是直线 → 只有 n-1）
+        var theme = CartesianChartTheme()
+        theme.lineConnectionStyle = .smooth
+        theme.showsArea = true
+        let r2 = LineChartRenderer()
+        let host = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        r2.mount(into: host)
+        r2.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, 30, 20, 40]),
+                     CartesianSeriesElement(name: "b", data: [15, 10, 25, 5])],
+            stacking: .normal),
+                  theme: theme,
+                  context: HYMChartRenderContext(bounds: host.bounds, center: host.center))
+        let masks = r2.seriesLayerSublayersForTesting()
+            .compactMap { $0 as? CAGradientLayer }
+            .compactMap { $0.mask as? CAShapeLayer }
+        assert(masks.count == 2, "两系列各一个渐变面积，got \(masks.count)")
+        var curves = 0
+        masks[1].path?.applyWithBlock { e in
+            if e.pointee.type == .addCurveToPoint { curves += 1 }
+        }
+        assert(curves == 6, "第 2 系列 mask = 正向 3 + 倒序 3 = 6 段曲线（下边界非直线），got \(curves)")
     }
 
     /// 橡皮筋余量按**当前窗口跨度** 25% 计算（曾按全量域算：放大后 00:00 可一路拖到最右侧）。

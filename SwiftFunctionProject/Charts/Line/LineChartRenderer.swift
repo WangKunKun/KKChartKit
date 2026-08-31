@@ -191,10 +191,16 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
                         let baseData = seg.map { idx in
                             screenPoint(x: Double(idx), y: base[idx], yAxisIndex: axisIdx)
                         }
-                        let basePts = theme.lineConnectionStyle == .smooth
-                            ? baseData
-                            : CartesianGeometry.steppedScreenPoints(baseData, style: theme.lineConnectionStyle)
-                        for pp in basePts.reversed() { areaPath.addLine(to: pp) }
+                        if theme.lineConnectionStyle == .smooth {
+                            // 下边界 = 前一层累计线的同一条平滑曲线倒序回走：
+                            // 若用直连线（旧实现），上层面积顶部是曲线、下层底部是弦线——
+                            // 曲线拱起处露白、下凹处叠色（堆叠+平滑+面积的报告缺陷）
+                            CartesianGeometry.appendSmoothCurveReversed(to: areaPath, points: baseData)
+                        } else {
+                            let basePts = CartesianGeometry.steppedScreenPoints(
+                                baseData, style: theme.lineConnectionStyle)
+                            for pp in basePts.reversed() { areaPath.addLine(to: pp) }
+                        }
                     } else {
                         areaPath.addLine(to: CGPoint(x: last.x, y: zeroY))
                         areaPath.addLine(to: CGPoint(x: first.x, y: zeroY))

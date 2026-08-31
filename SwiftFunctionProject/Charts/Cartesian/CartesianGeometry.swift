@@ -223,8 +223,43 @@ public enum CartesianGeometry {
             for p in points.dropFirst() { path.addLine(to: p) }
             return
         }
-        let n = points.count
+        let m = monotoneTangents(points)
 
+        // Hermite → 三次贝塞尔（控制点在端点切线 1/3 处）
+        for i in 0..<points.count - 1 {
+            let p1 = points[i]
+            let p2 = points[i + 1]
+            let dx = (p2.x - p1.x) / 3
+            path.addCurve(to: p2,
+                          controlPoint1: CGPoint(x: p1.x + dx, y: p1.y + m[i] * dx),
+                          controlPoint2: CGPoint(x: p2.x - dx, y: p2.y - m[i + 1] * dx))
+        }
+    }
+
+    /// 与 `appendSmoothCurve` **同一条曲线的倒序回走**（从末点画回首点）：
+    /// 切线由同一点列决定 → 几何完全一致，仅方向相反（三次贝塞尔控制点镜像互换）。
+    /// 堆叠面积下边界用它回走前一层的累计线——与上一层面积的上边界逐点重合，
+    /// 消除层间露白（曲线拱起处）与叠色（曲线下凹处）。
+    public static func appendSmoothCurveReversed(to path: UIBezierPath, points: [CGPoint]) {
+        guard points.count > 2 else {
+            for p in points.dropFirst().reversed() { path.addLine(to: p) }
+            return
+        }
+        let m = monotoneTangents(points)
+
+        for i in stride(from: points.count - 2, through: 0, by: -1) {
+            let p1 = points[i]
+            let p2 = points[i + 1]
+            let dx = (p2.x - p1.x) / 3
+            path.addCurve(to: p1,
+                          controlPoint1: CGPoint(x: p2.x - dx, y: p2.y - m[i + 1] * dx),
+                          controlPoint2: CGPoint(x: p1.x + dx, y: p1.y + m[i] * dx))
+        }
+    }
+
+    /// Fritsch-Carlson 单调插值的各点切线（斜率 → 极值平台化 → 限幅防过冲）。
+    private static func monotoneTangents(_ points: [CGPoint]) -> [CGFloat] {
+        let n = points.count
         // 1) 各段斜率
         var delta = [CGFloat](repeating: 0, count: n - 1)
         for i in 0..<n - 1 {
@@ -258,16 +293,7 @@ public enum CartesianGeometry {
                 m[i + 1] = t * b * delta[i]
             }
         }
-
-        // 4) Hermite → 三次贝塞尔（控制点在端点切线 1/3 处）
-        for i in 0..<n - 1 {
-            let p1 = points[i]
-            let p2 = points[i + 1]
-            let dx = (p2.x - p1.x) / 3
-            path.addCurve(to: p2,
-                          controlPoint1: CGPoint(x: p1.x + dx, y: p1.y + m[i] * dx),
-                          controlPoint2: CGPoint(x: p2.x - dx, y: p2.y - m[i + 1] * dx))
-        }
+        return m
     }
 
     /// v1→v2 严格跨零时的插值比例（0...1）；未跨零返回 nil。
