@@ -270,6 +270,16 @@ public enum CartesianGeometry {
         }
     }
 
+    /// v1→v2 严格跨零时的插值比例（0...1）；未跨零返回 nil。
+    /// 折线负值换色用：颜色在 y=0 处切换（Highcharts negativeColor 同款语义）。
+    public static func zeroCrossingRatio(_ v1: Double, _ v2: Double) -> Double? {
+        guard v1 * v2 < 0 else { return nil }
+        let d = v2 - v1
+        guard abs(d) > 1e-9 else { return nil }
+        let t = (0 - v1) / d
+        return (0...1).contains(t) ? t : nil
+    }
+
     /// 水平图类目 → 屏幕 Y（类目 0 在顶部，自上而下映射）。
     ///
     /// 与 `point` 的 Y 方向相反（`point` 的值域向上）：条形图的类目轴是离散

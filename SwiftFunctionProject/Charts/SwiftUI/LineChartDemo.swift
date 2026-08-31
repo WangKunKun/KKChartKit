@@ -48,6 +48,18 @@ struct LineChartDemo: View {
     @State private var lastSeriesDataLabelsOn = false
     // —— 捏合缩放轴向 ——
     @State private var zoomAxisSel = "x"
+    // —— 标线（阈值参考线）——
+    @State private var plotLinesOn = false
+    @State private var plotLineValue = 25.0
+    // —— 负值换色示例 ——
+    @State private var negSampleOn = false
+    // —— 空心圆点 ——
+    @State private var pointHoleOn = false
+    @State private var pointHoleRadius = 1.5
+    // —— 准线样式 ——
+    @State private var crosshairColor = UIColor(white: 0.55, alpha: 0.9)
+    @State private var crosshairWidth = 0.75
+    @State private var crosshairDash = "solid"
     @State private var isZoomEnabled = true
     @State private var minimumVisibleCategories = 12.0
     /// X 轴时间轴模式：按实际数据量把 24h 均分到每个点（288 点 = 5 分钟/点，1440 点 = 1 分钟/点）
@@ -103,7 +115,10 @@ struct LineChartDemo: View {
                       isRubberBandEnabled: rubberBandOn,
                       isSharedTooltipOnTapEnabled: sharedTooltipOn,
                       isCrosshairEnabled: crosshairOn,
-                      zoomAxisMode: HYMChartZoomAxisMode(rawValue: zoomAxisSel) ?? .x)
+                      zoomAxisMode: HYMChartZoomAxisMode(rawValue: zoomAxisSel) ?? .x,
+                      crosshairColor: crosshairColor,
+                      crosshairLineWidth: CGFloat(crosshairWidth),
+                      crosshairDashStyle: LineDashStyle(rawValue: crosshairDash) ?? .solid)
                 .frame(height: 280)
                 .padding(.horizontal)
                 .padding(.top, 8)
@@ -141,11 +156,15 @@ struct LineChartDemo: View {
             let dash: LineDashStyle? = (isLast && lastSeriesDashStyle != "跟随全局")
                 ? LineDashStyle(rawValue: lastSeriesDashStyle) : nil
             var data = (mirrorStackOn && isLast) ? rawData.map { -$0 } : rawData
+            if negSampleOn {
+                data = data.enumerated().map { $0.offset.isMultiple(of: 2) ? $0.element : -$0.element }
+            }
             if nullSampleOn, data.count > 2 { data[2] = .nan }
             return CartesianSeriesElement(
                 name: "系列\(i + 1)",
                 data: data,
                 color: seriesColors[i % seriesColors.count],
+                negativeColor: negSampleOn ? .systemRed : nil,
                 yAxisIndex: (dualAxisOn && isLast) ? 1 : 0,
                 lineDashStyle: dash,
                 connectNulls: connectNullsOn,
@@ -170,7 +189,11 @@ struct LineChartDemo: View {
             xAxis: x,
             yAxis: y,
             secondaryYAxis: secondary,
-            stacking: stacking)
+            stacking: stacking,
+            plotLines: plotLinesOn
+                ? [CartesianPlotLine(value: plotLineValue, color: .systemRed,
+                                     dashStyle: .dash, label: "阈值 \(Int(plotLineValue))")]
+                : [])
     }
 
     private var currentTheme: CartesianChartTheme {
@@ -188,6 +211,7 @@ struct LineChartDemo: View {
         t.lineConnectionStyle = connectionStyle
         t.lineDashStyle = LineDashStyle(rawValue: dashStyle) ?? .solid
         t.pointSymbol = PointMarkerSymbol(rawValue: pointSymbol) ?? .circle
+        t.pointHoleRadius = pointHoleOn ? CGFloat(pointHoleRadius) : 0
         t.showsDataLabels = dataLabelsOn
         t.dataLabelPosition = CartesianDataLabelPosition(rawValue: dataLabelPosition) ?? .outsideEnd
         // 堆叠默认联动开面积（分层展示更直观；可关成纯累计折线）
@@ -235,6 +259,11 @@ struct LineChartDemo: View {
             .picker(label: "末系列虚线（实际/预测）",
                     selection: $lastSeriesDashStyle,
                     options: ["跟随全局"] + LineDashStyle.allCases.map { $0.rawValue }),
+            .toggle(label: "负值换色示例（奇数点取负，红色段）", value: $negSampleOn),
+        ])
+        let plotLineSection = ChartDemoPanel.DemoSection(title: "标线（阈值）", items: [
+            .toggle(label: "阈值标线（红色虚线 + 标签）", value: $plotLinesOn),
+            .slider(label: "阈值数值", value: $plotLineValue, range: 5...50, step: 1),
         ])
         let axisSection = ChartDemoPanel.DemoSection(title: "轴系", items: [
             .toggle(label: "双轴（末系列绑右轴）", value: $dualAxisOn),
@@ -261,6 +290,8 @@ struct LineChartDemo: View {
             .slider(label: "点半径", value: Binding(
                 get: { Double(theme.pointRadius) },
                 set: { theme.pointRadius = CGFloat($0) }), range: 1...10, step: 0.5),
+            .toggle(label: "空心圆点（Charts holeRadius）", value: $pointHoleOn),
+            .slider(label: "空心内径", value: $pointHoleRadius, range: 0.5...4, step: 0.5),
             .toggle(label: "自定义点颜色", value: $pointColorOn),
             .color(label: "点颜色", value: $pointColor),
         ])
@@ -280,6 +311,10 @@ struct LineChartDemo: View {
             .slider(label: "放大下限（最小可见类目数）", value: $minimumVisibleCategories, range: 2...24, step: 1),
             .toggle(label: "点击弹整列数据（按 X 类目取所有系列）", value: $sharedTooltipOn),
             .toggle(label: "十字准线", value: $crosshairOn),
+            .color(label: "准线颜色", value: $crosshairColor),
+            .slider(label: "准线线宽", value: $crosshairWidth, range: 0.5...3, step: 0.25),
+            .picker(label: "准线虚线样式", selection: $crosshairDash,
+                    options: LineDashStyle.allCases.map { $0.rawValue }),
             .toggle(label: "空值示例（第3点无数据，断线缺口）", value: $nullSampleOn),
             .toggle(label: "跨空值连线（connectNulls）", value: $connectNullsOn),
             .toggle(label: "24小时时间轴（按数据量均分）", value: $useTimeAxis),
@@ -309,7 +344,7 @@ struct LineChartDemo: View {
             .toggle(label: "入场动画", value: $theme.showsEntranceAnimation),
             .toggle(label: "点击弹窗", value: $theme.showsTooltipOnHit),
         ])
-        return ChartDemoPanel(sections: [dataSection, axisSection, lineSection, areaSection, labelSection, interactionSection, pointSection, gridSection, overallSection])
+        return ChartDemoPanel(sections: [dataSection, axisSection, lineSection, areaSection, plotLineSection, labelSection, interactionSection, pointSection, gridSection, overallSection])
     }
 
     static func randomData(count: Int) -> [Double] {

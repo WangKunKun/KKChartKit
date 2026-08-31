@@ -91,16 +91,61 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
 
             // 折线 path（连接形态在此应用：直线/阶梯 = 过渡点折线，曲线 = 单调插值；
             // 每段一个子路径，视口外的点也连线，溢出由 seriesLayer 裁剪）
+            //
+            // 负值换色（negativeColor ≠ color 且非曲线形态）：按符号把折线切成正/负两条 path。
+            // 直线形态在跨零处插值切分（颜色恰在 y=0 切换，Highcharts 同款）；
+            // 阶梯在跨零后的数据点切分；曲线形态不切（F-C 切线估算对半段子路径不稳定，用系列色）。
+            let negativeColor = element.negativeColor ?? color
+            let useSplit = negativeColor != color && theme.lineConnectionStyle != .smooth
             let path = UIBezierPath()
-            for pts in segmentPoints {
-                guard let first = pts.first else { continue }
-                if theme.lineConnectionStyle == .smooth {
-                    path.move(to: first)
-                    CartesianGeometry.appendSmoothCurve(to: path, points: pts)
-                } else {
-                    let pathPts = CartesianGeometry.steppedScreenPoints(pts, style: theme.lineConnectionStyle)
+            var negativePath = UIBezierPath()
+            if useSplit {
+                var chunks: [(negative: Bool, points: [CGPoint])] = []
+                for (segIdx, seg) in segments.enumerated() {
+                    let pts = segmentPoints[segIdx]
+                    guard let firstIdx = seg.first, let firstPt = pts.first else { continue }
+                    var curNeg = values[firstIdx] < 0
+                    var cur: [CGPoint] = [firstPt]
+                    for k in 0..<(pts.count - 1) {
+                        let v1 = values[seg[k]], v2 = values[seg[k + 1]]
+                        cur.append(pts[k + 1])
+                        if (v2 < 0) != curNeg {
+                            if theme.lineConnectionStyle == .straight,
+                               let t = CartesianGeometry.zeroCrossingRatio(v1, v2) {
+                                let p1 = pts[k], p2 = pts[k + 1]
+                                let split = CGPoint(x: p1.x + CGFloat(t) * (p2.x - p1.x), y: zeroY)
+                                cur[cur.count - 1] = split
+                                chunks.append((curNeg, cur))
+                                cur = [split, pts[k + 1]]
+                            } else {
+                                chunks.append((curNeg, cur))
+                                cur = [pts[k + 1]]
+                            }
+                            curNeg = v2 < 0
+                        }
+                    }
+                    chunks.append((curNeg, cur))
+                }
+                for c in chunks {
+                    let target = c.negative ? negativePath : path
+                    let pathPts = theme.lineConnectionStyle == .straight
+                        ? c.points
+                        : CartesianGeometry.steppedScreenPoints(c.points, style: theme.lineConnectionStyle)
                     for (i, p) in pathPts.enumerated() {
-                        i == 0 ? path.move(to: p) : path.addLine(to: p)
+                        i == 0 ? target.move(to: p) : target.addLine(to: p)
+                    }
+                }
+            } else {
+                for pts in segmentPoints {
+                    guard let first = pts.first else { continue }
+                    if theme.lineConnectionStyle == .smooth {
+                        path.move(to: first)
+                        CartesianGeometry.appendSmoothCurve(to: path, points: pts)
+                    } else {
+                        let pathPts = CartesianGeometry.steppedScreenPoints(pts, style: theme.lineConnectionStyle)
+                        for (i, p) in pathPts.enumerated() {
+                            i == 0 ? path.move(to: p) : path.addLine(to: p)
+                        }
                     }
                 }
             }
@@ -165,29 +210,47 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
                 seriesLayer.addSublayer(gradient)
             }
 
-            let line = CAShapeLayer()
-            line.path = path.cgPath
-            line.strokeColor = color.cgColor
-            line.fillColor = nil
-            line.lineWidth = theme.lineWidth
-            line.lineJoin = .round
-            line.lineCap = .round
-            // 虚线/点线（圆头线帽下 1pt 段呈现为点）；nil = 实线
-            line.lineDashPattern = (element.lineDashStyle ?? theme.lineDashStyle).dashPattern
-            seriesLayer.addSublayer(line)
-            lineLayers.append(line)
+            // 线层：常规色（+ 负值换色时叠加负段层）；虚线/点线（圆头线帽下 1pt 段呈现为点）
+            let lineOutlines: [(UIBezierPath, UIColor)] = useSplit
+                ? [(path, color), (negativePath, negativeColor)]
+                : [(path, color)]
+            for (linePath, lineColor) in lineOutlines where !linePath.isEmpty {
+                let line = CAShapeLayer()
+                line.path = linePath.cgPath
+                line.strokeColor = lineColor.cgColor
+                line.fillColor = nil
+                line.lineWidth = theme.lineWidth
+                line.lineJoin = .round
+                line.lineCap = .round
+                line.lineDashPattern = (element.lineDashStyle ?? theme.lineDashStyle).dashPattern
+                seriesLayer.addSublayer(line)
+                lineLayers.append(line)
+            }
 
             // 数据点（画在有效数据点位置，与阶梯形态无关；空值处不画点）。
-            // 标记符号：圆/方/菱/正三角/倒三角（系列级覆盖主题）
+            // 标记符号：圆/方/菱/正三角/倒三角（系列级覆盖主题）；负值点换 negativeColor；
+            // 空心内芯（pointHoleRadius > 0）：同形状缩小版叠在点上（Charts holeRadius 同款）
             if theme.showsPoints {
                 let symbol = element.pointSymbol ?? theme.pointSymbol
-                for p in segmentPoints.flatMap({ $0 }) {
-                    let dot = CAShapeLayer()
-                    dot.path = symbol.path(center: p, radius: theme.pointRadius)
-                    dot.fillColor = (theme.pointColor ?? color).cgColor
-                    dot.strokeColor = UIColor.white.cgColor
-                    dot.lineWidth = 1
-                    seriesLayer.addSublayer(dot)
+                let holeR = min(theme.pointHoleRadius, theme.pointRadius - 0.5)
+                for (segIdx, seg) in segments.enumerated() {
+                    for (k, p) in segmentPoints[segIdx].enumerated() {
+                        let i = seg[k]
+                        let dotColor = theme.pointColor
+                            ?? (values[i] < 0 ? negativeColor : color)
+                        let dot = CAShapeLayer()
+                        dot.path = symbol.path(center: p, radius: theme.pointRadius)
+                        dot.fillColor = dotColor.cgColor
+                        dot.strokeColor = UIColor.white.cgColor
+                        dot.lineWidth = 1
+                        seriesLayer.addSublayer(dot)
+                        if holeR > 0 {
+                            let hole = CAShapeLayer()
+                            hole.path = symbol.path(center: p, radius: holeR)
+                            hole.fillColor = theme.pointHoleColor.cgColor
+                            seriesLayer.addSublayer(hole)
+                        }
+                    }
                 }
             }
 

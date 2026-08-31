@@ -49,6 +49,13 @@ struct ColumnChartDemo: View {
     @State private var dataLabelPosition = "端部外侧"
     // —— 捏合缩放轴向 ——
     @State private var zoomAxisSel = "x"
+    // —— 标线（阈值参考线）——
+    @State private var plotLinesOn = false
+    @State private var plotLineValue = 25.0
+    // —— 准线样式 ——
+    @State private var crosshairColor = UIColor(white: 0.55, alpha: 0.9)
+    @State private var crosshairWidth = 0.75
+    @State private var crosshairDash = "solid"
 
     // —— 缩放功能测试 ——
     @State private var isZoomEnabled = true
@@ -73,7 +80,10 @@ struct ColumnChartDemo: View {
                         isRubberBandEnabled: rubberBandOn,
                         isSharedTooltipOnTapEnabled: sharedTooltipOn,
                         isCrosshairEnabled: crosshairOn,
-                        zoomAxisMode: HYMChartZoomAxisMode(rawValue: zoomAxisSel) ?? .x)
+                        zoomAxisMode: HYMChartZoomAxisMode(rawValue: zoomAxisSel) ?? .x,
+                        crosshairColor: crosshairColor,
+                        crosshairLineWidth: CGFloat(crosshairWidth),
+                        crosshairDashStyle: LineDashStyle(rawValue: crosshairDash) ?? .solid)
                 .frame(height: 280)
                 .padding(.horizontal)
                 .padding(.top, 8)
@@ -134,7 +144,11 @@ struct ColumnChartDemo: View {
             xAxis: x,
             yAxis: y,
             secondaryYAxis: secondary,
-            stacking: stacking == .none ? nil : stacking
+            stacking: stacking == .none ? nil : stacking,
+            plotLines: plotLinesOn
+                ? [CartesianPlotLine(value: plotLineValue, color: .systemRed,
+                                     dashStyle: .dash, label: "阈值 \(Int(plotLineValue))")]
+                : []
         )
     }
 
@@ -211,6 +225,10 @@ struct ColumnChartDemo: View {
             .toggle(label: "边界橡皮筋（越界回弹）", value: $rubberBandOn),
             .toggle(label: "点击弹整列数据（按 X 类目取所有系列）", value: $sharedTooltipOn),
             .toggle(label: "十字准线", value: $crosshairOn),
+            .color(label: "准线颜色", value: $crosshairColor),
+            .slider(label: "准线线宽", value: $crosshairWidth, range: 0.5...3, step: 0.25),
+            .picker(label: "准线虚线样式", selection: $crosshairDash,
+                    options: LineDashStyle.allCases.map { $0.rawValue }),
         ])
 
         let animationSection = ChartDemoPanel.DemoSection(title: "动画与交互", items: [
@@ -224,12 +242,16 @@ struct ColumnChartDemo: View {
             .toggle(label: "24小时时间轴（按数据量均分）", value: $useTimeAxis),
         ])
 
+        let plotLineSection = ChartDemoPanel.DemoSection(title: "标线（阈值）", items: [
+            .toggle(label: "阈值标线（红色虚线 + 标签）", value: $plotLinesOn),
+            .slider(label: "阈值数值", value: $plotLineValue, range: 5...80, step: 1),
+        ])
         let labelSection = ChartDemoPanel.DemoSection(title: "数据标签", items: [
             .toggle(label: "数值标注在柱端/条端", value: $dataLabelsOn),
             .picker(label: "标签位置", selection: $dataLabelPosition,
                     options: CartesianDataLabelPosition.allCases.map { $0.rawValue }),
         ])
-        return ChartDemoPanel(sections: [dataSection, xAxisSection, nullSection, columnSection, stackSection, axisSection, gestureSection, labelSection, animationSection])
+        return ChartDemoPanel(sections: [dataSection, xAxisSection, nullSection, columnSection, stackSection, axisSection, gestureSection, plotLineSection, labelSection, animationSection])
     }
 
     private func regenerateData() {

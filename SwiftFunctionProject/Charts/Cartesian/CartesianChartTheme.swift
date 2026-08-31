@@ -58,6 +58,11 @@ public struct CartesianChartTheme: HYMChartTheme {
     public var pointColor: UIColor?
     /// 数据点默认标记符号（系列级 `pointSymbol` 可覆盖）
     public var pointSymbol: PointMarkerSymbol
+    /// 数据点空心内径（0 = 实心；>0 = 空心环，Charts holeRadius 同款）。
+    /// 会在 pointRadius 内 clamp，形状沿用各符号（圆环/方环/菱环…）。
+    public var pointHoleRadius: CGFloat
+    /// 空心内芯颜色（默认白，与描边呼应）
+    public var pointHoleColor: UIColor
 
     // —— 面积填充（面积图形态；仅折线图消费）——
     /// 是否填充折线与零轴之间的区域（默认 false）。
@@ -138,6 +143,8 @@ public struct CartesianChartTheme: HYMChartTheme {
         pointRadius: CGFloat = 3,
         pointColor: UIColor? = nil,
         pointSymbol: PointMarkerSymbol = .circle,
+        pointHoleRadius: CGFloat = 0,
+        pointHoleColor: UIColor = .white,
         showsArea: Bool = false,
         areaGradientColors: [UIColor]? = nil,
         showsDataLabels: Bool = false,
@@ -180,6 +187,8 @@ public struct CartesianChartTheme: HYMChartTheme {
         self.pointRadius = max(0, pointRadius)
         self.pointColor = pointColor
         self.pointSymbol = pointSymbol
+        self.pointHoleRadius = max(0, pointHoleRadius)
+        self.pointHoleColor = pointHoleColor
         self.showsArea = showsArea
         self.areaGradientColors = areaGradientColors
         self.showsDataLabels = showsDataLabels

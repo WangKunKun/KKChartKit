@@ -825,10 +825,97 @@ public enum ChartSelfTest {
         // —— 数据标签（数值标注）——
         runDataLabelSelfTest()
 
+        // —— 标线 / 折线负值换色 / 空心圆点 ——
+        runPlotLineSelfTest()
+
         // —— Y 轴缩放（zoomAxisMode .y/.xy）——
         runYAxisZoomSelfTest()
 
         print("✅ ChartSelfTest passed")
+    }
+
+    /// 标线（阈值参考线）、折线负值换色（跨零切分）、空心圆点。
+    static func runPlotLineSelfTest() {
+        func walkLayers(_ l: CALayer, _ visit: (CALayer) -> Void) {
+            visit(l)
+            l.sublayers?.forEach { walkLayers($0, visit) }
+        }
+        func allLayers(of host: UIView) -> [CALayer] {
+            var out: [CALayer] = []
+            walkLayers(host.layer) { out.append($0) }
+            return out
+        }
+
+        // 1) 标线：垂直图 = 水平横线（带虚线 pattern + 标签文本层）；越界自动隐藏
+        let r = LineChartRenderer()
+        let host = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        r.mount(into: host)
+        r.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, 20, 30, 40])],
+            plotLines: [CartesianPlotLine(value: 25, color: .systemRed, dashStyle: .dash, label: "阈值 25"),
+                        CartesianPlotLine(value: 999)]),
+                  theme: CartesianChartTheme(),
+                  context: HYMChartRenderContext(bounds: host.bounds, center: host.center))
+        let layers = allLayers(of: host)
+        let plotLineLayers = layers.compactMap { $0 as? CAShapeLayer }
+            .filter { $0.fillColor == nil && !($0.lineDashPattern ?? []).isEmpty
+                      && $0.strokeColor == UIColor.systemRed.cgColor }
+        assert(plotLineLayers.count == 1, "域内一条红色虚线标线（999 越界不画），got \(plotLineLayers.count)")
+        let labelTexts = layers.compactMap { ($0 as? CATextLayer)?.string as? String }
+        assert(labelTexts.contains("阈值 25"), "标线标签文本存在")
+        // 横线：boundingBox 宽 ≈ plot 宽、高 ≈ 0
+        let bbox = plotLineLayers[0].path!.boundingBoxOfPath
+        assert(bbox.width > 200 && bbox.height < 1, "标线应为贯穿 plot 的水平线，got \(bbox)")
+
+        // 2) Bar：标线 = 竖线（值轴在 X）
+        let b = BarChartRenderer()
+        let hostB = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        b.mount(into: hostB)
+        b.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, 20, 30])],
+            plotLines: [CartesianPlotLine(value: 15, color: .systemRed, dashStyle: .dash)]),
+                 theme: CartesianChartTheme(),
+                 context: HYMChartRenderContext(bounds: hostB.bounds, center: hostB.center))
+        let bboxB = allLayers(of: hostB).compactMap { $0 as? CAShapeLayer }
+            .first { $0.strokeColor == UIColor.systemRed.cgColor }?.path?.boundingBoxOfPath
+        assert(bboxB != nil && bboxB!.height > 100 && bboxB!.width < 1,
+               "Bar 标线应为竖线，got \(String(describing: bboxB))")
+
+        // 3) 折线负值换色：直线形态在跨零处切分 → 正/负两条线层，负层为 negativeColor
+        let rn = LineChartRenderer()
+        let hostN = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        rn.mount(into: hostN)
+        rn.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [20, -10, -30, 25],
+                                            negativeColor: .systemRed)]),
+                  theme: CartesianChartTheme(),
+                  context: HYMChartRenderContext(bounds: hostN.bounds, center: hostN.center))
+        let lineLayers = rn.seriesLayerSublayersForTesting().compactMap { $0 as? CAShapeLayer }
+            .filter { $0.strokeColor != nil && $0.fillColor == nil }
+        assert(lineLayers.count == 2, "正/负两条线层，got \(lineLayers.count)")
+        assert(lineLayers.contains { $0.strokeColor == UIColor.systemRed.cgColor },
+               "负段线层应为 negativeColor")
+        // 负值点填充红
+        let negDots = rn.seriesLayerSublayersForTesting().compactMap { $0 as? CAShapeLayer }
+            .filter { $0.fillColor == UIColor.systemRed.cgColor }
+        assert(negDots.count == 2, "两个负值数据点为红色，got \(negDots.count)")
+
+        // 4) 空心圆点：点层双叠（外环 + 内芯），内芯更小
+        var theme = CartesianChartTheme()
+        theme.pointHoleRadius = 1.5
+        theme.pointRadius = 4
+        let rh = LineChartRenderer()
+        let hostH = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        rh.mount(into: hostH)
+        rh.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, 20, 30])]),
+                  theme: theme,
+                  context: HYMChartRenderContext(bounds: hostH.bounds, center: hostH.center))
+        let dotLayers = rh.seriesLayerSublayersForTesting().compactMap { $0 as? CAShapeLayer }
+            .filter { $0.fillColor != nil }
+        assert(dotLayers.count == 6, "3 点 × (外环+内芯) = 6 层，got \(dotLayers.count)")
+        let radii = dotLayers.map { $0.path!.boundingBoxOfPath.width }.sorted()
+        assert(radii[0] < radii[5] && radii[5] < 10, "内芯层半径小于外层")
     }
 
     /// 数据标签：默认格式化、三种位置的几何中心、渲染级层计数与系列级覆盖、总量超限跳过。

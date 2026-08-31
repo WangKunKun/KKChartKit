@@ -76,6 +76,18 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     /// 命中数据时是否显示十字准线（贯穿绘图区的细线，Highcharts crosshair 同款）。
     /// 逐点命中与整列命中（shared tooltip）都会显示；默认开。
     public var isCrosshairEnabled: Bool = true
+    /// 准线颜色（默认半透明中性灰）
+    public var crosshairColor: UIColor = UIColor(white: 0.55, alpha: 0.9) {
+        didSet { crosshairLayer.strokeColor = crosshairColor.cgColor }
+    }
+    /// 准线线宽（默认 0.75）
+    public var crosshairLineWidth: CGFloat = 0.75 {
+        didSet { crosshairLayer.lineWidth = max(0.25, crosshairLineWidth) }
+    }
+    /// 准线虚线样式（默认实线；AAChartKit crosshair dashStyle 同款）
+    public var crosshairDashStyle: LineDashStyle = .solid {
+        didSet { crosshairLayer.lineDashPattern = crosshairDashStyle.dashPattern }
+    }
     /// 点击按 X 类目取**整列**数据（shared tooltip，Highcharts 同款）。
     /// - `nil`（默认，自动）：多系列图表开（整列对比信息密度最高）、单系列关（逐点+吸附更直观）；
     /// - `true`：强制整列；`false`：强制逐点。
@@ -136,9 +148,11 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         clipsToBounds = false
         isUserInteractionEnabled = true
         renderer.mount(into: self)
-        crosshairLayer.strokeColor = UIColor(white: 0.55, alpha: 0.9).cgColor
+        // 样式初值来自实例属性（didSet 在 init 阶段不触发，这里显式应用一次）
+        crosshairLayer.strokeColor = crosshairColor.cgColor
         crosshairLayer.fillColor = nil
-        crosshairLayer.lineWidth = 0.75
+        crosshairLayer.lineWidth = crosshairLineWidth
+        crosshairLayer.lineDashPattern = crosshairDashStyle.dashPattern
         crosshairLayer.isHidden = true
         // render() 每次重绘都会往 self.layer 追加内容层（卡片背景等不透明层在数组序上高于本层），
         // 用 zPosition 稳定置顶（低于 tooltip 的 1000，弹窗永远压住准线）

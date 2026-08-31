@@ -14,6 +14,9 @@ public struct LineChart: View {
     private let isSharedTooltipOnTapEnabled: Bool?
     private let isCrosshairEnabled: Bool
     private let zoomAxisMode: HYMChartZoomAxisMode
+    private let crosshairColor: UIColor
+    private let crosshairLineWidth: CGFloat
+    private let crosshairDashStyle: LineDashStyle
 
     public init(model: CartesianChartModel,
                 theme: CartesianChartTheme = CartesianChartTheme(),
@@ -26,7 +29,10 @@ public struct LineChart: View {
                 isRubberBandEnabled: Bool = true,
                 isSharedTooltipOnTapEnabled: Bool? = nil,
                 isCrosshairEnabled: Bool = true,
-                zoomAxisMode: HYMChartZoomAxisMode = .x) {
+                zoomAxisMode: HYMChartZoomAxisMode = .x,
+                crosshairColor: UIColor = UIColor(white: 0.55, alpha: 0.9),
+                crosshairLineWidth: CGFloat = 0.75,
+                crosshairDashStyle: LineDashStyle = .solid) {
         self.model = model
         self.theme = theme
         self.playsAnimationOnAppear = playsAnimationOnAppear
@@ -39,6 +45,9 @@ public struct LineChart: View {
         self.isSharedTooltipOnTapEnabled = isSharedTooltipOnTapEnabled
         self.isCrosshairEnabled = isCrosshairEnabled
         self.zoomAxisMode = zoomAxisMode
+        self.crosshairColor = crosshairColor
+        self.crosshairLineWidth = crosshairLineWidth
+        self.crosshairDashStyle = crosshairDashStyle
     }
 
     public var body: some View {
@@ -52,7 +61,10 @@ public struct LineChart: View {
                                isRubberBandEnabled: isRubberBandEnabled,
                                isSharedTooltipOnTapEnabled: isSharedTooltipOnTapEnabled,
                                isCrosshairEnabled: isCrosshairEnabled,
-                               zoomAxisMode: zoomAxisMode)
+                               zoomAxisMode: zoomAxisMode,
+                               crosshairColor: crosshairColor,
+                               crosshairLineWidth: crosshairLineWidth,
+                               crosshairDashStyle: crosshairDashStyle)
     }
 }
 
@@ -69,6 +81,9 @@ private struct LineChartRepresentable: UIViewRepresentable {
     let isSharedTooltipOnTapEnabled: Bool?
     let isCrosshairEnabled: Bool
     let zoomAxisMode: HYMChartZoomAxisMode
+    let crosshairColor: UIColor
+    let crosshairLineWidth: CGFloat
+    let crosshairDashStyle: LineDashStyle
 
     func makeUIView(context: Context) -> HYMChartView<LineChartRenderer> {
         let chart = HYMChartView<LineChartRenderer>(frame: .zero)
@@ -81,6 +96,9 @@ private struct LineChartRepresentable: UIViewRepresentable {
         chart.isSharedTooltipOnTapEnabled = isSharedTooltipOnTapEnabled
         chart.isCrosshairEnabled = isCrosshairEnabled
         chart.zoomAxisMode = zoomAxisMode
+        chart.crosshairColor = crosshairColor
+        chart.crosshairLineWidth = crosshairLineWidth
+        chart.crosshairDashStyle = crosshairDashStyle
         chart.onHit = { target, gesture in
             if let h = target as? LineHitTarget { onHit?(h, gesture) }
         }
@@ -101,6 +119,9 @@ private struct LineChartRepresentable: UIViewRepresentable {
         uiView.isSharedTooltipOnTapEnabled = isSharedTooltipOnTapEnabled
         uiView.isCrosshairEnabled = isCrosshairEnabled
         uiView.zoomAxisMode = zoomAxisMode
+        uiView.crosshairColor = crosshairColor
+        uiView.crosshairLineWidth = crosshairLineWidth
+        uiView.crosshairDashStyle = crosshairDashStyle
         uiView.configure(model: model, theme: theme)
     }
 }

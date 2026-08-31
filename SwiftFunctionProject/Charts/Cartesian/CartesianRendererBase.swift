@@ -476,6 +476,58 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
         if model.maxPointCount > 0 {
             drawSeries(model: model, theme: theme, plotFrame: currentPlotFrame)
         }
+        // 6) 标线（阈值参考线）：画在系列之上，超出当前值域自动隐藏（缩放平移跟随）
+        drawPlotLines(model: model, theme: cartTheme)
+    }
+
+    // MARK: - 标线（plotLines）
+    /// 值轴标线：垂直图 = 水平横线（次轴线按次值域换算），水平图（Bar）= 竖线。
+    private func drawPlotLines(model: CartesianChartModel, theme: CartesianChartTheme) {
+        guard !model.plotLines.isEmpty else { return }
+        for pl in model.plotLines {
+            let domain: ClosedRange<Double>?
+            let axisIdx = pl.yAxisIndex == 1 ? 1 : 0
+            if isHorizontalValueAxis {
+                domain = axisIdx == 0 ? currentViewport.xDomain : nil   // 水平图无次轴
+            } else {
+                domain = axisIdx == 1 ? currentSecondaryYDomain : currentViewport.yDomain
+            }
+            guard let domain,
+                  domain.lowerBound <= pl.value, pl.value <= domain.upperBound else { continue }
+
+            let path = UIBezierPath()
+            let labelCenter: CGPoint
+            let labelSize = pl.label.map { dataLabelTextSize($0, fontSize: theme.tickLabelFont.pointSize) }
+            if isHorizontalValueAxis {
+                let x = CartesianGeometry.point(x: pl.value, y: 0,
+                                                viewport: currentViewport,
+                                                plotFrame: currentPlotFrame).x
+                path.move(to: CGPoint(x: x, y: currentPlotFrame.minY))
+                path.addLine(to: CGPoint(x: x, y: currentPlotFrame.maxY))
+                labelCenter = CGPoint(x: min(x + (labelSize?.width ?? 0) / 2 + 4,
+                                             currentPlotFrame.maxX - (labelSize?.width ?? 0) / 2),
+                                      y: currentPlotFrame.minY + (labelSize?.height ?? 0) / 2 + 3)
+            } else {
+                let y = screenPoint(x: 0, y: pl.value, yAxisIndex: axisIdx).y
+                path.move(to: CGPoint(x: currentPlotFrame.minX, y: y))
+                path.addLine(to: CGPoint(x: currentPlotFrame.maxX, y: y))
+                labelCenter = CGPoint(x: currentPlotFrame.maxX - (labelSize?.width ?? 0) / 2 - 4,
+                                      y: y - (labelSize?.height ?? 0) / 2 - 3)
+            }
+            let line = CAShapeLayer()
+            line.path = path.cgPath
+            line.strokeColor = pl.color.cgColor
+            line.fillColor = nil
+            line.lineWidth = max(0.25, pl.lineWidth)
+            line.lineDashPattern = pl.dashStyle.dashPattern
+            rootLayer.addSublayer(line)
+
+            if let text = pl.label {
+                rootLayer.addSublayer(makeDataLabelLayer(
+                    text: text, fontSize: theme.tickLabelFont.pointSize,
+                    color: pl.color, center: labelCenter))
+            }
+        }
     }
 
     // MARK: - 子类扩展点

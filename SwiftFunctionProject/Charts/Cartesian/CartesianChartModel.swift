@@ -96,6 +96,33 @@ public struct CartesianSeriesElement {
     }
 }
 
+
+/// 标线（阈值线；Highcharts plotLines / Charts LimitLine 同款）。
+/// 值轴语义：垂直图 = 绘图区内水平横线，水平图（Bar）= 竖线；画在系列之上。
+/// 数值超出当前值域时自动不画（缩放平移后跟随显隐）。
+public struct CartesianPlotLine {
+    /// 标线数值（按 `yAxisIndex` 绑定值轴）
+    public var value: Double
+    /// 绑定值轴（0 = 主轴，1 = 次轴；水平图仅主轴）
+    public var yAxisIndex: Int
+    public var color: UIColor
+    public var lineWidth: CGFloat
+    public var dashStyle: LineDashStyle
+    /// 标线旁文字（nil = 无标签；颜色随线色）
+    public var label: String?
+
+    public init(value: Double, yAxisIndex: Int = 0,
+                color: UIColor = .systemRed, lineWidth: CGFloat = 1,
+                dashStyle: LineDashStyle = .solid, label: String? = nil) {
+        self.value = value
+        self.yAxisIndex = yAxisIndex
+        self.color = color
+        self.lineWidth = lineWidth
+        self.dashStyle = dashStyle
+        self.label = label
+    }
+}
+
 /// 轴系图表数据（折线/柱状等共用）。
 public struct CartesianChartModel: HYMChartModel {
     public var title: String?
@@ -106,19 +133,23 @@ public struct CartesianChartModel: HYMChartModel {
     public var secondaryYAxis: CartesianAxisModel?
     /// 堆叠配置（nil = 不堆叠）
     public var stacking: StackConfig?
+    /// 标线（阈值参考线，画在系列之上；可为多条）
+    public var plotLines: [CartesianPlotLine]
 
     public init(title: String? = nil,
                 series: [CartesianSeriesElement],
                 xAxis: CartesianAxisModel = CartesianAxisModel(kind: .category(labels: [])),
                 yAxis: CartesianAxisModel = CartesianAxisModel(kind: .value),
                 secondaryYAxis: CartesianAxisModel? = nil,
-                stacking: StackConfig? = nil) {
+                stacking: StackConfig? = nil,
+                plotLines: [CartesianPlotLine] = []) {
         self.title = title
         self.series = series
         self.xAxis = xAxis
         self.yAxis = yAxis
         self.secondaryYAxis = secondaryYAxis
         self.stacking = stacking
+        self.plotLines = plotLines
     }
 
     /// 最长 series 的点数（类目数）。
