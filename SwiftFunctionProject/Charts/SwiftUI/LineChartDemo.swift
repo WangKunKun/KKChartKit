@@ -39,7 +39,7 @@ struct LineChartDemo: View {
     /// 数据点标记符号（全局 + 末系列覆盖）
     @State private var pointSymbol = "circle"
     @State private var lastSeriesPointSymbol = "跟随全局"
-    /// 整列弹窗时显示十字准线
+    /// 命中数据时显示十字准线（逐点/整列都画）
     @State private var crosshairOn = true
     @State private var isZoomEnabled = true
     @State private var minimumVisibleCategories = 12.0
@@ -260,7 +260,7 @@ struct LineChartDemo: View {
             .toggle(label: "边界橡皮筋（越界回弹）", value: $rubberBandOn),
             .slider(label: "放大下限（最小可见类目数）", value: $minimumVisibleCategories, range: 2...24, step: 1),
             .toggle(label: "点击弹整列数据（按 X 类目取所有系列）", value: $sharedTooltipOn),
-            .toggle(label: "整列弹窗十字准线", value: $crosshairOn),
+            .toggle(label: "十字准线", value: $crosshairOn),
             .toggle(label: "空值示例（第3点无数据，断线缺口）", value: $nullSampleOn),
             .toggle(label: "跨空值连线（connectNulls）", value: $connectNullsOn),
             .toggle(label: "24小时时间轴（按数据量均分）", value: $useTimeAxis),

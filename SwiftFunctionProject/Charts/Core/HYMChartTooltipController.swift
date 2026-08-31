@@ -14,6 +14,8 @@ public final class HYMChartTooltipController {
         self.tooltip = HYMChartTooltip()
         tooltip.isHidden = true
         host.addSubview(tooltip)
+        // 弹窗永远压住准线（crosshairLayer zPosition 900）与标签层
+        tooltip.layer.zPosition = 1000
     }
 
     /// 显示弹窗。

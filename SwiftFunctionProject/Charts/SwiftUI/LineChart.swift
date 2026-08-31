@@ -86,6 +86,14 @@ private struct LineChartRepresentable: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: HYMChartView<LineChartRenderer>, context: Context) {
+        // 交互开关同步：demo 里拨动开关时 SwiftUI 不重建 UIView，须在此回写才实时生效
+        uiView.isZoomEnabled = isZoomEnabled
+        uiView.minimumVisibleCategories = minimumVisibleCategories
+        uiView.isDragDecelerationEnabled = isDragDecelerationEnabled
+        uiView.isHighlightPerDragEnabled = isHighlightPerDragEnabled
+        uiView.isRubberBandEnabled = isRubberBandEnabled
+        uiView.isSharedTooltipOnTapEnabled = isSharedTooltipOnTapEnabled
+        uiView.isCrosshairEnabled = isCrosshairEnabled
         uiView.configure(model: model, theme: theme)
     }
 }

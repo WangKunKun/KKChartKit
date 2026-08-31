@@ -63,7 +63,8 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     public var isHighlightPerDragEnabled: Bool = true
     /// 把视口拖出边界时的橡皮筋越界 + 松手回弹（默认开）。
     public var isRubberBandEnabled: Bool = true
-    /// 整列弹窗激活时是否显示十字准线（贯穿绘图区的细线，Highcharts crosshair 同款；默认开）。
+    /// 命中数据时是否显示十字准线（贯穿绘图区的细线，Highcharts crosshair 同款）。
+    /// 逐点命中与整列命中（shared tooltip）都会显示；默认开。
     public var isCrosshairEnabled: Bool = true
     /// 点击按 X 类目取**整列**数据（shared tooltip，Highcharts 同款）。
     /// - `nil`（默认，自动）：多系列图表开（整列对比信息密度最高）、单系列关（逐点+吸附更直观）；
@@ -127,6 +128,9 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         crosshairLayer.fillColor = nil
         crosshairLayer.lineWidth = 0.75
         crosshairLayer.isHidden = true
+        // render() 每次重绘都会往 self.layer 追加内容层（卡片背景等不透明层在数组序上高于本层），
+        // 用 zPosition 稳定置顶（低于 tooltip 的 1000，弹窗永远压住准线）
+        crosshairLayer.zPosition = 900
         layer.addSublayer(crosshairLayer)
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap(_:))))
         addGestureRecognizer(zoomGesture)
@@ -216,7 +220,11 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
 
     // MARK: - 十字准线（shared tooltip 激活时显示）
     private func showCrosshair(_ frame: CGRect) {
-        guard isCrosshairEnabled, frame.width > 0 || frame.height > 0 else { return }
+        // 开关关闭或几何无效 → 撤掉现有准线（避免上一命中的残影，如用户中途拨掉开关）
+        guard isCrosshairEnabled, frame.width > 0 || frame.height > 0 else {
+            hideCrosshair()
+            return
+        }
         let path = UIBezierPath()
         if frame.width <= 1 {          // 竖线
             path.move(to: CGPoint(x: frame.minX, y: frame.minY))
@@ -243,9 +251,22 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     // MARK: - 触摸命中（tap 与拖拽滑动选中共用）
     @objc private func onTap(_ gr: UITapGestureRecognizer) {
         let p = gr.location(in: self)
-        if handleSharedIfActive(at: p, gesture: .tap) { return }
-        handleHit(at: p, gesture: .tap)
+        performTap(at: p)
     }
+
+    /// 与 tap 手势同一分发路径（整列优先、回落逐点）；供测试与无手势环境驱动。
+    func performTap(at point: CGPoint) {
+        if !handleSharedIfActive(at: point, gesture: .tap) {
+            handleHit(at: point, gesture: .tap)
+        }
+    }
+
+    /// 准线当前是否可见（供单测断言；展示逻辑见 showCrosshair/hideCrosshair）。
+    var isCrosshairVisibleForTesting: Bool {
+        !crosshairLayer.isHidden && crosshairLayer.superlayer != nil
+    }
+    /// 准线层是否仍挂在 layer 树上（供单测诊断 detach 类问题）。
+    var isCrosshairAttachedForTesting: Bool { crosshairLayer.superlayer != nil }
 
     /// 整列命中（shared tooltip）：优先于逐点命中，点在绘图区外自动回落。
     /// 自动档（nil）：单系列（整列只有一条数据）回落逐点+吸附，多系列才整列。
@@ -257,6 +278,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         guard useShared else { return false }
         renderer.applySelection(shared.target)
         onHit?(shared.target, gesture)
+        showCrosshair(shared.crosshair)   // 整列弹窗伴随准线（isCrosshairEnabled=false 时内部跳过）
         // popup / onHitLocated 模式沿用逐点 target 的外部链路；shared 组合文本走内置 tooltip
         if popupContentProvider == nil && onHitLocated == nil {
             if let text = shared.target.tooltipText {
@@ -277,7 +299,12 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         let target = renderer.hitTest(point)
             ?? (renderer as? HYMChartSnapHitProvider)?.snapHit(at: point)
         renderer.applySelection(target)
-        hideCrosshair()   // 准线只伴随整列弹窗
+        // 准线跟命中走（不依赖整列弹窗）：命中画在类目上，未命中撤掉
+        if let target, let rect = renderer.crosshairRect(for: target) {
+            showCrosshair(rect)
+        } else {
+            hideCrosshair()
+        }
 
         if let target {
             onHit?(target, gesture)                      // 始终：命中事件通知

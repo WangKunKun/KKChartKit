@@ -26,6 +26,51 @@ final class SwiftFunctionProjectTests: XCTestCase {
 
     /// 框架级 DEBUG 自检（ChartSelfTest，随 App 启动也会跑一遍；此处供命令行/CI 验证）。
 
+    /// 准线点击链路：demo 默认配置（sharedTooltipOn=true → 单系列也走整列路径）与
+    /// 自动档（nil → 单系列逐点）两种 tap 路径都必须点亮准线（fix: 打开开关无效果）。
+    func testCrosshairVisibleAfterTap() {
+        let chart = HYMChartView<LineChartRenderer>(frame: CGRect(x: 0, y: 0, width: 390, height: 300))
+        let model = CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [20, 40, 60, 30])])
+        chart.configure(model: model, theme: CartesianChartTheme())
+        chart.layoutIfNeeded()
+        XCTAssertFalse(chart.isCrosshairVisibleForTesting, "未点击时准线应隐藏")
+
+        // 路径 1：demo 默认（显式开 shared，单系列仍整列命中）
+        chart.isSharedTooltipOnTapEnabled = true
+        chart.performTap(at: CGPoint(x: 195, y: 150))
+        XCTAssertTrue(chart.isCrosshairAttachedForTesting, "准线层应挂在 layer 树上（诊断 detach）")
+        XCTAssertTrue(chart.isCrosshairVisibleForTesting, "整列命中应显示准线")
+
+        // 再现 demo 入场动画后的布局（动画完成回调会跑 layout）
+        chart.playEntranceAnimation()
+        chart.layoutIfNeeded()
+        RunLoop.current.run(until: Date().addingTimeInterval(2.5))   // 等动画完成回调
+        chart.performTap(at: CGPoint(x: 195, y: 150))
+        XCTAssertTrue(chart.isCrosshairAttachedForTesting, "入场动画后准线层仍应在树上")
+        XCTAssertTrue(chart.isCrosshairVisibleForTesting, "入场动画后整列命中仍应显示准线")
+
+        // 关闭开关：命中不再画线
+        chart.isCrosshairEnabled = false
+        chart.performTap(at: CGPoint(x: 195, y: 150))
+        XCTAssertFalse(chart.isCrosshairVisibleForTesting, "isCrosshairEnabled=false 时不显示")
+
+        // 路径 2：自动档（nil → 单系列走逐点+吸附）
+        chart.isCrosshairEnabled = true
+        chart.isSharedTooltipOnTapEnabled = nil
+        chart.performTap(at: CGPoint(x: 195, y: 150))
+        XCTAssertTrue(chart.isCrosshairVisibleForTesting, "逐点命中也应显示准线")
+
+        // 多系列自动档：整列路径
+        let multi = CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [20, 40, 60, 30]),
+                     CartesianSeriesElement(name: "b", data: [50, 25, 45, 70])])
+        chart.configure(model: multi, theme: CartesianChartTheme())
+        chart.layoutIfNeeded()
+        XCTAssertFalse(chart.isCrosshairVisibleForTesting, "configure 重置后准线应隐藏")
+        chart.performTap(at: CGPoint(x: 195, y: 150))
+        XCTAssertTrue(chart.isCrosshairVisibleForTesting, "多系列自动档整列命中应显示准线")
+    }
 
     func testChartSelfTest() {
         ChartSelfTest.runAll()

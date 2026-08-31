@@ -33,6 +33,8 @@ struct BarChartDemo: View {
     @State private var highlightPerDragOn = true
     @State private var rubberBandOn = true
     @State private var sharedTooltipOn = true
+    /// 命中数据时显示十字准线（逐点/整行都画，水平图为横线）
+    @State private var crosshairOn = true
 
     // —— 缩放功能测试 ——
     @State private var isZoomEnabled = true
@@ -53,7 +55,8 @@ struct BarChartDemo: View {
                      isDragDecelerationEnabled: decelerationOn,
                      isHighlightPerDragEnabled: highlightPerDragOn,
                      isRubberBandEnabled: rubberBandOn,
-                     isSharedTooltipOnTapEnabled: sharedTooltipOn)
+                     isSharedTooltipOnTapEnabled: sharedTooltipOn,
+                     isCrosshairEnabled: crosshairOn)
                 .frame(height: 280)
                 .padding(.horizontal)
                 .padding(.top, 8)
@@ -168,6 +171,7 @@ struct BarChartDemo: View {
             .toggle(label: "滑动选中（全量视图拖拽=划过整行高亮）", value: $highlightPerDragOn),
             .toggle(label: "边界橡皮筋（越界回弹）", value: $rubberBandOn),
             .toggle(label: "点击弹整行数据（按类目取所有系列）", value: $sharedTooltipOn),
+            .toggle(label: "十字准线", value: $crosshairOn),
         ])
 
         let animationSection = ChartDemoPanel.DemoSection(title: "动画与交互", items: [

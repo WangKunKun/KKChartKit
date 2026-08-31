@@ -12,6 +12,7 @@ public struct ColumnChart: View {
     private let isHighlightPerDragEnabled: Bool
     private let isRubberBandEnabled: Bool
     private let isSharedTooltipOnTapEnabled: Bool?
+    private let isCrosshairEnabled: Bool
 
     public init(model: CartesianChartModel,
                 theme: CartesianChartTheme = CartesianChartTheme(),
@@ -22,7 +23,8 @@ public struct ColumnChart: View {
                 isDragDecelerationEnabled: Bool = true,
                 isHighlightPerDragEnabled: Bool = true,
                 isRubberBandEnabled: Bool = true,
-                isSharedTooltipOnTapEnabled: Bool? = nil) {
+                isSharedTooltipOnTapEnabled: Bool? = nil,
+                isCrosshairEnabled: Bool = true) {
         self.model = model
         self.theme = theme
         self.playsAnimationOnAppear = playsAnimationOnAppear
@@ -33,6 +35,7 @@ public struct ColumnChart: View {
         self.isHighlightPerDragEnabled = isHighlightPerDragEnabled
         self.isRubberBandEnabled = isRubberBandEnabled
         self.isSharedTooltipOnTapEnabled = isSharedTooltipOnTapEnabled
+        self.isCrosshairEnabled = isCrosshairEnabled
     }
 
     public var body: some View {
@@ -44,7 +47,8 @@ public struct ColumnChart: View {
                                isDragDecelerationEnabled: isDragDecelerationEnabled,
                                isHighlightPerDragEnabled: isHighlightPerDragEnabled,
                                isRubberBandEnabled: isRubberBandEnabled,
-                               isSharedTooltipOnTapEnabled: isSharedTooltipOnTapEnabled)
+                               isSharedTooltipOnTapEnabled: isSharedTooltipOnTapEnabled,
+                               isCrosshairEnabled: isCrosshairEnabled)
     }
 }
 
@@ -59,12 +63,14 @@ public struct ColumnChartRepresentable: UIViewRepresentable {
     private let isHighlightPerDragEnabled: Bool
     private let isRubberBandEnabled: Bool
     private let isSharedTooltipOnTapEnabled: Bool?
+    private let isCrosshairEnabled: Bool
 
     public init(model: CartesianChartModel, theme: CartesianChartTheme, playsAnimationOnAppear: Bool, onHit: ((ColumnHitTarget, HYMChartGesture) -> Void)?, isZoomEnabled: Bool, minimumVisibleCategories: Int,
                 isDragDecelerationEnabled: Bool,
                 isHighlightPerDragEnabled: Bool,
                 isRubberBandEnabled: Bool,
-                isSharedTooltipOnTapEnabled: Bool?) {
+                isSharedTooltipOnTapEnabled: Bool?,
+                isCrosshairEnabled: Bool) {
         self.model = model
         self.theme = theme
         self.playsAnimationOnAppear = playsAnimationOnAppear
@@ -75,6 +81,7 @@ public struct ColumnChartRepresentable: UIViewRepresentable {
         self.isHighlightPerDragEnabled = isHighlightPerDragEnabled
         self.isRubberBandEnabled = isRubberBandEnabled
         self.isSharedTooltipOnTapEnabled = isSharedTooltipOnTapEnabled
+        self.isCrosshairEnabled = isCrosshairEnabled
     }
 
     public func makeUIView(context: Context) -> HYMChartView<ColumnChartRenderer> {
@@ -86,6 +93,7 @@ public struct ColumnChartRepresentable: UIViewRepresentable {
         chart.isHighlightPerDragEnabled = isHighlightPerDragEnabled
         chart.isRubberBandEnabled = isRubberBandEnabled
         chart.isSharedTooltipOnTapEnabled = isSharedTooltipOnTapEnabled
+        chart.isCrosshairEnabled = isCrosshairEnabled
         chart.onHit = { target, gesture in
             if let h = target as? ColumnHitTarget { onHit?(h, gesture) }
         }
@@ -97,6 +105,14 @@ public struct ColumnChartRepresentable: UIViewRepresentable {
     }
 
     public func updateUIView(_ uiView: HYMChartView<ColumnChartRenderer>, context: Context) {
+        // 交互开关同步：demo 里拨动开关时 SwiftUI 不重建 UIView，须在此回写才实时生效
+        uiView.isZoomEnabled = isZoomEnabled
+        uiView.minimumVisibleCategories = minimumVisibleCategories
+        uiView.isDragDecelerationEnabled = isDragDecelerationEnabled
+        uiView.isHighlightPerDragEnabled = isHighlightPerDragEnabled
+        uiView.isRubberBandEnabled = isRubberBandEnabled
+        uiView.isSharedTooltipOnTapEnabled = isSharedTooltipOnTapEnabled
+        uiView.isCrosshairEnabled = isCrosshairEnabled
         uiView.configure(model: model, theme: theme)
     }
 }

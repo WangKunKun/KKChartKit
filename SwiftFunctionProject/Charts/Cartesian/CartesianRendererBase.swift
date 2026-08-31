@@ -502,6 +502,38 @@ extension CartesianRendererBase {
     }
 }
 
+// MARK: - 十字准线几何（逐点/整列命中共用）
+extension CartesianRendererBase {
+
+    /// 命中目标所在类目的准线：垂直图 = 过类目中心的全高竖线，水平图 = 过类目行的全宽横线。
+    /// 几何与 sharedHit 的 crosshair 完全一致（同一类目同一条线）。
+    public func crosshairRect(for target: HYMChartHitTarget) -> CGRect? {
+        guard let model = currentModel else { return nil }
+        let idx: Int?
+        switch target {
+        case let t as CartesianSharedHitTarget: idx = t.categoryIndex
+        case let t as LineHitTarget:             idx = t.index
+        case let t as ColumnHitTarget:           idx = t.categoryIndex
+        case let t as BarHitTarget:              idx = t.categoryIndex
+        default:                                 idx = nil
+        }
+        guard let categoryIndex = idx, categoryIndex >= 0, categoryIndex < model.maxPointCount else { return nil }
+
+        if isHorizontalValueAxis {
+            let y = CartesianGeometry.horizontalCategoryY(category: Double(categoryIndex),
+                                                          viewport: currentViewport,
+                                                          plotFrame: currentPlotFrame)
+            return CGRect(x: currentPlotFrame.minX, y: y - 0.5,
+                          width: currentPlotFrame.width, height: 1)
+        }
+        let x = CartesianGeometry.point(x: Double(categoryIndex), y: 0,
+                                        viewport: currentViewport,
+                                        plotFrame: currentPlotFrame).x
+        return CGRect(x: x - 0.5, y: currentPlotFrame.minY,
+                      width: 1, height: currentPlotFrame.height)
+    }
+}
+
 // MARK: - 整列命中（shared tooltip）
 extension CartesianRendererBase: HYMChartSharedHitProvider {
 
