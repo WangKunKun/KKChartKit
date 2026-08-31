@@ -33,6 +33,9 @@ struct LineChartDemo: View {
 
     // —— 连接形态 / 交互（阶段 1 新增）——
     @State private var connectionStyle: LineConnectionStyle = .straight
+    /// 全局默认虚线样式；末系列可单独覆盖（实际/预测场景）
+    @State private var dashStyle = "solid"
+    @State private var lastSeriesDashStyle = "跟随全局"
     @State private var isZoomEnabled = true
     @State private var minimumVisibleCategories = 12.0
     /// X 轴时间轴模式：按实际数据量把 24h 均分到每个点（288 点 = 5 分钟/点，1440 点 = 1 分钟/点）
@@ -117,11 +120,14 @@ struct LineChartDemo: View {
         let series = (0..<seriesCount).map { i in
             let isLast = i == seriesCount - 1
             let rawData = i < data.count ? data[i] : Self.randomData(count: pointCount)
+            let dash: LineDashStyle? = (isLast && lastSeriesDashStyle != "跟随全局")
+                ? LineDashStyle(rawValue: lastSeriesDashStyle) : nil
             return CartesianSeriesElement(
                 name: "系列\(i + 1)",
                 data: (mirrorStackOn && isLast) ? rawData.map { -$0 } : rawData,
                 color: seriesColors[i % seriesColors.count],
-                yAxisIndex: (dualAxisOn && isLast) ? 1 : 0)
+                yAxisIndex: (dualAxisOn && isLast) ? 1 : 0,
+                lineDashStyle: dash)
         }
 
         var secondary: CartesianAxisModel?
@@ -158,6 +164,7 @@ struct LineChartDemo: View {
         t.axisLineWidth = axisLineWidth
         t.axisLabelGap = axisLabelGap
         t.lineConnectionStyle = connectionStyle
+        t.lineDashStyle = LineDashStyle(rawValue: dashStyle) ?? .solid
         // 堆叠默认联动开面积（分层展示更直观；可关成纯累计折线）
         let stacked = stackingMode != "不堆叠"
         let areaOn = showsArea || (stacked && stackedAreaOn)
@@ -197,6 +204,12 @@ struct LineChartDemo: View {
                         get: { connectionStyle.rawValue },
                         set: { connectionStyle = LineConnectionStyle(rawValue: $0) ?? .straight }),
                     options: LineConnectionStyle.allCases.map { $0.rawValue }),
+            .picker(label: "虚线样式（全局）",
+                    selection: $dashStyle,
+                    options: LineDashStyle.allCases.map { $0.rawValue }),
+            .picker(label: "末系列虚线（实际/预测）",
+                    selection: $lastSeriesDashStyle,
+                    options: ["跟随全局"] + LineDashStyle.allCases.map { $0.rawValue }),
         ])
         let axisSection = ChartDemoPanel.DemoSection(title: "轴系", items: [
             .toggle(label: "双轴（末系列绑右轴）", value: $dualAxisOn),

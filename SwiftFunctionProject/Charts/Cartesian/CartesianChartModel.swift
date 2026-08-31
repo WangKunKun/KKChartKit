@@ -65,18 +65,21 @@ public struct CartesianSeriesElement {
     public var color: UIColor?
     /// 负值数据点的覆盖颜色（nil = 使用 color）
     public var negativeColor: UIColor?
+    /// 系列线条虚线样式（nil = 跟随主题 lineDashStyle；"实际/预测"区分用）
+    public var lineDashStyle: LineDashStyle?
     /// 绑定哪个值轴（0 = 主轴/左，1 = 次轴/右；Bar 水平图仅支持主轴）。
     public var yAxisIndex: Int
     /// clamp 后的有效轴索引（仅 1 绑次轴，其余——含越界——回落主轴 0）。
     public var effectiveYAxisIndex: Int { yAxisIndex == 1 ? 1 : 0 }
 
     public init(name: String, data: [Double], color: UIColor? = nil, negativeColor: UIColor? = nil,
-                yAxisIndex: Int = 0) {
+                yAxisIndex: Int = 0, lineDashStyle: LineDashStyle? = nil) {
         self.name = name
         self.data = data
         self.color = color
         self.negativeColor = negativeColor
         self.yAxisIndex = yAxisIndex
+        self.lineDashStyle = lineDashStyle
     }
 }
 

@@ -132,6 +132,8 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
             line.lineWidth = theme.lineWidth
             line.lineJoin = .round
             line.lineCap = .round
+            // 虚线/点线（圆头线帽下 1pt 段呈现为点）；nil = 实线
+            line.lineDashPattern = (element.lineDashStyle ?? theme.lineDashStyle).dashPattern
             seriesLayer.addSublayer(line)
             lineLayers.append(line)
 

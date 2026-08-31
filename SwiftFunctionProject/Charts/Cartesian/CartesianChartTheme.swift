@@ -50,6 +50,8 @@ public struct CartesianChartTheme: HYMChartTheme {
     public var lineWidth: CGFloat
     /// 折线阶梯样式（默认直线；仅折线图消费）。
     public var lineConnectionStyle: LineConnectionStyle
+    /// 系列线条默认虚线样式（系列级 `lineDashStyle` 可覆盖；区分实际/预测数据用）
+    public var lineDashStyle: LineDashStyle
     /// 是否绘制数据点圆点。
     public var showsPoints: Bool
     public var pointRadius: CGFloat
@@ -113,6 +115,7 @@ public struct CartesianChartTheme: HYMChartTheme {
         seriesColor: UIColor = UIColor(red: 0x21/255.0, green: 0x6e/255.0, blue: 0x39/255.0, alpha: 1),
         lineWidth: CGFloat = 2,
         lineConnectionStyle: LineConnectionStyle = .straight,
+        lineDashStyle: LineDashStyle = .solid,
         showsPoints: Bool = true,
         pointRadius: CGFloat = 3,
         pointColor: UIColor? = nil,
@@ -147,6 +150,7 @@ public struct CartesianChartTheme: HYMChartTheme {
         self.seriesColor = seriesColor
         self.lineWidth = max(0, lineWidth)
         self.lineConnectionStyle = lineConnectionStyle
+        self.lineDashStyle = lineDashStyle
         self.showsPoints = showsPoints
         self.pointRadius = max(0, pointRadius)
         self.pointColor = pointColor

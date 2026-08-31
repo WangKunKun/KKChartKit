@@ -807,6 +807,9 @@ public enum ChartSelfTest {
         // —— 正负分开堆叠（上下镜像）——
         runSignSeparatedStackingSelfTest()
 
+        // —— 线条虚线样式 ——
+        runDashStyleSelfTest()
+
         // —— 百分比堆叠 ——
         runPercentStackingSelfTest()
 
@@ -814,6 +817,51 @@ public enum ChartSelfTest {
         runSharedHitSelfTest()
 
         print("✅ ChartSelfTest passed")
+    }
+
+    /// 虚线样式：11 种 dashStyle 的 pattern 纯函数 + 渲染级 lineDashPattern 接线（系列级覆盖主题）。
+    static func runDashStyleSelfTest() {
+        // 1) 纯函数：solid → nil；非 solid → 交替偶数段非空
+        assert(LineDashStyle.solid.dashPattern == nil, "solid 应无 pattern")
+        for style in LineDashStyle.allCases where style != .solid {
+            let p = style.dashPattern!
+            assert(!p.isEmpty && p.count % 2 == 0, "\(style) pattern 应为非空偶数段，got \(p)")
+            assert(p.allSatisfy { $0.doubleValue > 0 }, "\(style) pattern 段长应为正")
+        }
+        assert(LineDashStyle.allCases.count == 11, "应对齐 Highcharts 的 11 种样式")
+
+        // 2) 渲染级：系列级 dash 生效、其余系列实线（覆盖主题）
+        let r = LineChartRenderer()
+        let host = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        r.mount(into: host)
+        r.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "实际", data: [10, 20, 30]),
+                     CartesianSeriesElement(name: "预测", data: [15, 25, 35],
+                                            lineDashStyle: .longDashDot)]),
+                  theme: CartesianChartTheme(),
+                  context: HYMChartRenderContext(bounds: host.bounds, center: host.center))
+        let shapeLayers = r.seriesLayerSublayersForTesting().compactMap { $0 as? CAShapeLayer }
+        let dashed = shapeLayers.filter { $0.lineDashPattern?.isEmpty == false }
+        assert(dashed.count == 1, "应只有 1 条虚线（预测系列），got \(dashed.count)")
+        if let d = dashed.first {
+            assert(d.lineDashPattern == LineDashStyle.longDashDot.dashPattern,
+                   "系列级样式应为 longDashDot，got \(String(describing: d.lineDashPattern))")
+        }
+
+        // 3) 主题级默认：不设系列样式时全部跟随主题
+        var theme = CartesianChartTheme()
+        theme.lineDashStyle = .dot
+        let r2 = LineChartRenderer()
+        let host2 = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        r2.mount(into: host2)
+        r2.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, 20]),
+                     CartesianSeriesElement(name: "b", data: [5, 15])]),
+                  theme: theme,
+                  context: HYMChartRenderContext(bounds: host2.bounds, center: host2.center))
+        let shape2 = r2.seriesLayerSublayersForTesting().compactMap { $0 as? CAShapeLayer }
+        assert(shape2.count == 2 && shape2.allSatisfy { $0.lineDashPattern == LineDashStyle.dot.dashPattern },
+               "主题级 dot 应应用到全部系列，got \(shape2.map { String(describing: $0.lineDashPattern) })")
     }
 
     /// 百分比堆叠：同列归一到 0...100（按符号分链），渲染域 0...100，命中报百分比累计。
