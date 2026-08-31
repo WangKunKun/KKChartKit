@@ -44,10 +44,8 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
         lastPointFrames.removeAll()
         lineLayers.removeAll()
 
-        // 堆叠：按轴分组链式累计（跨轴不混叠）；非堆叠用原值
-        let dataToDraw: [[Double]] = model.stacking == .normal
-            ? CartesianGeometry.stackedValuesByAxis(series: model.series)
-            : model.series.map { $0.data }
+        // 堆叠：normal=符号链累计 / percent=百分比累计；非堆叠用原值
+        let dataToDraw = model.stackedDrawValues
 
         for (s, element) in model.series.enumerated() {
             guard !element.data.isEmpty else { continue }
@@ -89,12 +87,13 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
             // 堆叠时分层：系列 i 面积下边界 = 同轴前一系列的累计线（层层叠高、颜色不互覆）。
             if theme.showsArea, let first = screenPts.first, let last = screenPts.last {
                 let areaPath = UIBezierPath(cgPath: path.cgPath)
-                if model.stacking == .normal {
-                    // 下边界 = 同符号链基准（自身累计 − 自身原值，逐点）：正链首系列 = 0（零轴），
-                    // 负链同理从 0 向下。须与折线连接形态一致（阶梯用阶梯折点），
+                if model.stacking == .normal || model.stacking == .percent {
+                    // 下边界 = 同符号链基准（自身累计 − 自身基准原值，逐点；percent 时基准为归一化原值）：
+                    // 正链首系列 = 0（零轴），负链同理从 0 向下。须与折线连接形态一致（阶梯用阶梯折点），
                     // 否则半透明层错位叠加；折点序列倒序回走 = 同一几何形状。
-                    let padded = element.data + [Double](repeating: 0, count: max(0, values.count - element.data.count))
-                    let base = zip(values, padded).map { $0 - $1 }
+                    let rawBaseFull = model.rawBaseValues(forSeries: s)
+                    let rawBase = rawBaseFull + [Double](repeating: 0, count: max(0, values.count - rawBaseFull.count))
+                    let base = zip(values, rawBase).map { $0 - $1 }
                     let baseData = base.enumerated().map { (i, v) in
                         screenPoint(x: Double(i), y: v, yAxisIndex: axisIdx)
                     }
@@ -159,8 +158,8 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
         for hit in lastPointFrames.reversed() where hit.frame.contains(point) {
             // 堆叠时命中报累计值（与柱状现状对齐）
             let value: Double
-            if model.stacking == .normal {
-                value = CartesianGeometry.stackedValuesByAxis(series: model.series)[hit.series][hit.index]
+            if model.stacking == .normal || model.stacking == .percent {
+                value = model.stackedDrawValues[hit.series][hit.index]
             } else {
                 value = model.series[hit.series].data[hit.index]
             }
@@ -203,8 +202,8 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
         }
         // 堆叠模式返回累计值位置（与绘制同源）
         let value: Double
-        if model.stacking == .normal {
-            value = CartesianGeometry.stackedValuesByAxis(series: model.series)[series][index]
+        if model.stacking == .normal || model.stacking == .percent {
+            value = model.stackedDrawValues[series][index]
         } else {
             value = model.series[series].data[index]
         }

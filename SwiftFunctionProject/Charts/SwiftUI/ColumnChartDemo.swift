@@ -89,6 +89,7 @@ struct ColumnChartDemo: View {
             switch stackingMode {
             case "不堆叠": return .none
             case "普通堆叠": return .normal
+            case "百分比堆叠": return .percent
             default: return .none
             }
         }()
@@ -169,7 +170,7 @@ struct ColumnChartDemo: View {
         ])
 
         let stackSection = ChartDemoPanel.DemoSection(title: "堆叠", items: [
-            .picker(label: "堆叠模式", selection: $stackingMode, options: ["不堆叠", "普通堆叠"]),
+            .picker(label: "堆叠模式", selection: $stackingMode, options: ["不堆叠", "普通堆叠", "百分比堆叠"]),
             .toggle(label: "双轴（末系列绑右轴）", value: $dualAxisOn),
             .toggle(label: "上下镜像（末系列取负，与堆叠无关）", value: $mirrorStackOn),
             .toggle(label: "分隔线", value: $stackSeparatorOn),

@@ -113,14 +113,38 @@ public struct CartesianChartModel: HYMChartModel {
         let group = series.filter { $0.effectiveYAxisIndex == yAxisIndex }
         guard !group.isEmpty else { return nil }
         let dataToUse: [[Double]]
-        if stacking == .normal {
+        switch stacking {
+        case .normal:
             dataToUse = CartesianGeometry.stackedValuesByAxis(series: group)
-        } else {
+        case .percent:
+            dataToUse = CartesianGeometry.stackedPercentValues(series: group)
+        default:
             dataToUse = group.map { $0.data }
         }
         let flat = dataToUse.flatMap { $0 }
         guard let lo = flat.min(), let hi = flat.max() else { return nil }
         return (lo, hi)
+    }
+
+    /// 是否处于堆叠形态（normal 或 percent）。
+    public var isStacked: Bool { stacking == .normal || stacking == .percent }
+
+    /// 渲染用累计数据（normal → 符号链累计；percent → 百分比累计；其余原值）。与系列同序。
+    public var stackedDrawValues: [[Double]] {
+        switch stacking {
+        case .normal: return CartesianGeometry.stackedValuesByAxis(series: series)
+        case .percent: return CartesianGeometry.stackedPercentValues(series: series)
+        default: return series.map { $0.data }
+        }
+    }
+
+    /// 堆叠基准原值（面积下边界/柱基准 = 累计 − 本值）：percent 时为归一化原值，否则原值。
+    public func rawBaseValues(forSeries seriesIndex: Int) -> [Double] {
+        guard seriesIndex < series.count else { return [] }
+        if stacking == .percent {
+            return CartesianGeometry.percentNormalizedValues(series: series)[seriesIndex]
+        }
+        return series[seriesIndex].data
     }
 
     /// 实际生效的类目标签：显式非空优先；否则自动 "1"..."n"（1-based，用户友好）。

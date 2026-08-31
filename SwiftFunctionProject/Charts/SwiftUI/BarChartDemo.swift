@@ -79,6 +79,7 @@ struct BarChartDemo: View {
             switch stackingMode {
             case "不堆叠": return .none
             case "普通堆叠": return .normal
+            case "百分比堆叠": return .percent
             default: return .none
             }
         }()
@@ -146,7 +147,7 @@ struct BarChartDemo: View {
         ])
 
         let stackSection = ChartDemoPanel.DemoSection(title: "堆叠", items: [
-            .picker(label: "堆叠模式", selection: $stackingMode, options: ["不堆叠", "普通堆叠"]),
+            .picker(label: "堆叠模式", selection: $stackingMode, options: ["不堆叠", "普通堆叠", "百分比堆叠"]),
             .toggle(label: "分隔线", value: $stackSeparatorOn),
             .color(label: "分隔线颜色", value: $stackSeparatorColor),
         ])

@@ -807,10 +807,68 @@ public enum ChartSelfTest {
         // —— 正负分开堆叠（上下镜像）——
         runSignSeparatedStackingSelfTest()
 
+        // —— 百分比堆叠 ——
+        runPercentStackingSelfTest()
+
         // —— 整列命中（shared tooltip）——
         runSharedHitSelfTest()
 
         print("✅ ChartSelfTest passed")
+    }
+
+    /// 百分比堆叠：同列归一到 0...100（按符号分链），渲染域 0...100，命中报百分比累计。
+    static func runPercentStackingSelfTest() {
+        // 1) 纯函数：80/20 → 80%/100%；列内全零 → 0
+        let a = CartesianSeriesElement(name: "a", data: [80, 0])
+        let b = CartesianSeriesElement(name: "b", data: [20, 0])
+        let pct = CartesianGeometry.stackedPercentValues(series: [a, b])
+        assert(pct[0] == [80, 0] && pct[1] == [100, 0],
+               "百分比累计应为 80/100 与全零列 0，got \(pct)")
+
+        // 2) 正负混合：75/-25 → 75% 向上、-25% 向下（|v| 总和为分母）
+        let m = CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [75]),
+                     CartesianSeriesElement(name: "b", data: [-25])],
+            stacking: .percent)
+        let mp = CartesianGeometry.stackedPercentValues(series: m.series)
+        assert(mp[0] == [75] && mp[1] == [-25],
+               "正负混合应按 |v| 归一各走各链，got \(mp)")
+        let mb = m.dataBounds(yAxisIndex: 0)!
+        assert(abs(mb.min + 25) < 1e-9 && abs(mb.max - 75) < 1e-9,
+               "percent 边界应为 -25...75，got \(mb)")
+
+        // 3) 渲染级（折线）：正值百分比堆叠域 0...100，顶线在 plot 顶部
+        let r = LineChartRenderer()
+        let host = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        r.mount(into: host)
+        r.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [80, 30]),
+                     CartesianSeriesElement(name: "b", data: [20, 70])],
+            stacking: .percent),
+                  theme: CartesianChartTheme(),
+                  context: HYMChartRenderContext(bounds: host.bounds, center: host.center))
+        assert(abs(r.currentViewport.yMax - 100) < 0.001 && abs(r.currentViewport.yMin) < 0.001,
+               "percent 域应 nice 到 0...100，got \(r.currentViewport.yDomain)")
+        let top = r.testScreenPoint(series: 1, index: 0)
+        assert(abs(top.y - r.currentPlotFrame.minY) < 1.0, "百分比累计 100 应在顶部，got \(top.y)")
+
+        // 4) 渲染级（柱状）：柱高比例 = 百分比，命中报百分比累计
+        let c = ColumnChartRenderer()
+        let hostC = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        c.mount(into: hostC)
+        c.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [80]),
+                     CartesianSeriesElement(name: "b", data: [20])],
+            stacking: .percent),
+                  theme: CartesianChartTheme(),
+                  context: HYMChartRenderContext(bounds: hostC.bounds, center: hostC.center))
+        let plotC = c.currentPlotFrame
+        if let hit = c.hitTest(CGPoint(x: plotC.midX, y: plotC.minY + plotC.height * 0.05)) as? ColumnHitTarget {
+            assert(hit.seriesIndex == 1 && abs(hit.value - 100) < 0.001,
+                   "顶部应命中 b 的百分比累计 100，got series=\(hit.seriesIndex) value=\(hit.value)")
+        } else {
+            assertionFailure("percent 顶部柱段应可命中")
+        }
     }
 
     /// 点击按 X 类目取整列：任意 x 归到最近类目，弹窗文本含所有系列值；绘图区外回落。

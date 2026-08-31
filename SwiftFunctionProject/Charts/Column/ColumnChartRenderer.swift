@@ -23,17 +23,12 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
 
         // 1. 计算零轴位置（次轴系列在循环内按所属值域另算）
 
-        // 2. 如果堆叠，计算累计值（按轴分组：跨轴不混叠）
-        let dataToDraw: [[Double]]
-        if model.stacking == .normal {
-            dataToDraw = CartesianGeometry.stackedValuesByAxis(series: model.series)
-        } else {
-            dataToDraw = model.series.map { $0.data }
-        }
+        // 2. 如果堆叠，计算累计值（normal=符号链累计 / percent=百分比累计）
+        let dataToDraw = model.stackedDrawValues
 
         // 3. 可见类目范围（视口缩放后跳过视口外柱体的 path 构造）
         let visible = visibleCategoryRange
-        let seriesCount = model.stacking == .normal ? 1 : model.series.count
+        let seriesCount = model.isStacked ? 1 : model.series.count
 
         // 4. 每系列：复合 path 收集 → 单 layer 输出
         for (seriesIndex, oneSeries) in dataToDraw.enumerated() {
@@ -54,9 +49,9 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
                 // 基准值（堆叠）：同符号链前累计 = 自身累计 − 自身原值（正链贴零轴向上、
                 // 负链贴零轴向下；与 Highcharts 正负分开堆叠一致）。基准 ≈ 0 → 从零轴起。
                 let baselineValue: Double?
-                if model.stacking == .normal {
-                    let base = value - (index < model.series[seriesIndex].data.count
-                                        ? model.series[seriesIndex].data[index] : 0)
+                if model.stacking == .normal || model.stacking == .percent {
+                    let rawBase = model.rawBaseValues(forSeries: seriesIndex)
+                    let base = value - (index < rawBase.count ? rawBase[index] : 0)
                     baselineValue = abs(base) < 1e-9 ? nil : base
                 } else {
                     baselineValue = nil
@@ -71,7 +66,7 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
                     theme: theme,
                     zeroY: seriesZeroY,
                     baselineValue: baselineValue,
-                    seriesIndex: model.stacking == .normal ? 0 : seriesIndex,
+                    seriesIndex: model.isStacked ? 0 : seriesIndex,
                     seriesCount: seriesCount
                 )
                 rect = animatedRect(from: rect, zeroY: seriesZeroY, progress: currentAnimationProgress)
@@ -80,7 +75,7 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
                 // 堆叠时只有链**末端段**保留圆角（正链最上段顶圆角、负链最下段底圆角），
                 // 中间段直角——整根堆叠柱看起来是一个连续柱体而非逐段圆角。
                 let corners: UIRectCorner
-                if model.stacking == .normal {
+                if model.isStacked {
                     // 同轴同符号链上方还有非零段 → 本段是中间段，不圆角
                     let hasSegmentAbove = model.series[(seriesIndex + 1)...].contains { s2 in
                         guard s2.effectiveYAxisIndex == axisIdx,
@@ -109,7 +104,7 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
                 }
 
                 // 堆叠且非同轴最后一个系列：记录分隔线 y
-                if model.stacking == .normal,
+                if model.isStacked,
                    model.series[(seriesIndex + 1)...].contains(where: { $0.effectiveYAxisIndex == axisIdx }) {
                     separatorPath.move(to: CGPoint(x: plotFrame.minX, y: rect.maxY))
                     separatorPath.addLine(to: CGPoint(x: plotFrame.maxX, y: rect.maxY))
@@ -159,8 +154,8 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
         guard categoryIndex >= 0 && categoryIndex < model.maxPointCount else { return nil }
 
         // 2. 确定系列索引（堆叠时需要判断 point.y 落在哪个柱体段）
-        let dataToCheck = model.stacking == .normal
-            ? CartesianGeometry.stackedValuesByAxis(series: model.series)
+        let dataToCheck = (model.stacking == .normal || model.stacking == .percent)
+            ? model.stackedDrawValues
             : model.series.map { $0.data }
 
         for (seriesIndex, oneSeries) in dataToCheck.enumerated() {
@@ -178,8 +173,8 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
                 plotArea: currentPlotFrame,
                 theme: theme,
                 zeroY: seriesZeroY,
-                seriesIndex: model.stacking == .normal ? 0 : seriesIndex,
-                seriesCount: model.stacking == .normal ? 1 : model.series.count
+                seriesIndex: model.isStacked ? 0 : seriesIndex,
+                seriesCount: model.isStacked ? 1 : model.series.count
             )
 
             if rect.contains(point) {
@@ -208,8 +203,8 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
             plotArea: currentPlotFrame,
             theme: theme,
             zeroY: zeroY,
-            seriesIndex: model.stacking == .normal ? 0 : t.seriesIndex,
-            seriesCount: model.stacking == .normal ? 1 : model.series.count)
+            seriesIndex: model.isStacked ? 0 : t.seriesIndex,
+            seriesCount: model.isStacked ? 1 : model.series.count)
         return HYMChartTooltipAnchor(frame: rect, preferredPlacements: [.top, .bottom])
     }
 

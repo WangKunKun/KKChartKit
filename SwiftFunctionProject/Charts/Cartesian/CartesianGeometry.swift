@@ -403,6 +403,40 @@ public enum CartesianGeometry {
         return out
     }
 
+    /// 百分比堆叠：归一化原值（同轴同列 |v| 总和为分母 → v/分母×100；分母 0 → 0）。
+    /// 与输入同序；符号保留（正链向上、负链向下），短系列补 0 对齐。
+    public static func percentNormalizedValues(series: [CartesianSeriesElement]) -> [[Double]] {
+        guard !series.isEmpty else { return [] }
+        let maxLength = series.map { $0.data.count }.max() ?? 0
+        guard maxLength > 0 else { return [] }
+        var totals: [Int: [Double]] = [:]   // axis -> 每列 |v| 总和
+        for s in series {
+            let axis = s.effectiveYAxisIndex
+            var t = totals[axis] ?? [Double](repeating: 0, count: maxLength)
+            for j in 0..<maxLength where j < s.data.count {
+                t[j] += abs(s.data[j])
+            }
+            totals[axis] = t
+        }
+        return series.map { s in
+            let axis = s.effectiveYAxisIndex
+            let t = totals[axis] ?? [Double](repeating: 0, count: maxLength)
+            return (0..<maxLength).map { j in
+                let v = j < s.data.count ? s.data[j] : 0
+                return t[j] > 1e-9 ? v / t[j] * 100 : 0
+            }
+        }
+    }
+
+    /// 百分比堆叠累计：归一化原值按符号链累计（正链 0→100 向上、负链 0→-100 向下）。
+    public static func stackedPercentValues(series: [CartesianSeriesElement]) -> [[Double]] {
+        let normalized = zip(series, percentNormalizedValues(series: series)).map {
+            CartesianSeriesElement(name: $0.name, data: $1, color: $0.color,
+                                   negativeColor: $0.negativeColor, yAxisIndex: $0.yAxisIndex)
+        }
+        return stackedValuesByAxis(series: normalized)
+    }
+
     /// 单个柱体位置（垂直图）。
     ///
     /// X 定位与槽宽均由 `viewport` 驱动：视口放大时柱体变宽并跟随视口

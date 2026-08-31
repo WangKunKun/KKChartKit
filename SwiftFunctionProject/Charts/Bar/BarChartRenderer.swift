@@ -31,17 +31,12 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
             isHorizontal: true  // 关键差异：水平图
         )
 
-        // 2. 如果堆叠，计算累计值
-        let dataToDraw: [[Double]]
-        if model.stacking == .normal {
-            dataToDraw = CartesianGeometry.stackedValues(series: model.series)
-        } else {
-            dataToDraw = model.series.map { $0.data }
-        }
+        // 2. 如果堆叠，计算累计值（normal=符号链累计 / percent=百分比累计）
+        let dataToDraw = model.stackedDrawValues
 
         // 3. 遍历每个系列（类目在 Y 轴、恒全量可见，无需裁剪；
         //    条形长度沿 X 数值轴，视口缩放由 seriesLayer 裁剪兜底）
-        let seriesCount = model.stacking == .normal ? 1 : model.series.count
+        let seriesCount = model.isStacked ? 1 : model.series.count
         for (seriesIndex, oneSeries) in dataToDraw.enumerated() {
             let baseColor = model.series[seriesIndex].color ?? theme.seriesColor
             let negativeColor = model.series[seriesIndex].negativeColor ?? baseColor
@@ -51,10 +46,12 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
             var separatorPath = UIBezierPath()  // 堆叠分隔线（同色同宽合并）
 
             for (index, value) in oneSeries.enumerated() {
-                // 基准值（堆叠模式下使用前一系列的累计值）
+                // 基准值（堆叠）：符号链前累计 = 自身累计 − 自身基准原值（percent 时为归一化原值）
                 let baselineValue: Double?
-                if model.stacking == .normal && seriesIndex > 0 {
-                    baselineValue = dataToDraw[seriesIndex - 1][index]
+                if model.isStacked {
+                    let rawBase = model.rawBaseValues(forSeries: seriesIndex)
+                    let base = value - (index < rawBase.count ? rawBase[index] : 0)
+                    baselineValue = abs(base) < 1e-9 ? nil : base
                 } else {
                     baselineValue = nil
                 }
@@ -67,7 +64,7 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
                     theme: theme,
                     zeroX: zeroX,
                     baselineValue: baselineValue,
-                    seriesIndex: model.stacking == .normal ? 0 : seriesIndex,
+                    seriesIndex: model.isStacked ? 0 : seriesIndex,
                     seriesCount: seriesCount
                 )
                 rect = animatedRect(from: rect, zeroX: zeroX, progress: currentAnimationProgress)
@@ -87,7 +84,7 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
                 }
 
                 // 堆叠且非最后系列：记录分隔线 x
-                if model.stacking == .normal, seriesIndex < model.series.count - 1 {
+                if model.isStacked, seriesIndex < model.series.count - 1 {
                     separatorPath.move(to: CGPoint(x: rect.maxX, y: plotFrame.minY))
                     separatorPath.addLine(to: CGPoint(x: rect.maxX, y: plotFrame.maxY))
                 }
@@ -144,8 +141,8 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
         guard categoryIndex >= 0 && categoryIndex < model.maxPointCount else { return nil }
 
         // 2. 确定系列索引（堆叠时需要判断 point.x 落在哪个条形段）
-        let dataToCheck = model.stacking == .normal
-            ? CartesianGeometry.stackedValues(series: model.series)
+        let dataToCheck = model.isStacked
+            ? model.stackedDrawValues
             : model.series.map { $0.data }
 
         for (seriesIndex, oneSeries) in dataToCheck.enumerated() {
@@ -158,8 +155,8 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
                 plotArea: currentPlotFrame,
                 theme: theme,
                 zeroX: zeroX,
-                seriesIndex: model.stacking == .normal ? 0 : seriesIndex,
-                seriesCount: model.stacking == .normal ? 1 : model.series.count
+                seriesIndex: model.isStacked ? 0 : seriesIndex,
+                seriesCount: model.isStacked ? 1 : model.series.count
             )
 
             if rect.contains(point) {
@@ -187,8 +184,8 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
             plotArea: currentPlotFrame,
             theme: theme,
             zeroX: zeroX,
-            seriesIndex: model.stacking == .normal ? 0 : t.seriesIndex,
-            seriesCount: model.stacking == .normal ? 1 : model.series.count)
+            seriesIndex: model.isStacked ? 0 : t.seriesIndex,
+            seriesCount: model.isStacked ? 1 : model.series.count)
         return HYMChartTooltipAnchor(frame: rect, preferredPlacements: [.top, .bottom])
     }
 
