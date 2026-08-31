@@ -196,7 +196,8 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
 
             if rect.contains(point) {
                 return ColumnHitTarget(seriesIndex: seriesIndex, categoryIndex: categoryIndex,
-                                       value: value, yAxisIndex: axisIdx)
+                                       value: value, yAxisIndex: axisIdx,
+                                       name: model.series[seriesIndex].name)
             }
         }
 
@@ -273,7 +274,8 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
         guard let model = currentModel, seriesIndex < model.series.count else { return nil }
         return ColumnHitTarget(seriesIndex: seriesIndex, categoryIndex: categoryIndex,
                                value: value,
-                               yAxisIndex: model.series[seriesIndex].effectiveYAxisIndex)
+                               yAxisIndex: model.series[seriesIndex].effectiveYAxisIndex,
+                               name: model.series[seriesIndex].name)
     }
 
     /// DEBUG 自检辅助：seriesLayer 子层（圆角曲线数量断言用）。

@@ -45,17 +45,17 @@
 
 ### 4. 数据与轴系
 
-| 能力 | 我们 | AAChartKit | Charts |
-|---|---|---|---|
-| 空值断线 + connectNulls（系列级） | ✅ | ✅ | ✅ NaN gap |
-| 线堆叠（普通/正负分链/百分比/统一基准 max） | ⭐✅ | ✅ | ❌（无原生线堆叠） |
-| 双值轴（次轴独立刻度/域） | ✅ | ✅（多 Y 轴 >2） | ✅ axisDependency |
-| 刻度四档自定义（positions/interval/count/auto）+ formatter | ✅ | ✅ | ✅ granularity/forceLabels |
-| Y 轴反向 reversed | ❌ | ✅ | ✅ inverted |
-| 对数轴 logarithmic | ❌ | ✅ | ❌ |
-| 轴标签旋转 | ❌ | ✅ | ✅ |
-| 轴百分比留白（spaceTop/spaceBottom） | ❌（nice padding 固定） | ✅ | ✅ |
-| 类目轴居中标签（centerAxisLabels） | ❌ | ✅ | ✅ |
+| 能力                                                | 我们                 | AAChartKit  | Charts                    |
+| ------------------------------------------------- | ------------------ | ----------- | ------------------------- |
+| 空值断线 + connectNulls（系列级）                          | ✅                  | ✅           | ✅ NaN gap                 |
+| 线堆叠（普通/正负分链/百分比/统一基准 max）                         | ⭐✅                 | ✅           | ❌（无原生线堆叠）                 |
+| 双值轴（次轴独立刻度/域）                                     | ✅                  | ✅（多 Y 轴 >2） | ✅ axisDependency          |
+| 刻度四档自定义（positions/interval/count/auto）+ formatter | ✅                  | ✅           | ✅ granularity/forceLabels |
+| Y 轴反向 reversed                                    | ❌                  | ✅           | ✅ inverted                |
+| 对数轴 logarithmic                                   | ❌                  | ✅           | ❌                         |
+| 轴标签旋转                                             | ❌                  | ✅           | ✅                         |
+| 轴百分比留白（spaceTop/spaceBottom）                      | ❌（nice padding 固定） | ✅           | ✅                         |
+| 类目轴居中标签（centerAxisLabels）                         | ❌                  | ✅           | ✅                         |
 
 ### 5. 数据标签
 
@@ -67,18 +67,18 @@
 
 ### 6. 交互（弹窗/准线/手势）
 
-| 能力 | 我们 | AAChartKit | Charts |
-|---|---|---|---|
-| 弹窗内容自定义（popupContentProvider） | ✅（等价 ChartMarker） | ✅ | ✅ |
-| 整列 shared / 逐点+吸附 双模式 + 自动档 | ✅ | ✅ shared | 部分 |
-| 十字准线（逐点/整列统一） | ✅ 样式可配（颜色/线宽/虚线，2026-08-31） | ✅ | ✅ 竖/横指示线 |
-| 准线横+竖双向指示 | ❌（当前单向：垂直图竖线/水平图横线） | ✅ | ✅ |
-| 捏合缩放轴向 x/y/xy | ✅ | ✅ zoomType | ✅（可锁拖拽方向） |
-| 锚点跟手/平移/惯性减速/橡皮筋回弹 | ✅ | 部分（WebView 手势） | ✅ |
-| 双击重置（两轴） | ✅ | ✅ + reset 按钮回调 | ⚠️ 双击是放大（语义不同） |
-| 滑动选中（全量视图拖拽=划过高亮） | ✅ | ❌ | ✅ |
-| 多图联动 sync | ❌ | ❌ | 第三方 SyncChartGesture |
-| 弹窗文本模板（header/valueSuffix/decimals） | ❌（tooltipText 固定格式） | ✅ | ✅ |
+| 能力                                  | 我们                          | AAChartKit     | Charts               |
+| ----------------------------------- | --------------------------- | -------------- | -------------------- |
+| 弹窗内容自定义（popupContentProvider）       | ✅（等价 ChartMarker）           | ✅              | ✅                    |
+| 整列 shared / 逐点+吸附 双模式 + 自动档         | ✅                           | ✅ shared       | 部分                   |
+| 十字准线（逐点/整列统一）                       | ✅ 样式可配（颜色/线宽/虚线，2026-08-31） | ✅              | ✅ 竖/横指示线             |
+| 准线横+竖双向指示                           | ❌（当前单向：垂直图竖线/水平图横线）         | ✅              | ✅                    |
+| 捏合缩放轴向 x/y/xy                       | ✅                           | ✅ zoomType     | ✅（可锁拖拽方向）            |
+| 锚点跟手/平移/惯性减速/橡皮筋回弹                  | ✅                           | 部分（WebView 手势） | ✅                    |
+| 双击重置（两轴）                            | ✅                           | ✅ + reset 按钮回调 | ⚠️ 双击是放大（语义不同）       |
+| 滑动选中（全量视图拖拽=划过高亮）                   | ✅                           | ❌              | ✅                    |
+| 多图联动 sync                           | ❌                           | ❌              | 第三方 SyncChartGesture |
+| 弹窗文本模板（header/valueSuffix/decimals） | ❌（tooltipText 固定格式）         | ✅              | ✅                    |
 
 ### 7. 周边能力
 

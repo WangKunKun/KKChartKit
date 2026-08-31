@@ -10,6 +10,8 @@ public struct LineHitTarget: HYMChartHitTarget {
     /// 绑定的值轴（0 = 主轴/左，1 = 次轴/右）。
     public let yAxisIndex: Int
     public let tooltipText: String?
+    /// 系列名（弹窗模板数据源用）
+    public let name: String
 
     public init(seriesIndex: Int, index: Int, value: Double, label: String?, yAxisIndex: Int = 0) {
         self.seriesIndex = seriesIndex
@@ -17,11 +19,19 @@ public struct LineHitTarget: HYMChartHitTarget {
         self.value = value
         self.yAxisIndex = yAxisIndex
         let name = label ?? "series \(seriesIndex)"
+        self.name = name
         self.identifier = "\(name):\(index)"
         var text = "\(name) · \(AxisRenderer.format(value))"
         if yAxisIndex == 1 { text += " (右轴)" }
         self.tooltipText = text
     }
+}
+
+extension LineHitTarget: HYMChartTooltipDataSource {
+    public var tooltipRows: [(name: String, value: Double, isSecondaryAxis: Bool)] {
+        [(name, value, yAxisIndex == 1)]
+    }
+    public var tooltipHeaderKey: String? { nil }
 }
 
 /// 折线图渲染器：CartesianRendererBase 的首个薄 Renderer——

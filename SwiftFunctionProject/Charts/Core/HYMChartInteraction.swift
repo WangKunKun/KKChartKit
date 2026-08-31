@@ -30,6 +30,47 @@ public extension HYMChartHitTarget {
     var tooltipText: String? { nil }
 }
 
+// MARK: - 弹窗结构化数据源 + 文本模板
+
+/// 命中目标可选实现：为「弹窗文本模板」（`HYMChartTooltipTextOptions`）提供结构化数据。
+/// 未实现或模板未配置时，内置弹窗回落到 `tooltipText` 固定格式。
+/// （不约束 AnyObject：各图表 HitTarget 均为 struct。）
+public protocol HYMChartTooltipDataSource {
+    /// 弹窗数据行（系列名 + 值 + 是否次轴）
+    var tooltipRows: [(name: String, value: Double, isSecondaryAxis: Bool)] { get }
+    /// 表头键（类目标签等；nil = 无表头可代入 `{key}`，配置了表头也不拼该行）
+    var tooltipHeaderKey: String? { get }
+}
+
+/// 内置弹窗文本模板（AAChartKit/Highcharts headerFormat/valueSuffix/valueDecimals 同款）。
+/// 在 `HYMChartView.tooltipTextOptions` 上配置；命中目标实现 `HYMChartTooltipDataSource`
+/// 才生效，否则回落各 target 的 `tooltipText` 固定格式。
+public struct HYMChartTooltipTextOptions: Equatable {
+    /// 表头行模板：`{key}` 占位类目标签（如 "{key} 元" → "3月 元"）。nil = 不加表头行。
+    public var header: String?
+    /// 数值后缀（如 " 万元"、"%"）；nil = 无后缀。
+    public var valueSuffix: String?
+    /// 数值固定小数位数；nil = 自动（整数无小数、非整数最多 2 位去尾零）。
+    public var valueDecimals: Int?
+
+    public init(header: String? = nil,
+                valueSuffix: String? = nil,
+                valueDecimals: Int? = nil) {
+        self.header = header
+        self.valueSuffix = valueSuffix
+        self.valueDecimals = valueDecimals
+    }
+
+    /// 是否全默认（此时直接回落 target 自带格式，零开销）
+    public var isDefault: Bool { header == nil && valueSuffix == nil && valueDecimals == nil }
+
+    /// 按模板格式化数值：decimals 固定位数；nil 自动（同数据标签默认：整型不带小数、非整型两位去尾零）
+    public static func formatValue(_ value: Double, decimals: Int?) -> String {
+        if let d = decimals { return String(format: "%.\(d)f", value) }
+        return CartesianDataLabelGeometry.labelText(value)
+    }
+}
+
 /// 一次命中 + 其在 chartView 内的几何位置（供外部自定义弹窗定位）。
 ///
 /// 位置不进 `HYMChartHitTarget`（保持其"数据，非绘图细节"语义），单独放在此 context。

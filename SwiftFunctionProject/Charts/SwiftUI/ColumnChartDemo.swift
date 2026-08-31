@@ -56,6 +56,11 @@ struct ColumnChartDemo: View {
     @State private var crosshairColor = UIColor(white: 0.55, alpha: 0.9)
     @State private var crosshairWidth = 0.75
     @State private var crosshairDash = "solid"
+    @State private var crosshairDualOn = false
+    // —— 弹窗文本模板 ——
+    @State private var tooltipHeaderOn = false
+    @State private var tooltipSuffix = ""
+    @State private var tooltipDecimals = "自动"
 
     // —— 缩放功能测试 ——
     @State private var isZoomEnabled = true
@@ -83,7 +88,12 @@ struct ColumnChartDemo: View {
                         zoomAxisMode: HYMChartZoomAxisMode(rawValue: zoomAxisSel) ?? .x,
                         crosshairColor: crosshairColor,
                         crosshairLineWidth: CGFloat(crosshairWidth),
-                        crosshairDashStyle: LineDashStyle(rawValue: crosshairDash) ?? .solid)
+                        crosshairDashStyle: LineDashStyle(rawValue: crosshairDash) ?? .solid,
+                      isCrosshairDualDirectionEnabled: crosshairDualOn,
+                      tooltipTextOptions: HYMChartTooltipTextOptions(
+                          header: tooltipHeaderOn ? "{key}" : nil,
+                          valueSuffix: tooltipSuffix.isEmpty ? nil : tooltipSuffix,
+                          valueDecimals: (["自动": nil, "0": 0, "1": 1, "2": 2] as [String: Int?])[tooltipDecimals] ?? nil))
                 .frame(height: 280)
                 .padding(.horizontal)
                 .padding(.top, 8)
@@ -229,6 +239,12 @@ struct ColumnChartDemo: View {
             .slider(label: "准线线宽", value: $crosshairWidth, range: 0.5...3, step: 0.25),
             .picker(label: "准线虚线样式", selection: $crosshairDash,
                     options: LineDashStyle.allCases.map { $0.rawValue }),
+            .toggle(label: "准线双向（横+竖十字）", value: $crosshairDualOn),
+        ])
+        let tooltipSection = ChartDemoPanel.DemoSection(title: "弹窗模板", items: [
+            .toggle(label: "表头行（{key} = 类目标签）", value: $tooltipHeaderOn),
+            .textField(label: "数值后缀（如 万元 / %）", value: $tooltipSuffix),
+            .picker(label: "数值小数位", selection: $tooltipDecimals, options: ["自动", "0", "1", "2"]),
         ])
 
         let animationSection = ChartDemoPanel.DemoSection(title: "动画与交互", items: [
@@ -251,7 +267,7 @@ struct ColumnChartDemo: View {
             .picker(label: "标签位置", selection: $dataLabelPosition,
                     options: CartesianDataLabelPosition.allCases.map { $0.rawValue }),
         ])
-        return ChartDemoPanel(sections: [dataSection, xAxisSection, nullSection, columnSection, stackSection, axisSection, gestureSection, plotLineSection, labelSection, animationSection])
+        return ChartDemoPanel(sections: [dataSection, xAxisSection, nullSection, columnSection, stackSection, axisSection, gestureSection, plotLineSection, labelSection, tooltipSection, animationSection])
     }
 
     private func regenerateData() {

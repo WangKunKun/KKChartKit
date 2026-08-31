@@ -18,11 +18,15 @@ public struct CartesianSharedHitTarget: HYMChartHitTarget {
     public let entries: [Entry]
     /// 十字线 x（view 坐标；锚点用）
     public let crosshairX: CGFloat
+    /// 表头键（类目标签；弹窗文本模板 {key} 代入用，nil = 无）
+    public let headerKey: String?
 
-    public init(categoryIndex: Int, entries: [Entry], crosshairX: CGFloat) {
+    public init(categoryIndex: Int, entries: [Entry], crosshairX: CGFloat,
+                headerKey: String? = nil) {
         self.categoryIndex = categoryIndex
         self.entries = entries
         self.crosshairX = crosshairX
+        self.headerKey = headerKey
     }
 
     // MARK: - HYMChartHitTarget
@@ -36,6 +40,13 @@ public struct CartesianSharedHitTarget: HYMChartHitTarget {
             return text
         }.joined(separator: "\n")
     }
+}
+
+extension CartesianSharedHitTarget: HYMChartTooltipDataSource {
+    public var tooltipRows: [(name: String, value: Double, isSecondaryAxis: Bool)] {
+        entries.map { ($0.name, $0.value, $0.isSecondaryAxis) }
+    }
+    public var tooltipHeaderKey: String? { headerKey }
 }
 
 /// 轴系图表渲染基类（模板方法）。
@@ -773,6 +784,34 @@ extension CartesianRendererBase {
     }
 }
 
+// MARK: - 双向准线的值向分量
+extension CartesianRendererBase {
+
+    /// 值轴方向准线：垂直图 = 过命中值的横线（按 target 绑定轴选域），水平图（Bar）= 竖线。
+    /// 整列命中（CartesianSharedHitTarget）无单一值，由 sharedHit 的触点分量代替。
+    public func valueCrosshairRect(for target: HYMChartHitTarget) -> CGRect? {
+        guard currentModel != nil, currentPlotFrame.width > 0 else { return nil }
+        let value: Double?
+        let axis: Int
+        switch target {
+        case let t as LineHitTarget:   value = t.value; axis = t.yAxisIndex
+        case let t as ColumnHitTarget: value = t.value; axis = t.yAxisIndex
+        case let t as BarHitTarget:    value = t.value; axis = 0
+        default:                       value = nil; axis = 0
+        }
+        guard let v = value else { return nil }
+        if isHorizontalValueAxis {
+            let x = CartesianGeometry.point(x: v, y: 0, viewport: currentViewport,
+                                            plotFrame: currentPlotFrame).x
+            return CGRect(x: x - 0.5, y: currentPlotFrame.minY,
+                          width: 1, height: currentPlotFrame.height)
+        }
+        let y = screenPoint(x: 0, y: v, yAxisIndex: axis).y
+        return CGRect(x: currentPlotFrame.minX, y: y - 0.5,
+                      width: currentPlotFrame.width, height: 1)
+    }
+}
+
 // MARK: - 整列命中（shared tooltip）
 extension CartesianRendererBase: HYMChartSharedHitProvider {
 
@@ -780,7 +819,8 @@ extension CartesianRendererBase: HYMChartSharedHitProvider {
     /// 点在 plot 区外（±8pt 宽容）返回 nil，由容器回落到逐点命中。
     public func sharedHit(at point: CGPoint) -> (target: any HYMChartHitTarget,
                                                  anchor: HYMChartTooltipAnchor,
-                                                 crosshair: CGRect)? {
+                                                 crosshair: CGRect,
+                                                 valueCrosshair: CGRect)? {
         guard let model = currentModel,
               let categoryIndex = categoryIndex(at: point) else { return nil }
 
@@ -796,9 +836,11 @@ extension CartesianRendererBase: HYMChartSharedHitProvider {
 
         // 锚点在触点位置（弹窗跟手出现，而非固定在图表顶部/底部）：
         // 垂直图 x 对齐类目中心、水平图 y 对齐类目行中心
-        // 十字准线：垂直图为过类目中心的全高竖线，水平图为过类目行的全宽横线
+        // 十字准线：垂直图为过类目中心的全高竖线，水平图为过类目行的全宽横线；
+        // 值向分量跟触点走（垂直图横线过触点 y、水平图竖线过触点 x，钳制在 plot 内）
         let band: CGRect
         let crosshair: CGRect
+        let valueCrosshair: CGRect
         if isHorizontalValueAxis {
             let y = CartesianGeometry.horizontalCategoryY(category: Double(categoryIndex),
                                                           viewport: currentViewport,
@@ -806,6 +848,9 @@ extension CartesianRendererBase: HYMChartSharedHitProvider {
             band = CGRect(x: point.x - 1, y: y - 1, width: 2, height: 2)
             crosshair = CGRect(x: currentPlotFrame.minX, y: y - 0.5,
                                width: currentPlotFrame.width, height: 1)
+            let vx = min(max(point.x, currentPlotFrame.minX), currentPlotFrame.maxX)
+            valueCrosshair = CGRect(x: vx - 0.5, y: currentPlotFrame.minY,
+                                    width: 1, height: currentPlotFrame.height)
         } else {
             let x = CartesianGeometry.point(x: Double(categoryIndex), y: 0,
                                             viewport: currentViewport,
@@ -813,13 +858,19 @@ extension CartesianRendererBase: HYMChartSharedHitProvider {
             band = CGRect(x: x - 1, y: point.y - 1, width: 2, height: 2)
             crosshair = CGRect(x: x - 0.5, y: currentPlotFrame.minY,
                                width: 1, height: currentPlotFrame.height)
+            let vy = min(max(point.y, currentPlotFrame.minY), currentPlotFrame.maxY)
+            valueCrosshair = CGRect(x: currentPlotFrame.minX, y: vy - 0.5,
+                                    width: currentPlotFrame.width, height: 1)
         }
+        let headerKey = categoryIndex < model.categoryLabels.count
+            ? model.categoryLabels[categoryIndex] : nil
         let target = CartesianSharedHitTarget(categoryIndex: categoryIndex,
                                               entries: entries,
-                                              crosshairX: band.midX)
+                                              crosshairX: band.midX,
+                                              headerKey: headerKey)
         return (target, HYMChartTooltipAnchor(frame: band,
                                                preferredPlacements: [.top, .bottom]),
-                crosshair)
+                crosshair, valueCrosshair)
     }
 }
 

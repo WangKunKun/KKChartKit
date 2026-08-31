@@ -8,12 +8,16 @@ public struct ColumnHitTarget: HYMChartHitTarget {
     public let value: Double
     /// 绑定的值轴（0 = 主轴/左，1 = 次轴/右）。
     public let yAxisIndex: Int
+    /// 系列名（nil = "系列N" 兜底；弹窗模板数据源用）
+    public let name: String?
 
-    public init(seriesIndex: Int, categoryIndex: Int, value: Double, yAxisIndex: Int = 0) {
+    public init(seriesIndex: Int, categoryIndex: Int, value: Double,
+                yAxisIndex: Int = 0, name: String? = nil) {
         self.seriesIndex = seriesIndex
         self.categoryIndex = categoryIndex
         self.value = value
         self.yAxisIndex = yAxisIndex
+        self.name = name
     }
 
     // MARK: - HYMChartHitTarget
@@ -33,4 +37,11 @@ public struct ColumnHitTarget: HYMChartHitTarget {
         let categoryName = "项\(categoryIndex + 1)"
         return "\(seriesName) - \(categoryName): \(value)"
     }
+}
+
+extension ColumnHitTarget: HYMChartTooltipDataSource {
+    public var tooltipRows: [(name: String, value: Double, isSecondaryAxis: Bool)] {
+        [(name ?? "系列\(seriesIndex + 1)", value, yAxisIndex == 1)]
+    }
+    public var tooltipHeaderKey: String? { nil }
 }

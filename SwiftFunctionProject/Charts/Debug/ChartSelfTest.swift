@@ -831,7 +831,80 @@ public enum ChartSelfTest {
         // —— Y 轴缩放（zoomAxisMode .y/.xy）——
         runYAxisZoomSelfTest()
 
+        // —— 准线双向 + 弹窗文本模板 ——
+        runCrosshairAndTooltipSelfTest()
+
         print("✅ ChartSelfTest passed")
+    }
+
+    /// 准线双向（值向分量几何）+ 弹窗文本模板（数据源/格式化/表头）。
+    static func runCrosshairAndTooltipSelfTest() {
+        let r = LineChartRenderer()
+        let host = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        r.mount(into: host)
+        r.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, 30, 20])]),
+                  theme: CartesianChartTheme(),
+                  context: HYMChartRenderContext(bounds: host.bounds, center: host.center))
+
+        // 1) 值向准线：LineHitTarget → 过命中值的横线（高 1、宽 = plot 宽）
+        let target = r.hitTest(CGPoint(x: 200, y: 80)) ?? r.snapHit(at: CGPoint(x: 200, y: 80))!
+        let vRect = r.valueCrosshairRect(for: target)
+        assert(vRect != nil, "Line target 应支持值向准线")
+        assert(vRect!.height == 1 && vRect!.width > 200, "垂直图值向准线 = 全宽横线")
+        let hitY = r.screenPoint(x: 0, y: (target as! LineHitTarget).value,
+                                 yAxisIndex: (target as! LineHitTarget).yAxisIndex).y
+        assert(abs(vRect!.minY + 0.5 - hitY) < 0.5, "值向准线过命中值")
+
+        // 2) sharedHit 四元组：值向分量跟触点走（钳制 plot 内）
+        let shared = r.sharedHit(at: CGPoint(x: 200, y: 90))!
+        assert(abs(shared.valueCrosshair.minY + 0.5 - 90) < 0.5,
+               "整列命中值向准线过触点 y")
+        assert(shared.valueCrosshair.width > 200 && shared.valueCrosshair.height == 1,
+               "值向准线全宽 1pt")
+        // 表头键：无类目标签时 nil；有标签时代入
+        // 无显式标签时 categoryLabels 自动生成序号（"1","2",…）→ headerKey 默认可用
+        assert((shared.target as! HYMChartTooltipDataSource).tooltipHeaderKey != nil,
+               "headerKey 默认有值（自动序号）")
+        let r2 = LineChartRenderer()
+        let host2 = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        r2.mount(into: host2)
+        let m2 = CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, 30, 20])],
+            xAxis: CartesianAxisModel(kind: .category(labels: ["一月", "二月", "三月"])))
+        r2.render(model: m2, theme: CartesianChartTheme(),
+                  context: HYMChartRenderContext(bounds: host2.bounds, center: host2.center))
+        let shared2 = r2.sharedHit(at: CGPoint(x: 200, y: 90))!
+        assert((shared2.target as! HYMChartTooltipDataSource).tooltipHeaderKey == "二月", "headerKey 代入类目标签")
+
+        // 3) Bar 值向准线 = 竖线
+        let b = BarChartRenderer()
+        let hostB = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        b.mount(into: hostB)
+        b.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, 20, 30])]),
+                 theme: CartesianChartTheme(),
+                 context: HYMChartRenderContext(bounds: hostB.bounds, center: hostB.center))
+        let bTarget = b.hitTest(CGPoint(x: 200, y: 100)) ?? b.snapHit(at: CGPoint(x: 200, y: 100))!
+        let bRect = b.valueCrosshairRect(for: bTarget)!
+        assert(bRect.width == 1 && bRect.height > 100, "Bar 值向准线 = 全高竖线")
+
+        // 4) 文本模板：格式化 + 数据源行
+        assert(HYMChartTooltipTextOptions.formatValue(3.14159, decimals: 2) == "3.14")
+        assert(HYMChartTooltipTextOptions.formatValue(3.14159, decimals: 0) == "3")
+        assert(HYMChartTooltipTextOptions.formatValue(20.0, decimals: nil) == "20")
+        assert(HYMChartTooltipTextOptions.formatValue(3.5, decimals: nil) == "3.5")
+        var options = HYMChartTooltipTextOptions()
+        assert(options.isDefault)
+        options = HYMChartTooltipTextOptions(header: "{key}", valueSuffix: " 万元", valueDecimals: 1)
+        assert(!options.isDefault, "配置后不再是默认模板")
+        let ds = shared2.target as! HYMChartTooltipDataSource
+        assert(ds.tooltipRows.count == 1 && ds.tooltipRows[0].name == "a")
+        // 模板组装（与 HYMChartView.formattedTooltipText 同逻辑的自检版）
+        let text = ([ds.tooltipHeaderKey.map { options.header!.replacingOccurrences(of: "{key}", with: $0) } ?? nil].compactMap { $0 }
+            + ds.tooltipRows.map { "\($0.name): \(HYMChartTooltipTextOptions.formatValue($0.value, decimals: options.valueDecimals))\(options.valueSuffix!)" })
+            .joined(separator: "\n")
+        assert(text == "二月\na: 30.0 万元", "模板组装结果，got \(text)")
     }
 
     /// 标线（阈值参考线）、折线负值换色（跨零切分）、空心圆点。

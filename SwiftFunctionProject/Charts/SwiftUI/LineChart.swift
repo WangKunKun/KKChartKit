@@ -17,6 +17,8 @@ public struct LineChart: View {
     private let crosshairColor: UIColor
     private let crosshairLineWidth: CGFloat
     private let crosshairDashStyle: LineDashStyle
+    private let isCrosshairDualDirectionEnabled: Bool
+    private let tooltipTextOptions: HYMChartTooltipTextOptions
 
     public init(model: CartesianChartModel,
                 theme: CartesianChartTheme = CartesianChartTheme(),
@@ -32,7 +34,9 @@ public struct LineChart: View {
                 zoomAxisMode: HYMChartZoomAxisMode = .x,
                 crosshairColor: UIColor = UIColor(white: 0.55, alpha: 0.9),
                 crosshairLineWidth: CGFloat = 0.75,
-                crosshairDashStyle: LineDashStyle = .solid) {
+                crosshairDashStyle: LineDashStyle = .solid,
+                isCrosshairDualDirectionEnabled: Bool = false,
+                tooltipTextOptions: HYMChartTooltipTextOptions = HYMChartTooltipTextOptions()) {
         self.model = model
         self.theme = theme
         self.playsAnimationOnAppear = playsAnimationOnAppear
@@ -48,6 +52,8 @@ public struct LineChart: View {
         self.crosshairColor = crosshairColor
         self.crosshairLineWidth = crosshairLineWidth
         self.crosshairDashStyle = crosshairDashStyle
+        self.isCrosshairDualDirectionEnabled = isCrosshairDualDirectionEnabled
+        self.tooltipTextOptions = tooltipTextOptions
     }
 
     public var body: some View {
@@ -64,7 +70,9 @@ public struct LineChart: View {
                                zoomAxisMode: zoomAxisMode,
                                crosshairColor: crosshairColor,
                                crosshairLineWidth: crosshairLineWidth,
-                               crosshairDashStyle: crosshairDashStyle)
+                               crosshairDashStyle: crosshairDashStyle,
+                               isCrosshairDualDirectionEnabled: isCrosshairDualDirectionEnabled,
+                               tooltipTextOptions: tooltipTextOptions)
     }
 }
 
@@ -84,6 +92,8 @@ private struct LineChartRepresentable: UIViewRepresentable {
     let crosshairColor: UIColor
     let crosshairLineWidth: CGFloat
     let crosshairDashStyle: LineDashStyle
+    let isCrosshairDualDirectionEnabled: Bool
+    let tooltipTextOptions: HYMChartTooltipTextOptions
 
     func makeUIView(context: Context) -> HYMChartView<LineChartRenderer> {
         let chart = HYMChartView<LineChartRenderer>(frame: .zero)
@@ -99,6 +109,8 @@ private struct LineChartRepresentable: UIViewRepresentable {
         chart.crosshairColor = crosshairColor
         chart.crosshairLineWidth = crosshairLineWidth
         chart.crosshairDashStyle = crosshairDashStyle
+        chart.isCrosshairDualDirectionEnabled = isCrosshairDualDirectionEnabled
+        chart.tooltipTextOptions = tooltipTextOptions
         chart.onHit = { target, gesture in
             if let h = target as? LineHitTarget { onHit?(h, gesture) }
         }
@@ -122,6 +134,8 @@ private struct LineChartRepresentable: UIViewRepresentable {
         uiView.crosshairColor = crosshairColor
         uiView.crosshairLineWidth = crosshairLineWidth
         uiView.crosshairDashStyle = crosshairDashStyle
+        uiView.isCrosshairDualDirectionEnabled = isCrosshairDualDirectionEnabled
+        uiView.tooltipTextOptions = tooltipTextOptions
         uiView.configure(model: model, theme: theme)
     }
 }

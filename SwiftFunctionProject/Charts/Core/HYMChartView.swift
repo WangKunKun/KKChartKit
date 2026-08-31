@@ -88,6 +88,12 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     public var crosshairDashStyle: LineDashStyle = .solid {
         didSet { crosshairLayer.lineDashPattern = crosshairDashStyle.dashPattern }
     }
+    /// 准线横+竖双向指示（默认单向：类目向一条线）。
+    /// 开启后叠加值向分量——逐点命中 = 过命中值的线，整列命中 = 跟触点走（Highcharts crosshair 同款）。
+    public var isCrosshairDualDirectionEnabled: Bool = false
+    /// 内置弹窗文本模板（表头 {key} / 数值后缀 / 固定小数位）。
+    /// 命中 target 实现 HYMChartTooltipDataSource 时生效，否则回落 target.tooltipText 固定格式。
+    public var tooltipTextOptions = HYMChartTooltipTextOptions()
     /// 点击按 X 类目取**整列**数据（shared tooltip，Highcharts 同款）。
     /// - `nil`（默认，自动）：多系列图表开（整列对比信息密度最高）、单系列关（逐点+吸附更直观）；
     /// - `true`：强制整列；`false`：强制逐点。
@@ -246,19 +252,25 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     }
 
     // MARK: - 十字准线（shared tooltip 激活时显示）
-    private func showCrosshair(_ frame: CGRect) {
+    private func showCrosshair(_ lines: [CGRect]) {
         // 开关关闭或几何无效 → 撤掉现有准线（避免上一命中的残影，如用户中途拨掉开关）
-        guard isCrosshairEnabled, frame.width > 0 || frame.height > 0 else {
+        guard isCrosshairEnabled else {
             hideCrosshair()
             return
         }
         let path = UIBezierPath()
-        if frame.width <= 1 {          // 竖线
-            path.move(to: CGPoint(x: frame.minX, y: frame.minY))
-            path.addLine(to: CGPoint(x: frame.minX, y: frame.maxY))
-        } else {                       // 横线（水平图）
-            path.move(to: CGPoint(x: frame.minX, y: frame.minY))
-            path.addLine(to: CGPoint(x: frame.maxX, y: frame.minY))
+        for frame in lines where frame.width > 0 || frame.height > 0 {
+            if frame.width <= 1 {          // 竖线
+                path.move(to: CGPoint(x: frame.minX, y: frame.minY))
+                path.addLine(to: CGPoint(x: frame.minX, y: frame.maxY))
+            } else {                       // 横线（水平图）
+                path.move(to: CGPoint(x: frame.minX, y: frame.minY))
+                path.addLine(to: CGPoint(x: frame.maxX, y: frame.minY))
+            }
+        }
+        guard !path.isEmpty else {
+            hideCrosshair()
+            return
         }
         CATransaction.begin()
         CATransaction.setDisableActions(true)
@@ -305,10 +317,13 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         guard useShared else { return false }
         renderer.applySelection(shared.target)
         onHit?(shared.target, gesture)
-        showCrosshair(shared.crosshair)   // 整列弹窗伴随准线（isCrosshairEnabled=false 时内部跳过）
+        // 整列弹窗伴随准线：单向 = 类目向；双向 = 叠加跟触点的值向分量
+        showCrosshair(isCrosshairDualDirectionEnabled
+                      ? [shared.crosshair, shared.valueCrosshair]
+                      : [shared.crosshair])
         // popup / onHitLocated 模式沿用逐点 target 的外部链路；shared 组合文本走内置 tooltip
         if popupContentProvider == nil && onHitLocated == nil {
-            if let text = shared.target.tooltipText {
+            if let text = formattedTooltipText(for: shared.target) {
                 ensureTooltipController().show(anchor: shared.anchor.frame, text: text,
                                                in: bounds,
                                                preferred: shared.anchor.preferredPlacements,
@@ -328,7 +343,12 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         renderer.applySelection(target)
         // 准线跟命中走（不依赖整列弹窗）：命中画在类目上，未命中撤掉
         if let target, let rect = renderer.crosshairRect(for: target) {
-            showCrosshair(rect)
+            var lines = [rect]
+            if isCrosshairDualDirectionEnabled,
+               let vRect = renderer.valueCrosshairRect(for: target) {
+                lines.append(vRect)   // 双向：叠加过命中值的值向线
+            }
+            showCrosshair(lines)
         } else {
             hideCrosshair()
         }
@@ -552,13 +572,34 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         return c
     }
 
+    /// 按文本模板组装弹窗内容：target 提供结构化行 + options 配置（表头/后缀/小数位）；
+    /// 模板未配置或 target 未实现数据源 → 回落 target.tooltipText 固定格式。
+    private func formattedTooltipText(for target: HYMChartHitTarget) -> String? {
+        guard !tooltipTextOptions.isDefault,
+              let dataSource = target as? HYMChartTooltipDataSource else {
+            return target.tooltipText
+        }
+        var lines: [String] = []
+        if let header = tooltipTextOptions.header, let key = dataSource.tooltipHeaderKey {
+            lines.append(header.replacingOccurrences(of: "{key}", with: key))
+        }
+        for row in dataSource.tooltipRows {
+            var text = "\(row.name): "
+                + HYMChartTooltipTextOptions.formatValue(row.value, decimals: tooltipTextOptions.valueDecimals)
+            if let suffix = tooltipTextOptions.valueSuffix { text += suffix }
+            if row.isSecondaryAxis { text += " (右轴)" }
+            lines.append(text)
+        }
+        return lines.isEmpty ? nil : lines.joined(separator: "\n")
+    }
+
     /// 命中后更新 tooltip：开关关 / 无文本 / 无锚点 → 隐藏；否则显示。
     /// - Parameter animated: false = 已可见的跟手移动更新（滑动选中），不重播淡入。
     private func updateTooltip(for target: HYMChartHitTarget?, animated: Bool = true) {
         if onHitLocated != nil { tooltipController?.hide(); return }   // 外部接管弹窗 → 跳过内置
         guard showsTooltipOnHit else { tooltipController?.hide(); return }
         guard let target,
-              let text = target.tooltipText,
+              let text = formattedTooltipText(for: target),
               let anchor = renderer.tooltipAnchor(for: target) else {
             tooltipController?.hide()
             return

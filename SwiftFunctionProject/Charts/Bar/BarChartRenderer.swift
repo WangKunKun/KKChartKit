@@ -176,7 +176,8 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
             )
 
             if rect.contains(point) {
-                return BarHitTarget(seriesIndex: seriesIndex, categoryIndex: categoryIndex, value: value)
+                return BarHitTarget(seriesIndex: seriesIndex, categoryIndex: categoryIndex,
+                                     value: value, name: model.series[seriesIndex].name)
             }
         }
 
@@ -250,6 +251,8 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
     /// 吸附命中 → BarHitTarget（水平图按最近类目行取条形值）。
     public override func makeHitTarget(seriesIndex: Int, categoryIndex: Int, value: Double)
         -> (any HYMChartHitTarget)? {
-        BarHitTarget(seriesIndex: seriesIndex, categoryIndex: categoryIndex, value: value)
+        guard let model = currentModel, seriesIndex < model.series.count else { return nil }
+        return BarHitTarget(seriesIndex: seriesIndex, categoryIndex: categoryIndex,
+                            value: value, name: model.series[seriesIndex].name)
     }
 }

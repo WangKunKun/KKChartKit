@@ -58,6 +58,9 @@ public protocol HYMChartRenderer: AnyObject {
     /// 命中目标的十字准线几何（贯穿绘图区的细线，view 坐标系）；nil = 不画。
     /// 逐点命中与整列命中共用（Highcharts crosshair 语义：跟命中走，不依赖 shared tooltip）。默认 nil。
     func crosshairRect(for target: HYMChartHitTarget) -> CGRect?
+    /// 双向准线的**值轴方向**分量（垂直图 = 过命中值的横线 / 水平图 = 竖线）；nil = 不支持。
+    /// 由 `HYMChartView.isCrosshairDualDirectionEnabled` 开启后叠加在类目向准线旁。默认 nil。
+    func valueCrosshairRect(for target: HYMChartHitTarget) -> CGRect?
 }
 
 /// 默认实现：交互与逐帧回调为可选；不关心的图表无需实现这些方法
@@ -68,6 +71,7 @@ public extension HYMChartRenderer {
     func tooltipAnchor(for target: HYMChartHitTarget) -> HYMChartTooltipAnchor? { nil }
     func hitFrame(for target: HYMChartHitTarget) -> CGRect? { nil }
     func crosshairRect(for target: HYMChartHitTarget) -> CGRect? { nil }
+    func valueCrosshairRect(for target: HYMChartHitTarget) -> CGRect? { nil }
 }
 
 /// X 轴视口缩放能力（轴系图表专属；雷达图/热力图等不实现即自动不支持）。
@@ -174,10 +178,11 @@ public enum HYMChartZoomAxisMode: String, CaseIterable {
 /// 整列命中（shared tooltip）提供者：点击按类目取该 X 位置**所有系列**的数据。
 /// 实现者返回组合好的 target（tooltipText 已含各系列值）与弹窗锚点。
 public protocol HYMChartSharedHitProvider: HYMChartRenderer {
-    /// - Returns: 该点的整列命中（含十字准线 frame，坐标同 host；nil = 不支持/点在绘图区外）
+    /// - Returns: 该点的整列命中（含十字准线两条线框，坐标同 host；nil = 不支持/点在绘图区外）
     func sharedHit(at point: CGPoint) -> (target: any HYMChartHitTarget,
                                           anchor: HYMChartTooltipAnchor,
-                                          crosshair: CGRect)?
+                                          crosshair: CGRect,
+                                          valueCrosshair: CGRect)?
 }
 
 /// 吸附命中提供者：点击没落在任何数据点上时，吸附到**横向最近类目**上离触点
