@@ -841,14 +841,18 @@ public enum ChartSelfTest {
         assert(CartesianDataLabelGeometry.labelText(Double.nan) == "–")
         assert(CartesianDataLabelGeometry.labelText(7, formatter: { "¥\($0)" }) == "¥7.0")
 
-        // 2) 折线点标签：outsideEnd 在点上方、center 在点下方（半径与字号参与间距）
+        // 2) 折线点标签：outsideEnd 在点上方、center 在点右侧、insideEnd 在点下方（三档两两不同）
         let size = CGSize(width: 14, height: 10)
         let p = CGPoint(x: 100, y: 60)
         let above = CartesianDataLabelGeometry.labelCenter(
             point: p, textSize: size, position: .outsideEnd, pointRadius: 3)
-        let below = CartesianDataLabelGeometry.labelCenter(
+        let right = CartesianDataLabelGeometry.labelCenter(
             point: p, textSize: size, position: .center, pointRadius: 3)
+        let below = CartesianDataLabelGeometry.labelCenter(
+            point: p, textSize: size, position: .insideEnd, pointRadius: 3)
         assert(above == CGPoint(x: 100, y: 60 - 3 - 5 - 2), "点上方 y = 点y-半径-h/2-2")
+        assert(right == CGPoint(x: 100 + 3 + 7 + 4, y: 60),
+               "center = 点右侧 x = 点x+半径+w/2+4（与 insideEnd 不同）")
         assert(below == CGPoint(x: 100, y: 60 + 3 + 5 + 2), "点下方 y = 点y+半径+h/2+2")
 
         // 3) 柱段标签：正值 outsideEnd 在顶外、center 在中心、负值在底外；条形水平镜像

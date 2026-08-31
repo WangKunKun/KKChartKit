@@ -266,7 +266,7 @@ struct LineChartDemo: View {
         ])
         let labelSection = ChartDemoPanel.DemoSection(title: "数据标签", items: [
             .toggle(label: "数值标注在数据点上", value: $dataLabelsOn),
-            .picker(label: "标签位置（外侧=点上方）", selection: $dataLabelPosition,
+            .picker(label: "标签位置（外侧=点上方/中心=点右侧/内侧=点下方）", selection: $dataLabelPosition,
                     options: CartesianDataLabelPosition.allCases.map { $0.rawValue }),
             .toggle(label: "末系列强制开启（系列级覆盖）", value: $lastSeriesDataLabelsOn),
         ])

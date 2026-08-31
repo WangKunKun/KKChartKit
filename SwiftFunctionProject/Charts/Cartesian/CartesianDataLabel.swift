@@ -2,7 +2,8 @@ import UIKit
 
 /// 数据标签位置（Highcharts dataLabels 的 align/verticalAlign 简化版）。
 /// 语义随图表形态映射：
-/// - 折线：`outsideEnd` = 点上方，`center`/`insideEnd` = 点下方；
+/// - 折线：`outsideEnd` = 点上方，`center` = 点右侧（时间轴标注惯例，不遮挡前后连线），
+///   `insideEnd` = 点下方；
 /// - 柱状（垂直）：`outsideEnd` = 柱顶外侧（负值柱底外侧）、`center` = 柱段中心、`insideEnd` = 柱顶内侧；
 /// - 条形（水平）：镜像到水平方向——`outsideEnd` = 条端右侧（负值左侧）、`center` = 段中心、`insideEnd` = 条端内侧。
 public enum CartesianDataLabelPosition: String, CaseIterable {
@@ -23,12 +24,17 @@ public enum CartesianDataLabelGeometry {
     public static func labelCenter(point: CGPoint, textSize: CGSize,
                                    position: CartesianDataLabelPosition,
                                    pointRadius: CGFloat) -> CGPoint {
-        let gap = pointRadius + textSize.height / 2 + 2
         switch position {
         case .outsideEnd:
-            return CGPoint(x: point.x, y: point.y - gap)
-        case .center, .insideEnd:
-            return CGPoint(x: point.x, y: point.y + gap)
+            return CGPoint(x: point.x,
+                           y: point.y - pointRadius - textSize.height / 2 - 2)
+        case .center:
+            // 折线点没有"内部/中心"体积 → 右侧贴点（水平偏移），三档位置两两不同
+            return CGPoint(x: point.x + pointRadius + textSize.width / 2 + 4,
+                           y: point.y)
+        case .insideEnd:
+            return CGPoint(x: point.x,
+                           y: point.y + pointRadius + textSize.height / 2 + 2)
         }
     }
 
