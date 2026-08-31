@@ -810,6 +810,9 @@ public enum ChartSelfTest {
         // —— 线条虚线样式 ——
         runDashStyleSelfTest()
 
+        // —— 空值处理（NaN 断线 / connectNulls 连线）——
+        runNullValueSelfTest()
+
         // —— 百分比堆叠 ——
         runPercentStackingSelfTest()
 
@@ -817,6 +820,78 @@ public enum ChartSelfTest {
         runSharedHitSelfTest()
 
         print("✅ ChartSelfTest passed")
+    }
+
+    /// 空值（NaN）：断线成多段子路径、connectNulls 直连、柱状跳过、堆叠链不被空值破坏。
+    static func runNullValueSelfTest() {
+        // 1) dataBounds 过滤 NaN：[10, NaN, 30] → 10...30
+        let nullModel = CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, .nan, 30])])
+        let nb = nullModel.dataBounds()!
+        assert(abs(nb.min - 10) < 1e-9 && abs(nb.max - 30) < 1e-9,
+               "dataBounds 应跳过 NaN，got \(nb)")
+
+        // 2) 堆叠链不被空值破坏：a=[10,NaN,30]、b=[1,2,3] → b 累计 [11,2,33]、a 空点 NaN
+        let chain = CartesianGeometry.stackedValuesByAxis(series: [
+            CartesianSeriesElement(name: "a", data: [10, .nan, 30]),
+            CartesianSeriesElement(name: "b", data: [1, 2, 3])])
+        assert(chain[0][1].isNaN, "空值点自身应为 NaN")
+        assert(chain[1] == [11, 2, 33], "后续系列累计应视空值为缺位，got \(chain[1])")
+
+        // 3) 折线断线：NaN 处线断成两段（path 两个子路径）
+        func lineSubpathCount(_ connectNulls: Bool) -> Int {
+            let r = LineChartRenderer()
+            let host = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+            r.mount(into: host)
+            r.render(model: CartesianChartModel(
+                series: [CartesianSeriesElement(name: "a", data: [10, 20, .nan, 40, 50],
+                                                connectNulls: connectNulls)]),
+                     theme: CartesianChartTheme(),
+                     context: HYMChartRenderContext(bounds: host.bounds, center: host.center))
+            var moves = 0
+            for layer in r.seriesLayerSublayersForTesting() {
+                (layer as? CAShapeLayer)?.path?.applyWithBlock { elem in
+                    if elem.pointee.type == .moveToPoint { moves += 1 }
+                }
+            }
+            return moves
+        }
+        assert(lineSubpathCount(false) == 2, "NaN 断线应有 2 个子路径，got \(lineSubpathCount(false))")
+        assert(lineSubpathCount(true) == 1, "connectNulls 应连成 1 段，got \(lineSubpathCount(true))")
+
+        // 4) 柱状：空值类目不画柱、不可命中
+        let c = ColumnChartRenderer()
+        let hostC = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        c.mount(into: hostC)
+        c.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, .nan, 30])]),
+                  theme: CartesianChartTheme(),
+                  context: HYMChartRenderContext(bounds: hostC.bounds, center: hostC.center))
+        var columnMoves = 0
+        for layer in c.seriesLayerSublayersForTesting() {
+            (layer as? CAShapeLayer)?.path?.applyWithBlock { elem in
+                if elem.pointee.type == .moveToPoint { columnMoves += 1 }
+            }
+        }
+        assert(columnMoves == 2, "3 类目含 1 空值应只画 2 柱，got \(columnMoves)")
+
+        // 5) 整列命中：空值系列不出现在弹窗（entries 为空 → 该列回落逐点/无命中）
+        let sh = LineChartRenderer()
+        let hostS = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        sh.mount(into: hostS)
+        sh.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [.nan]),
+                     CartesianSeriesElement(name: "b", data: [5])]),
+                  theme: CartesianChartTheme(),
+                  context: HYMChartRenderContext(bounds: hostS.bounds, center: hostS.center))
+        if let hit = sh.sharedHit(at: CGPoint(x: sh.currentPlotFrame.midX,
+                                              y: sh.currentPlotFrame.midY)) {
+            let t = hit.target as! CartesianSharedHitTarget
+            assert(t.entries.count == 1 && t.entries[0].name == "b",
+                   "空值系列应被跳过，got \(t.entries)")
+        } else {
+            assertionFailure("含空值列也应可整列命中（只含有效系列）")
+        }
     }
 
     /// 虚线样式：11 种 dashStyle 的 pattern 纯函数 + 渲染级 lineDashPattern 接线（系列级覆盖主题）。

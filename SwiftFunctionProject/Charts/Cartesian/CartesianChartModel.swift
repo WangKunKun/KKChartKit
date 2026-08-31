@@ -67,19 +67,24 @@ public struct CartesianSeriesElement {
     public var negativeColor: UIColor?
     /// 系列线条虚线样式（nil = 跟随主题 lineDashStyle；"实际/预测"区分用）
     public var lineDashStyle: LineDashStyle?
+    /// 空值（数据中的 `.nan`）是否跨空连线：false = 断线留缺口（默认，Highcharts 同款）；
+    /// true = 忽略空值直接连到下一个有效点。柱状/条形忽略本参数（空值恒不画柱）。
+    public var connectNulls: Bool
     /// 绑定哪个值轴（0 = 主轴/左，1 = 次轴/右；Bar 水平图仅支持主轴）。
     public var yAxisIndex: Int
     /// clamp 后的有效轴索引（仅 1 绑次轴，其余——含越界——回落主轴 0）。
     public var effectiveYAxisIndex: Int { yAxisIndex == 1 ? 1 : 0 }
 
     public init(name: String, data: [Double], color: UIColor? = nil, negativeColor: UIColor? = nil,
-                yAxisIndex: Int = 0, lineDashStyle: LineDashStyle? = nil) {
+                yAxisIndex: Int = 0, lineDashStyle: LineDashStyle? = nil,
+                connectNulls: Bool = false) {
         self.name = name
         self.data = data
         self.color = color
         self.negativeColor = negativeColor
         self.yAxisIndex = yAxisIndex
         self.lineDashStyle = lineDashStyle
+        self.connectNulls = connectNulls
     }
 }
 
@@ -129,7 +134,7 @@ public struct CartesianChartModel: HYMChartModel {
         default:
             dataToUse = group.map { $0.data }
         }
-        let flat = dataToUse.flatMap { $0 }
+        let flat = dataToUse.flatMap { $0 }.filter { $0.isFinite }
         guard let lo = flat.min(), let hi = flat.max() else { return nil }
         return (lo, hi)
     }

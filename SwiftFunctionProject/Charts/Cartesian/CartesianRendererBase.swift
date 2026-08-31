@@ -513,7 +513,8 @@ extension CartesianRendererBase: HYMChartSharedHitProvider {
               let categoryIndex = categoryIndex(at: point) else { return nil }
 
         var entries: [CartesianSharedHitTarget.Entry] = []
-        for (i, s) in model.series.enumerated() where categoryIndex < s.data.count {
+        for (i, s) in model.series.enumerated()
+        where categoryIndex < s.data.count && s.data[categoryIndex].isFinite {
             let isSecondary = s.effectiveYAxisIndex == 1
             entries.append(CartesianSharedHitTarget.Entry(seriesIndex: i, name: s.name,
                                                           value: s.data[categoryIndex],
@@ -552,7 +553,8 @@ extension CartesianRendererBase: HYMChartSnapHitProvider {
         guard let model = currentModel,
               let categoryIndex = categoryIndex(at: point) else { return nil }
         var best: (series: Int, value: Double, dist: CGFloat)?
-        for (i, s) in model.series.enumerated() where categoryIndex < s.data.count {
+        for (i, s) in model.series.enumerated()
+        where categoryIndex < s.data.count && s.data[categoryIndex].isFinite {
             let v = s.data[categoryIndex]
             let p = isHorizontalValueAxis
                 ? screenPoint(x: v, y: Double(categoryIndex))

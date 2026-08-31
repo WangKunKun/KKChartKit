@@ -58,54 +58,84 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
                 viewport: currentViewport, plotArea: plotFrame, isHorizontal: false,
                 valueDomain: axisIdx == 1 ? currentSecondaryYDomain : nil)
 
-            // 数据点屏幕坐标（命中 frame 按数据点，与阶梯形态无关）
-            let screenPts = values.enumerated().map { (i, v) -> CGPoint in
-                screenPoint(x: Double(i), y: v, yAxisIndex: axisIdx)
-            }
-            for (i, p) in screenPts.enumerated() {
-                let r = max(hitRadius, theme.pointRadius)   // 命中半径 ≥ 视觉点半径
-                lastPointFrames.append((s, i,
-                    CGRect(x: p.x - r, y: p.y - r, width: r * 2, height: r * 2)))
-            }
-
-            // 折线 path（连接形态在此应用：直线/阶梯 = 过渡点折线，曲线 = Catmull-Rom；
-            // 视口外的点也连线，保证可见段两侧的线形完整，溢出部分由 seriesLayer 裁剪）
-            let path = UIBezierPath()
-            if theme.lineConnectionStyle == .smooth {
-                guard let first = screenPts.first else { continue }
-                path.move(to: first)
-                CartesianGeometry.appendSmoothCurve(to: path, points: screenPts)
+            // 空值（NaN）分段：有效索引按连续性切分（connectNulls 合成一段全直连）；
+            // 每段独立成子路径——线断、面积分段、点与命中只取有效点
+            let finiteIndices = values.indices.filter { values[$0].isFinite }
+            guard !finiteIndices.isEmpty else { continue }
+            var segments: [[Int]] = []
+            if element.connectNulls {
+                segments = [finiteIndices]
             } else {
-                let pathPts = CartesianGeometry.steppedScreenPoints(screenPts, style: theme.lineConnectionStyle)
-                for (i, p) in pathPts.enumerated() {
-                    i == 0 ? path.move(to: p) : path.addLine(to: p)
+                var run: [Int] = []
+                for idx in finiteIndices {
+                    if let last = run.last, idx == last + 1 { run.append(idx) }
+                    else { if !run.isEmpty { segments.append(run) }; run = [idx] }
+                }
+                if !run.isEmpty { segments.append(run) }
+            }
+
+            // 每段屏幕坐标（命中 frame 按数据点，与阶梯形态无关）
+            var segmentPoints: [[CGPoint]] = []
+            for seg in segments {
+                segmentPoints.append(seg.map { idx in
+                    screenPoint(x: Double(idx), y: values[idx], yAxisIndex: axisIdx)
+                })
+            }
+            for (segIdx, seg) in segments.enumerated() {
+                for (k, p) in segmentPoints[segIdx].enumerated() {
+                    let r = max(hitRadius, theme.pointRadius)   // 命中半径 ≥ 视觉点半径
+                    lastPointFrames.append((s, seg[k],
+                        CGRect(x: p.x - r, y: p.y - r, width: r * 2, height: r * 2)))
                 }
             }
 
-            // 面积填充（面积图形态）：折线 path 闭合到零轴 → CAGradientLayer + mask。
-            // 先于线添加（线压在面积上）；渐变自上而下（近线浓 → 近零轴淡）。
-            // 堆叠时分层：系列 i 面积下边界 = 同轴前一系列的累计线（层层叠高、颜色不互覆）。
-            if theme.showsArea, let first = screenPts.first, let last = screenPts.last {
-                let areaPath = UIBezierPath(cgPath: path.cgPath)
-                if model.stacking == .normal || model.stacking == .percent {
-                    // 下边界 = 同符号链基准（自身累计 − 自身基准原值，逐点；percent 时基准为归一化原值）：
-                    // 正链首系列 = 0（零轴），负链同理从 0 向下。须与折线连接形态一致（阶梯用阶梯折点），
-                    // 否则半透明层错位叠加；折点序列倒序回走 = 同一几何形状。
-                    let rawBaseFull = model.rawBaseValues(forSeries: s)
-                    let rawBase = rawBaseFull + [Double](repeating: 0, count: max(0, values.count - rawBaseFull.count))
-                    let base = zip(values, rawBase).map { $0 - $1 }
-                    let baseData = base.enumerated().map { (i, v) in
-                        screenPoint(x: Double(i), y: v, yAxisIndex: axisIdx)
-                    }
-                    let prevPathPts = theme.lineConnectionStyle == .smooth
-                        ? baseData
-                        : CartesianGeometry.steppedScreenPoints(baseData, style: theme.lineConnectionStyle)
-                    for pp in prevPathPts.reversed() { areaPath.addLine(to: pp) }
+            // 折线 path（连接形态在此应用：直线/阶梯 = 过渡点折线，曲线 = 单调插值；
+            // 每段一个子路径，视口外的点也连线，溢出由 seriesLayer 裁剪）
+            let path = UIBezierPath()
+            for pts in segmentPoints {
+                guard let first = pts.first else { continue }
+                if theme.lineConnectionStyle == .smooth {
+                    path.move(to: first)
+                    CartesianGeometry.appendSmoothCurve(to: path, points: pts)
                 } else {
-                    areaPath.addLine(to: CGPoint(x: last.x, y: zeroY))
-                    areaPath.addLine(to: CGPoint(x: first.x, y: zeroY))
+                    let pathPts = CartesianGeometry.steppedScreenPoints(pts, style: theme.lineConnectionStyle)
+                    for (i, p) in pathPts.enumerated() {
+                        i == 0 ? path.move(to: p) : path.addLine(to: p)
+                    }
                 }
-                areaPath.close()
+            }
+
+            // 面积填充（面积图形态）：每段独立闭合（空值处面积断开）；
+            // 堆叠时分层下边界 = 同符号链基准（自身累计 − 基准原值，percent 为归一化原值）。
+            if theme.showsArea, !path.isEmpty {
+                var base: [Double]? = nil
+                if model.isStacked {
+                    let rawBaseFull = model.rawBaseValues(forSeries: s)
+                    let rawBase = rawBaseFull + [Double](repeating: 0,
+                        count: max(0, values.count - rawBaseFull.count))
+                    base = zip(values, rawBase).map { $0 - $1 }
+                }
+                let areaPath = UIBezierPath(cgPath: path.cgPath)
+                for (segIdx, seg) in segments.enumerated() {
+                    guard let first = segmentPoints[segIdx].first,
+                          let last = segmentPoints[segIdx].last else { continue }
+                    if let base = base {
+                        let baseData = seg.map { idx in
+                            screenPoint(x: Double(idx), y: base[idx], yAxisIndex: axisIdx)
+                        }
+                        let prevPathPts = theme.lineConnectionStyle == .smooth
+                            ? baseData
+                            : CartesianGeometry.steppedScreenPoints(baseData, style: theme.lineConnectionStyle)
+                        for pp in prevPathPts.reversed() { areaPath.addLine(to: pp) }
+                    } else {
+                        areaPath.addLine(to: CGPoint(x: last.x, y: zeroY))
+                        areaPath.addLine(to: CGPoint(x: first.x, y: zeroY))
+                    }
+                    areaPath.close()
+                    if segIdx < segments.count - 1, let nextFirst = segmentPoints[segIdx + 1].first {
+                        areaPath.move(to: nextFirst)   // 下一段重新起子路径
+                    }
+                }
 
                 let gradient = CAGradientLayer()
                 gradient.frame = plotFrame
@@ -137,9 +167,9 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
             seriesLayer.addSublayer(line)
             lineLayers.append(line)
 
-            // 数据点（画在原始数据点位置，与阶梯形态无关）
+            // 数据点（画在有效数据点位置，与阶梯形态无关；空值处不画点）
             if theme.showsPoints {
-                for p in screenPts {
+                for p in segmentPoints.flatMap({ $0 }) {
                     let dot = CALayer()
                     dot.frame = CGRect(x: p.x - theme.pointRadius, y: p.y - theme.pointRadius,
                                        width: theme.pointRadius * 2, height: theme.pointRadius * 2)

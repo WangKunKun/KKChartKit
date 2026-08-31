@@ -28,6 +28,8 @@ struct ColumnChartDemo: View {
     @State private var mirrorStackOn = false
     /// 百分比堆叠统一基准（0 = 每列自动满 100%）
     @State private var percentBaseMax = 0.0
+    /// 空值示例：每系列第 3 个类目置 NaN（该类目无柱）
+    @State private var nullSampleOn = false
     /// 首末柱贴边（类目域 0...n-1）
     @State private var edgePointsOn = false
     // —— 值轴刻度自定义 ——
@@ -79,10 +81,12 @@ struct ColumnChartDemo: View {
     private var currentModel: CartesianChartModel {
         let series = (0..<seriesCount).map { index in
             let isLast = index == seriesCount - 1
-            let rawData = index < data.count ? data[index] : Self.randomData(count: pointCount)
+            var rawData = index < data.count ? data[index] : Self.randomData(count: pointCount)
+            if mirrorStackOn && isLast { rawData = rawData.map { -$0 } }
+            if nullSampleOn, rawData.count > 2 { rawData[2] = .nan }
             return CartesianSeriesElement(
                 name: "系列\(index + 1)",
-                data: (mirrorStackOn && isLast) ? rawData.map { -$0 } : rawData,
+                data: rawData,
                 color: seriesColors[index % seriesColors.count],
                 yAxisIndex: (dualAxisOn && isLast) ? 1 : 0
             )
@@ -172,6 +176,9 @@ struct ColumnChartDemo: View {
             .color(label: "边框颜色", value: $columnBorderColor),
         ])
 
+        let nullSection = ChartDemoPanel.DemoSection(title: "空值", items: [
+            .toggle(label: "空值示例（第3类目无柱）", value: $nullSampleOn),
+        ])
         let stackSection = ChartDemoPanel.DemoSection(title: "堆叠", items: [
             .picker(label: "堆叠模式", selection: $stackingMode, options: ["不堆叠", "普通堆叠", "百分比堆叠"]),
             .toggle(label: "双轴（末系列绑右轴）", value: $dualAxisOn),
@@ -204,7 +211,7 @@ struct ColumnChartDemo: View {
             .toggle(label: "24小时时间轴（按数据量均分）", value: $useTimeAxis),
         ])
 
-        return ChartDemoPanel(sections: [dataSection, xAxisSection, columnSection, stackSection, axisSection, gestureSection, animationSection])
+        return ChartDemoPanel(sections: [dataSection, xAxisSection, nullSection, columnSection, stackSection, axisSection, gestureSection, animationSection])
     }
 
     private func regenerateData() {

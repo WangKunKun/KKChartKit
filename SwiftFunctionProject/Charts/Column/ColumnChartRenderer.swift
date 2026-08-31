@@ -43,7 +43,7 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
             var negativePath = UIBezierPath()   // 仅负值色独立时才单独成层
             var separatorPath = UIBezierPath()  // 堆叠分隔线（同色同宽合并）
 
-            for index in visible where index < oneSeries.count {
+            for index in visible where index < oneSeries.count && oneSeries[index].isFinite {
                 let value = oneSeries[index]
 
                 // 基准值（堆叠）：同符号链前累计 = 自身累计 − 自身原值（正链贴零轴向上、
@@ -159,7 +159,7 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
             : model.series.map { $0.data }
 
         for (seriesIndex, oneSeries) in dataToCheck.enumerated() {
-            guard categoryIndex < oneSeries.count else { continue }
+            guard categoryIndex < oneSeries.count, oneSeries[categoryIndex].isFinite else { continue }
             let value = oneSeries[categoryIndex]
             let axisIdx = model.series[seriesIndex].effectiveYAxisIndex
             let seriesZeroY = CartesianGeometry.zeroAxisPosition(

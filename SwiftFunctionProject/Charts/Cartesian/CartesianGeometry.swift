@@ -388,12 +388,14 @@ public enum CartesianGeometry {
             let neg = runningNegative[axis] ?? zeros
             var cum = [Double](repeating: 0, count: maxLength)
             for j in 0..<maxLength {
+                // 空值（NaN）：自身该点保持 NaN（断线），且不更新链——后续系列视其为缺位
+                guard padded[j].isFinite else { cum[j] = .nan; continue }
                 // 逐点按符号入链：v ≥ 0 归正链（0 视为正，与 Highcharts 一致）
                 cum[j] = padded[j] >= 0 ? pos[j] + padded[j] : neg[j] + padded[j]
             }
             var newPos = pos
             var newNeg = neg
-            for j in 0..<maxLength where padded[j] != 0 {
+            for j in 0..<maxLength where padded[j].isFinite && padded[j] != 0 {
                 if padded[j] > 0 { newPos[j] = cum[j] } else { newNeg[j] = cum[j] }
             }
             runningPositive[axis] = newPos
@@ -419,18 +421,19 @@ public enum CartesianGeometry {
                 let axis = s.effectiveYAxisIndex
                 var t = totals[axis] ?? [Double](repeating: 0, count: maxLength)
                 for j in 0..<maxLength where j < s.data.count {
-                    t[j] += abs(s.data[j])
+                    t[j] += abs(s.data[j])   // NaN 参与加法得 NaN，下方 isFinite 过滤按 0 计
                 }
-                totals[axis] = t
+                totals[axis] = t.map { $0.isFinite ? $0 : 0 }
             }
         }
         return series.map { s in
             let axis = s.effectiveYAxisIndex
             let t = totals[axis] ?? [Double](repeating: 0, count: maxLength)
             return (0..<maxLength).map { j in
-                let v = j < s.data.count ? s.data[j] : 0
+                let raw = j < s.data.count ? s.data[j] : 0
+                guard raw.isFinite else { return .nan }   // 空值保持 NaN（断线）
                 let denom = fixedMax ?? t[j]
-                return denom > 1e-9 ? v / denom * 100 : 0
+                return denom > 1e-9 ? raw / denom * 100 : 0
             }
         }
     }

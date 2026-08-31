@@ -60,6 +60,10 @@ struct LineChartDemo: View {
     @State private var mirrorStackOn = false
     /// 百分比堆叠统一基准（0 = 每列自动满 100%）
     @State private var percentBaseMax = 0.0
+    /// 空值示例：每个系列第 3 个点置 NaN（断线缺口）
+    @State private var nullSampleOn = false
+    /// 空值处是否跨空连线（connectNulls）
+    @State private var connectNullsOn = false
     /// 堆叠模式下是否叠加面积分层展示（默认开，可关成纯累计折线）
     @State private var stackedAreaOn = true
     @State private var tickCountOn = false
@@ -122,12 +126,15 @@ struct LineChartDemo: View {
             let rawData = i < data.count ? data[i] : Self.randomData(count: pointCount)
             let dash: LineDashStyle? = (isLast && lastSeriesDashStyle != "跟随全局")
                 ? LineDashStyle(rawValue: lastSeriesDashStyle) : nil
+            var data = (mirrorStackOn && isLast) ? rawData.map { -$0 } : rawData
+            if nullSampleOn, data.count > 2 { data[2] = .nan }
             return CartesianSeriesElement(
                 name: "系列\(i + 1)",
-                data: (mirrorStackOn && isLast) ? rawData.map { -$0 } : rawData,
+                data: data,
                 color: seriesColors[i % seriesColors.count],
                 yAxisIndex: (dualAxisOn && isLast) ? 1 : 0,
-                lineDashStyle: dash)
+                lineDashStyle: dash,
+                connectNulls: connectNullsOn)
         }
 
         var secondary: CartesianAxisModel?
@@ -242,6 +249,8 @@ struct LineChartDemo: View {
             .toggle(label: "边界橡皮筋（越界回弹）", value: $rubberBandOn),
             .slider(label: "放大下限（最小可见类目数）", value: $minimumVisibleCategories, range: 2...24, step: 1),
             .toggle(label: "点击弹整列数据（按 X 类目取所有系列）", value: $sharedTooltipOn),
+            .toggle(label: "空值示例（第3点无数据，断线缺口）", value: $nullSampleOn),
+            .toggle(label: "跨空值连线（connectNulls）", value: $connectNullsOn),
             .toggle(label: "24小时时间轴（按数据量均分）", value: $useTimeAxis),
         ])
         let gridSection = ChartDemoPanel.DemoSection(title: "网格与轴", items: [

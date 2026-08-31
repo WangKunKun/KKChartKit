@@ -45,7 +45,7 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
             var negativePath = UIBezierPath()   // 仅负值色独立时才单独成层
             var separatorPath = UIBezierPath()  // 堆叠分隔线（同色同宽合并）
 
-            for (index, value) in oneSeries.enumerated() {
+            for (index, value) in oneSeries.enumerated() where value.isFinite {
                 // 基准值（堆叠）：符号链前累计 = 自身累计 − 自身基准原值（percent 时为归一化原值）
                 let baselineValue: Double?
                 if model.isStacked {
@@ -146,7 +146,7 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
             : model.series.map { $0.data }
 
         for (seriesIndex, oneSeries) in dataToCheck.enumerated() {
-            guard categoryIndex < oneSeries.count else { continue }
+            guard categoryIndex < oneSeries.count, oneSeries[categoryIndex].isFinite else { continue }
             let value = oneSeries[categoryIndex]
             let rect = CartesianGeometry.barRect(
                 dataPoint: value,
