@@ -403,34 +403,42 @@ public enum CartesianGeometry {
         return out
     }
 
-    /// 百分比堆叠：归一化原值（同轴同列 |v| 总和为分母 → v/分母×100；分母 0 → 0）。
-    /// 与输入同序；符号保留（正链向上、负链向下），短系列补 0 对齐。
-    public static func percentNormalizedValues(series: [CartesianSeriesElement]) -> [[Double]] {
+    /// 百分比堆叠：归一化原值。
+    /// - Parameters:
+    ///   - fixedMax: 统一基准（nil = 每列按该列 |v| 总和归一，必满 100%）；
+    ///     显式值时所有列按 v/fixedMax×100 归一，列合计可不满/超过 100%。
+    /// 与输入同序；符号保留（正链向上、负链向下），短系列补 0 对齐；分母 ≤ 0 → 0。
+    public static func percentNormalizedValues(series: [CartesianSeriesElement],
+                                               fixedMax: Double? = nil) -> [[Double]] {
         guard !series.isEmpty else { return [] }
         let maxLength = series.map { $0.data.count }.max() ?? 0
         guard maxLength > 0 else { return [] }
-        var totals: [Int: [Double]] = [:]   // axis -> 每列 |v| 总和
-        for s in series {
-            let axis = s.effectiveYAxisIndex
-            var t = totals[axis] ?? [Double](repeating: 0, count: maxLength)
-            for j in 0..<maxLength where j < s.data.count {
-                t[j] += abs(s.data[j])
+        var totals: [Int: [Double]] = [:]   // axis -> 每列 |v| 总和（fixedMax 模式不用）
+        if fixedMax == nil {
+            for s in series {
+                let axis = s.effectiveYAxisIndex
+                var t = totals[axis] ?? [Double](repeating: 0, count: maxLength)
+                for j in 0..<maxLength where j < s.data.count {
+                    t[j] += abs(s.data[j])
+                }
+                totals[axis] = t
             }
-            totals[axis] = t
         }
         return series.map { s in
             let axis = s.effectiveYAxisIndex
             let t = totals[axis] ?? [Double](repeating: 0, count: maxLength)
             return (0..<maxLength).map { j in
                 let v = j < s.data.count ? s.data[j] : 0
-                return t[j] > 1e-9 ? v / t[j] * 100 : 0
+                let denom = fixedMax ?? t[j]
+                return denom > 1e-9 ? v / denom * 100 : 0
             }
         }
     }
 
-    /// 百分比堆叠累计：归一化原值按符号链累计（正链 0→100 向上、负链 0→-100 向下）。
-    public static func stackedPercentValues(series: [CartesianSeriesElement]) -> [[Double]] {
-        let normalized = zip(series, percentNormalizedValues(series: series)).map {
+    /// 百分比堆叠累计：归一化原值按符号链累计（正链向上、负链向下）。
+    public static func stackedPercentValues(series: [CartesianSeriesElement],
+                                            fixedMax: Double? = nil) -> [[Double]] {
+        let normalized = zip(series, percentNormalizedValues(series: series, fixedMax: fixedMax)).map {
             CartesianSeriesElement(name: $0.name, data: $1, color: $0.color,
                                    negativeColor: $0.negativeColor, yAxisIndex: $0.yAxisIndex)
         }

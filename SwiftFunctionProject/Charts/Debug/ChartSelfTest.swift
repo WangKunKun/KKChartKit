@@ -819,6 +819,8 @@ public enum ChartSelfTest {
     /// 百分比堆叠：同列归一到 0...100（按符号分链），渲染域 0...100，命中报百分比累计。
     static func runPercentStackingSelfTest() {
         // 1) 纯函数：80/20 → 80%/100%；列内全零 → 0
+        let a0 = CartesianSeriesElement(name: "a", data: [80])
+        let b0 = CartesianSeriesElement(name: "b", data: [20])
         let a = CartesianSeriesElement(name: "a", data: [80, 0])
         let b = CartesianSeriesElement(name: "b", data: [20, 0])
         let pct = CartesianGeometry.stackedPercentValues(series: [a, b])
@@ -836,6 +838,19 @@ public enum ChartSelfTest {
         let mb = m.dataBounds(yAxisIndex: 0)!
         assert(abs(mb.min + 25) < 1e-9 && abs(mb.max - 75) < 1e-9,
                "percent 边界应为 -25...75，got \(mb)")
+
+        // 2.5) 统一基准 percentFixed：a=80,b=20、max=200 → 累计 40%/50%（不满 100）
+        let fixed = CartesianGeometry.stackedPercentValues(
+            series: [a0, b0], fixedMax: 200)
+        assert(fixed[0] == [40] && fixed[1] == [50],
+               "统一基准 200 应得累计 40/50（不满 100），got \(fixed)")
+        let fixedModel = CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [80]),
+                     CartesianSeriesElement(name: "b", data: [20])],
+            stacking: .percentFixed(max: 200))
+        assert(fixedModel.isStacked, "percentFixed 应视为堆叠形态")
+        let fb = fixedModel.dataBounds(yAxisIndex: 0)!
+        assert(abs(fb.max - 50) < 1e-9, "统一基准边界应为 50%，got \(fb)")
 
         // 3) 渲染级（折线）：正值百分比堆叠域 0...100，顶线在 plot 顶部
         let r = LineChartRenderer()

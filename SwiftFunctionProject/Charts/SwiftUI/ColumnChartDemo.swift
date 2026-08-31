@@ -26,6 +26,8 @@ struct ColumnChartDemo: View {
     @State private var dualAxisOn = false
     /// 上下镜像：末系列取负（正链向上、负链向下，与堆叠独立）
     @State private var mirrorStackOn = false
+    /// 百分比堆叠统一基准（0 = 每列自动满 100%）
+    @State private var percentBaseMax = 0.0
     /// 首末柱贴边（类目域 0...n-1）
     @State private var edgePointsOn = false
     // —— 值轴刻度自定义 ——
@@ -89,7 +91,8 @@ struct ColumnChartDemo: View {
             switch stackingMode {
             case "不堆叠": return .none
             case "普通堆叠": return .normal
-            case "百分比堆叠": return .percent
+            case "百分比堆叠":
+                return percentBaseMax > 0 ? .percentFixed(max: percentBaseMax) : .percent
             default: return .none
             }
         }()
@@ -173,6 +176,7 @@ struct ColumnChartDemo: View {
             .picker(label: "堆叠模式", selection: $stackingMode, options: ["不堆叠", "普通堆叠", "百分比堆叠"]),
             .toggle(label: "双轴（末系列绑右轴）", value: $dualAxisOn),
             .toggle(label: "上下镜像（末系列取负，与堆叠无关）", value: $mirrorStackOn),
+            .slider(label: "百分比基准（0=每列自动满100%）", value: $percentBaseMax, range: 0...500, step: 10),
             .toggle(label: "分隔线", value: $stackSeparatorOn),
             .color(label: "分隔线颜色", value: $stackSeparatorColor),
         ])

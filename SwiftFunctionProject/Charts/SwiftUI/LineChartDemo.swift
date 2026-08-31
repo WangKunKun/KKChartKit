@@ -55,6 +55,8 @@ struct LineChartDemo: View {
     @State private var stackingMode = "不堆叠"
     /// 上下镜像（正负分开堆叠）：末系列取负，正链从 0 向上、负链从 0 向下
     @State private var mirrorStackOn = false
+    /// 百分比堆叠统一基准（0 = 每列自动满 100%）
+    @State private var percentBaseMax = 0.0
     /// 堆叠模式下是否叠加面积分层展示（默认开，可关成纯累计折线）
     @State private var stackedAreaOn = true
     @State private var tickCountOn = false
@@ -105,7 +107,11 @@ struct LineChartDemo: View {
             y.labelFormatter = { AxisRenderer.format(abs($0)) }
         }
 
-        let stacking: StackConfig? = stackingMode == "普通堆叠" ? .normal : (stackingMode == "百分比堆叠" ? .percent : nil)
+        let stacking: StackConfig?
+        if stackingMode == "普通堆叠" { stacking = .normal }
+        else if stackingMode == "百分比堆叠" {
+            stacking = percentBaseMax > 0 ? .percentFixed(max: percentBaseMax) : .percent
+        } else { stacking = nil }
         // 真实多系列：按面板系列数量取数据集；末系列在双轴模式下绑右轴；
         // 镜像模式下末系列取负（正链从 0 向上、负链从 0 向下的上下两组形态）
         let series = (0..<seriesCount).map { i in
@@ -196,6 +202,7 @@ struct LineChartDemo: View {
             .toggle(label: "双轴（末系列绑右轴）", value: $dualAxisOn),
             .picker(label: "堆叠模式", selection: $stackingMode, options: ["不堆叠", "普通堆叠", "百分比堆叠"]),
             .toggle(label: "堆叠时面积分层", value: $stackedAreaOn),
+            .slider(label: "百分比基准（0=每列自动满100%）", value: $percentBaseMax, range: 0...500, step: 10),
             .toggle(label: "上下镜像（末系列取负，与堆叠无关）", value: $mirrorStackOn),
             .toggle(label: "自定义刻度数量", value: $tickCountOn),
             .slider(label: "刻度数量", value: $tickCount, range: 2...12, step: 1),

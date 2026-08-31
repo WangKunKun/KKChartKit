@@ -7,8 +7,11 @@ public enum StackConfig: Equatable {
     case none
     /// 普通堆叠（阶段 1 实现）
     case normal
-    /// 百分比堆叠（预留，阶段 X）
+    /// 百分比堆叠：每列按该列 |v| 总和归一（每列必满 100%，Highcharts 同款）
     case percent
+    /// 百分比堆叠（统一基准）：所有列按固定 max 归一——列合计可不满/超过 100%，
+    /// 适合"对照统一目标/阈值"的占比形态
+    case percentFixed(max: Double)
     /// 分组堆叠（预留，阶段 X）
     case grouped(groupCount: Int)
 }
@@ -118,6 +121,8 @@ public struct CartesianChartModel: HYMChartModel {
             dataToUse = CartesianGeometry.stackedValuesByAxis(series: group)
         case .percent:
             dataToUse = CartesianGeometry.stackedPercentValues(series: group)
+        case .percentFixed(let max):
+            dataToUse = CartesianGeometry.stackedPercentValues(series: group, fixedMax: max)
         default:
             dataToUse = group.map { $0.data }
         }
@@ -126,25 +131,36 @@ public struct CartesianChartModel: HYMChartModel {
         return (lo, hi)
     }
 
-    /// 是否处于堆叠形态（normal 或 percent）。
-    public var isStacked: Bool { stacking == .normal || stacking == .percent }
+    /// 是否处于堆叠形态（normal / percent / percentFixed）。
+    public var isStacked: Bool {
+        switch stacking {
+        case .normal, .percent, .percentFixed: return true
+        default: return false
+        }
+    }
 
-    /// 渲染用累计数据（normal → 符号链累计；percent → 百分比累计；其余原值）。与系列同序。
+    /// 渲染用累计数据（normal → 符号链累计；percent 系 → 百分比累计；其余原值）。与系列同序。
     public var stackedDrawValues: [[Double]] {
         switch stacking {
         case .normal: return CartesianGeometry.stackedValuesByAxis(series: series)
         case .percent: return CartesianGeometry.stackedPercentValues(series: series)
+        case .percentFixed(let max):
+            return CartesianGeometry.stackedPercentValues(series: series, fixedMax: max)
         default: return series.map { $0.data }
         }
     }
 
-    /// 堆叠基准原值（面积下边界/柱基准 = 累计 − 本值）：percent 时为归一化原值，否则原值。
+    /// 堆叠基准原值（面积下边界/柱基准 = 累计 − 本值）：percent 系为归一化原值，否则原值。
     public func rawBaseValues(forSeries seriesIndex: Int) -> [Double] {
         guard seriesIndex < series.count else { return [] }
-        if stacking == .percent {
+        switch stacking {
+        case .percent:
             return CartesianGeometry.percentNormalizedValues(series: series)[seriesIndex]
+        case .percentFixed(let max):
+            return CartesianGeometry.percentNormalizedValues(series: series, fixedMax: max)[seriesIndex]
+        default:
+            return series[seriesIndex].data
         }
-        return series[seriesIndex].data
     }
 
     /// 实际生效的类目标签：显式非空优先；否则自动 "1"..."n"（1-based，用户友好）。
