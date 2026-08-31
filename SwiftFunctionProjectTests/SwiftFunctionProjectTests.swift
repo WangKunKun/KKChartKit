@@ -72,6 +72,34 @@ final class SwiftFunctionProjectTests: XCTestCase {
         XCTAssertTrue(chart.isCrosshairVisibleForTesting, "多系列自动档整列命中应显示准线")
     }
 
+    /// 橡皮筋回弹端到端：拖出边界 → 松手 → 动画结束视口回全量域（fix: 越界余量曾按全量域算）。
+    func testRubberBandRebound() {
+        let chart = HYMChartView<LineChartRenderer>(frame: CGRect(x: 0, y: 0, width: 390, height: 300))
+        chart.isZoomEnabled = true
+        chart.isDragDecelerationEnabled = false   // 隔离：只验回弹，不叠惯性
+        chart.configure(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: (0..<100).map { Double($0) })]),
+                        theme: CartesianChartTheme())
+        chart.layoutIfNeeded()
+        let full = chart.xAxisViewportForTesting!
+
+        // 手指右滑拖出下界（把首类目往右拖），越界余量 = 窗口跨度 25%
+        chart.simulateViewportPan(deltaX: 5000)
+        let overshot = chart.xAxisViewportForTesting!
+        XCTAssertLessThan(overshot.lowerBound, full.lowerBound, "应已越出下界")
+        XCTAssertLessThanOrEqual(full.lowerBound - overshot.lowerBound,
+                                 (full.upperBound - full.lowerBound) * 0.25 + 1e-6,
+                                 "越界不超过窗口跨度 25%")
+
+        // 松手回弹：DisplayLink 驱动（wait 驱动主 RunLoop；run(until:) 不服务 display link）
+        let reboundDone = expectation(description: "rebound")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { reboundDone.fulfill() }
+        wait(for: [reboundDone], timeout: 3)
+        XCTAssertEqual(chart.xAxisViewportForTesting!.lowerBound, full.lowerBound, accuracy: 1e-6,
+                       "回弹后视口应回全量域")
+        XCTAssertEqual(chart.xAxisViewportForTesting!.upperBound, full.upperBound, accuracy: 1e-6)
+    }
+
     func testChartSelfTest() {
         ChartSelfTest.runAll()
     }

@@ -834,7 +834,50 @@ public enum ChartSelfTest {
         // —— 准线双向 + 弹窗文本模板 ——
         runCrosshairAndTooltipSelfTest()
 
+        // —— 橡皮筋越界余量（窗口相对口径）——
+        runRubberBandMarginSelfTest()
+
         print("✅ ChartSelfTest passed")
+    }
+
+    /// 橡皮筋余量按**当前窗口跨度** 25% 计算（曾按全量域算：放大后 00:00 可一路拖到最右侧）。
+    /// 未缩放（窗口=全量）时与旧行为一致（全量跨度 25%）。
+    static func runRubberBandMarginSelfTest() {
+        let r = LineChartRenderer()
+        let host = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        r.mount(into: host)
+        r.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: (0..<100).map { Double($0) })]),
+                  theme: CartesianChartTheme(),
+                  context: HYMChartRenderContext(bounds: host.bounds, center: host.center))
+        let full = r.fullXAxisDomain
+        let fullSpan = full.upperBound - full.lowerBound
+
+        // 1) 未缩放：巨大拖拽 → 越界 = 全量跨度 25%（旧口径，回归保护）。
+        //    正位移 = 手指右滑 = 内容右移 = 窗口推向数值小端（拖出下界，即用户"把 00:00 往右拖"）
+        r.panXAxis(screenDeltaX: 100000, allowsRubberBand: true)
+        let loUnzoomed = r.xAxisViewport.lowerBound
+        assert(abs((full.lowerBound - loUnzoomed) - fullSpan * 0.25) < 1e-6,
+               "未缩放越界 = 全量 25%，got \(full.lowerBound - loUnzoomed) vs \(fullSpan * 0.25)")
+        r.resetXAxisViewport()
+
+        // 2) 放大 10 倍：越界 ≤ 窗口跨度 25%（远小于全量 25%）
+        r.zoomXAxis(factor: 10, anchorScreenX: r.currentPlotFrame.midX)
+        let windowSpan = r.xAxisViewport.upperBound - r.xAxisViewport.lowerBound
+        assert(windowSpan < fullSpan / 9, "前置：已放大")
+        r.panXAxis(screenDeltaX: 100000, allowsRubberBand: true)
+        let overshoot = full.lowerBound - r.xAxisViewport.lowerBound
+        assert(overshoot <= windowSpan * 0.25 + 1e-6,
+               "放大后越界 ≤ 窗口 25%（\(windowSpan * 0.25)），got \(overshoot)")
+        assert(r.isXAxisOvershooting, "越界态松手须回弹")
+
+        // 3) Y 轴同口径
+        r.resetXAxisViewport()
+        r.zoomYAxis(factor: 10, anchorScreenY: r.currentPlotFrame.midY)
+        let ySpan = r.yAxisViewport.upperBound - r.yAxisViewport.lowerBound
+        r.panYAxis(screenDeltaY: 100000, allowsRubberBand: true)    // 下滑 → 拖出值域下界
+        let yOver = r.fullYAxisDomain.lowerBound - r.yAxisViewport.lowerBound
+        assert(yOver <= ySpan * 0.25 + 1e-6, "Y 越界 ≤ 窗口 25%，got \(yOver) vs \(ySpan * 0.25)")
     }
 
     /// 准线双向（值向分量几何）+ 弹窗文本模板（数据源/格式化/表头）。

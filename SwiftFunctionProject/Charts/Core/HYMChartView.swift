@@ -300,6 +300,25 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         }
     }
 
+    /// 供测试：模拟一次"拖视口后松手"（与 onPan 的 .changed/.ended 同分发路径：
+    /// 橡皮筋拖拽越界 → 松手回弹 / 惯性减速），无需真实手势。
+    func simulateViewportPan(deltaX: CGFloat, velocityX: CGFloat = 0) {
+        guard isZoomEnabled, let zoomable = xAxisZoomable else { return }
+        finishEntranceAnimationIfNeeded()
+        stopDeceleration()
+        panIsHighlightMode = false
+        zoomable.panXAxis(screenDeltaX: deltaX, allowsRubberBand: isRubberBandEnabled)
+        if isRubberBandEnabled { reboundIfNeeded() }
+        if !isRebounding, isDragDecelerationEnabled {
+            startDeceleration(zoomable, velocity: velocityX)
+        }
+    }
+
+    /// 供测试：当前 X 视口（renderer 未实现缩放协议时为 nil）。
+    var xAxisViewportForTesting: ClosedRange<Double>? {
+        (renderer as? HYMChartXAxisZoomable)?.xAxisViewport
+    }
+
     /// 准线当前是否可见（供单测断言；展示逻辑见 showCrosshair/hideCrosshair）。
     var isCrosshairVisibleForTesting: Bool {
         !crosshairLayer.isHidden && crosshairLayer.superlayer != nil
@@ -488,19 +507,17 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         let yStart = yOver ? yz!.yAxisViewport : nil
         let yTarget = yOver ? target(of: yz!.yAxisViewport, full: yz!.fullYAxisDomain) : nil
 
+        // 插值用**绝对进度**（setXAxisViewport 是绝对语义）：曾误用逐帧增量 t 配绝对锚点，
+        // 每帧都只从起点挪一小步、互不累积，最后一帧 t≈0 → 视口停在越界处（回弹从未生效）。
         isRebounding = true
-        lastDecelProgress = 0
         decelAnimator.startEaseOut(duration: 0.25,
-            handler: { [weak self] progress in
-                guard let self else { return }
-                let t = progress - self.lastDecelProgress
-                self.lastDecelProgress = progress
+            handler: { progress in
                 if let s = xStart, let tg = xTarget {
-                    let lo = s.lowerBound + (tg.lowerBound - s.lowerBound) * t
+                    let lo = s.lowerBound + (tg.lowerBound - s.lowerBound) * progress
                     zoomable.setXAxisViewport(lo...(lo + (s.upperBound - s.lowerBound)))
                 }
                 if let s = yStart, let tg = yTarget, let yz {
-                    let lo = s.lowerBound + (tg.lowerBound - s.lowerBound) * t
+                    let lo = s.lowerBound + (tg.lowerBound - s.lowerBound) * progress
                     yz.setYAxisViewport(lo...(lo + (s.upperBound - s.lowerBound)))
                 }
             },
