@@ -115,26 +115,36 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
                         count: max(0, values.count - rawBaseFull.count))
                     base = zip(values, rawBase).map { $0 - $1 }
                 }
-                let areaPath = UIBezierPath(cgPath: path.cgPath)
+                // 每段独立构建面积子路径（正向折线 + 反向下边界 + close）：
+                // 不能从整条折线 path 拷贝后追加——close 会闭错子路径、回走起点错乱
+                let areaPath = UIBezierPath()
                 for (segIdx, seg) in segments.enumerated() {
-                    guard let first = segmentPoints[segIdx].first,
-                          let last = segmentPoints[segIdx].last else { continue }
+                    let pts = segmentPoints[segIdx]
+                    guard let first = pts.first, let last = pts.last else { continue }
+                    // 正向：与折线同一连接形态
+                    if theme.lineConnectionStyle == .smooth {
+                        areaPath.move(to: first)
+                        CartesianGeometry.appendSmoothCurve(to: areaPath, points: pts)
+                    } else {
+                        let pathPts = CartesianGeometry.steppedScreenPoints(pts, style: theme.lineConnectionStyle)
+                        for (i, p) in pathPts.enumerated() {
+                            i == 0 ? areaPath.move(to: p) : areaPath.addLine(to: p)
+                        }
+                    }
+                    // 反向：下边界（堆叠 = 同符号链基准，与折线同形态；否则闭合到零轴）
                     if let base = base {
                         let baseData = seg.map { idx in
                             screenPoint(x: Double(idx), y: base[idx], yAxisIndex: axisIdx)
                         }
-                        let prevPathPts = theme.lineConnectionStyle == .smooth
+                        let basePts = theme.lineConnectionStyle == .smooth
                             ? baseData
                             : CartesianGeometry.steppedScreenPoints(baseData, style: theme.lineConnectionStyle)
-                        for pp in prevPathPts.reversed() { areaPath.addLine(to: pp) }
+                        for pp in basePts.reversed() { areaPath.addLine(to: pp) }
                     } else {
                         areaPath.addLine(to: CGPoint(x: last.x, y: zeroY))
                         areaPath.addLine(to: CGPoint(x: first.x, y: zeroY))
                     }
                     areaPath.close()
-                    if segIdx < segments.count - 1, let nextFirst = segmentPoints[segIdx + 1].first {
-                        areaPath.move(to: nextFirst)   // 下一段重新起子路径
-                    }
                 }
 
                 let gradient = CAGradientLayer()

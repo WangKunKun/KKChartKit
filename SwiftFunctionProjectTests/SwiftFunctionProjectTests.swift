@@ -25,6 +25,8 @@ final class SwiftFunctionProjectTests: XCTestCase {
     }
 
     /// 框架级 DEBUG 自检（ChartSelfTest，随 App 启动也会跑一遍；此处供命令行/CI 验证）。
+
+
     func testChartSelfTest() {
         ChartSelfTest.runAll()
     }
