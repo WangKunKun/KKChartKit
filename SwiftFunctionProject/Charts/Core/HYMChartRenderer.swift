@@ -125,6 +125,52 @@ public protocol HYMChartXAxisZoomable: HYMChartRenderer {
     func resetXAxisViewport()
 }
 
+/// 屏幕纵向（Y 方向）轴的缩放/平移能力——`HYMChartView.zoomAxisMode` 为 `.y`/`.xy` 时启用。
+/// 轴语义随图表方向映射：垂直图 = **值轴**（Y 刻度随缩放重算），水平图（Bar）= **类目轴**。
+/// 接口语义与 `HYMChartXAxisZoomable` 一一对应（增量、锚点跟手、橡皮筋回弹）。
+public protocol HYMChartYAxisZoomable: HYMChartRenderer {
+    /// 当前 Y 轴视口（值域）；未缩放时等于 `fullYAxisDomain`。
+    var yAxisViewport: ClosedRange<Double> { get }
+    /// 全量 Y 域（缩放/平移的 clamp 边界）。
+    var fullYAxisDomain: ClosedRange<Double> { get }
+    /// 当前 Y 轴缩放倍率（全量跨度 / 当前跨度；未缩放时 1）。
+    var yAxisZoomScale: CGFloat { get }
+    /// 最大放大倍数（垂直图值轴的唯一放大上限；水平图与 minimumYAxisCategories 共同约束）。
+    var maximumYAxisZoomScale: CGFloat { get set }
+    /// 最小可见类目数（仅水平图类目轴消费；垂直图值轴无类目语义）。
+    var minimumYAxisCategories: Int { get set }
+
+    /// 增量缩放 Y 视口（锚点语义同 `zoomXAxis`：`anchorScreenY` 处的刻度保持原地）。
+    /// 垂直图双轴时次值轴以同倍率、各自锚点值同步缩放。
+    func zoomYAxis(factor: CGFloat, anchorScreenY: CGFloat)
+
+    /// 增量平移 Y 视口（`screenDeltaY` 下滑为正 → 视口向数值小端移动，内容跟手）。
+    func panYAxis(screenDeltaY: CGFloat, allowsRubberBand: Bool)
+
+    /// 直接设置 Y 视口（回弹动画逐帧插值用）：钳制到全量域 ± 橡皮筋余量。
+    func setYAxisViewport(_ range: ClosedRange<Double>)
+
+    /// 当前 Y 视口是否越出全量域（松手须回弹）。
+    var isYAxisOvershooting: Bool { get }
+
+    /// 重置 Y 视口到全量数据（含次值轴）。
+    func resetYAxisViewport()
+}
+
+/// 捏合缩放的轴配置（`HYMChartView.zoomAxisMode`）：捏合只作用于所选轴向，
+/// 锚点取捏合中心在对应方向的分量。
+public enum HYMChartZoomAxisMode: String, CaseIterable {
+    /// 只缩放 X 方向轴（现状：垂直图类目轴 / 水平图值轴）。
+    case x
+    /// 只缩放 Y 方向轴（垂直图值轴 / 水平图类目轴）。
+    case y
+    /// 双向同时缩放（各自钳制，单轴到限后另一轴仍可继续）。
+    case xy
+
+    public var includesX: Bool { self == .x || self == .xy }
+    public var includesY: Bool { self == .y || self == .xy }
+}
+
 /// 整列命中（shared tooltip）提供者：点击按类目取该 X 位置**所有系列**的数据。
 /// 实现者返回组合好的 target（tooltipText 已含各系列值）与弹窗锚点。
 public protocol HYMChartSharedHitProvider: HYMChartRenderer {

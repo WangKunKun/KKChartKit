@@ -45,15 +45,25 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
 
     /// 最小缩放级别。当前实现固定语义 1.0（不可缩小超过全量数据），预留扩展。
     public var minimumZoomScale: CGFloat = 1.0
-    /// 最大缩放级别（默认 10.0）。同步为 renderer 的最小可视 X 跨度。
+    /// 最大缩放级别（默认 10.0）。同步为 renderer 的最小可视 X/Y 跨度。
     public var maximumZoomScale: CGFloat = 10.0 {
-      didSet { xAxisZoomable?.maximumXAxisZoomScale = maximumZoomScale }
+      didSet {
+        xAxisZoomable?.maximumXAxisZoomScale = maximumZoomScale
+        yAxisZoomable?.maximumYAxisZoomScale = maximumZoomScale
+      }
     }
     /// 最小可见类目数（放大下限，默认 12；≥ 2）。与 `maximumZoomScale` 共同约束，取更宽松者
     /// （小数据量按倍数防过度放大，大数据量按类目数保证"放大到底能看清单柱"）。
     public var minimumVisibleCategories: Int = 12 {
-      didSet { xAxisZoomable?.minimumXAxisCategories = max(2, minimumVisibleCategories) }
+      didSet {
+        xAxisZoomable?.minimumXAxisCategories = max(2, minimumVisibleCategories)
+        yAxisZoomable?.minimumYAxisCategories = max(2, minimumVisibleCategories)
+      }
     }
+    /// 捏合缩放作用的轴向（默认 `.x` = 现状）。`.y`/`.xy` 需 renderer 实现
+    /// `HYMChartYAxisZoomable`（轴系图表均实现）：垂直图 Y = 值轴、水平图 Y = 类目轴。
+    /// 锚点取捏合中心在对应方向的分量；`.xy` 时两轴各自钳制（单轴到限另一轴仍可继续）。
+    public var zoomAxisMode: HYMChartZoomAxisMode = .x
 
     // MARK: - 手势体验增强（参照 Charts/AAChartKit 交互惯例）
     /// 拖拽松手后的惯性减速（默认开）。
@@ -82,14 +92,16 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     /// 弹窗控制器（首次显示时懒创建）。
     private var tooltipController: HYMChartTooltipController?
 
-    // MARK: - X 轴视口手势状态
+    // MARK: - 轴视口手势状态
     /// 当前 renderer 若实现 `HYMChartXAxisZoomable`（轴系图表）则支持 X 视口手势；
     /// 雷达图/热力图等未实现协议时所有手势自动无效。
     private var xAxisZoomable: HYMChartXAxisZoomable? { renderer as? HYMChartXAxisZoomable }
+    /// renderer 若实现 `HYMChartYAxisZoomable`（轴系图表均实现）则支持 Y 轴缩放/平移。
+    private var yAxisZoomable: HYMChartYAxisZoomable? { renderer as? HYMChartYAxisZoomable }
     /// 捏合增量基准（上一帧 gr.scale；增量比值连续复合 = 手势累计，跨手势天然续接）。
     private var lastPinchScale: CGFloat = 1.0
-    /// 平移增量基准（上一帧累计 translation.x，差值即本次增量，无累计漂移）。
-    private var lastPanTranslationX: CGFloat = 0
+    /// 平移增量基准（上一帧累计 translation，差值即本次增量，无累计漂移）。
+    private var lastPanTranslation = CGPoint.zero
     /// 当前 pan 的模式（拖视口 / 全量视图下滑动选中）。
     private var panIsHighlightMode = false
     /// 惯性减速/回弹动画专用（与入场动画的 animator 分开，互不干扰）。
@@ -152,6 +164,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         self.model = model
         self.theme = theme
         xAxisZoomable?.resetXAxisViewport()
+        yAxisZoomable?.resetYAxisViewport()
         setNeedsLayout()
     }
 
@@ -337,8 +350,9 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         }
     }
 
-    // MARK: - X 轴视口手势（viewport 驱动：只改 X 视口，Y 轴恒定）
-    /// 捏合缩放 X 视口：增量倍率连续复合，捏合中心（跟手锚点）保持不动。
+    // MARK: - 轴视口手势（viewport 驱动；轴向由 zoomAxisMode 决定）
+    /// 捏合缩放视口：增量倍率连续复合，捏合中心（跟手锚点）保持不动。
+    /// zoomAxisMode：`.x` 只缩 X 轴、`.y` 只缩 Y 轴、`.xy` 两轴同时（锚点取捏合中心分量）。
     @objc private func onPinch(_ gr: UIPinchGestureRecognizer) {
         guard isZoomEnabled, let zoomable = xAxisZoomable else { return }
 
@@ -351,15 +365,21 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
             // 且跨手势天然续接（第二次捏合从当前视口继续，无快照、无漂移）。
             let factor = gr.scale / max(lastPinchScale, 1e-9)
             lastPinchScale = gr.scale
-            zoomable.zoomXAxis(factor: factor, anchorScreenX: gr.location(in: self).x)
+            let loc = gr.location(in: self)
+            if zoomAxisMode.includesX {
+                zoomable.zoomXAxis(factor: factor, anchorScreenX: loc.x)
+            }
+            if zoomAxisMode.includesY, let yz = yAxisZoomable {
+                yz.zoomYAxis(factor: factor, anchorScreenY: loc.y)
+            }
         default:
             break
         }
     }
 
-    /// 单指左右手势：
+    /// 单指拖拽手势（轴向由 zoomAxisMode 决定）：
     /// - 图表处于全量视口（未缩放/平移过）且开启滑动选中 → 「滑动选中」模式：手指划过逐个高亮数据点；
-    /// - 否则 → 拖移 X 视口（橡皮筋可越界），松手时惯性减速 / 回弹。
+    /// - 否则 → 拖移视口（橡皮筋可越界），松手时惯性减速（仅 X 轴）/ 回弹。
     @objc private func onPan(_ gr: UIPanGestureRecognizer) {
         guard isZoomEnabled, let zoomable = xAxisZoomable else { return }
 
@@ -367,9 +387,16 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         case .began:
             finishEntranceAnimationIfNeeded()
             stopDeceleration()
-            lastPanTranslationX = 0
+            lastPanTranslation = .zero
             // 全量视口时拖视口无意义（clamp 后原地不动）→ 自动切换为滑动选中
-            let fullyZoomedOut = zoomable.xAxisZoomScale <= 1.0001
+            // （参与缩放的轴向全部处于全量才视为"全量视图"）
+            var fullyZoomedOut = true
+            if zoomAxisMode.includesX {
+                fullyZoomedOut = zoomable.xAxisZoomScale <= 1.0001
+            }
+            if fullyZoomedOut, zoomAxisMode.includesY, let yz = yAxisZoomable {
+                fullyZoomedOut = yz.yAxisZoomScale <= 1.0001
+            }
             panIsHighlightMode = isHighlightPerDragEnabled && fullyZoomedOut
         case .changed:
             if panIsHighlightMode {
@@ -380,21 +407,73 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
                 return
             }
             hideCrosshair()   // 拖视口：准线所属视口已失效
-            let total = gr.translation(in: self).x
-            let delta = total - lastPanTranslationX
-            lastPanTranslationX = total
-            guard delta != 0 else { return }
-            zoomable.panXAxis(screenDeltaX: delta, allowsRubberBand: isRubberBandEnabled)
+            let total = gr.translation(in: self)
+            let dx = total.x - lastPanTranslation.x
+            let dy = total.y - lastPanTranslation.y
+            lastPanTranslation = total
+            if dx != 0, zoomAxisMode.includesX {
+                zoomable.panXAxis(screenDeltaX: dx, allowsRubberBand: isRubberBandEnabled)
+            }
+            if dy != 0, zoomAxisMode.includesY, let yz = yAxisZoomable {
+                yz.panYAxis(screenDeltaY: dy, allowsRubberBand: isRubberBandEnabled)
+            }
         case .ended, .cancelled:
             guard !panIsHighlightMode else { return }
-            if isRubberBandEnabled, zoomable.isXAxisOvershooting {
-                reboundXAxis(zoomable)         // 越界 → 回弹优先（不叠加惯性）
-            } else if isDragDecelerationEnabled, gr.state == .ended {
+            if isRubberBandEnabled { reboundIfNeeded() }   // 越界 → 回弹优先（不叠加惯性）
+            if !isRebounding, isDragDecelerationEnabled, gr.state == .ended,
+               zoomAxisMode.includesX {
                 startDeceleration(zoomable, velocity: gr.velocity(in: self).x)
             }
         default:
             break
         }
+    }
+
+    /// 本次松手是否正在回弹（回弹期间不再叠加 X 轴惯性）。
+    private var isRebounding = false
+
+    /// 橡皮筋回弹：把越界轴的窗口 ease-out 插值回全量域内的钳制位置。
+    /// X/Y 可同时越界（.xy 模式斜拖）——两轴共用一段动画逐帧插值。
+    private func reboundIfNeeded() {
+        let zoomable = xAxisZoomable
+        let yz = yAxisZoomable
+        let xOver = zoomable?.isXAxisOvershooting == true
+        let yOver = yz?.isYAxisOvershooting == true
+        guard xOver || yOver, let zoomable else { return }
+
+        // 各越界轴的目标窗口：越界侧贴回全量域边缘（span 保持不变）
+        func target<V: FloatingPoint>(of start: ClosedRange<V>, full: ClosedRange<V>) -> ClosedRange<V> {
+            let span = start.upperBound - start.lowerBound
+            let targetLo: V = start.lowerBound < full.lowerBound
+                ? full.lowerBound
+                : min(start.lowerBound, full.upperBound - span)
+            return targetLo...(targetLo + span)
+        }
+        let xStart = xOver ? zoomable.xAxisViewport : nil
+        let xTarget = xOver ? target(of: zoomable.xAxisViewport, full: zoomable.fullXAxisDomain) : nil
+        let yStart = yOver ? yz!.yAxisViewport : nil
+        let yTarget = yOver ? target(of: yz!.yAxisViewport, full: yz!.fullYAxisDomain) : nil
+
+        isRebounding = true
+        lastDecelProgress = 0
+        decelAnimator.startEaseOut(duration: 0.25,
+            handler: { [weak self] progress in
+                guard let self else { return }
+                let t = progress - self.lastDecelProgress
+                self.lastDecelProgress = progress
+                if let s = xStart, let tg = xTarget {
+                    let lo = s.lowerBound + (tg.lowerBound - s.lowerBound) * t
+                    zoomable.setXAxisViewport(lo...(lo + (s.upperBound - s.lowerBound)))
+                }
+                if let s = yStart, let tg = yTarget, let yz {
+                    let lo = s.lowerBound + (tg.lowerBound - s.lowerBound) * t
+                    yz.setYAxisViewport(lo...(lo + (s.upperBound - s.lowerBound)))
+                }
+            },
+            completion: { [weak self] in
+                self?.isRebounding = false
+                self?.stopDeceleration()
+            })
     }
 
     /// 惯性减速：松手速度经指数衰减继续平移视口（ease-out 驱动，视口顶到边界即停）。
@@ -419,36 +498,17 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
             completion: { [weak self] in self?.stopDeceleration() })
     }
 
-    /// 橡皮筋回弹：从当前越界视口 ease-out 插值回全量域内的钳制位置。
-    private func reboundXAxis(_ zoomable: HYMChartXAxisZoomable) {
-        let full = zoomable.fullXAxisDomain
-        let start = zoomable.xAxisViewport
-        let span = start.upperBound - start.lowerBound
-        // 目标：越界侧贴回全量域边缘
-        let targetLo: Double
-        if start.lowerBound < full.lowerBound { targetLo = full.lowerBound }
-        else { targetLo = min(start.lowerBound, full.upperBound - span) }
-        lastDecelProgress = 0
-        decelAnimator.startEaseOut(duration: 0.25,
-            handler: { [weak self] progress in
-                guard let self else { return }
-                let t = progress - self.lastDecelProgress
-                self.lastDecelProgress = progress
-                let lo = start.lowerBound + (targetLo - start.lowerBound) * t
-                zoomable.setXAxisViewport(lo...(lo + span))
-            },
-            completion: { [weak self] in self?.stopDeceleration() })
-    }
-
     /// 停止惯性/回弹（新手势开始、configure 重置时调用）。
     private func stopDeceleration() {
         decelAnimator.stop()
+        isRebounding = false
     }
 
-    /// 双击重置 X 视口到全量数据。
+    /// 双击重置视口到全量数据（X/Y 两轴一起重置）。
     @objc private func onDoubleTap(_ gr: UITapGestureRecognizer) {
         guard isZoomEnabled, let zoomable = xAxisZoomable else { return }
         zoomable.resetXAxisViewport()
+        yAxisZoomable?.resetYAxisViewport()
     }
 
     /// 手势开始前的统一收尾：

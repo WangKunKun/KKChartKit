@@ -109,6 +109,23 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
                     separatorPath.move(to: CGPoint(x: plotFrame.minX, y: rect.maxY))
                     separatorPath.addLine(to: CGPoint(x: plotFrame.maxX, y: rect.maxY))
                 }
+
+                // 数据标签：数值 = 系列原值（堆叠时各段自身值，位置在累计后的段矩形上），
+                // 随入场动画矩形一起生长。挂 rootLayer（不被 plot 裁剪，端部外侧可探出）。
+                if dataLabelsAllowed(for: model.series[seriesIndex], theme: theme) {
+                    let raw = model.series[seriesIndex].data[index]
+                    let text = CartesianDataLabelGeometry.labelText(
+                        raw, formatter: theme.dataLabelFormatter)
+                    let size = dataLabelTextSize(text, fontSize: theme.dataLabelFontSize)
+                    let center = CartesianDataLabelGeometry.labelCenter(
+                        rect: rect, textSize: size, position: theme.dataLabelPosition,
+                        isHorizontal: false, isPositive: value >= 0)
+                    rootLayer.addSublayer(makeDataLabelLayer(
+                        text: text, fontSize: theme.dataLabelFontSize,
+                        color: dataLabelColor(theme: theme,
+                                              inside: theme.dataLabelPosition != .outsideEnd),
+                        center: center))
+                }
             }
 
             if !positivePath.isEmpty {

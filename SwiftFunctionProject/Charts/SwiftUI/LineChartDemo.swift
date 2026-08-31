@@ -41,6 +41,13 @@ struct LineChartDemo: View {
     @State private var lastSeriesPointSymbol = "跟随全局"
     /// 命中数据时显示十字准线（逐点/整列都画）
     @State private var crosshairOn = true
+    // —— 数据标签 ——
+    @State private var dataLabelsOn = false
+    @State private var dataLabelPosition = "端部外侧"
+    /// 末系列强制开启标注（演示系列级 dataLabelsEnabled 覆盖）
+    @State private var lastSeriesDataLabelsOn = false
+    // —— 捏合缩放轴向 ——
+    @State private var zoomAxisSel = "x"
     @State private var isZoomEnabled = true
     @State private var minimumVisibleCategories = 12.0
     /// X 轴时间轴模式：按实际数据量把 24h 均分到每个点（288 点 = 5 分钟/点，1440 点 = 1 分钟/点）
@@ -95,7 +102,8 @@ struct LineChartDemo: View {
                       isHighlightPerDragEnabled: highlightPerDragOn,
                       isRubberBandEnabled: rubberBandOn,
                       isSharedTooltipOnTapEnabled: sharedTooltipOn,
-                      isCrosshairEnabled: crosshairOn)
+                      isCrosshairEnabled: crosshairOn,
+                      zoomAxisMode: HYMChartZoomAxisMode(rawValue: zoomAxisSel) ?? .x)
                 .frame(height: 280)
                 .padding(.horizontal)
                 .padding(.top, 8)
@@ -140,7 +148,8 @@ struct LineChartDemo: View {
                 color: seriesColors[i % seriesColors.count],
                 yAxisIndex: (dualAxisOn && isLast) ? 1 : 0,
                 lineDashStyle: dash,
-                connectNulls: connectNullsOn)
+                connectNulls: connectNullsOn,
+                dataLabelsEnabled: (isLast && lastSeriesDataLabelsOn) ? true : nil)
         }
 
         var secondary: CartesianAxisModel?
@@ -179,6 +188,8 @@ struct LineChartDemo: View {
         t.lineConnectionStyle = connectionStyle
         t.lineDashStyle = LineDashStyle(rawValue: dashStyle) ?? .solid
         t.pointSymbol = PointMarkerSymbol(rawValue: pointSymbol) ?? .circle
+        t.showsDataLabels = dataLabelsOn
+        t.dataLabelPosition = CartesianDataLabelPosition(rawValue: dataLabelPosition) ?? .outsideEnd
         // 堆叠默认联动开面积（分层展示更直观；可关成纯累计折线）
         let stacked = stackingMode != "不堆叠"
         let areaOn = showsArea || (stacked && stackedAreaOn)
@@ -253,8 +264,16 @@ struct LineChartDemo: View {
             .toggle(label: "自定义点颜色", value: $pointColorOn),
             .color(label: "点颜色", value: $pointColor),
         ])
+        let labelSection = ChartDemoPanel.DemoSection(title: "数据标签", items: [
+            .toggle(label: "数值标注在数据点上", value: $dataLabelsOn),
+            .picker(label: "标签位置（外侧=点上方）", selection: $dataLabelPosition,
+                    options: CartesianDataLabelPosition.allCases.map { $0.rawValue }),
+            .toggle(label: "末系列强制开启（系列级覆盖）", value: $lastSeriesDataLabelsOn),
+        ])
         let interactionSection = ChartDemoPanel.DemoSection(title: "交互", items: [
-            .toggle(label: "启用缩放（X轴捏合/平移，双击重置）", value: $isZoomEnabled),
+            .toggle(label: "启用缩放（捏合/平移，双击重置）", value: $isZoomEnabled),
+            .picker(label: "捏合缩放轴向", selection: $zoomAxisSel,
+                    options: ["x", "y", "xy"]),
             .toggle(label: "拖拽惯性减速", value: $decelerationOn),
             .toggle(label: "滑动选中（全量视图拖拽=划过高亮）", value: $highlightPerDragOn),
             .toggle(label: "边界橡皮筋（越界回弹）", value: $rubberBandOn),
@@ -290,7 +309,7 @@ struct LineChartDemo: View {
             .toggle(label: "入场动画", value: $theme.showsEntranceAnimation),
             .toggle(label: "点击弹窗", value: $theme.showsTooltipOnHit),
         ])
-        return ChartDemoPanel(sections: [dataSection, axisSection, lineSection, areaSection, interactionSection, pointSection, gridSection, overallSection])
+        return ChartDemoPanel(sections: [dataSection, axisSection, lineSection, areaSection, labelSection, interactionSection, pointSection, gridSection, overallSection])
     }
 
     static func randomData(count: Int) -> [Double] {

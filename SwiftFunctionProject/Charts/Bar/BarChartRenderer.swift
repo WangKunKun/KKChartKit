@@ -88,6 +88,22 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
                     separatorPath.move(to: CGPoint(x: rect.maxX, y: plotFrame.minY))
                     separatorPath.addLine(to: CGPoint(x: rect.maxX, y: plotFrame.maxY))
                 }
+
+                // 数据标签：数值 = 系列原值（堆叠时各段自身值）；水平方向镜像（端部在右/左）。
+                if dataLabelsAllowed(for: model.series[seriesIndex], theme: theme) {
+                    let raw = model.series[seriesIndex].data[index]
+                    let text = CartesianDataLabelGeometry.labelText(
+                        raw, formatter: theme.dataLabelFormatter)
+                    let size = dataLabelTextSize(text, fontSize: theme.dataLabelFontSize)
+                    let center = CartesianDataLabelGeometry.labelCenter(
+                        rect: rect, textSize: size, position: theme.dataLabelPosition,
+                        isHorizontal: true, isPositive: value >= 0)
+                    rootLayer.addSublayer(makeDataLabelLayer(
+                        text: text, fontSize: theme.dataLabelFontSize,
+                        color: dataLabelColor(theme: theme,
+                                              inside: theme.dataLabelPosition != .outsideEnd),
+                        center: center))
+                }
             }
 
             if !positivePath.isEmpty {

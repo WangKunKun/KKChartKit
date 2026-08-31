@@ -822,7 +822,153 @@ public enum ChartSelfTest {
         // —— 整列命中（shared tooltip）——
         runSharedHitSelfTest()
 
+        // —— 数据标签（数值标注）——
+        runDataLabelSelfTest()
+
+        // —— Y 轴缩放（zoomAxisMode .y/.xy）——
+        runYAxisZoomSelfTest()
+
         print("✅ ChartSelfTest passed")
+    }
+
+    /// 数据标签：默认格式化、三种位置的几何中心、渲染级层计数与系列级覆盖、总量超限跳过。
+    static func runDataLabelSelfTest() {
+        // 1) 默认格式化：整数无小数、非整数两位去尾零、formatter 优先、NaN 占位符
+        assert(CartesianDataLabelGeometry.labelText(20) == "20")
+        assert(CartesianDataLabelGeometry.labelText(3.5) == "3.5")
+        assert(CartesianDataLabelGeometry.labelText(-4) == "-4")
+        assert(CartesianDataLabelGeometry.labelText(0.25) == "0.25")
+        assert(CartesianDataLabelGeometry.labelText(Double.nan) == "–")
+        assert(CartesianDataLabelGeometry.labelText(7, formatter: { "¥\($0)" }) == "¥7.0")
+
+        // 2) 折线点标签：outsideEnd 在点上方、center 在点下方（半径与字号参与间距）
+        let size = CGSize(width: 14, height: 10)
+        let p = CGPoint(x: 100, y: 60)
+        let above = CartesianDataLabelGeometry.labelCenter(
+            point: p, textSize: size, position: .outsideEnd, pointRadius: 3)
+        let below = CartesianDataLabelGeometry.labelCenter(
+            point: p, textSize: size, position: .center, pointRadius: 3)
+        assert(above == CGPoint(x: 100, y: 60 - 3 - 5 - 2), "点上方 y = 点y-半径-h/2-2")
+        assert(below == CGPoint(x: 100, y: 60 + 3 + 5 + 2), "点下方 y = 点y+半径+h/2+2")
+
+        // 3) 柱段标签：正值 outsideEnd 在顶外、center 在中心、负值在底外；条形水平镜像
+        let rect = CGRect(x: 40, y: 50, width: 20, height: 30)
+        let colOut = CartesianDataLabelGeometry.labelCenter(
+            rect: rect, textSize: size, position: .outsideEnd, isHorizontal: false, isPositive: true)
+        let colCtr = CartesianDataLabelGeometry.labelCenter(
+            rect: rect, textSize: size, position: .center, isHorizontal: false, isPositive: true)
+        let colNeg = CartesianDataLabelGeometry.labelCenter(
+            rect: rect, textSize: size, position: .outsideEnd, isHorizontal: false, isPositive: false)
+        let barOut = CartesianDataLabelGeometry.labelCenter(
+            rect: rect, textSize: size, position: .outsideEnd, isHorizontal: true, isPositive: true)
+        assert(colOut.y == rect.minY - 5 - 3 && colOut.x == rect.midX, "正值柱顶外侧")
+        assert(colCtr == CGPoint(x: rect.midX, y: rect.midY), "柱段中心")
+        assert(colNeg.y == rect.maxY + 5 + 3, "负值柱底外侧")
+        assert(barOut.x == rect.maxX + 7 + 3 && barOut.y == rect.midY, "正条端右侧")
+
+        // 4) 渲染级：Line 开标签 → 每个有效点一个 CATextLayer；空值点不标
+        func textLayers(of host: UIView) -> [CATextLayer] {
+            var out: [CATextLayer] = []
+            func walk(_ l: CALayer) {
+                if let t = l as? CATextLayer { out.append(t) }
+                l.sublayers?.forEach(walk)
+            }
+            walk(host.layer)
+            return out
+        }
+        let r = LineChartRenderer()
+        let host = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        r.mount(into: host)
+        var theme = CartesianChartTheme()
+        theme.showsDataLabels = true
+        r.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, 20, .nan, 40])]),
+                  theme: theme,
+                  context: HYMChartRenderContext(bounds: host.bounds, center: host.center))
+        assert(textLayers(of: host).count == 3, "4 点中 1 空值 → 3 个标签，got \(textLayers(of: host).count)")
+        assert(textLayers(of: host).compactMap { $0.string as? String }.sorted() == ["10", "20", "40"])
+
+        // 5) 系列级覆盖：主题关、系列开 → 仍标注
+        let r2 = ColumnChartRenderer()
+        let host2 = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        r2.mount(into: host2)
+        r2.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, 20], dataLabelsEnabled: true)]),
+                  theme: CartesianChartTheme(),   // showsDataLabels = false
+                  context: HYMChartRenderContext(bounds: host2.bounds, center: host2.center))
+        assert(textLayers(of: host2).count == 2, "系列级覆盖应标注 2 个")
+
+        // 6) 总量超限整图跳过（默认 200；缩放后可见数变少会自动恢复）
+        var theme3 = CartesianChartTheme()
+        theme3.showsDataLabels = true
+        let big = CartesianChartModel(
+            series: (0..<3).map { CartesianSeriesElement(name: "s\($0)", data: (0..<80).map { Double($0) }) })
+        let r3 = LineChartRenderer()
+        let host3 = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        r3.mount(into: host3)
+        r3.render(model: big, theme: theme3,
+                  context: HYMChartRenderContext(bounds: host3.bounds, center: host3.center))
+        assert(textLayers(of: host3).isEmpty, "240 标注 > 200 上限 → 整图跳过")
+    }
+
+    /// Y 轴缩放：锚点跟手（缩放后锚点值屏幕位置不变）、倍率、次轴同步、橡皮筋越界、重置。
+    static func runYAxisZoomSelfTest() {
+        let r = LineChartRenderer()
+        let host = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        r.mount(into: host)
+        let model = CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [0, 20, 40, 60, 80]),
+                     CartesianSeriesElement(name: "b", data: [10, 30, 50, 70, 90],
+                                            yAxisIndex: 1)],
+            secondaryYAxis: CartesianAxisModel(kind: .value, min: 0, max: 100))
+        r.render(model: model, theme: CartesianChartTheme(),
+                 context: HYMChartRenderContext(bounds: host.bounds, center: host.center))
+        assert(abs(r.yAxisZoomScale - 1) < 1e-6, "初始倍率 1")
+        let fullSpan = r.fullYAxisDomain.upperBound - r.fullYAxisDomain.lowerBound
+
+        // 1) 中心锚点放大 2 倍：span 减半、域中点不动、锚点屏幕位置不变
+        let midY = r.currentPlotFrame.midY
+        let midValue = (r.yAxisViewport.lowerBound + r.yAxisViewport.upperBound) / 2
+        let secFullSpan = (r.currentSecondaryYDomain?.upperBound ?? 0) - (r.currentSecondaryYDomain?.lowerBound ?? 0)
+        r.zoomYAxis(factor: 2, anchorScreenY: midY)
+        assert(abs(r.yAxisZoomScale - 2) < 1e-6, "放大 2 倍，got \(r.yAxisZoomScale)")
+        assert(abs((r.yAxisViewport.upperBound - r.yAxisViewport.lowerBound) - fullSpan / 2) < 1e-6,
+               "主轴 span 减半")
+        assert(abs((r.yAxisViewport.lowerBound + r.yAxisViewport.upperBound) / 2 - midValue) < 1e-6,
+               "锚点值（域中点）保持")
+        let p = r.screenPoint(x: 0, y: midValue)
+        assert(abs(p.y - midY) < 0.5, "锚点值屏幕位置不变（跟手），got \(p.y) vs \(midY)")
+        // 次轴同倍率缩放（各自域独立换算，span 同步减半）
+        let secNow = (r.currentSecondaryYDomain?.upperBound ?? 0) - (r.currentSecondaryYDomain?.lowerBound ?? 0)
+        assert(abs(secNow - secFullSpan / 2) < 1e-6, "次轴 span 同步减半")
+
+        // 2) 平移：上滑（负 dy）→ 视口向数值大端移动
+        let before = r.yAxisViewport.lowerBound
+        r.panYAxis(screenDeltaY: -40, allowsRubberBand: false)
+        assert(r.yAxisViewport.lowerBound > before, "上滑后视口下界上移（数值大端）")
+
+        // 3) 橡皮筋：越界平移后 isYAxisOvershooting，setYAxisViewport 钳回
+        r.panYAxis(screenDeltaY: 100000, allowsRubberBand: true)
+        assert(r.isYAxisOvershooting, "大幅平移应越界")
+        r.setYAxisViewport(r.fullYAxisDomain)
+        assert(!r.isYAxisOvershooting, "setYAxisViewport 到全量域后不越界")
+
+        // 4) 重置：倍率回 1、次轴域回全量
+        r.resetYAxisViewport()
+        assert(abs(r.yAxisZoomScale - 1) < 1e-6, "重置后倍率 1")
+        let secReset = (r.currentSecondaryYDomain?.upperBound ?? 0) - (r.currentSecondaryYDomain?.lowerBound ?? 0)
+        assert(abs(secReset - secFullSpan) < 1e-6, "次轴域回全量")
+
+        // 5) 水平图（Bar）：Y 缩放作用于类目轴——放大后类目域收窄
+        let b = BarChartRenderer()
+        let hostB = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        b.mount(into: hostB)
+        b.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, 20, 30, 40, 50, 60])]),
+                 theme: CartesianChartTheme(),
+                 context: HYMChartRenderContext(bounds: hostB.bounds, center: hostB.center))
+        b.zoomYAxis(factor: 2, anchorScreenY: b.currentPlotFrame.midY)
+        assert(abs(b.yAxisZoomScale - 2) < 1e-6, "Bar 纵向类目轴可缩放，got \(b.yAxisZoomScale)")
     }
 
     /// 标记符号：五种形状的 path 元素结构 + 渲染级点层形状；十字准线 frame 贯穿绘图区。

@@ -190,6 +190,30 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
                     seriesLayer.addSublayer(dot)
                 }
             }
+
+            // 数据标签：数值 = 系列原值（堆叠时也标各段自身值，位置在累计后的点上）；
+            // outsideEnd = 点上方，center/insideEnd = 点下方。挂 rootLayer（不被 plot 裁剪）。
+            if dataLabelsAllowed(for: element, theme: theme) {
+                let labelColor = dataLabelColor(theme: theme, inside: false)
+                let radius = theme.showsPoints ? theme.pointRadius : 0
+                for (segIdx, seg) in segments.enumerated() {
+                    let pts = segmentPoints[segIdx]
+                    for (k, p) in pts.enumerated()
+                    where visibleCategoryRange.contains(seg[k]) {
+                        let i = seg[k]
+                        guard i < element.data.count, element.data[i].isFinite else { continue }
+                        let text = CartesianDataLabelGeometry.labelText(
+                            element.data[i], formatter: theme.dataLabelFormatter)
+                        let size = dataLabelTextSize(text, fontSize: theme.dataLabelFontSize)
+                        let center = CartesianDataLabelGeometry.labelCenter(
+                            point: p, textSize: size,
+                            position: theme.dataLabelPosition, pointRadius: radius)
+                        rootLayer.addSublayer(makeDataLabelLayer(
+                            text: text, fontSize: theme.dataLabelFontSize,
+                            color: labelColor, center: center))
+                    }
+                }
+            }
         }
     }
 

@@ -13,6 +13,7 @@ public struct LineChart: View {
     private let isRubberBandEnabled: Bool
     private let isSharedTooltipOnTapEnabled: Bool?
     private let isCrosshairEnabled: Bool
+    private let zoomAxisMode: HYMChartZoomAxisMode
 
     public init(model: CartesianChartModel,
                 theme: CartesianChartTheme = CartesianChartTheme(),
@@ -24,7 +25,8 @@ public struct LineChart: View {
                 isHighlightPerDragEnabled: Bool = true,
                 isRubberBandEnabled: Bool = true,
                 isSharedTooltipOnTapEnabled: Bool? = nil,
-                isCrosshairEnabled: Bool = true) {
+                isCrosshairEnabled: Bool = true,
+                zoomAxisMode: HYMChartZoomAxisMode = .x) {
         self.model = model
         self.theme = theme
         self.playsAnimationOnAppear = playsAnimationOnAppear
@@ -36,6 +38,7 @@ public struct LineChart: View {
         self.isRubberBandEnabled = isRubberBandEnabled
         self.isSharedTooltipOnTapEnabled = isSharedTooltipOnTapEnabled
         self.isCrosshairEnabled = isCrosshairEnabled
+        self.zoomAxisMode = zoomAxisMode
     }
 
     public var body: some View {
@@ -48,7 +51,8 @@ public struct LineChart: View {
                                isHighlightPerDragEnabled: isHighlightPerDragEnabled,
                                isRubberBandEnabled: isRubberBandEnabled,
                                isSharedTooltipOnTapEnabled: isSharedTooltipOnTapEnabled,
-                               isCrosshairEnabled: isCrosshairEnabled)
+                               isCrosshairEnabled: isCrosshairEnabled,
+                               zoomAxisMode: zoomAxisMode)
     }
 }
 
@@ -64,6 +68,7 @@ private struct LineChartRepresentable: UIViewRepresentable {
     let isRubberBandEnabled: Bool
     let isSharedTooltipOnTapEnabled: Bool?
     let isCrosshairEnabled: Bool
+    let zoomAxisMode: HYMChartZoomAxisMode
 
     func makeUIView(context: Context) -> HYMChartView<LineChartRenderer> {
         let chart = HYMChartView<LineChartRenderer>(frame: .zero)
@@ -75,6 +80,7 @@ private struct LineChartRepresentable: UIViewRepresentable {
         chart.isRubberBandEnabled = isRubberBandEnabled
         chart.isSharedTooltipOnTapEnabled = isSharedTooltipOnTapEnabled
         chart.isCrosshairEnabled = isCrosshairEnabled
+        chart.zoomAxisMode = zoomAxisMode
         chart.onHit = { target, gesture in
             if let h = target as? LineHitTarget { onHit?(h, gesture) }
         }
@@ -94,6 +100,7 @@ private struct LineChartRepresentable: UIViewRepresentable {
         uiView.isRubberBandEnabled = isRubberBandEnabled
         uiView.isSharedTooltipOnTapEnabled = isSharedTooltipOnTapEnabled
         uiView.isCrosshairEnabled = isCrosshairEnabled
+        uiView.zoomAxisMode = zoomAxisMode
         uiView.configure(model: model, theme: theme)
     }
 }

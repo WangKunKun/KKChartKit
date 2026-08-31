@@ -49,7 +49,7 @@ public struct CartesianSharedHitTarget: HYMChartHitTarget {
 ///
 /// 遵循 `HYMChartXAxisZoomable`：所有轴系子类（Column/Bar/Line…）自动获得
 /// X 轴视口缩放/平移能力（Y 轴视口始终数据驱动，不参与手势）。
-open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, HYMChartXAxisZoomable {
+open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, HYMChartXAxisZoomable, HYMChartYAxisZoomable {
     public typealias Model = CartesianChartModel
     public typealias Theme = ChartTheme
 
@@ -94,6 +94,15 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
     private(set) var fullXRange: ClosedRange<Double> = -0.5...0.5
     /// 用户手势设置的 X 窗口（nil = 全量）。外部 configure 会重置（见 `resetXAxisViewport`）。
     private var userXRange: ClosedRange<Double>?
+
+    // MARK: - Y 轴视口状态（zoomAxisMode .y/.xy 启用；屏幕 Y 方向轴）
+    /// 语义随方向映射：垂直图 = 值轴（刻度随缩放重算），水平图（Bar）= 类目轴。
+    private(set) var fullYRange: ClosedRange<Double> = 0...1
+    /// 用户手势设置的 Y 窗口（nil = 全量）。configure 会重置（见 `resetYAxisViewport`）。
+    private var userYRange: ClosedRange<Double>?
+    /// 次值轴（右）全量域与用户窗口（仅垂直图双轴；与主轴同手势、各自锚点换算）。
+    private var fullSecondaryYRange: ClosedRange<Double>?
+    private var userSecondaryYRange: ClosedRange<Double>?
 
     // MARK: - mount / unmount
     public func mount(into view: UIView) {
@@ -212,6 +221,117 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
         relayout()
     }
 
+    // MARK: - Y 轴视口手势（HYMChartYAxisZoomable）
+    /// 最大放大倍数（容器 `HYMChartView.maximumZoomScale` 同步）。
+    public var maximumYAxisZoomScale: CGFloat = 10.0
+    /// 最小可见类目数（仅水平图类目轴消费；容器 minimumVisibleCategories 同步）。
+    public var minimumYAxisCategories: Int = 12
+
+    /// 放大下限跨度：垂直图值轴只按最大倍数；水平图类目轴再叠加类目数下限（与 X 轴同理）。
+    private var minimumYSpan: Double {
+        let fullSpan = fullYRange.upperBound - fullYRange.lowerBound
+        let byZoom = fullSpan / max(maximumYAxisZoomScale, 1)
+        return isHorizontalValueAxis ? min(byZoom, Double(minimumYAxisCategories)) : byZoom
+    }
+
+    public var yAxisViewport: ClosedRange<Double> { currentViewport.yDomain }
+    public var fullYAxisDomain: ClosedRange<Double> { fullYRange }
+
+    public var yAxisZoomScale: CGFloat {
+        let full = fullYRange.upperBound - fullYRange.lowerBound
+        let current = currentViewport.ySpan
+        guard current > 0 else { return 1 }
+        return CGFloat(full / current)
+    }
+
+    public func zoomYAxis(factor: CGFloat, anchorScreenY: CGFloat) {
+        guard currentPlotFrame.height > 0 else { return }
+        // 屏幕 y → Y 域锚点。垂直图值轴向上、水平图类目轴向下——两个方向的比率相反。
+        let t: Double
+        if isHorizontalValueAxis {
+            t = Double((anchorScreenY - currentPlotFrame.minY) / currentPlotFrame.height)
+        } else {
+            t = Double((currentPlotFrame.maxY - anchorScreenY) / currentPlotFrame.height)
+        }
+        let anchorValue = currentViewport.yMin + t * currentViewport.ySpan
+        let newY = CartesianGeometry.zoomedXRange(
+            from: currentViewport.yDomain,
+            factor: factor,
+            anchorValue: anchorValue,
+            fullDomain: fullYRange,
+            minSpan: minimumYSpan,
+            maxSpan: fullYRange.upperBound - fullYRange.lowerBound)
+
+        // 垂直图双轴：次值轴同倍率、以自身域换算锚点同步缩放（两轴刻度对齐关系保持）
+        var newSec: ClosedRange<Double>?
+        if let sec = currentSecondaryYDomain, let fullSec = fullSecondaryYRange {
+            let anchorS = sec.lowerBound + t * (sec.upperBound - sec.lowerBound)
+            newSec = CartesianGeometry.zoomedXRange(
+                from: sec, factor: factor, anchorValue: anchorS,
+                fullDomain: fullSec,
+                minSpan: (fullSec.upperBound - fullSec.lowerBound) / max(maximumYAxisZoomScale, 1),
+                maxSpan: fullSec.upperBound - fullSec.lowerBound)
+        }
+        commitYRange(main: newY, secondary: newSec)
+    }
+
+    public func panYAxis(screenDeltaY: CGFloat, allowsRubberBand: Bool) {
+        let margin = allowsRubberBand
+            ? (fullYRange.upperBound - fullYRange.lowerBound) * CartesianGeometry.rubberBandMarginRatio
+            : 0
+        let newY = CartesianGeometry.pannedXRange(
+            from: currentViewport.yDomain,
+            screenDeltaX: screenDeltaY,     // 两轴平移公式同构：内容跟手，高度换算
+            plotWidth: currentPlotFrame.height,
+            fullDomain: fullYRange,
+            overshootMargin: margin)
+
+        var newSec: ClosedRange<Double>?
+        if let sec = currentSecondaryYDomain, let fullSec = fullSecondaryYRange {
+            let secMargin = allowsRubberBand
+                ? (fullSec.upperBound - fullSec.lowerBound) * CartesianGeometry.rubberBandMarginRatio
+                : 0
+            newSec = CartesianGeometry.pannedXRange(
+                from: sec, screenDeltaX: screenDeltaY,
+                plotWidth: currentPlotFrame.height,
+                fullDomain: fullSec, overshootMargin: secMargin)
+        }
+        commitYRange(main: newY, secondary: newSec)
+    }
+
+    /// 主/次 Y 窗口一起提交（一次 relayout，两轴原子更新）。
+    private func commitYRange(main: ClosedRange<Double>, secondary: ClosedRange<Double>?) {
+        let oldMain = userYRange, oldSec = userSecondaryYRange
+        userYRange = main
+        userSecondaryYRange = secondary ?? oldSec
+        if main != oldMain || userSecondaryYRange != oldSec { relayout() }
+    }
+
+    public func setYAxisViewport(_ range: ClosedRange<Double>) {
+        let margin = (fullYRange.upperBound - fullYRange.lowerBound) * CartesianGeometry.rubberBandMarginRatio
+        let lo = min(max(range.lowerBound, fullYRange.lowerBound - margin), fullYRange.upperBound)
+        let hi = max(min(range.upperBound, fullYRange.upperBound + margin), fullYRange.lowerBound)
+        applyUserYRange(min(lo, hi)...max(lo, hi))
+    }
+
+    public var isYAxisOvershooting: Bool {
+        currentViewport.yMin < fullYRange.lowerBound - 1e-9
+            || currentViewport.yMax > fullYRange.upperBound + 1e-9
+    }
+
+    public func resetYAxisViewport() {
+        guard userYRange != nil || userSecondaryYRange != nil else { return }
+        userYRange = nil
+        userSecondaryYRange = nil
+        relayout()
+    }
+
+    private func applyUserYRange(_ range: ClosedRange<Double>) {
+        guard range != userYRange else { return }
+        userYRange = range
+        relayout()
+    }
+
     /// 手势视口变化后的整体重排（禁用隐式动画，保证跟手）。
     private func relayout() {
         guard let model = currentModel, let theme = currentTheme, let context = lastContext else { return }
@@ -266,18 +386,34 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
                 assertionFailure("Bar（水平图）暂不支持 secondaryYAxis，将忽略")
                 currentSecondaryYDomain = nil
                 currentSecondaryValueTicks = []
+                fullSecondaryYRange = nil
             } else {
                 let bounds = model.dataBounds(yAxisIndex: 1)
-                let domain = makeValueDomain(axis: secondary, bounds: bounds)
+                let full = makeValueDomain(axis: secondary, bounds: bounds)
+                fullSecondaryYRange = full
+                // Y 缩放窗口（与主轴同手势、独立域）：clamp 语义与主轴一致
+                var domain = full
+                if let user = userSecondaryYRange {
+                    let fullSpan = full.upperBound - full.lowerBound
+                    let span = min(max(user.upperBound - user.lowerBound,
+                                       fullSpan / max(maximumYAxisZoomScale, 1)), fullSpan)
+                    let margin = fullSpan * CartesianGeometry.rubberBandMarginRatio
+                    var lo = min(max(user.lowerBound, full.lowerBound - margin),
+                                 full.upperBound + margin - span)
+                    lo = max(lo, full.lowerBound - margin)
+                    domain = lo...(lo + span)
+                }
                 currentSecondaryYDomain = domain
                 currentSecondaryValueTicks = domain.lowerBound == domain.upperBound
                     ? []
                     : ValueTickGenerator.ticks(axis: secondary, domain: domain,
-                                               dataBounds: bounds, generatesFromDomain: false)
+                                               dataBounds: bounds,
+                                               generatesFromDomain: userSecondaryYRange != nil)
             }
         } else {
             currentSecondaryYDomain = nil
             currentSecondaryValueTicks = []
+            fullSecondaryYRange = nil
         }
 
         // 3) 值轴刻度 + 布局（左侧标签宽度：水平图量类目标签、垂直图量值刻度文本；
@@ -373,6 +509,43 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
                                 yDomain: yAxisIndex == 1 ? currentSecondaryYDomain : nil)
     }
 
+    // MARK: - 数据标签（Line/Column/Bar 共用工具）
+    /// 系列是否画数据标签：系列级 `dataLabelsEnabled` 覆盖主题开关；
+    /// 可见类目 × 系列总数超 `dataLabelMaxMarkCount` 时整图跳过（缩放后可见数变少自动恢复）。
+    func dataLabelsAllowed(for element: CartesianSeriesElement,
+                           theme: CartesianChartTheme) -> Bool {
+        guard element.dataLabelsEnabled ?? theme.showsDataLabels else { return false }
+        let visible = visibleCategoryRange.count
+        return visible * max(currentModel?.series.count ?? 0, 1) <= theme.dataLabelMaxMarkCount
+    }
+
+    /// 标签文本尺寸（与 makeDataLabelLayer 同字体，供先量尺寸再算中心）。
+    func dataLabelTextSize(_ text: String, fontSize: CGFloat) -> CGSize {
+        textSize(text, font: UIFont.systemFont(ofSize: fontSize, weight: .medium))
+    }
+
+    /// 标签颜色：显式 `dataLabelColor` > 位置自适应（形状内 = 白、外侧 = `.label` 随深浅色）。
+    func dataLabelColor(theme: CartesianChartTheme, inside: Bool) -> UIColor {
+        theme.dataLabelColor ?? (inside ? .white : .label)
+    }
+
+    /// 居中定位的 CATextLayer（加到 rootLayer，不受 seriesLayer 裁剪——
+    /// 端部外侧标签允许略微探出 plot 区，否则贴边柱/点的标签会被裁一半）。
+    func makeDataLabelLayer(text: String, fontSize: CGFloat, color: UIColor, center: CGPoint) -> CATextLayer {
+        let font = UIFont.systemFont(ofSize: fontSize, weight: .medium)
+        let size = textSize(text, font: font)
+        let label = CATextLayer()
+        label.string = text
+        label.font = font
+        label.fontSize = fontSize
+        label.foregroundColor = color.cgColor
+        label.alignmentMode = .center
+        label.contentsScale = hostView?.window?.screen.scale ?? UIScreen.main.scale
+        label.frame = CGRect(x: center.x - size.width / 2, y: center.y - size.height / 2,
+                             width: size.width, height: size.height)
+        return label
+    }
+
     // MARK: - 私有
     /// 由轴配置 + 绑定系列边界算值域（显式 min/max 优先，否则 nice scale）。
     private func makeValueDomain(axis: CartesianAxisModel,
@@ -399,7 +572,8 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
         let fullValue = makeValueDomain(axis: model.yAxis, bounds: model.dataBounds(yAxisIndex: 0))
 
         // 手势窗口只作用于 X 轴：垂直图缩放类目域、水平图缩放数值域。
-        // Y 轴始终数据驱动（垂直图 = 值域，水平图 = 类目域），不参与手势。
+        // Y 轴（垂直图 = 值域，水平图 = 类目域）默认数据驱动；
+        // zoomAxisMode .y/.xy 时由 userYRange 接管（同 X 的钳制与橡皮筋语义）。
         fullXRange = isHorizontalValueAxis ? fullValue : fullCategory
         var effectiveX = fullXRange
         if let user = userXRange {
@@ -413,22 +587,35 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
             effectiveX = lo...(lo + span)
         }
 
+        fullYRange = isHorizontalValueAxis ? fullCategory : fullValue
+        var effectiveY = fullYRange
+        if let user = userYRange {
+            let fullSpan = fullYRange.upperBound - fullYRange.lowerBound
+            let span = min(max(user.upperBound - user.lowerBound, minimumYSpan), fullSpan)
+            let rubberMargin = fullSpan * CartesianGeometry.rubberBandMarginRatio
+            var lo = min(max(user.lowerBound, fullYRange.lowerBound - rubberMargin),
+                         fullYRange.upperBound + rubberMargin - span)
+            lo = max(lo, fullYRange.lowerBound - rubberMargin)
+            effectiveY = lo...(lo + span)
+        }
+
         return isHorizontalValueAxis
             ? CartesianViewport(xMin: effectiveX.lowerBound, xMax: effectiveX.upperBound,
-                                yMin: fullCategory.lowerBound, yMax: fullCategory.upperBound)
+                                yMin: effectiveY.lowerBound, yMax: effectiveY.upperBound)
             : CartesianViewport(xMin: effectiveX.lowerBound, xMax: effectiveX.upperBound,
-                                yMin: fullValue.lowerBound, yMax: fullValue.upperBound)
+                                yMin: effectiveY.lowerBound, yMax: effectiveY.upperBound)
     }
 
     /// 值轴刻度：显式 tickInterval（须显式 min/max）从 min 步进；否则 nice scale ticks。
     /// 水平图值轴在 X：自动刻度按**生效 X 窗口**生成（缩放/平移时刻度跟随）；
-    /// 垂直图值轴在 Y：Y 恒全量，按数据边界生成。
+    /// 垂直图值轴在 Y：默认按数据边界生成，Y 缩放窗口生效后改为按窗口域生成
+    /// （否则放大后窗口内只剩零星刻度）。
     /// 结果过滤到生效值域内（显式 0...95 时 nice 化出的 100 不得越界画线）。
     private func makeValueTicks(axis: CartesianAxisModel,
                                 domain: ClosedRange<Double>,
                                 bounds: (min: Double, max: Double)?) -> [Double] {
         ValueTickGenerator.ticks(axis: axis, domain: domain, dataBounds: bounds,
-                                 generatesFromDomain: isHorizontalValueAxis)
+                                 generatesFromDomain: isHorizontalValueAxis || userYRange != nil)
     }
 
     private func addTickLabels(model: CartesianChartModel, theme: CartesianChartTheme) {

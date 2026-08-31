@@ -44,6 +44,11 @@ struct ColumnChartDemo: View {
     @State private var sharedTooltipOn = true
     /// 命中数据时显示十字准线（逐点/整列都画）
     @State private var crosshairOn = true
+    // —— 数据标签 ——
+    @State private var dataLabelsOn = false
+    @State private var dataLabelPosition = "端部外侧"
+    // —— 捏合缩放轴向 ——
+    @State private var zoomAxisSel = "x"
 
     // —— 缩放功能测试 ——
     @State private var isZoomEnabled = true
@@ -67,7 +72,8 @@ struct ColumnChartDemo: View {
                         isHighlightPerDragEnabled: highlightPerDragOn,
                         isRubberBandEnabled: rubberBandOn,
                         isSharedTooltipOnTapEnabled: sharedTooltipOn,
-                        isCrosshairEnabled: crosshairOn)
+                        isCrosshairEnabled: crosshairOn,
+                        zoomAxisMode: HYMChartZoomAxisMode(rawValue: zoomAxisSel) ?? .x)
                 .frame(height: 280)
                 .padding(.horizontal)
                 .padding(.top, 8)
@@ -137,6 +143,8 @@ struct ColumnChartDemo: View {
         t.columnWidthRatio = columnWidthRatio
         t.columnInnerSpacingRatio = columnInnerSpacing >= 0.01 ? columnInnerSpacing : nil
         t.columnGroupSpacingRatio = columnGroupSpacing
+        t.showsDataLabels = dataLabelsOn
+        t.dataLabelPosition = CartesianDataLabelPosition(rawValue: dataLabelPosition) ?? .outsideEnd
         t.columnCornerRadius = columnCornerRadius
         if columnBorderOn {
             t.columnBorderColor = columnBorderColor
@@ -208,14 +216,20 @@ struct ColumnChartDemo: View {
         let animationSection = ChartDemoPanel.DemoSection(title: "动画与交互", items: [
             .toggle(label: "入场动画", value: $theme.showsColumnEntranceAnimation),
             .toggle(label: "点击弹窗", value: $theme.showsTooltipOnHit),
-            .toggle(label: "启用缩放（X轴捏合/平移，双击重置）", value: $isZoomEnabled),
+            .picker(label: "捏合缩放轴向", selection: $zoomAxisSel, options: ["x", "y", "xy"]),
+            .toggle(label: "启用缩放（捏合/平移，双击重置）", value: $isZoomEnabled),
             .slider(label: "放大下限（最小可见类目数）", value: $minimumVisibleCategories, range: 2...24, step: 1),
         ])
         let xAxisSection = ChartDemoPanel.DemoSection(title: "X 轴", items: [
             .toggle(label: "24小时时间轴（按数据量均分）", value: $useTimeAxis),
         ])
 
-        return ChartDemoPanel(sections: [dataSection, xAxisSection, nullSection, columnSection, stackSection, axisSection, gestureSection, animationSection])
+        let labelSection = ChartDemoPanel.DemoSection(title: "数据标签", items: [
+            .toggle(label: "数值标注在柱端/条端", value: $dataLabelsOn),
+            .picker(label: "标签位置", selection: $dataLabelPosition,
+                    options: CartesianDataLabelPosition.allCases.map { $0.rawValue }),
+        ])
+        return ChartDemoPanel(sections: [dataSection, xAxisSection, nullSection, columnSection, stackSection, axisSection, gestureSection, labelSection, animationSection])
     }
 
     private func regenerateData() {

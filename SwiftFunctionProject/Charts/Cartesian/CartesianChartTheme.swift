@@ -66,6 +66,22 @@ public struct CartesianChartTheme: HYMChartTheme {
     /// nil = 自动由各系列颜色派生：[系列色 35% 透明度 → 4% 透明度]。
     public var areaGradientColors: [UIColor]?
 
+    // —— 数据标签（数值标注；Line/Column/Bar 共用，系列级 dataLabelsEnabled 可覆盖）——
+    /// 是否在数据点/柱段端部标注数值（默认 false）。
+    public var showsDataLabels: Bool
+    /// 数据标签字号（默认 10）。
+    public var dataLabelFontSize: CGFloat
+    /// 数据标签颜色。nil = 自动：柱/条外与折线点旁用 `.label`（随深浅色自适应），
+    /// 柱/条内（insideEnd/center 且被形状覆盖）用白色。
+    public var dataLabelColor: UIColor?
+    /// 数据标签位置（语义按图表形态映射，见 `CartesianDataLabelPosition`）。
+    public var dataLabelPosition: CartesianDataLabelPosition
+    /// 数值格式化（nil = 自动：整数不带小数、非整数最多 2 位去尾零）。
+    public var dataLabelFormatter: ((Double) -> String)?
+    /// 可见类目 × 系列总数超过该值时整图跳过标注（防大数据集糊屏 + 手势期 layer 风暴；
+    /// 缩放后可见数变少会自动恢复显示）。默认 200。
+    public var dataLabelMaxMarkCount: Int
+
     // —— 行为 ——
     public var showsEntranceAnimation: Bool
     public var showsTooltipOnHit: Bool
@@ -124,6 +140,12 @@ public struct CartesianChartTheme: HYMChartTheme {
         pointSymbol: PointMarkerSymbol = .circle,
         showsArea: Bool = false,
         areaGradientColors: [UIColor]? = nil,
+        showsDataLabels: Bool = false,
+        dataLabelFontSize: CGFloat = 10,
+        dataLabelColor: UIColor? = nil,
+        dataLabelPosition: CartesianDataLabelPosition = .outsideEnd,
+        dataLabelFormatter: ((Double) -> String)? = nil,
+        dataLabelMaxMarkCount: Int = 200,
         showsEntranceAnimation: Bool = true,
         showsTooltipOnHit: Bool = true,
         columnWidthRatio: CGFloat = 0.8,
@@ -160,6 +182,12 @@ public struct CartesianChartTheme: HYMChartTheme {
         self.pointSymbol = pointSymbol
         self.showsArea = showsArea
         self.areaGradientColors = areaGradientColors
+        self.showsDataLabels = showsDataLabels
+        self.dataLabelFontSize = max(6, dataLabelFontSize)
+        self.dataLabelColor = dataLabelColor
+        self.dataLabelPosition = dataLabelPosition
+        self.dataLabelFormatter = dataLabelFormatter
+        self.dataLabelMaxMarkCount = max(0, dataLabelMaxMarkCount)
         self.showsEntranceAnimation = showsEntranceAnimation
         self.showsTooltipOnHit = showsTooltipOnHit
         self.columnWidthRatio = max(0.1, min(1.0, columnWidthRatio))

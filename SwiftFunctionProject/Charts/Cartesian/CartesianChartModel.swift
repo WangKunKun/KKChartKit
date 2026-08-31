@@ -72,6 +72,9 @@ public struct CartesianSeriesElement {
     /// 空值（数据中的 `.nan`）是否跨空连线：false = 断线留缺口（默认，Highcharts 同款）；
     /// true = 忽略空值直接连到下一个有效点。柱状/条形忽略本参数（空值恒不画柱）。
     public var connectNulls: Bool
+    /// 数据标签（数值标注）系列级开关：nil = 跟随主题 showsDataLabels
+    /// （数值显示系列原值——堆叠时也标各段自身值，位置在累计后的点/段上）。
+    public var dataLabelsEnabled: Bool?
     /// 绑定哪个值轴（0 = 主轴/左，1 = 次轴/右；Bar 水平图仅支持主轴）。
     public var yAxisIndex: Int
     /// clamp 后的有效轴索引（仅 1 绑次轴，其余——含越界——回落主轴 0）。
@@ -79,7 +82,8 @@ public struct CartesianSeriesElement {
 
     public init(name: String, data: [Double], color: UIColor? = nil, negativeColor: UIColor? = nil,
                 yAxisIndex: Int = 0, lineDashStyle: LineDashStyle? = nil,
-                connectNulls: Bool = false, pointSymbol: PointMarkerSymbol? = nil) {
+                connectNulls: Bool = false, pointSymbol: PointMarkerSymbol? = nil,
+                dataLabelsEnabled: Bool? = nil) {
         self.name = name
         self.data = data
         self.color = color
@@ -88,6 +92,7 @@ public struct CartesianSeriesElement {
         self.lineDashStyle = lineDashStyle
         self.connectNulls = connectNulls
         self.pointSymbol = pointSymbol
+        self.dataLabelsEnabled = dataLabelsEnabled
     }
 }
 
