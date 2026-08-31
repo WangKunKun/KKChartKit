@@ -508,7 +508,8 @@ extension CartesianRendererBase: HYMChartSharedHitProvider {
     /// 点击按类目取整列：X 位置四舍五入到最近类目，组合所有有值系列。
     /// 点在 plot 区外（±8pt 宽容）返回 nil，由容器回落到逐点命中。
     public func sharedHit(at point: CGPoint) -> (target: any HYMChartHitTarget,
-                                                 anchor: HYMChartTooltipAnchor)? {
+                                                 anchor: HYMChartTooltipAnchor,
+                                                 crosshair: CGRect)? {
         guard let model = currentModel,
               let categoryIndex = categoryIndex(at: point) else { return nil }
 
@@ -524,23 +525,30 @@ extension CartesianRendererBase: HYMChartSharedHitProvider {
 
         // 锚点在触点位置（弹窗跟手出现，而非固定在图表顶部/底部）：
         // 垂直图 x 对齐类目中心、水平图 y 对齐类目行中心
+        // 十字准线：垂直图为过类目中心的全高竖线，水平图为过类目行的全宽横线
         let band: CGRect
+        let crosshair: CGRect
         if isHorizontalValueAxis {
             let y = CartesianGeometry.horizontalCategoryY(category: Double(categoryIndex),
                                                           viewport: currentViewport,
                                                           plotFrame: currentPlotFrame)
             band = CGRect(x: point.x - 1, y: y - 1, width: 2, height: 2)
+            crosshair = CGRect(x: currentPlotFrame.minX, y: y - 0.5,
+                               width: currentPlotFrame.width, height: 1)
         } else {
             let x = CartesianGeometry.point(x: Double(categoryIndex), y: 0,
                                             viewport: currentViewport,
                                             plotFrame: currentPlotFrame).x
             band = CGRect(x: x - 1, y: point.y - 1, width: 2, height: 2)
+            crosshair = CGRect(x: x - 0.5, y: currentPlotFrame.minY,
+                               width: 1, height: currentPlotFrame.height)
         }
         let target = CartesianSharedHitTarget(categoryIndex: categoryIndex,
                                               entries: entries,
                                               crosshairX: band.midX)
         return (target, HYMChartTooltipAnchor(frame: band,
-                                               preferredPlacements: [.top, .bottom]))
+                                               preferredPlacements: [.top, .bottom]),
+                crosshair)
     }
 }
 

@@ -63,6 +63,8 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     public var isHighlightPerDragEnabled: Bool = true
     /// 把视口拖出边界时的橡皮筋越界 + 松手回弹（默认开）。
     public var isRubberBandEnabled: Bool = true
+    /// 整列弹窗激活时是否显示十字准线（贯穿绘图区的细线，Highcharts crosshair 同款；默认开）。
+    public var isCrosshairEnabled: Bool = true
     /// 点击按 X 类目取**整列**数据（shared tooltip，Highcharts 同款）。
     /// - `nil`（默认，自动）：多系列图表开（整列对比信息密度最高）、单系列关（逐点+吸附更直观）；
     /// - `true`：强制整列；`false`：强制逐点。
@@ -93,6 +95,8 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     private let decelAnimator = HYMChartValueAnimator()
     /// 减速消费进度（上一帧 ease-out 进度，差值即本帧位移占比）。
     private var lastDecelProgress: Double = 0
+    /// 十字准线层（shared tooltip 激活时贯穿绘图区）
+    private let crosshairLayer = CAShapeLayer()
 
     private lazy var zoomGesture = UIPinchGestureRecognizer(target: self, action: #selector(onPinch(_:)))
     private lazy var panGesture = UIPanGestureRecognizer(target: self, action: #selector(onPan(_:)))
@@ -119,6 +123,11 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         clipsToBounds = false
         isUserInteractionEnabled = true
         renderer.mount(into: self)
+        crosshairLayer.strokeColor = UIColor(white: 0.55, alpha: 0.9).cgColor
+        crosshairLayer.fillColor = nil
+        crosshairLayer.lineWidth = 0.75
+        crosshairLayer.isHidden = true
+        layer.addSublayer(crosshairLayer)
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onTap(_:))))
         addGestureRecognizer(zoomGesture)
         addGestureRecognizer(panGesture)
@@ -135,6 +144,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     /// 外部数据/主题变化会重置 X 轴视口到全量（手势缩放状态不跨数据更新保留）。
     public func configure(model: Renderer.Model, theme: Renderer.Theme) {
         stopDeceleration()
+        hideCrosshair()
         self.model = model
         self.theme = theme
         xAxisZoomable?.resetXAxisViewport()
@@ -204,6 +214,32 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
             })
     }
 
+    // MARK: - 十字准线（shared tooltip 激活时显示）
+    private func showCrosshair(_ frame: CGRect) {
+        guard isCrosshairEnabled, frame.width > 0 || frame.height > 0 else { return }
+        let path = UIBezierPath()
+        if frame.width <= 1 {          // 竖线
+            path.move(to: CGPoint(x: frame.minX, y: frame.minY))
+            path.addLine(to: CGPoint(x: frame.minX, y: frame.maxY))
+        } else {                       // 横线（水平图）
+            path.move(to: CGPoint(x: frame.minX, y: frame.minY))
+            path.addLine(to: CGPoint(x: frame.maxX, y: frame.minY))
+        }
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        crosshairLayer.path = path.cgPath
+        crosshairLayer.isHidden = false
+        CATransaction.commit()
+    }
+
+    private func hideCrosshair() {
+        guard !crosshairLayer.isHidden else { return }
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        crosshairLayer.isHidden = true
+        CATransaction.commit()
+    }
+
     // MARK: - 触摸命中（tap 与拖拽滑动选中共用）
     @objc private func onTap(_ gr: UITapGestureRecognizer) {
         let p = gr.location(in: self)
@@ -241,6 +277,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         let target = renderer.hitTest(point)
             ?? (renderer as? HYMChartSnapHitProvider)?.snapHit(at: point)
         renderer.applySelection(target)
+        hideCrosshair()   // 准线只伴随整列弹窗
 
         if let target {
             onHit?(target, gesture)                      // 始终：命中事件通知
@@ -315,6 +352,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
                 }
                 return
             }
+            hideCrosshair()   // 拖视口：准线所属视口已失效
             let total = gr.translation(in: self).x
             let delta = total - lastPanTranslationX
             lastPanTranslationX = total
@@ -395,6 +433,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     private func finishEntranceAnimationIfNeeded() {
         animator.stop()
         decelAnimator.stop()
+        hideCrosshair()
         pendingAnimation = false
         CATransaction.begin()
         CATransaction.setDisableActions(true)

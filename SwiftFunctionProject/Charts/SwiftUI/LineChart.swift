@@ -12,6 +12,7 @@ public struct LineChart: View {
     private let isHighlightPerDragEnabled: Bool
     private let isRubberBandEnabled: Bool
     private let isSharedTooltipOnTapEnabled: Bool?
+    private let isCrosshairEnabled: Bool
 
     public init(model: CartesianChartModel,
                 theme: CartesianChartTheme = CartesianChartTheme(),
@@ -22,7 +23,8 @@ public struct LineChart: View {
                 isDragDecelerationEnabled: Bool = true,
                 isHighlightPerDragEnabled: Bool = true,
                 isRubberBandEnabled: Bool = true,
-                isSharedTooltipOnTapEnabled: Bool? = nil) {
+                isSharedTooltipOnTapEnabled: Bool? = nil,
+                isCrosshairEnabled: Bool = true) {
         self.model = model
         self.theme = theme
         self.playsAnimationOnAppear = playsAnimationOnAppear
@@ -33,6 +35,7 @@ public struct LineChart: View {
         self.isHighlightPerDragEnabled = isHighlightPerDragEnabled
         self.isRubberBandEnabled = isRubberBandEnabled
         self.isSharedTooltipOnTapEnabled = isSharedTooltipOnTapEnabled
+        self.isCrosshairEnabled = isCrosshairEnabled
     }
 
     public var body: some View {
@@ -44,7 +47,8 @@ public struct LineChart: View {
                                isDragDecelerationEnabled: isDragDecelerationEnabled,
                                isHighlightPerDragEnabled: isHighlightPerDragEnabled,
                                isRubberBandEnabled: isRubberBandEnabled,
-                               isSharedTooltipOnTapEnabled: isSharedTooltipOnTapEnabled)
+                               isSharedTooltipOnTapEnabled: isSharedTooltipOnTapEnabled,
+                               isCrosshairEnabled: isCrosshairEnabled)
     }
 }
 
@@ -59,6 +63,7 @@ private struct LineChartRepresentable: UIViewRepresentable {
     let isHighlightPerDragEnabled: Bool
     let isRubberBandEnabled: Bool
     let isSharedTooltipOnTapEnabled: Bool?
+    let isCrosshairEnabled: Bool
 
     func makeUIView(context: Context) -> HYMChartView<LineChartRenderer> {
         let chart = HYMChartView<LineChartRenderer>(frame: .zero)
@@ -69,6 +74,7 @@ private struct LineChartRepresentable: UIViewRepresentable {
         chart.isHighlightPerDragEnabled = isHighlightPerDragEnabled
         chart.isRubberBandEnabled = isRubberBandEnabled
         chart.isSharedTooltipOnTapEnabled = isSharedTooltipOnTapEnabled
+        chart.isCrosshairEnabled = isCrosshairEnabled
         chart.onHit = { target, gesture in
             if let h = target as? LineHitTarget { onHit?(h, gesture) }
         }

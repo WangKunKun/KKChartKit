@@ -56,6 +56,8 @@ public struct CartesianChartTheme: HYMChartTheme {
     public var showsPoints: Bool
     public var pointRadius: CGFloat
     public var pointColor: UIColor?
+    /// 数据点默认标记符号（系列级 `pointSymbol` 可覆盖）
+    public var pointSymbol: PointMarkerSymbol
 
     // —— 面积填充（面积图形态；仅折线图消费）——
     /// 是否填充折线与零轴之间的区域（默认 false）。
@@ -119,6 +121,7 @@ public struct CartesianChartTheme: HYMChartTheme {
         showsPoints: Bool = true,
         pointRadius: CGFloat = 3,
         pointColor: UIColor? = nil,
+        pointSymbol: PointMarkerSymbol = .circle,
         showsArea: Bool = false,
         areaGradientColors: [UIColor]? = nil,
         showsEntranceAnimation: Bool = true,
@@ -154,6 +157,7 @@ public struct CartesianChartTheme: HYMChartTheme {
         self.showsPoints = showsPoints
         self.pointRadius = max(0, pointRadius)
         self.pointColor = pointColor
+        self.pointSymbol = pointSymbol
         self.showsArea = showsArea
         self.areaGradientColors = areaGradientColors
         self.showsEntranceAnimation = showsEntranceAnimation

@@ -177,16 +177,16 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
             seriesLayer.addSublayer(line)
             lineLayers.append(line)
 
-            // 数据点（画在有效数据点位置，与阶梯形态无关；空值处不画点）
+            // 数据点（画在有效数据点位置，与阶梯形态无关；空值处不画点）。
+            // 标记符号：圆/方/菱/正三角/倒三角（系列级覆盖主题）
             if theme.showsPoints {
+                let symbol = element.pointSymbol ?? theme.pointSymbol
                 for p in segmentPoints.flatMap({ $0 }) {
-                    let dot = CALayer()
-                    dot.frame = CGRect(x: p.x - theme.pointRadius, y: p.y - theme.pointRadius,
-                                       width: theme.pointRadius * 2, height: theme.pointRadius * 2)
-                    dot.cornerRadius = theme.pointRadius
-                    dot.backgroundColor = (theme.pointColor ?? color).cgColor
-                    dot.borderColor = UIColor.white.cgColor
-                    dot.borderWidth = 1
+                    let dot = CAShapeLayer()
+                    dot.path = symbol.path(center: p, radius: theme.pointRadius)
+                    dot.fillColor = (theme.pointColor ?? color).cgColor
+                    dot.strokeColor = UIColor.white.cgColor
+                    dot.lineWidth = 1
                     seriesLayer.addSublayer(dot)
                 }
             }

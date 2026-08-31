@@ -67,6 +67,8 @@ public struct CartesianSeriesElement {
     public var negativeColor: UIColor?
     /// 系列线条虚线样式（nil = 跟随主题 lineDashStyle；"实际/预测"区分用）
     public var lineDashStyle: LineDashStyle?
+    /// 数据点标记符号（nil = 跟随主题 pointSymbol；多系列形状区分）
+    public var pointSymbol: PointMarkerSymbol?
     /// 空值（数据中的 `.nan`）是否跨空连线：false = 断线留缺口（默认，Highcharts 同款）；
     /// true = 忽略空值直接连到下一个有效点。柱状/条形忽略本参数（空值恒不画柱）。
     public var connectNulls: Bool
@@ -77,7 +79,7 @@ public struct CartesianSeriesElement {
 
     public init(name: String, data: [Double], color: UIColor? = nil, negativeColor: UIColor? = nil,
                 yAxisIndex: Int = 0, lineDashStyle: LineDashStyle? = nil,
-                connectNulls: Bool = false) {
+                connectNulls: Bool = false, pointSymbol: PointMarkerSymbol? = nil) {
         self.name = name
         self.data = data
         self.color = color
@@ -85,6 +87,7 @@ public struct CartesianSeriesElement {
         self.yAxisIndex = yAxisIndex
         self.lineDashStyle = lineDashStyle
         self.connectNulls = connectNulls
+        self.pointSymbol = pointSymbol
     }
 }
 

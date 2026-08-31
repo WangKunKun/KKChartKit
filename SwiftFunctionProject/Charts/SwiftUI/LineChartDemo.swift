@@ -36,6 +36,11 @@ struct LineChartDemo: View {
     /// 全局默认虚线样式；末系列可单独覆盖（实际/预测场景）
     @State private var dashStyle = "solid"
     @State private var lastSeriesDashStyle = "跟随全局"
+    /// 数据点标记符号（全局 + 末系列覆盖）
+    @State private var pointSymbol = "circle"
+    @State private var lastSeriesPointSymbol = "跟随全局"
+    /// 整列弹窗时显示十字准线
+    @State private var crosshairOn = true
     @State private var isZoomEnabled = true
     @State private var minimumVisibleCategories = 12.0
     /// X 轴时间轴模式：按实际数据量把 24h 均分到每个点（288 点 = 5 分钟/点，1440 点 = 1 分钟/点）
@@ -89,7 +94,8 @@ struct LineChartDemo: View {
                       isDragDecelerationEnabled: decelerationOn,
                       isHighlightPerDragEnabled: highlightPerDragOn,
                       isRubberBandEnabled: rubberBandOn,
-                      isSharedTooltipOnTapEnabled: sharedTooltipOn)
+                      isSharedTooltipOnTapEnabled: sharedTooltipOn,
+                      isCrosshairEnabled: crosshairOn)
                 .frame(height: 280)
                 .padding(.horizontal)
                 .padding(.top, 8)
@@ -172,6 +178,7 @@ struct LineChartDemo: View {
         t.axisLabelGap = axisLabelGap
         t.lineConnectionStyle = connectionStyle
         t.lineDashStyle = LineDashStyle(rawValue: dashStyle) ?? .solid
+        t.pointSymbol = PointMarkerSymbol(rawValue: pointSymbol) ?? .circle
         // 堆叠默认联动开面积（分层展示更直观；可关成纯累计折线）
         let stacked = stackingMode != "不堆叠"
         let areaOn = showsArea || (stacked && stackedAreaOn)
@@ -236,6 +243,10 @@ struct LineChartDemo: View {
         ])
         let pointSection = ChartDemoPanel.DemoSection(title: "数据点", items: [
             .toggle(label: "显示数据点", value: $theme.showsPoints),
+            .picker(label: "点形状（全局）", selection: $pointSymbol,
+                    options: PointMarkerSymbol.allCases.map { $0.rawValue }),
+            .picker(label: "末系列点形状", selection: $lastSeriesPointSymbol,
+                    options: ["跟随全局"] + PointMarkerSymbol.allCases.map { $0.rawValue }),
             .slider(label: "点半径", value: Binding(
                 get: { Double(theme.pointRadius) },
                 set: { theme.pointRadius = CGFloat($0) }), range: 1...10, step: 0.5),
@@ -249,6 +260,7 @@ struct LineChartDemo: View {
             .toggle(label: "边界橡皮筋（越界回弹）", value: $rubberBandOn),
             .slider(label: "放大下限（最小可见类目数）", value: $minimumVisibleCategories, range: 2...24, step: 1),
             .toggle(label: "点击弹整列数据（按 X 类目取所有系列）", value: $sharedTooltipOn),
+            .toggle(label: "整列弹窗十字准线", value: $crosshairOn),
             .toggle(label: "空值示例（第3点无数据，断线缺口）", value: $nullSampleOn),
             .toggle(label: "跨空值连线（connectNulls）", value: $connectNullsOn),
             .toggle(label: "24小时时间轴（按数据量均分）", value: $useTimeAxis),

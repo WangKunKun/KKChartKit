@@ -813,6 +813,9 @@ public enum ChartSelfTest {
         // —— 空值处理（NaN 断线 / connectNulls 连线）——
         runNullValueSelfTest()
 
+        // —— 数据点标记符号 + 十字准线 ——
+        runMarkerSymbolSelfTest()
+
         // —— 百分比堆叠 ——
         runPercentStackingSelfTest()
 
@@ -820,6 +823,67 @@ public enum ChartSelfTest {
         runSharedHitSelfTest()
 
         print("✅ ChartSelfTest passed")
+    }
+
+    /// 标记符号：五种形状的 path 元素结构 + 渲染级点层形状；十字准线 frame 贯穿绘图区。
+    static func runMarkerSymbolSelfTest() {
+        // 1) 纯函数：circle = 4 曲线；square/diamond = 4 直线；triangle* = 3 直线
+        func counts(_ sym: PointMarkerSymbol) -> (lines: Int, curves: Int) {
+            var l = 0, c = 0
+            sym.path(center: CGPoint(x: 10, y: 10), radius: 3).applyWithBlock { e in
+                switch e.pointee.type {
+                case .addLineToPoint: l += 1
+                case .addCurveToPoint, .addQuadCurveToPoint: c += 1
+                default: break
+                }
+            }
+            return (l, c)
+        }
+        assert(counts(.circle).curves == 4, "circle 应为 4 段曲线")
+        assert(counts(.square).lines == 3, "square = move+3 线段+close（4 顶点），got \(counts(.square))")
+        // diamond/triangle 的"回到起点"末线段会被 UIBezierPath 折叠进 close（不再单独输出）
+        assert(counts(.diamond).lines == 3, "diamond 应为 3 线段+close（末段折叠），got \(counts(.diamond))")
+        assert(counts(.triangle).lines == 2, "triangle = 2 线段+close（末段折叠），got \(counts(.triangle))")
+        assert(counts(.triangleDown).lines == 2, "triangleDown = 2 线段+close")
+        assert(PointMarkerSymbol.allCases.count == 5, "五种标记符号")
+
+        // 2) 渲染级：系列级 triangle 覆盖主题 circle；点层为填充形状层
+        let r = LineChartRenderer()
+        let host = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        r.mount(into: host)
+        r.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, 20], pointSymbol: .triangle)]),
+                  theme: CartesianChartTheme(),
+                  context: HYMChartRenderContext(bounds: host.bounds, center: host.center))
+        let dotLayers = r.seriesLayerSublayersForTesting().compactMap { $0 as? CAShapeLayer }
+            .filter { $0.fillColor != nil }   // 点层（线层 fillColor = nil）
+        assert(dotLayers.count == 2, "两个数据点应有两个点层，got \(dotLayers.count)")
+        var triLines = 0
+        dotLayers.forEach { $0.path?.applyWithBlock { e in
+            if e.pointee.type == .addLineToPoint { triLines += 1 }
+        } }
+        assert(triLines == 4, "两个三角点层应各 2 线段（末段折叠进 close），got \(triLines)")
+
+        // 3) 十字准线：贯穿绘图区、x 对齐类目中心
+        let sh = LineChartRenderer()
+        let hostS = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        sh.mount(into: hostS)
+        sh.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, 20, 30]),
+                     CartesianSeriesElement(name: "b", data: [5, 15, 25])]),
+                  theme: CartesianChartTheme(),
+                  context: HYMChartRenderContext(bounds: hostS.bounds, center: hostS.center))
+        let plotS = sh.currentPlotFrame
+        let cat1 = CartesianGeometry.point(x: 1, y: 0, viewport: sh.currentViewport,
+                                           plotFrame: plotS).x
+        if let hit = sh.sharedHit(at: CGPoint(x: cat1, y: plotS.midY)) {
+            let ch = hit.crosshair
+            assert(abs(ch.minX - cat1) < 1.0, "准线 x 应对齐类目中心，got \(ch.minX) vs \(cat1)")
+            assert(abs(ch.minY - plotS.minY) < 0.01 && abs(ch.height - plotS.height) < 0.01,
+                   "准线应贯穿绘图区全高，got \(ch)")
+        } else {
+            assertionFailure("应产生整列命中")
+        }
     }
 
     /// 空值（NaN）：断线成多段子路径、connectNulls 直连、柱状跳过、堆叠链不被空值破坏。
@@ -850,7 +914,10 @@ public enum ChartSelfTest {
                      context: HYMChartRenderContext(bounds: host.bounds, center: host.center))
             var moves = 0
             for layer in r.seriesLayerSublayersForTesting() {
-                (layer as? CAShapeLayer)?.path?.applyWithBlock { elem in
+                // 线层 = 有描边无填充（点层为填充形状层，单点 1 子路径会虚高计数）
+                guard let sl = layer as? CAShapeLayer,
+                      sl.strokeColor != nil, sl.fillColor == nil else { continue }
+                sl.path?.applyWithBlock { elem in
                     if elem.pointee.type == .moveToPoint { moves += 1 }
                 }
             }
@@ -915,7 +982,9 @@ public enum ChartSelfTest {
                                             lineDashStyle: .longDashDot)]),
                   theme: CartesianChartTheme(),
                   context: HYMChartRenderContext(bounds: host.bounds, center: host.center))
+        // 线层 = 有描边无填充（点层是填充形状层，无 dashPattern）
         let shapeLayers = r.seriesLayerSublayersForTesting().compactMap { $0 as? CAShapeLayer }
+            .filter { $0.strokeColor != nil && $0.fillColor == nil }
         let dashed = shapeLayers.filter { $0.lineDashPattern?.isEmpty == false }
         assert(dashed.count == 1, "应只有 1 条虚线（预测系列），got \(dashed.count)")
         if let d = dashed.first {
@@ -935,6 +1004,7 @@ public enum ChartSelfTest {
                   theme: theme,
                   context: HYMChartRenderContext(bounds: host2.bounds, center: host2.center))
         let shape2 = r2.seriesLayerSublayersForTesting().compactMap { $0 as? CAShapeLayer }
+            .filter { $0.strokeColor != nil && $0.fillColor == nil }
         assert(shape2.count == 2 && shape2.allSatisfy { $0.lineDashPattern == LineDashStyle.dot.dashPattern },
                "主题级 dot 应应用到全部系列，got \(shape2.map { String(describing: $0.lineDashPattern) })")
     }
