@@ -96,7 +96,6 @@
 |---|---|---|---|
 | 图例 legend（点击隐藏系列） | 高：系列多时必须能关；demo 也需要 | 中 | 需系列显隐状态进 model 渲染层过滤；点击交互区（顶部条） |
 | zones 分段变色（按值区间换色） | 高：超标变色与标线同源 | 中 | 数据结构与 plotLines 同构（value 区间 → 颜色）；曲线形态切分同 negativeColor 限制 |
-| 弹窗文本模板（header/valueSuffix/valueDecimals） | 中：外接弹窗/固定格式不够灵活 | 低-中 | tooltipText 组装层加模板参数 |
 
 ### 第 3 档（高成本，按需）
 | 缺口 | 价值 | 预估成本 | 备注 |
@@ -137,6 +136,7 @@
 
 ## 五、更新日志
 
+- 2026-08-31（`d242e43`）：补齐准线横+竖双向指示（`isCrosshairDualDirectionEnabled`）、弹窗文本模板（`HYMChartTooltipTextOptions` header `{key}`/valueSuffix/valueDecimals + `HYMChartTooltipDataSource`）；两项从缺口表移除。
 - 2026-08-31（`0e3a710`）：补齐第 1 档四项——标线 plotLines、折线 negativeColor、空心圆点、准线样式可配；本文档建立。
 - 2026-08-31（`7318807`）：数据标签、捏合缩放轴向 x/y/xy 对齐。
 - 更新约定：每补齐一项，把对应行 ❌/🟡 改 ✅（标注日期/提交），并从「剩余缺口」表移除。
