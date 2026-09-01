@@ -72,6 +72,9 @@ public struct CartesianSeriesElement {
     /// 空值（数据中的 `.nan`）是否跨空连线：false = 断线留缺口（默认，Highcharts 同款）；
     /// true = 忽略空值直接连到下一个有效点。柱状/条形忽略本参数（空值恒不画柱）。
     public var connectNulls: Bool
+    /// 逐柱/逐条颜色（Column/Bar 消费；nil = 系列色）。按类目索引循环取色——
+    /// 传调色板即 AAChartKit colorByPoint 形态。负值柱优先系列 negativeColor。
+    public var barColors: [UIColor]?
     /// 数据标签（数值标注）系列级开关：nil = 跟随主题 showsDataLabels
     /// （数值显示系列原值——堆叠时也标各段自身值，位置在累计后的点/段上）。
     public var dataLabelsEnabled: Bool?
@@ -83,7 +86,8 @@ public struct CartesianSeriesElement {
     public init(name: String, data: [Double], color: UIColor? = nil, negativeColor: UIColor? = nil,
                 yAxisIndex: Int = 0, lineDashStyle: LineDashStyle? = nil,
                 connectNulls: Bool = false, pointSymbol: PointMarkerSymbol? = nil,
-                dataLabelsEnabled: Bool? = nil) {
+                dataLabelsEnabled: Bool? = nil,
+                barColors: [UIColor]? = nil) {
         self.name = name
         self.data = data
         self.color = color
@@ -93,6 +97,7 @@ public struct CartesianSeriesElement {
         self.connectNulls = connectNulls
         self.pointSymbol = pointSymbol
         self.dataLabelsEnabled = dataLabelsEnabled
+        self.barColors = barColors
     }
 }
 

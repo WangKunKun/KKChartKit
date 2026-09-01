@@ -32,15 +32,17 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
 
         // 4. 每系列：复合 path 收集 → 单 layer 输出
         for (seriesIndex, oneSeries) in dataToDraw.enumerated() {
-            let baseColor = model.series[seriesIndex].color ?? theme.seriesColor
-            let negativeColor = model.series[seriesIndex].negativeColor ?? baseColor
-            let axisIdx = model.series[seriesIndex].effectiveYAxisIndex
+            let element = model.series[seriesIndex]
+            let baseColor = element.color ?? theme.seriesColor
+            let negativeColor = element.negativeColor ?? baseColor
+            let axisIdx = element.effectiveYAxisIndex
             let seriesZeroY = CartesianGeometry.zeroAxisPosition(
                 viewport: currentViewport, plotArea: plotFrame, isHorizontal: false,
                 valueDomain: axisIdx == 1 ? currentSecondaryYDomain : nil)
 
-            var positivePath = UIBezierPath()
-            var negativePath = UIBezierPath()   // 仅负值色独立时才单独成层
+            // 按最终填充色分组的复合 path（同色合一层，大数据量性能与单色一致）：
+            // 取色优先级 = 负值换色 negativeColor > 逐柱色 barColors（按类目循环）> 系列色
+            var pathsByColor: [UIColor: UIBezierPath] = [:]
             var separatorPath = UIBezierPath()  // 堆叠分隔线（同色同宽合并）
 
             for index in visible where index < oneSeries.count && oneSeries[index].isFinite {
@@ -97,11 +99,16 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
                     roundedRect: rect, byRoundingCorners: corners,
                     cornerRadii: CGSize(width: cornerRadius, height: cornerRadius))
 
+                let fillColor: UIColor
                 if value < 0, negativeColor != baseColor {
-                    negativePath.append(columnPath)
+                    fillColor = negativeColor
+                } else if let barColors = element.barColors, !barColors.isEmpty {
+                    fillColor = barColors[index % barColors.count]
                 } else {
-                    positivePath.append(columnPath)
+                    fillColor = baseColor
                 }
+                if pathsByColor[fillColor] == nil { pathsByColor[fillColor] = UIBezierPath() }
+                pathsByColor[fillColor]!.append(columnPath)
 
                 // 堆叠且非同轴最后一个系列：记录分隔线 y
                 if model.isStacked,
@@ -128,11 +135,8 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
                 }
             }
 
-            if !positivePath.isEmpty {
-                seriesLayer.addSublayer(makeColumnLayer(path: positivePath, color: baseColor, theme: theme))
-            }
-            if !negativePath.isEmpty {
-                seriesLayer.addSublayer(makeColumnLayer(path: negativePath, color: negativeColor, theme: theme))
+            for (color, path) in pathsByColor where !path.isEmpty {
+                seriesLayer.addSublayer(makeColumnLayer(path: path, color: color, theme: theme))
             }
             if !separatorPath.isEmpty, let separatorColor = theme.stackSeparatorColor {
                 let line = CAShapeLayer()

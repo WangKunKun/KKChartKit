@@ -558,14 +558,21 @@ public enum CartesianGeometry {
             startY = zeroY
         }
 
-        // 5. 根据正负值确定矩形
+        // 5. 根据正负值确定矩形（最小柱高：非零小值在大量级下不可见 → clamp；
+        //    仅非堆叠生效——堆叠段须按累计精确铺排；0 值不画不给最小高）
+        let minLength = theme.columnMinPointLength
+        let unstacked = baselineValue == nil
         if dataPoint >= 0 {
-            // 正值：从基准线向上到 valueY
-            let height = startY - valueY
-            return CGRect(x: columnX, y: valueY, width: barWidth, height: height)
+            var height = startY - valueY
+            if unstacked, dataPoint > 0, minLength > 0, height < minLength {
+                height = minLength
+            }
+            return CGRect(x: columnX, y: startY - height, width: barWidth, height: height)
         } else {
-            // 负值：从 valueY 向下到基准线
-            let height = valueY - startY
+            var height = valueY - startY
+            if unstacked, minLength > 0, height < minLength {
+                height = minLength
+            }
             return CGRect(x: columnX, y: startY, width: barWidth, height: height)
         }
     }
@@ -616,15 +623,21 @@ public enum CartesianGeometry {
             startX = zeroX
         }
 
-        // 5. 根据正负值确定矩形
+        // 5. 根据正负值确定矩形（最小条长：columnMinPointLength 复用，仅非堆叠生效）
+        let minLength = theme.columnMinPointLength
+        let unstacked = baselineValue == nil
         if dataPoint >= 0 {
-            // 正值：从基准线向右到 valueX
-            let width = valueX - startX
+            var width = valueX - startX
+            if unstacked, dataPoint > 0, minLength > 0, width < minLength {
+                width = minLength
+            }
             return CGRect(x: startX, y: barY, width: width, height: barHeight)
         } else {
-            // 负值：从 valueX 向左到基准线
-            let width = startX - valueX
-            return CGRect(x: valueX, y: barY, width: width, height: barHeight)
+            var width = startX - valueX
+            if unstacked, minLength > 0, width < minLength {
+                width = minLength
+            }
+            return CGRect(x: startX - width, y: barY, width: width, height: barHeight)
         }
     }
 }

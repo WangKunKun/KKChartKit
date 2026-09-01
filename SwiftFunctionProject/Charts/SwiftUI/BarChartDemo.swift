@@ -52,6 +52,10 @@ struct BarChartDemo: View {
     @State private var tooltipHeaderOn = false
     @State private var tooltipSuffix = ""
     @State private var tooltipDecimals = "自动"
+    // —— 最小条长 + 逐条颜色 ——
+    @State private var minPointLengthOn = false
+    @State private var minPointLength = 6.0
+    @State private var barColorsOn = false
 
     // —— 缩放功能测试 ——
     @State private var isZoomEnabled = true
@@ -103,7 +107,8 @@ struct BarChartDemo: View {
             return CartesianSeriesElement(
                 name: "系列\(index + 1)",
                 data: (mirrorStackOn && isLast) ? rawData.map { -$0 } : rawData,
-                color: seriesColors[index % seriesColors.count]
+                color: seriesColors[index % seriesColors.count],
+                barColors: barColorsOn ? seriesColors : nil
             )
         }
         let stacking: StackConfig? = {
@@ -142,6 +147,7 @@ struct BarChartDemo: View {
     private var currentTheme: CartesianChartTheme {
         var t = theme
         t.columnWidthRatio = columnWidthRatio
+        t.columnMinPointLength = minPointLengthOn ? CGFloat(minPointLength) : 0
         t.showsDataLabels = dataLabelsOn
         t.dataLabelPosition = CartesianDataLabelPosition(rawValue: dataLabelPosition) ?? .outsideEnd
         t.columnCornerRadius = columnCornerRadius
@@ -178,6 +184,10 @@ struct BarChartDemo: View {
         ])
 
         let barSection = ChartDemoPanel.DemoSection(title: "条形外观", items: [
+            .toggle(label: "最小柱高（小值仍可见，minPointLength）", value: $minPointLengthOn),
+            .slider(label: "最小柱高数值", value: $minPointLength, range: 2...12, step: 1),
+            .toggle(label: "逐柱颜色（调色板循环，colorByPoint）", value: $barColorsOn),
+
             .slider(label: "条形高度比例", value: $columnWidthRatio, range: 0.3...1.0, step: 0.05),
             .slider(label: "圆角半径", value: $columnCornerRadius, range: 0...10, step: 1),
             .toggle(label: "边框", value: $columnBorderOn),

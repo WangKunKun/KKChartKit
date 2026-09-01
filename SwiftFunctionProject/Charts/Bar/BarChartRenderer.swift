@@ -38,11 +38,12 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
         //    条形长度沿 X 数值轴，视口缩放由 seriesLayer 裁剪兜底）
         let seriesCount = model.isStacked ? 1 : model.series.count
         for (seriesIndex, oneSeries) in dataToDraw.enumerated() {
-            let baseColor = model.series[seriesIndex].color ?? theme.seriesColor
-            let negativeColor = model.series[seriesIndex].negativeColor ?? baseColor
+            let element = model.series[seriesIndex]
+            let baseColor = element.color ?? theme.seriesColor
+            let negativeColor = element.negativeColor ?? baseColor
 
-            var positivePath = UIBezierPath()
-            var negativePath = UIBezierPath()   // 仅负值色独立时才单独成层
+            // 按最终填充色分组的复合 path（同色合一层）：负值换色 > 逐条色 barColors > 系列色
+            var pathsByColor: [UIColor: UIBezierPath] = [:]
             var separatorPath = UIBezierPath()  // 堆叠分隔线（同色同宽合并）
 
             for (index, value) in oneSeries.enumerated() where value.isFinite {
@@ -77,11 +78,16 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
                     roundedRect: rect, byRoundingCorners: corners,
                     cornerRadii: CGSize(width: theme.columnCornerRadius, height: theme.columnCornerRadius))
 
+                let fillColor: UIColor
                 if value < 0, negativeColor != baseColor {
-                    negativePath.append(barPath)
+                    fillColor = negativeColor
+                } else if let barColors = element.barColors, !barColors.isEmpty {
+                    fillColor = barColors[index % barColors.count]
                 } else {
-                    positivePath.append(barPath)
+                    fillColor = baseColor
                 }
+                if pathsByColor[fillColor] == nil { pathsByColor[fillColor] = UIBezierPath() }
+                pathsByColor[fillColor]!.append(barPath)
 
                 // 堆叠且非最后系列：记录分隔线 x
                 if model.isStacked, seriesIndex < model.series.count - 1 {
@@ -106,11 +112,8 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
                 }
             }
 
-            if !positivePath.isEmpty {
-                seriesLayer.addSublayer(makeBarLayer(path: positivePath, color: baseColor, theme: theme))
-            }
-            if !negativePath.isEmpty {
-                seriesLayer.addSublayer(makeBarLayer(path: negativePath, color: negativeColor, theme: theme))
+            for (color, path) in pathsByColor where !path.isEmpty {
+                seriesLayer.addSublayer(makeBarLayer(path: path, color: color, theme: theme))
             }
             if !separatorPath.isEmpty, let separatorColor = theme.stackSeparatorColor {
                 let line = CAShapeLayer()

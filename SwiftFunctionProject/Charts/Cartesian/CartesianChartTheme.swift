@@ -100,6 +100,10 @@ public struct CartesianChartTheme: HYMChartTheme {
     /// 设值后组内间距独立可调，柱宽仍由 columnWidthRatio 决定（超槽自动 clamp）。
     public var columnInnerSpacingRatio: CGFloat?
 
+    /// 最小柱高/条长（值轴方向，Highcharts minPointLength 同款）：非零小值在大量级下
+    /// 完全不可见 → clamp 到该最小长度仍可点击可见；0 = 关闭。仅非堆叠生效
+    /// （堆叠段须按累计值精确铺排，min 长会破坏层叠几何）。默认 0。
+    public var columnMinPointLength: CGFloat
     /// 柱体圆角半径（默认 4）
     public var columnCornerRadius: CGFloat
 
@@ -158,6 +162,7 @@ public struct CartesianChartTheme: HYMChartTheme {
         columnWidthRatio: CGFloat = 0.8,
         columnGroupSpacingRatio: CGFloat = 0,
         columnInnerSpacingRatio: CGFloat? = nil,
+        columnMinPointLength: CGFloat = 0,
         columnCornerRadius: CGFloat = 4,
         columnBorderColor: UIColor? = nil,
         columnBorderWidth: CGFloat = 1,
@@ -202,6 +207,7 @@ public struct CartesianChartTheme: HYMChartTheme {
         self.columnWidthRatio = max(0.1, min(1.0, columnWidthRatio))
         self.columnGroupSpacingRatio = max(0, min(0.5, columnGroupSpacingRatio))
         self.columnInnerSpacingRatio = columnInnerSpacingRatio.map { max(0, min(0.5, $0)) }
+        self.columnMinPointLength = max(0, columnMinPointLength)
         self.columnCornerRadius = max(0, columnCornerRadius)
         self.columnBorderColor = columnBorderColor
         self.columnBorderWidth = max(0, columnBorderWidth)

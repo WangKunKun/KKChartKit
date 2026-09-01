@@ -840,7 +840,104 @@ public enum ChartSelfTest {
         // —— 堆叠 + 平滑 + 面积（下边界倒序曲线，层间无露白/叠色）——
         runSmoothStackedAreaSelfTest()
 
+        // —— 最小柱高/条长 + 逐柱颜色 ——
+        runColumnParitySelfTest()
+
         print("✅ ChartSelfTest passed")
+    }
+
+
+    static func runColumnParitySelfTest() {
+        // 纯几何：viewport y 0...100 → plot 高 160（值→像素 1.6x）
+        var theme = CartesianChartTheme()
+        theme.columnMinPointLength = 8
+        let vp = CartesianViewport(xMin: -0.5, xMax: 2.5, yMin: 0, yMax: 100)
+        let plot = CGRect(x: 50, y: 40, width: 200, height: 160)
+
+        // 1) 小正值（0.5 → 0.8px < 8）→ 柱高 = 8；方向从零轴向上
+        let tiny = CartesianGeometry.columnRect(
+            dataPoint: 0.5, categoryIndex: 0, viewport: vp, plotArea: plot,
+            theme: theme, zeroY: 200)
+        assert(abs(tiny.height - 8) < 1e-6 && abs(tiny.maxY - 200) < 1e-6,
+               "小正值 clamp 到最小柱高且贴零轴，got \(tiny)")
+        // 2) 0 值不画（不给最小高）
+        let zeroRect = CartesianGeometry.columnRect(
+            dataPoint: 0, categoryIndex: 0, viewport: vp, plotArea: plot,
+            theme: theme, zeroY: 200)
+        assert(zeroRect.height < 0.5, "0 值不画，got \(zeroRect)")
+        // 3) 正常值不受影响（50 → 80px > 8）
+        let normal = CartesianGeometry.columnRect(
+            dataPoint: 50, categoryIndex: 0, viewport: vp, plotArea: plot,
+            theme: theme, zeroY: 200)
+        assert(abs(normal.height - 80) < 1e-6, "正常柱高不受 min 影响，got \(normal)")
+        // 4) 负值向下 clamp
+        let tinyNeg = CartesianGeometry.columnRect(
+            dataPoint: -0.5, categoryIndex: 0, viewport: vp, plotArea: plot,
+            theme: theme, zeroY: 200)
+        assert(abs(tinyNeg.height - 8) < 1e-6 && abs(tinyNeg.minY - 200) < 1e-6,
+               "小负值向下 clamp，got \(tinyNeg)")
+        // 5) 堆叠（baselineValue 非 nil）不 clamp
+        let stacked = CartesianGeometry.columnRect(
+            dataPoint: 10.5, categoryIndex: 0, viewport: vp, plotArea: plot,
+            theme: theme, zeroY: 200, baselineValue: 10)
+        assert(stacked.height < 8 + 1e-6, "堆叠段不受 min 影响，got \(stacked)")
+
+        // 6) Bar 最小条长（值轴在 X：视口 x 域传值域 0...100，y 域为类目）
+        let barVP = CartesianViewport(xMin: 0, xMax: 100, yMin: -0.5, yMax: 2.5)
+        let barTiny = CartesianGeometry.barRect(
+            dataPoint: 0.5, categoryIndex: 0, viewport: barVP, plotArea: plot,
+            theme: theme, zeroX: 50)
+        assert(abs(barTiny.width - 8) < 1e-6 && abs(barTiny.minX - 50) < 1e-6,
+               "Bar 小正值 clamp 最小条长且贴零轴，got \(barTiny)")
+
+        // 7) 堆叠圆角回归 + 层详情（此前色组重构曾致圆角层消失——若挂看 report）
+        let rc = ColumnChartRenderer()
+        let hostC = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        rc.mount(into: hostC)
+        rc.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, 20, 30]),
+                     CartesianSeriesElement(name: "b", data: [5, 15, 25])],
+            stacking: .normal),
+                  theme: CartesianChartTheme(),
+                  context: HYMChartRenderContext(bounds: hostC.bounds, center: hostC.center))
+        var layerReport = ""
+        var rounded = 0
+        for l in rc.seriesLayerSublayersForTesting() {
+            var c = 0, ln = 0
+            (l as? CAShapeLayer)?.path?.applyWithBlock { e in
+                if e.pointee.type == .addCurveToPoint { c += 1 }
+                if e.pointee.type == .addLineToPoint { ln += 1 }
+            }
+            if c > 0 { rounded += 1 }
+            layerReport += "[\(type(of: l)) c=\(c) l=\(ln) fill=\((l as? CAShapeLayer).map { String(describing: $0.fillColor) } ?? "-")] "
+        }
+        assert(rounded == 1, "堆叠圆角回归：应 1 层带圆角，got \(rounded) \(layerReport)")
+
+        // 8) 逐柱颜色 → 按色分组层；nil → 单层
+        let r = ColumnChartRenderer()
+        let host = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        r.mount(into: host)
+        r.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, 20, 30, 40],
+                                            barColors: [.systemRed, .systemGreen])]),
+                  theme: CartesianChartTheme(),
+                  context: HYMChartRenderContext(bounds: host.bounds, center: host.center))
+        let fillLayers = r.seriesLayerSublayersForTesting().compactMap { $0 as? CAShapeLayer }
+            .filter { $0.fillColor != nil }
+        assert(fillLayers.count == 2, "两色循环 → 两层，got \(fillLayers.count) \(layerReport)")
+        let fills = Set(fillLayers.map { String(describing: $0.fillColor) })
+        assert(fills.count == 2, "层色互不相同，got \(fills)")
+
+        let r2 = ColumnChartRenderer()
+        let host2 = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        r2.mount(into: host2)
+        r2.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, 20, 30, 40])]),
+                   theme: CartesianChartTheme(),
+                   context: HYMChartRenderContext(bounds: host2.bounds, center: host2.center))
+        let fillLayers2 = r2.seriesLayerSublayersForTesting().compactMap { $0 as? CAShapeLayer }
+            .filter { $0.fillColor != nil }
+        assert(fillLayers2.count == 1, "无逐柱色 → 单层（回归），got \(fillLayers2.count)")
     }
 
     /// 堆叠平滑面积：下边界 = 前一层平滑曲线的倒序回走（旧实现为直连线，

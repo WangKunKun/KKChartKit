@@ -61,6 +61,10 @@ struct ColumnChartDemo: View {
     @State private var tooltipHeaderOn = false
     @State private var tooltipSuffix = ""
     @State private var tooltipDecimals = "自动"
+    // —— 最小柱高/条长 + 逐柱颜色 ——
+    @State private var minPointLengthOn = false
+    @State private var minPointLength = 6.0
+    @State private var barColorsOn = false
 
     // —— 缩放功能测试 ——
     @State private var isZoomEnabled = true
@@ -117,7 +121,8 @@ struct ColumnChartDemo: View {
                 name: "系列\(index + 1)",
                 data: rawData,
                 color: seriesColors[index % seriesColors.count],
-                yAxisIndex: (dualAxisOn && isLast) ? 1 : 0
+                yAxisIndex: (dualAxisOn && isLast) ? 1 : 0,
+                barColors: barColorsOn ? seriesColors : nil
             )
         }
         let stacking: StackConfig? = {
@@ -167,6 +172,7 @@ struct ColumnChartDemo: View {
         t.columnWidthRatio = columnWidthRatio
         t.columnInnerSpacingRatio = columnInnerSpacing >= 0.01 ? columnInnerSpacing : nil
         t.columnGroupSpacingRatio = columnGroupSpacing
+        t.columnMinPointLength = minPointLengthOn ? CGFloat(minPointLength) : 0
         t.showsDataLabels = dataLabelsOn
         t.dataLabelPosition = CartesianDataLabelPosition(rawValue: dataLabelPosition) ?? .outsideEnd
         t.columnCornerRadius = columnCornerRadius
@@ -203,6 +209,10 @@ struct ColumnChartDemo: View {
         ])
 
         let columnSection = ChartDemoPanel.DemoSection(title: "柱体外观", items: [
+            .toggle(label: "最小柱高（小值仍可见，minPointLength）", value: $minPointLengthOn),
+            .slider(label: "最小柱高数值", value: $minPointLength, range: 2...12, step: 1),
+            .toggle(label: "逐柱颜色（调色板循环，colorByPoint）", value: $barColorsOn),
+
             .slider(label: "柱体宽度比例", value: $columnWidthRatio, range: 0.3...1.0, step: 0.05),
             .slider(label: "组内柱间距（0=自动）", value: $columnInnerSpacing, range: 0...0.5, step: 0.05),
             .slider(label: "组间距（组间空隙比例）", value: $columnGroupSpacing, range: 0...0.5, step: 0.05),
