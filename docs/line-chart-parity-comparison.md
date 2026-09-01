@@ -98,24 +98,24 @@
 | zones 分段变色（按值区间换色） | 高：超标变色与标线同源 | 中 | 数据结构与 plotLines 同构（value 区间 → 颜色）；曲线形态切分同 negativeColor 限制 |
 
 ### 第 3 档（高成本，按需）
-| 缺口 | 价值 | 预估成本 | 备注 |
-|---|---|---|---|
-| Y 轴 reversed | 中 | 高 | 几何符号翻转，波及刻度/网格/零轴/命中/堆叠 |
-| 面积填充到自定义线（fillFormatter） | 中 | 高 | 面积下边界泛化 |
-| HorizontalBezier 形态 | 低（锦上添花） | 低 | 每段 addCurve 控制点水平；共享全部下游逻辑 |
-| 逐点颜色数组 / 点上图标 | 中 | 中 | 点层循环按索引取色/贴图 |
-| 点 hover/selected 态（选中放大） | 中 | 中 | applySelection 目前空实现；需命中几何→视觉反馈 |
-| 系列阴影 shadow | 低 | 低 | CALayer.shadowXxx 直配 |
-| 色带 plotBands | 中 | 低-中 | 与标线同源（区间矩形层） |
-| 准线横+竖双向 | 低 | 低 | crosshairRect 已有几何，加垂直分量 |
-| 轴标签旋转 | 低 | 低-中 | tick label transform |
-| 轴百分比留白 / 类目标签居中 | 低 | 中 | makeValueDomain/布局微调 |
-| 对数轴 logarithmic | 低（受众窄） | 高 | 值映射整条链路换算 |
-| 多 Y 轴（>2） | 低 | 高 | 有效轴索引泛化 |
-| 双击改放大语义 | — | — | 不建议（我们是重置，语义更好） |
-| tension 曲线张力 | — | — | 不做（F-C 结论，见记忆 smoothing-algorithm-comparison） |
-| polar 极坐标 | 低 | 很高 | 整套坐标系 |
-| 多图联动 sync | 低 | 中 | 可后续以手势广播组件提供 |
+| 缺口                       | 价值      | 预估成本 | 备注                                            |
+| ------------------------ | ------- | ---- | --------------------------------------------- |
+| Y 轴 reversed             | 中       | 高    | 几何符号翻转，波及刻度/网格/零轴/命中/堆叠                       |
+| 面积填充到自定义线（fillFormatter） | 中       | 高    | 面积下边界泛化                                       |
+| HorizontalBezier 形态      | 低（锦上添花） | 低    | 每段 addCurve 控制点水平；共享全部下游逻辑                    |
+| 逐点颜色数组 / 点上图标            | 中       | 中    | 点层循环按索引取色/贴图                                  |
+| 点 hover/selected 态（选中放大） | 中       | 中    | applySelection 目前空实现；需命中几何→视觉反馈               |
+| 系列阴影 shadow              | 低       | 低    | CALayer.shadowXxx 直配                          |
+| 色带 plotBands             | 中       | 低-中  | 与标线同源（区间矩形层）                                  |
+| 准线横+竖双向                  | 低       | 低    | crosshairRect 已有几何，加垂直分量                      |
+| 轴标签旋转                    | 低       | 低-中  | tick label transform                          |
+| 轴百分比留白 / 类目标签居中          | 低       | 中    | makeValueDomain/布局微调                          |
+| 对数轴 logarithmic          | 低（受众窄）  | 高    | 值映射整条链路换算                                     |
+| 多 Y 轴（>2）                | 低       | 高    | 有效轴索引泛化                                       |
+| 双击改放大语义                  | —       | —    | 不建议（我们是重置，语义更好）                               |
+| tension 曲线张力             | —       | —    | 不做（F-C 结论，见记忆 smoothing-algorithm-comparison） |
+| polar 极坐标                | 低       | 很高   | 整套坐标系                                         |
+| 多图联动 sync                | 低       | 中    | 可后续以手势广播组件提供                                  |
 
 ## 三、我们独有/领先项
 
