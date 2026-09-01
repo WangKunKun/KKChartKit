@@ -27,13 +27,13 @@
 | 虚线 11 种（主题级 + 系列级） | ✅ | ✅ | ✅（另有 lineDashPhase） |
 | 负值换色 negativeColor | ✅ 直线（跨零插值切分）/🟡 阶梯（数据点切分）/🟡 曲线（不切，用系列色） | ✅ | ❌ |
 | 分段变色 zones（按值区间） | ❌ | ✅ | ❌（可用逐点色半实现） |
-| 系列阴影 shadow | ❌ | ✅ | ✅ |
+| 系列阴影 shadow（主题默认 + 系列级覆盖） | ✅ 2026-09-01 | ✅ | ✅ |
 | 点形状（圆/方/菱/正三角/倒三角） | ✅ 系列级覆盖 | ✅ 类似集合 | 仅圆 |
 | 空心圆点（holeRadius/holeColor） | ✅ 2026-08-31 | ❌ | ✅ |
 | 逐点颜色数组 / 点上放图标 | ❌ | 部分（icon） | ✅ |
 | 点 hover/selected 态（选中放大） | ❌（applySelection 空实现） | ✅ states | ✅ highlight |
 | 标线（阈值线，plotLines/LimitLine） | ✅ 2026-08-31（含标签/虚线/轴绑定） | ✅（另有 plotBands 色带） | ✅ |
-| 色带 plotBands（区间背景色块） | ❌ | ✅ | ❌（LimitLine 无色带） |
+| 色带 plotBands（区间背景色块 + 带内标签） | ✅ 2026-09-01 | ✅ | ❌（LimitLine 无色带） |
 
 ### 3. 面积填充
 
@@ -105,8 +105,6 @@
 | HorizontalBezier 形态      | 低（锦上添花） | 低    | 每段 addCurve 控制点水平；共享全部下游逻辑                    |
 | 逐点颜色数组 / 点上图标            | 中       | 中    | 点层循环按索引取色/贴图                                  |
 | 点 hover/selected 态（选中放大） | 中       | 中    | applySelection 目前空实现；需命中几何→视觉反馈               |
-| 系列阴影 shadow              | 低       | 低    | CALayer.shadowXxx 直配                          |
-| 色带 plotBands             | 中       | 低-中  | 与标线同源（区间矩形层）                                  |
 | 准线横+竖双向                  | 低       | 低    | crosshairRect 已有几何，加垂直分量                      |
 | 轴标签旋转                    | 低       | 低-中  | tick label transform                          |
 | 轴百分比留白 / 类目标签居中          | 低       | 中    | makeValueDomain/布局微调                          |
@@ -136,6 +134,7 @@
 
 ## 五、更新日志
 
+- 2026-09-01（`24ff680`）：补齐色带 plotBands（区间背景块 + 带内标签，网格上系列下、越界裁剪/隐现、次轴绑定）+ 系列阴影 shadow（主题 `seriesShadow` 默认 + 系列级覆盖；隐形 caster 挂裁剪层外，贴边投影不被 seriesLayer 裁掉）；两项从缺口表移除。
 - 2026-08-31（`d242e43`）：补齐准线横+竖双向指示（`isCrosshairDualDirectionEnabled`）、弹窗文本模板（`HYMChartTooltipTextOptions` header `{key}`/valueSuffix/valueDecimals + `HYMChartTooltipDataSource`）；两项从缺口表移除。
 - 2026-08-31（`0e3a710`）：补齐第 1 档四项——标线 plotLines、折线 negativeColor、空心圆点、准线样式可配；本文档建立。
 - 2026-08-31（`7318807`）：数据标签、捏合缩放轴向 x/y/xy 对齐。
