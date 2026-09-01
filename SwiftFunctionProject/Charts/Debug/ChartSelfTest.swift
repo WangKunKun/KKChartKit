@@ -843,6 +843,9 @@ public enum ChartSelfTest {
         // —— 最小柱高/条长 + 逐柱颜色 ——
         runColumnParitySelfTest()
 
+        // —— 色带（plotBands）+ 系列阴影 ——
+        runPlotBandShadowSelfTest()
+
         print("✅ ChartSelfTest passed")
     }
 
@@ -938,6 +941,143 @@ public enum ChartSelfTest {
         let fillLayers2 = r2.seriesLayerSublayersForTesting().compactMap { $0 as? CAShapeLayer }
             .filter { $0.fillColor != nil }
         assert(fillLayers2.count == 1, "无逐柱色 → 单层（回归），got \(fillLayers2.count)")
+    }
+
+    /// 色带（plotBands）：方向/越界/裁剪/z 序（网格上、系列下）+ 系列阴影（柱/线层 shadowPath）。
+    static func runPlotBandShadowSelfTest() {
+        func walkLayers(_ l: CALayer, _ visit: (CALayer) -> Void) {
+            visit(l)
+            l.sublayers?.forEach { walkLayers($0, visit) }
+        }
+        func allLayers(of host: UIView) -> [CALayer] {
+            var out: [CALayer] = []
+            walkLayers(host.layer) { out.append($0) }
+            return out
+        }
+
+        // 1) Column：水平横带（宽 = plot 宽）+ 越界不画 + 反序 from/to 归一 + 标签存在
+        let rc = ColumnChartRenderer()
+        let hostC = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        rc.mount(into: hostC)
+        let bandGreen = UIColor.systemGreen.withAlphaComponent(0.12)
+        rc.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [20, 55, 45, 30])],
+            plotBands: [CartesianPlotBand(from: 40, to: 70, color: bandGreen, label: "达标区"),
+                        CartesianPlotBand(from: 500, to: 600, color: .systemOrange),  // 域外（不画）
+                        CartesianPlotBand(from: 35, to: 15, color: .systemBlue)]),    // 反序 → 15...35
+                  theme: CartesianChartTheme(),
+                  context: HYMChartRenderContext(bounds: hostC.bounds, center: hostC.center))
+        let layersC = allLayers(of: hostC)
+        let bandLayers = layersC.filter {
+            $0 is CALayer && !($0 is CAShapeLayer) && !($0 is CATextLayer) && !($0 is CAGradientLayer)
+                && $0.backgroundColor != nil
+        }
+        assert(bandLayers.count == 2, "域内两条带（90-95 越界不画；反序算一条），got \(bandLayers.count)\n"
+               + bandLayers.map { String(describing: $0.backgroundColor) }.joined(separator: ","))
+        let wideBands = bandLayers.filter { $0.frame.width > 200 && $0.frame.height > 10 && $0.frame.height < 100 }
+        assert(wideBands.count == 2, "两条都应为贯穿 plot 的水平横带，got \(wideBands.count)")
+        let labelTexts = layersC.compactMap { ($0 as? CATextLayer)?.string as? String }
+        assert(labelTexts.contains("达标区"), "色带标签文本存在")
+        // z 序：带层在 rootLayer 中的索引 < seriesLayer（画在系列之下）
+        let seriesBody = rc.seriesLayerSublayersForTesting().compactMap { $0 as? CAShapeLayer }
+            .first { $0.fillColor != nil }
+        let rootChildren = (seriesBody?.superlayer?.superlayer?.sublayers ?? [])
+        if let seriesIdx = rootChildren.firstIndex(where: { $0 === seriesBody?.superlayer }),
+           let bandIdx = rootChildren.firstIndex(where: { $0 === bandLayers[0] }) {
+            assert(bandIdx < seriesIdx, "色带应在系列层之下：band=\(bandIdx) series=\(seriesIdx)")
+        } else {
+            assertionFailure("rootLayer 里应能找到带层与系列层")
+        }
+
+        // 2) Bar：竖带（值轴在 X → 高 = plot 高、宽随值区间）
+        let rb = BarChartRenderer()
+        let hostB = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        rb.mount(into: hostB)
+        rb.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [20, 55, 45])],
+            plotBands: [CartesianPlotBand(from: 40, to: 70, color: bandGreen)]),
+                  theme: CartesianChartTheme(),
+                  context: HYMChartRenderContext(bounds: hostB.bounds, center: hostB.center))
+        let bandB = allLayers(of: hostB).filter {
+            !($0 is CAShapeLayer) && !($0 is CATextLayer) && $0.backgroundColor == bandGreen.cgColor
+        }
+        assert(bandB.count == 1 && bandB[0].frame.height > 100 && bandB[0].frame.width > 10,
+               "Bar 色带应为竖带（高 ≈ plot 高），got \(bandB.count) \(bandB.map { $0.frame })")
+
+        // 3) 部分越界裁剪：band 90...150 只留域内部分，frame 不超出宿主 bounds
+        let rc2 = ColumnChartRenderer()
+        let hostC2 = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        rc2.mount(into: hostC2)
+        rc2.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [20, 55, 45, 30])],
+            yAxis: CartesianAxisModel(kind: .value, min: 0, max: 100),
+            plotBands: [CartesianPlotBand(from: 90, to: 150, color: .systemOrange)]),
+                   theme: CartesianChartTheme(),
+                   context: HYMChartRenderContext(bounds: hostC2.bounds, center: hostC2.center))
+        let clipped = allLayers(of: hostC2).filter {
+            !($0 is CAShapeLayer) && !($0 is CATextLayer) && $0.backgroundColor == UIColor.systemOrange.cgColor
+        }
+        assert(clipped.count == 1 && hostC2.bounds.contains(clipped[0].frame),
+               "部分越界带应裁剪回 plot 区，got \(clipped.map { $0.frame })")
+
+        // 4) 次轴色带（yAxisIndex=1）：按次值域换算并绘制
+        let rc3 = ColumnChartRenderer()
+        let hostC3 = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        rc3.mount(into: hostC3)
+        var themeD = CartesianChartTheme()
+        themeD.seriesShadow = CartesianShadowStyle()
+        rc3.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [20, 40, 30]),
+                     CartesianSeriesElement(name: "b", data: [10, 20, 12], yAxisIndex: 1)],
+            secondaryYAxis: CartesianAxisModel(kind: .value),
+            plotBands: [CartesianPlotBand(from: 5, to: 15, yAxisIndex: 1, color: .systemPurple)]),
+                   theme: themeD,
+                   context: HYMChartRenderContext(bounds: hostC3.bounds, center: hostC3.center))
+        let secBand = allLayers(of: hostC3).filter {
+            !($0 is CAShapeLayer) && !($0 is CATextLayer) && $0.backgroundColor == UIColor.systemPurple.cgColor
+        }
+        assert(secBand.count == 1, "次轴色带按次值域绘制，got \(secBand.count)")
+
+        // 5) 阴影：theme.seriesShadow → 每系列一根隐形 caster（挂 rootLayer、
+        //    seriesLayer 之下——贴轴柱底的投影不能被 masksToBounds 裁掉）
+        let casters3 = allLayers(of: hostC3).compactMap { $0 as? CAShapeLayer }
+            .filter { $0.shadowPath != nil && $0.shadowOpacity > 0 }
+        assert(casters3.count == 2, "两个系列各一根 caster，got \(casters3.count)")
+        let bodies3 = rc3.seriesLayerSublayersForTesting().compactMap { $0 as? CAShapeLayer }
+            .filter { $0.fillColor != nil }
+        assert(bodies3.allSatisfy { $0.shadowOpacity == 0 },
+               "柱体本体层不带阴影（投影全由 caster 出）")
+        let seriesBody3 = rc3.seriesLayerSublayersForTesting().compactMap { $0 as? CAShapeLayer }
+            .first { $0.fillColor != nil }
+        let rootChildren3 = seriesBody3?.superlayer?.superlayer?.sublayers ?? []
+        if let sIdx = rootChildren3.firstIndex(where: { $0 === seriesBody3?.superlayer }),
+           let cIdx = rootChildren3.firstIndex(where: { $0 === casters3.first }) {
+            assert(cIdx < sIdx, "caster 应在系列层之下：caster=\(cIdx) series=\(sIdx)")
+        }
+        let rc4 = ColumnChartRenderer()
+        let hostC4 = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        rc4.mount(into: hostC4)
+        rc4.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, 20, 30])]),
+                   theme: CartesianChartTheme(),
+                   context: HYMChartRenderContext(bounds: hostC4.bounds, center: hostC4.center))
+        let casters4 = allLayers(of: hostC4).compactMap { $0 as? CAShapeLayer }
+            .filter { $0.shadowPath != nil && $0.shadowOpacity > 0 }
+        assert(casters4.isEmpty, "默认无阴影 → 无 caster，got \(casters4.count)")
+
+        // 6) 折线阴影：系列级 shadow 覆盖主题 nil → 一根 caster（半径取系列级样式）
+        let rl = LineChartRenderer()
+        let hostL = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        rl.mount(into: hostL)
+        rl.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: [10, 30, 20, 40],
+                                            shadow: CartesianShadowStyle(offsetY: 2.5, blurRadius: 3, opacity: 0.35))]),
+                  theme: CartesianChartTheme(),
+                  context: HYMChartRenderContext(bounds: hostL.bounds, center: hostL.center))
+        let castersL = allLayers(of: hostL).compactMap { $0 as? CAShapeLayer }
+            .filter { $0.shadowPath != nil && $0.shadowOpacity > 0 }
+        assert(castersL.count == 1 && abs(castersL[0].shadowRadius - 3) < 1e-6,
+               "折线一根 caster 且半径取系列级样式，got \(castersL.count)")
     }
 
     /// 堆叠平滑面积：下边界 = 前一层平滑曲线的倒序回走（旧实现为直连线，

@@ -65,6 +65,9 @@ struct ColumnChartDemo: View {
     @State private var minPointLengthOn = false
     @State private var minPointLength = 6.0
     @State private var barColorsOn = false
+    // —— 色带（plotBands）+ 系列阴影 ——
+    @State private var plotBandsOn = false
+    @State private var seriesShadowOn = false
 
     // —— 缩放功能测试 ——
     @State private var isZoomEnabled = true
@@ -163,6 +166,12 @@ struct ColumnChartDemo: View {
             plotLines: plotLinesOn
                 ? [CartesianPlotLine(value: plotLineValue, color: .systemRed,
                                      dashStyle: .dash, label: "阈值 \(Int(plotLineValue))")]
+                : [],
+            plotBands: plotBandsOn
+                ? [CartesianPlotBand(from: 40, to: 70, label: "达标区 40–70"),
+                   CartesianPlotBand(from: 70, to: 100,
+                                     color: UIColor.systemOrange.withAlphaComponent(0.10),
+                                     label: "预警区 70+")]
                 : []
         )
     }
@@ -182,6 +191,7 @@ struct ColumnChartDemo: View {
         if stackSeparatorOn {
             t.stackSeparatorColor = stackSeparatorColor
         }
+        t.seriesShadow = seriesShadowOn ? CartesianShadowStyle() : nil
         return t
     }
 
@@ -219,6 +229,7 @@ struct ColumnChartDemo: View {
             .slider(label: "圆角半径", value: $columnCornerRadius, range: 0...10, step: 1),
             .toggle(label: "边框", value: $columnBorderOn),
             .color(label: "边框颜色", value: $columnBorderColor),
+            .toggle(label: "柱体阴影（seriesShadow）", value: $seriesShadowOn),
         ])
 
         let nullSection = ChartDemoPanel.DemoSection(title: "空值", items: [
@@ -277,7 +288,10 @@ struct ColumnChartDemo: View {
             .picker(label: "标签位置", selection: $dataLabelPosition,
                     options: CartesianDataLabelPosition.allCases.map { $0.rawValue }),
         ])
-        return ChartDemoPanel(sections: [dataSection, xAxisSection, nullSection, columnSection, stackSection, axisSection, gestureSection, plotLineSection, labelSection, tooltipSection, animationSection])
+        let plotBandSection = ChartDemoPanel.DemoSection(title: "色带（区间背景）", items: [
+            .toggle(label: "色带示例（40–70 达标 / 70+ 预警，plotBands）", value: $plotBandsOn),
+        ])
+        return ChartDemoPanel(sections: [dataSection, xAxisSection, nullSection, columnSection, stackSection, axisSection, gestureSection, plotLineSection, plotBandSection, labelSection, tooltipSection, animationSection])
     }
 
     private func regenerateData() {

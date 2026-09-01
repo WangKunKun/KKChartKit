@@ -20,6 +20,7 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
 
         // 清空旧柱体（render 与动画/手势的逐帧重画共用本方法，必须先清后画）
         seriesLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
+        clearSeriesShadowCasters()
 
         // 1. 计算零轴位置（次轴系列在循环内按所属值域另算）
 
@@ -137,6 +138,15 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
 
             for (color, path) in pathsByColor where !path.isEmpty {
                 seriesLayer.addSublayer(makeColumnLayer(path: path, color: color, theme: theme))
+            }
+            // 阴影走隐形 caster（挂裁剪层外）：柱底贴 plot 下边界，画在 seriesLayer
+            // 内会被 masksToBounds 裁光
+            if let shadowStyle = element.shadow ?? theme.seriesShadow {
+                let union = UIBezierPath()
+                for (_, p) in pathsByColor where !p.isEmpty { union.append(p) }
+                if !union.isEmpty {
+                    addSeriesShadowCaster(path: union.cgPath, style: shadowStyle)
+                }
             }
             if !separatorPath.isEmpty, let separatorColor = theme.stackSeparatorColor {
                 let line = CAShapeLayer()

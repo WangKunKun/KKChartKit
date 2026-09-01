@@ -479,6 +479,9 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
         addTickLabels(model: model, theme: cartTheme)
         addTitleLabel(model: model, theme: cartTheme)
 
+        // 4.5) 色带（plotBands）：画在网格之上、系列之下
+        drawPlotBands(model: model, theme: cartTheme)
+
         // 5) series 挂载层（裁剪到 plot 区，防止缩放后溢出），子类画在其下
         //
         // 坐标系约定（关键）：子类几何函数返回 **view 绝对坐标**（与 grid/axis 的 path 一致）。
@@ -488,11 +491,104 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
         seriesLayer.bounds.origin = currentPlotFrame.origin
         seriesLayer.masksToBounds = true
         rootLayer.addSublayer(seriesLayer)
+        clearSeriesShadowCasters()
         if model.maxPointCount > 0 {
             drawSeries(model: model, theme: theme, plotFrame: currentPlotFrame)
         }
         // 6) 标线（阈值参考线）：画在系列之上，超出当前值域自动隐藏（缩放平移跟随）
         drawPlotLines(model: model, theme: cartTheme)
+    }
+
+    // MARK: - 色带（plotBands）
+    /// 值轴色带：垂直图 = 绘图区内水平横带，水平图（Bar）= 竖带；画在网格之上、系列之下。
+    /// 区间与当前值域无交集时不画；部分越界裁剪到绘图区（缩放平移跟随）。
+    private func drawPlotBands(model: CartesianChartModel, theme: CartesianChartTheme) {
+        guard !model.plotBands.isEmpty else { return }
+        for band in model.plotBands {
+            let lo = min(band.from, band.to), hi = max(band.from, band.to)
+            let axisIdx = band.yAxisIndex == 1 ? 1 : 0
+            let domain: ClosedRange<Double>?
+            if isHorizontalValueAxis {
+                domain = axisIdx == 0 ? currentViewport.xDomain : nil   // 水平图无次轴
+            } else {
+                domain = axisIdx == 1 ? currentSecondaryYDomain : currentViewport.yDomain
+            }
+            guard let domain, lo <= domain.upperBound, hi >= domain.lowerBound else { continue }
+
+            var frame: CGRect
+            if isHorizontalValueAxis {
+                let x1 = CartesianGeometry.point(x: lo, y: 0,
+                                                 viewport: currentViewport,
+                                                 plotFrame: currentPlotFrame).x
+                let x2 = CartesianGeometry.point(x: hi, y: 0,
+                                                 viewport: currentViewport,
+                                                 plotFrame: currentPlotFrame).x
+                frame = CGRect(x: min(x1, x2), y: currentPlotFrame.minY,
+                               width: abs(x2 - x1), height: currentPlotFrame.height)
+            } else {
+                let y1 = screenPoint(x: 0, y: lo, yAxisIndex: axisIdx).y
+                let y2 = screenPoint(x: 0, y: hi, yAxisIndex: axisIdx).y
+                frame = CGRect(x: currentPlotFrame.minX, y: min(y1, y2),
+                               width: currentPlotFrame.width, height: abs(y2 - y1))
+            }
+            guard frame.intersects(currentPlotFrame) else { continue }
+            frame = frame.intersection(currentPlotFrame)
+            guard !frame.isNull, frame.width >= 0.5, frame.height >= 0.5 else { continue }
+
+            let bandLayer = CALayer()
+            bandLayer.frame = frame
+            bandLayer.backgroundColor = band.color.cgColor
+            rootLayer.addSublayer(bandLayer)
+
+            if let text = band.label {
+                let fontSize = theme.tickLabelFont.pointSize
+                let size = dataLabelTextSize(text, fontSize: fontSize)
+                // 带中央；带比文字矮时上下钳回带内（贴上/下沿）
+                let half = size.height / 2
+                let cy = max(frame.minY + min(half, frame.height / 2),
+                             min(frame.maxY - min(half, frame.height / 2), frame.midY))
+                rootLayer.addSublayer(makeDataLabelLayer(
+                    text: text, fontSize: fontSize,
+                    color: band.color.withAlphaComponent(1),
+                    center: CGPoint(x: frame.midX, y: cy)))
+            }
+        }
+    }
+
+    // MARK: - 系列阴影
+    /// 应用系列阴影到系列主体层。shadowPath 显式给复合 path（否则 CALayer 离屏
+    /// 反推影子形状，1440 柱大数据量不可接受）。nil 样式直接跳过。
+    func applySeriesShadow(to layer: CALayer, style: CartesianShadowStyle?, path: CGPath?) {
+        guard let style else { return }
+        layer.shadowColor = style.color.cgColor
+        layer.shadowOpacity = style.opacity
+        layer.shadowOffset = CGSize(width: style.offsetX, height: style.offsetY)
+        layer.shadowRadius = style.blurRadius
+        if let path { layer.shadowPath = path }
+    }
+
+    /// 系列阴影投射层（隐形层只投影不画本体）。柱/条底贴零轴（= plot 下边界），
+    /// seriesLayer masksToBounds 会把向下投影全部裁掉——阴影必须挂裁剪层外
+    /// （rootLayer、seriesLayer 之下）。每次 drawSeries 先 clear 再逐系列 add。
+    private var seriesShadowCasters: [CALayer] = []
+
+    func clearSeriesShadowCasters() {
+        seriesShadowCasters.forEach { $0.removeFromSuperlayer() }
+        seriesShadowCasters = []
+    }
+
+    /// 把复合 path 作为投影形状加一层隐形 caster（fill/stroke 全空，只出 shadow）。
+    func addSeriesShadowCaster(path: CGPath, style: CartesianShadowStyle) {
+        let caster = CAShapeLayer()
+        caster.fillColor = nil
+        caster.strokeColor = nil
+        applySeriesShadow(to: caster, style: style, path: path)
+        if let parent = seriesLayer.superlayer {
+            parent.insertSublayer(caster, below: seriesLayer)
+        } else {
+            rootLayer.addSublayer(caster)
+        }
+        seriesShadowCasters.append(caster)
     }
 
     // MARK: - 标线（plotLines）

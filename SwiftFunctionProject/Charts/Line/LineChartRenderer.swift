@@ -53,6 +53,7 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
         seriesLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
         lastPointFrames.removeAll()
         lineLayers.removeAll()
+        clearSeriesShadowCasters()
 
         // 堆叠：normal=符号链累计 / percent=百分比累计；非堆叠用原值
         let dataToDraw = model.stackedDrawValues
@@ -241,6 +242,14 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
                 line.lineDashPattern = (element.lineDashStyle ?? theme.lineDashStyle).dashPattern
                 seriesLayer.addSublayer(line)
                 lineLayers.append(line)
+            }
+            // 阴影走隐形 caster（挂裁剪层外）：贴 plot 边缘的线段投影不被裁剪
+            if let shadowStyle = element.shadow ?? theme.seriesShadow {
+                let union = UIBezierPath()
+                for (p, _) in lineOutlines where !p.isEmpty { union.append(p) }
+                if !union.isEmpty {
+                    addSeriesShadowCaster(path: union.cgPath, style: shadowStyle)
+                }
             }
 
             // 数据点（画在有效数据点位置，与阶梯形态无关；空值处不画点）。

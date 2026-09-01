@@ -75,6 +75,9 @@ public struct CartesianSeriesElement {
     /// 逐柱/逐条颜色（Column/Bar 消费；nil = 系列色）。按类目索引循环取色——
     /// 传调色板即 AAChartKit colorByPoint 形态。负值柱优先系列 negativeColor。
     public var barColors: [UIColor]?
+    /// 系列阴影（nil = 跟随主题 seriesShadow；两者皆 nil = 无阴影）。
+    /// 作用于系列主体层：柱/条体、折线（Highcharts shadow 同款）。
+    public var shadow: CartesianShadowStyle?
     /// 数据标签（数值标注）系列级开关：nil = 跟随主题 showsDataLabels
     /// （数值显示系列原值——堆叠时也标各段自身值，位置在累计后的点/段上）。
     public var dataLabelsEnabled: Bool?
@@ -87,7 +90,8 @@ public struct CartesianSeriesElement {
                 yAxisIndex: Int = 0, lineDashStyle: LineDashStyle? = nil,
                 connectNulls: Bool = false, pointSymbol: PointMarkerSymbol? = nil,
                 dataLabelsEnabled: Bool? = nil,
-                barColors: [UIColor]? = nil) {
+                barColors: [UIColor]? = nil,
+                shadow: CartesianShadowStyle? = nil) {
         self.name = name
         self.data = data
         self.color = color
@@ -98,6 +102,7 @@ public struct CartesianSeriesElement {
         self.pointSymbol = pointSymbol
         self.dataLabelsEnabled = dataLabelsEnabled
         self.barColors = barColors
+        self.shadow = shadow
     }
 }
 
@@ -128,6 +133,54 @@ public struct CartesianPlotLine {
     }
 }
 
+/// 色带（值轴区间背景色块；Highcharts plotBands 同款）。
+/// 值轴语义：垂直图 = 绘图区内水平横带，水平图（Bar）= 竖带；画在网格之上、系列之下。
+/// 区间与当前值域无交集时自动不画（缩放平移后跟随显隐）；部分越界裁剪到绘图区。
+public struct CartesianPlotBand {
+    /// 区间下界（按 `yAxisIndex` 绑定值轴；from/to 大小不限，内部按 min/max）
+    public var from: Double
+    /// 区间上界
+    public var to: Double
+    /// 绑定值轴（0 = 主轴，1 = 次轴；水平图仅主轴）
+    public var yAxisIndex: Int
+    /// 带体颜色（建议半透明，如 `UIColor.systemGreen.withAlphaComponent(0.12)`）
+    public var color: UIColor
+    /// 带内文字（nil = 无标签；置于带中央，颜色取带色同色系不透明版）
+    public var label: String?
+
+    public init(from: Double, to: Double, yAxisIndex: Int = 0,
+                color: UIColor = UIColor.systemGreen.withAlphaComponent(0.12),
+                label: String? = nil) {
+        self.from = from
+        self.to = to
+        self.yAxisIndex = yAxisIndex
+        self.color = color
+        self.label = label
+    }
+}
+
+/// 系列阴影样式（Highcharts shadow / Charts shadowColor 系同款）。
+/// 作用于系列主体层（柱/条体复合 path、折线）；nil = 无阴影。
+public struct CartesianShadowStyle {
+    public var color: UIColor
+    public var offsetX: CGFloat
+    public var offsetY: CGFloat
+    /// 模糊半径（Highcharts shadow.width 同义）
+    public var blurRadius: CGFloat
+    /// 阴影不透明度（0...1，与颜色自身 alpha 相乘）
+    public var opacity: Float
+
+    public init(color: UIColor = .black,
+                offsetX: CGFloat = 0, offsetY: CGFloat = 2,
+                blurRadius: CGFloat = 4, opacity: Float = 0.25) {
+        self.color = color
+        self.offsetX = offsetX
+        self.offsetY = offsetY
+        self.blurRadius = max(0, blurRadius)
+        self.opacity = min(1, max(0, opacity))
+    }
+}
+
 /// 轴系图表数据（折线/柱状等共用）。
 public struct CartesianChartModel: HYMChartModel {
     public var title: String?
@@ -140,6 +193,8 @@ public struct CartesianChartModel: HYMChartModel {
     public var stacking: StackConfig?
     /// 标线（阈值参考线，画在系列之上；可为多条）
     public var plotLines: [CartesianPlotLine]
+    /// 色带（区间背景色块，画在网格之上、系列之下；可为多条）
+    public var plotBands: [CartesianPlotBand]
 
     public init(title: String? = nil,
                 series: [CartesianSeriesElement],
@@ -147,7 +202,8 @@ public struct CartesianChartModel: HYMChartModel {
                 yAxis: CartesianAxisModel = CartesianAxisModel(kind: .value),
                 secondaryYAxis: CartesianAxisModel? = nil,
                 stacking: StackConfig? = nil,
-                plotLines: [CartesianPlotLine] = []) {
+                plotLines: [CartesianPlotLine] = [],
+                plotBands: [CartesianPlotBand] = []) {
         self.title = title
         self.series = series
         self.xAxis = xAxis
@@ -155,6 +211,7 @@ public struct CartesianChartModel: HYMChartModel {
         self.secondaryYAxis = secondaryYAxis
         self.stacking = stacking
         self.plotLines = plotLines
+        self.plotBands = plotBands
     }
 
     /// 最长 series 的点数（类目数）。

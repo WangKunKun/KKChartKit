@@ -120,6 +120,11 @@ public struct CartesianChartTheme: HYMChartTheme {
     /// 堆叠柱体间的分隔线宽度（默认 1）
     public var stackSeparatorWidth: CGFloat
 
+    // ===== 系列阴影 =====
+    /// 系列阴影默认样式（nil = 无阴影；系列级 `shadow` 可覆盖）。
+    /// 作用于系列主体层：柱/条体、折线。建议浅偏移低透明度。
+    public var seriesShadow: CartesianShadowStyle?
+
     // ===== 动画配置 =====
     /// 柱状图入场动画：柱体从零轴升起（默认 true）
     public var showsColumnEntranceAnimation: Bool
@@ -168,6 +173,7 @@ public struct CartesianChartTheme: HYMChartTheme {
         columnBorderWidth: CGFloat = 1,
         stackSeparatorColor: UIColor? = nil,
         stackSeparatorWidth: CGFloat = 1,
+        seriesShadow: CartesianShadowStyle? = nil,
         showsColumnEntranceAnimation: Bool = true
     ) {
         self.backgroundColor = backgroundColor
@@ -213,6 +219,7 @@ public struct CartesianChartTheme: HYMChartTheme {
         self.columnBorderWidth = max(0, columnBorderWidth)
         self.stackSeparatorColor = stackSeparatorColor
         self.stackSeparatorWidth = max(0, stackSeparatorWidth)
+        self.seriesShadow = seriesShadow
         self.showsColumnEntranceAnimation = showsColumnEntranceAnimation
     }
 }

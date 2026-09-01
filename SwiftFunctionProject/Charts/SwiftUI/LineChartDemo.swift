@@ -50,6 +50,9 @@ struct LineChartDemo: View {
     @State private var zoomAxisSel = "x"
     // —— 标线（阈值参考线）——
     @State private var plotLinesOn = false
+    // —— 色带（plotBands）+ 系列阴影 ——
+    @State private var plotBandsOn = false
+    @State private var seriesShadowOn = false
     @State private var plotLineValue = 25.0
     // —— 负值换色示例 ——
     @State private var negSampleOn = false
@@ -203,6 +206,9 @@ struct LineChartDemo: View {
             plotLines: plotLinesOn
                 ? [CartesianPlotLine(value: plotLineValue, color: .systemRed,
                                      dashStyle: .dash, label: "阈值 \(Int(plotLineValue))")]
+                : [],
+            plotBands: plotBandsOn
+                ? [CartesianPlotBand(from: 40, to: 70, label: "达标区 40–70")]
                 : [])
     }
 
@@ -237,6 +243,7 @@ struct LineChartDemo: View {
         }
         t.contentInset = UIEdgeInsets(top: insetTop, left: insetLeft,
                                        bottom: insetBottom, right: insetRight)
+        t.seriesShadow = seriesShadowOn ? CartesianShadowStyle(offsetY: 2.5, blurRadius: 3, opacity: 0.35) : nil
         return t
     }
 
@@ -270,10 +277,14 @@ struct LineChartDemo: View {
                     selection: $lastSeriesDashStyle,
                     options: ["跟随全局"] + LineDashStyle.allCases.map { $0.rawValue }),
             .toggle(label: "负值换色示例（奇数点取负，红色段）", value: $negSampleOn),
+            .toggle(label: "折线阴影（seriesShadow）", value: $seriesShadowOn),
         ])
         let plotLineSection = ChartDemoPanel.DemoSection(title: "标线（阈值）", items: [
             .toggle(label: "阈值标线（红色虚线 + 标签）", value: $plotLinesOn),
             .slider(label: "阈值数值", value: $plotLineValue, range: 5...50, step: 1),
+        ])
+        let plotBandSection = ChartDemoPanel.DemoSection(title: "色带（区间背景）", items: [
+            .toggle(label: "色带示例（40–70 达标区，plotBands）", value: $plotBandsOn),
         ])
         let axisSection = ChartDemoPanel.DemoSection(title: "轴系", items: [
             .toggle(label: "双轴（末系列绑右轴）", value: $dualAxisOn),
@@ -360,7 +371,7 @@ struct LineChartDemo: View {
             .toggle(label: "入场动画", value: $theme.showsEntranceAnimation),
             .toggle(label: "点击弹窗", value: $theme.showsTooltipOnHit),
         ])
-        return ChartDemoPanel(sections: [dataSection, axisSection, lineSection, areaSection, plotLineSection, labelSection, tooltipSection, interactionSection, pointSection, gridSection, overallSection])
+        return ChartDemoPanel(sections: [dataSection, axisSection, lineSection, areaSection, plotLineSection, plotBandSection, labelSection, tooltipSection, interactionSection, pointSection, gridSection, overallSection])
     }
 
     static func randomData(count: Int) -> [Double] {
