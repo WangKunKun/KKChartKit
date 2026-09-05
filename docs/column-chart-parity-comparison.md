@@ -51,7 +51,7 @@
 | 空值跳过（`.nan` 该类目无柱，堆叠链不被破坏） | ✅ | ✅ | ✅ |
 | 刻度四档自定义（positions/interval/count/auto）+ formatter | ✅ | ✅ | ✅ granularity/forceLabels |
 | 类目轴贴边（首柱贴轴起点，-0.5 起坐标） | ✅（须显式 min/max，默认点居中） | ✅ | ✅ |
-| 轴标签旋转 | ❌ | ✅ | ✅ |
+| 轴标签旋转（类目轴 tickLabelRotation，默认关；让高/抽稀按旋转包围盒） | ✅ 2026-09-05 | ✅ | ✅ |
 | 轴百分比留白（spaceTop/spaceBottom） | ❌（nice padding 固定） | ✅ | ✅ |
 | 对数轴 logarithmic | ❌ | ✅ | ❌ |
 | X 轴（类目轴）reversed | ❌ | ✅ | ✅ |
@@ -101,7 +101,7 @@
 | Y 轴 reversed / X 轴 reversed | 中 | 高 | 几何符号翻转，波及刻度/网格/零轴/命中/堆叠 |
 | 瀑布图 waterfall | 中 | 中（组合） | 堆叠+透明桥系列+逐柱颜色已具备原材料，缺封装形态 |
 | 悬浮柱形态 | 低 | 低-中 | 全圆角 + pointPadding 组合 |
-| 轴标签旋转 / 轴百分比留白 | 低 | 低-中 | tick label transform / makeValueDomain 微调 |
+| 轴百分比留白 | 低 | 中 | makeValueDomain/布局微调 |
 | 对数轴 logarithmic | 低（受众窄） | 高 | 值映射整条链路换算 |
 | 标签边框/底色/旋转 | 低 | 中 | 数据标签绘制层扩展 |
 | 多 Y 轴（>2） | 低 | 高 | 有效轴索引泛化 |

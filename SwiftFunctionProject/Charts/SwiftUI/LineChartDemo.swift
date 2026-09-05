@@ -104,6 +104,9 @@ struct LineChartDemo: View {
     @State private var usePercentFormatter = false
     /// 首末点贴边：类目域压到 0...n-1（默认 -0.5...n-0.5，点居槽位中心）
     @State private var edgePointsOn = false
+    /// 类目标签旋转（默认关；开启后长标签斜排不再抽稀）
+    @State private var tickLabelRotationOn = false
+    @State private var tickLabelRotationAngle = "-45"
 
     var body: some View {
         VStack(spacing: 0) {
@@ -195,6 +198,9 @@ struct LineChartDemo: View {
             // 类目域压到 0...n-1：首点贴左缘、末点贴右缘（Highcharts pointPlacement:"on" 同款形态）
             x.min = 0
             x.max = Double(pointCount - 1)
+        }
+        if tickLabelRotationOn, let angle = Double(tickLabelRotationAngle.dropLast()) {
+            x.tickLabelRotation = CGFloat(angle)
         }
         return CartesianChartModel(
             title: title.isEmpty ? nil : title,
@@ -297,6 +303,9 @@ struct LineChartDemo: View {
             .toggle(label: "显式刻度位置（0/30/60/100）", value: $useTickPositions),
             .toggle(label: "刻度文本加 %", value: $usePercentFormatter),
             .toggle(label: "首末点贴边（类目域 0...n-1）", value: $edgePointsOn),
+            .toggle(label: "类目标签旋转（默认关）", value: $tickLabelRotationOn),
+            .picker(label: "旋转角度", selection: $tickLabelRotationAngle,
+                    options: ["-45\"", "30\"", "45\"", "90\""]),
         ])
         let areaSection = ChartDemoPanel.DemoSection(title: "面积填充", items: [
             .toggle(label: "填充折线下方区域（面积图）", value: $showsArea),

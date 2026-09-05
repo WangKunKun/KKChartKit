@@ -846,7 +846,79 @@ public enum ChartSelfTest {
         // —— 色带（plotBands）+ 系列阴影 ——
         runPlotBandShadowSelfTest()
 
+        // —— 轴标签旋转（类目轴底部标签；默认 0 不旋转）——
+        runTickLabelRotationSelfTest()
+
         print("✅ ChartSelfTest passed")
+    }
+
+    /// 类目轴标签旋转：默认关；开启后 transform 旋转、让高按旋转包围盒、抽稀按投影宽度。
+    static func runTickLabelRotationSelfTest() {
+        // 1) rotatedBounds 纯函数：轴对齐包围盒
+        let r0 = CartesianGeometry.rotatedBounds(width: 100, height: 20, angleDegrees: 0)
+        assert(abs(r0.width - 100) < 0.001 && abs(r0.height - 20) < 0.001,
+               "0° 应原样，got \(r0)")
+        let r90 = CartesianGeometry.rotatedBounds(width: 100, height: 20, angleDegrees: 90)
+        assert(abs(r90.width - 20) < 0.001 && abs(r90.height - 100) < 0.001,
+               "90° 应宽高互换，got \(r90)")
+        let r45 = CartesianGeometry.rotatedBounds(width: 100, height: 20, angleDegrees: 45)
+        assert(abs(r45.width - 84.85) < 0.1 && abs(r45.height - 84.85) < 0.1,
+               "45° 包围盒应 ≈ 84.85²，got \(r45)")
+        let rNeg = CartesianGeometry.rotatedBounds(width: 100, height: 20, angleDegrees: -45)
+        assert(abs(rNeg.width - r45.width) < 0.001 && abs(rNeg.height - r45.height) < 0.001,
+               "负角包围盒应与正角相同，got \(rNeg)")
+
+        // 2) makeCategoryLabels：默认不旋转；旋转后 transform 生效、按旋转包围盒下移
+        let vp = CartesianViewport(xMin: -0.5, xMax: 3.5, yMin: 0, yMax: 100)
+        let plot = CGRect(x: 50, y: 20, width: 264, height: 160)
+        let theme = CartesianChartTheme()
+        let quarters = ["第一季度", "第二季度", "第三季度", "第四季度"]
+        let flat = AxisRenderer.makeCategoryLabels(labels: quarters,
+                                                   viewport: vp, plotFrame: plot, theme: theme)
+        let rot = AxisRenderer.makeCategoryLabels(labels: quarters,
+                                                  viewport: vp, plotFrame: plot, theme: theme,
+                                                  rotation: 45)
+        assert(flat.count == 4 && rot.count == 4, "宽槽下两种形态都应全显示")
+        assert(flat[0].transform.isIdentity, "默认（0°）不得旋转")
+        assert(!rot[0].transform.isIdentity, "rotation≠0 应有旋转变换")
+        assert(abs(flat[0].center.x - rot[0].center.x) < 0.001,
+               "旋转不改水平锚点（类目中心）")
+        assert(rot[0].center.y > flat[0].center.y + 5,
+               "旋转标签应按旋转包围盒更高而下移，got \(rot[0].center.y) vs \(flat[0].center.y)")
+
+        // 3) 抽稀联动：长标签窄槽下，旋转使水平占位变小 → 显示更多标签
+        //    （用 90° 竖排使差异对字体度量稳健；45° 的收益会被 stride 取整量化）
+        let longLabels = (0..<12).map { "类别\($0)号" }
+        let longVP = CartesianViewport(xMin: -0.5, xMax: 11.5, yMin: 0, yMax: 100)
+        let narrowPlot = CGRect(x: 10, y: 20, width: 120, height: 160)   // 槽宽 10
+        let flatLong = AxisRenderer.makeCategoryLabels(labels: longLabels, viewport: longVP,
+                                                       plotFrame: narrowPlot, theme: theme)
+        let rotLong = AxisRenderer.makeCategoryLabels(labels: longLabels, viewport: longVP,
+                                                      plotFrame: narrowPlot, theme: theme,
+                                                      rotation: 90)
+        assert(flatLong.count < 6, "长标签窄槽平排应显著抽稀，got \(flatLong.count)")
+        assert(rotLong.count > flatLong.count,
+               "旋转后水平投影变小应显示更多标签，got \(rotLong.count) vs \(flatLong.count)")
+
+        // 4) 渲染级：开启旋转后底部让高更大 → plot 更矮（长标签下显著）
+        let host1 = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        let plain = ColumnChartRenderer()
+        plain.mount(into: host1)
+        plain.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "s", data: [1, 2, 3, 4])],
+            xAxis: CartesianAxisModel(kind: .category(labels: quarters))),
+                     theme: theme,
+                     context: HYMChartRenderContext(bounds: host1.bounds, center: host1.center))
+        let host2 = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        let rotated = ColumnChartRenderer()
+        rotated.mount(into: host2)
+        rotated.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "s", data: [1, 2, 3, 4])],
+            xAxis: CartesianAxisModel(kind: .category(labels: quarters), tickLabelRotation: 45)),
+                       theme: theme,
+                       context: HYMChartRenderContext(bounds: host2.bounds, center: host2.center))
+        assert(rotated.currentPlotFrame.height < plain.currentPlotFrame.height - 5,
+               "旋转长标签底部让高应显著更大，got \(rotated.currentPlotFrame.height) vs \(plain.currentPlotFrame.height)")
     }
 
 

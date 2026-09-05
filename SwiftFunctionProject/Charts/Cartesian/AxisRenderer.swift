@@ -51,18 +51,28 @@ enum AxisRenderer {
     /// （即柱子组中心，缩放后跟随视口重排）；抽稀步长按**标签实测宽度**自适应
     /// （短标签全显示，放不下才隔 N 取 1，用绝对索引取模保证平移不闪跳）。
     /// 标签的 y 位置恒定（Y 轴不参与手势）。
+    ///
+    /// 旋转（`rotation` 度，默认 0 不旋转）：标签 transform 旋转、水平锚点不动；
+    /// 垂直让位与抽稀按旋转后的轴对齐包围盒算（`rotatedBounds`）——
+    /// 斜排的水平占位变小，同样槽宽能容纳更多标签。
     static func makeCategoryLabels(labels: [String],
                                    viewport: CartesianViewport,
                                    plotFrame: CGRect,
-                                   theme: CartesianChartTheme) -> [UILabel] {
+                                   theme: CartesianChartTheme,
+                                   rotation: CGFloat = 0) -> [UILabel] {
         let visible = CartesianGeometry.visibleCategoryRange(viewport: viewport, count: labels.count)
         guard !visible.isEmpty else { return [] }
 
-        // 最宽标签 + 槽宽 → 自适应步长（12 个短数字标签可全显示）
+        // 最宽标签 + 槽宽 → 自适应步长（12 个短数字标签可全显示）。
+        // 旋转时水平占位用旋转包围盒的宽（cos 分量为主）。
         let fontAttrs: [NSAttributedString.Key: Any] = [.font: theme.tickLabelFont]
         let maxLabelWidth = visible.map { (labels[$0] as NSString).size(withAttributes: fontAttrs).width }.max() ?? 0
+        let labelHeight = (labels[visible.lowerBound] as NSString).size(withAttributes: fontAttrs).height
+        let effectiveWidth = rotation == 0 ? maxLabelWidth
+            : CartesianGeometry.rotatedBounds(width: maxLabelWidth, height: labelHeight,
+                                              angleDegrees: rotation).width
         let slotWidth = plotFrame.width / CGFloat(max(viewport.xSpan, 1e-9))
-        let stride = CartesianGeometry.categoryLabelStride(labelWidth: maxLabelWidth,
+        let stride = CartesianGeometry.categoryLabelStride(labelWidth: effectiveWidth,
                                                            slotWidth: slotWidth)
 
         var out: [UILabel] = []
@@ -74,8 +84,15 @@ enum AxisRenderer {
             lbl.sizeToFit()
             let x = CartesianGeometry.point(x: Double(i), y: 0,
                                             viewport: viewport, plotFrame: plotFrame).x
+            // 垂直让位：平排用行高；旋转用该标签旋转包围盒的高
+            let slotHeight = rotation == 0 ? lbl.bounds.height
+                : CartesianGeometry.rotatedBounds(width: lbl.bounds.width, height: lbl.bounds.height,
+                                                  angleDegrees: rotation).height
             lbl.center = CGPoint(x: x,
-                                 y: plotFrame.maxY + theme.axisLabelGap + lbl.bounds.height / 2)
+                                 y: plotFrame.maxY + theme.axisLabelGap + slotHeight / 2)
+            if rotation != 0 {
+                lbl.transform = CGAffineTransform(rotationAngle: rotation * .pi / 180)
+            }
             out.append(lbl)
         }
         return out

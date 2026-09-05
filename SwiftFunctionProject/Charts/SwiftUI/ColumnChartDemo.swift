@@ -32,6 +32,9 @@ struct ColumnChartDemo: View {
     @State private var nullSampleOn = false
     /// 首末柱贴边（类目域 0...n-1）
     @State private var edgePointsOn = false
+    /// 类目标签旋转（默认关；开启后长标签斜排不再抽稀）
+    @State private var tickLabelRotationOn = false
+    @State private var tickLabelRotationAngle = "-45"
     // —— 值轴刻度自定义 ——
     @State private var tickCountOn = false
     @State private var tickCount = 6.0
@@ -156,6 +159,9 @@ struct ColumnChartDemo: View {
             x.min = 0
             x.max = Double(pointCount - 1)
         }
+        if tickLabelRotationOn, let angle = Double(tickLabelRotationAngle.dropLast()) {
+            x.tickLabelRotation = CGFloat(angle)
+        }
         return CartesianChartModel(
             title: title.isEmpty ? nil : title,
             series: series,
@@ -249,6 +255,9 @@ struct ColumnChartDemo: View {
             .toggle(label: "显式刻度位置（0/25/50/100）", value: $useTickPositions),
             .toggle(label: "刻度文本加 %", value: $usePercentFormatter),
             .toggle(label: "首末柱贴边（类目域 0...n-1）", value: $edgePointsOn),
+            .toggle(label: "类目标签旋转（默认关）", value: $tickLabelRotationOn),
+            .picker(label: "旋转角度", selection: $tickLabelRotationAngle,
+                    options: ["-45\"", "30\"", "45\"", "90\""]),
         ])
         let gestureSection = ChartDemoPanel.DemoSection(title: "手势", items: [
             .toggle(label: "拖拽惯性减速", value: $decelerationOn),

@@ -444,7 +444,19 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
             ? model.categoryLabels.map { textSize($0, font: cartTheme.tickLabelFont).width }.max() ?? 0
             : currentValueTicks.map { textSize(AxisRenderer.tickText($0, formatter: model.yAxis.labelFormatter),
                                                font: cartTheme.tickLabelFont).width }.max() ?? 0
-        let xTickHeight = textSize("0", font: cartTheme.tickLabelFont).height
+        // 底部让高：默认刻度字体行高；垂直图类目标签旋转时按旋转包围盒加高
+        // （水平图底部是数值刻度，不参与旋转）
+        let xTickHeight: CGFloat
+        if !isHorizontalValueAxis, model.xAxis.tickLabelRotation != 0 {
+            let labels = model.categoryLabels
+            let w = labels.map { textSize($0, font: cartTheme.tickLabelFont).width }.max() ?? 0
+            let h = textSize("0", font: cartTheme.tickLabelFont).height
+            xTickHeight = CartesianGeometry.rotatedBounds(
+                width: w, height: h,
+                angleDegrees: model.xAxis.tickLabelRotation).height
+        } else {
+            xTickHeight = textSize("0", font: cartTheme.tickLabelFont).height
+        }
         let titleHeight = model.title.map { textSize($0, font: cartTheme.titleFont).height } ?? 0
         let rightAxisLabelWidth: CGFloat = currentSecondaryYDomain == nil ? 0 :
             currentSecondaryValueTicks.map {
@@ -806,7 +818,8 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
             }
             tickLabels.append(contentsOf: AxisRenderer.makeCategoryLabels(
                 labels: model.categoryLabels, viewport: currentViewport,
-                plotFrame: currentPlotFrame, theme: theme))
+                plotFrame: currentPlotFrame, theme: theme,
+                rotation: model.xAxis.tickLabelRotation))
         }
         tickLabels.forEach { view.addSubview($0) }
     }

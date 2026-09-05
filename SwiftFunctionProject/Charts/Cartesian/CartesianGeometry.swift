@@ -67,6 +67,19 @@ public enum CartesianGeometry {
         return Int(ceil((labelWidth + minGap) / slotWidth))
     }
 
+    /// 旋转后的轴对齐包围盒（angleDegrees 度，顺时针为正；正负角包围盒相同）。
+    ///
+    /// 标签旋转（`tickLabelRotation`）的布局与抽稀依据：宽 = w·|cosθ| + h·|sinθ|，
+    /// 高 = w·|sinθ| + h·|cosθ|。
+    public static func rotatedBounds(width: CGFloat, height: CGFloat,
+                                     angleDegrees: CGFloat) -> CGSize {
+        let rad = angleDegrees * .pi / 180
+        let c = abs(CGFloat(cos(rad)))
+        let s = abs(CGFloat(sin(rad)))
+        return CGSize(width: width * c + height * s,
+                      height: width * s + height * c)
+    }
+
     // MARK: - X 轴视口手势数学（纯函数，DEBUG 自检覆盖）
 
     /// 以锚点值为中心缩放 X 视口窗口（`factor` > 1 放大），并 clamp 到全量域。

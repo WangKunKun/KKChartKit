@@ -53,7 +53,7 @@
 | 刻度四档自定义（positions/interval/count/auto）+ formatter | ✅                  | ✅           | ✅ granularity/forceLabels |
 | Y 轴反向 reversed                                    | ❌                  | ✅           | ✅ inverted                |
 | 对数轴 logarithmic                                   | ❌                  | ✅           | ❌                         |
-| 轴标签旋转                                             | ❌                  | ✅           | ✅                         |
+| 轴标签旋转（tickLabelRotation，默认关）                                             | ✅ 2026-09-05                  | ✅           | ✅                         |
 | 轴百分比留白（spaceTop/spaceBottom）                      | ❌（nice padding 固定） | ✅           | ✅                         |
 | 类目轴居中标签（centerAxisLabels）                         | ❌                  | ✅           | ✅                         |
 
@@ -106,7 +106,6 @@
 | 逐点颜色数组 / 点上图标            | 中       | 中    | 点层循环按索引取色/贴图                                  |
 | 点 hover/selected 态（选中放大） | 中       | 中    | applySelection 目前空实现；需命中几何→视觉反馈               |
 | 准线横+竖双向                  | 低       | 低    | crosshairRect 已有几何，加垂直分量                      |
-| 轴标签旋转                    | 低       | 低-中  | tick label transform                          |
 | 轴百分比留白 / 类目标签居中          | 低       | 中    | makeValueDomain/布局微调                          |
 | 对数轴 logarithmic          | 低（受众窄）  | 高    | 值映射整条链路换算                                     |
 | 多 Y 轴（>2）                | 低       | 高    | 有效轴索引泛化                                       |

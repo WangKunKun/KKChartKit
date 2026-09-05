@@ -41,11 +41,15 @@ public struct CartesianAxisModel {
     public var labelFormatter: ((Double) -> String)?
     /// 该轴是否画网格（nil = 主轴跟随 theme、次轴默认关）。
     public var showsGridlines: Bool?
+    /// 刻度标签旋转角度（度，顺时针为正；默认 0 = 不旋转）。
+    /// 仅作用于垂直图底部类目标签；数值轴与 Bar 左侧标签忽略。
+    public var tickLabelRotation: CGFloat = 0
 
     public init(kind: CartesianAxisKind,
                 min: Double? = nil, max: Double? = nil, tickInterval: Double? = nil,
                 tickCount: Int? = nil, tickPositions: [Double]? = nil,
-                labelFormatter: ((Double) -> String)? = nil, showsGridlines: Bool? = nil) {
+                labelFormatter: ((Double) -> String)? = nil, showsGridlines: Bool? = nil,
+                tickLabelRotation: CGFloat = 0) {
         self.kind = kind
         self.min = min
         self.max = max
@@ -54,6 +58,7 @@ public struct CartesianAxisModel {
         self.tickPositions = tickPositions
         self.labelFormatter = labelFormatter
         self.showsGridlines = showsGridlines
+        self.tickLabelRotation = tickLabelRotation
     }
 }
 
