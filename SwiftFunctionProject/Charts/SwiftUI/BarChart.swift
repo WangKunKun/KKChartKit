@@ -1,6 +1,8 @@
 import SwiftUI
 
 /// 条形图 SwiftUI 封装（demo 配套最小版）
+/// 数据/主题更新默认保留窗口；viewportUpdatePolicy 设为 .reset 可恢复逐次重置行为。
+/// 更新时替换 onHit（包括移除闭包），入场动画只在首次创建时触发。
 public struct BarChart: View {
     private let model: CartesianChartModel
     private let theme: CartesianChartTheme
@@ -19,6 +21,8 @@ public struct BarChart: View {
     private let crosshairDashStyle: LineDashStyle
     private let isCrosshairDualDirectionEnabled: Bool
     private let tooltipTextOptions: HYMChartTooltipTextOptions
+    private let onSeriesVisibilityChanged: ((String, Bool) -> Void)?
+    private let viewportUpdatePolicy: HYMChartViewportUpdatePolicy
 
     public init(model: CartesianChartModel,
                 theme: CartesianChartTheme = CartesianChartTheme(),
@@ -36,7 +40,9 @@ public struct BarChart: View {
                 crosshairLineWidth: CGFloat = 0.75,
                 crosshairDashStyle: LineDashStyle = .solid,
                 isCrosshairDualDirectionEnabled: Bool = false,
-                tooltipTextOptions: HYMChartTooltipTextOptions = HYMChartTooltipTextOptions()) {
+                tooltipTextOptions: HYMChartTooltipTextOptions = HYMChartTooltipTextOptions(),
+                viewportUpdatePolicy: HYMChartViewportUpdatePolicy = .preserve,
+                onSeriesVisibilityChanged: ((String, Bool) -> Void)? = nil) {
         self.model = model
         self.theme = theme
         self.playsAnimationOnAppear = playsAnimationOnAppear
@@ -54,6 +60,8 @@ public struct BarChart: View {
         self.crosshairDashStyle = crosshairDashStyle
         self.isCrosshairDualDirectionEnabled = isCrosshairDualDirectionEnabled
         self.tooltipTextOptions = tooltipTextOptions
+        self.onSeriesVisibilityChanged = onSeriesVisibilityChanged
+        self.viewportUpdatePolicy = viewportUpdatePolicy
     }
 
     public var body: some View {
@@ -72,7 +80,9 @@ public struct BarChart: View {
                                crosshairLineWidth: crosshairLineWidth,
                                crosshairDashStyle: crosshairDashStyle,
                                isCrosshairDualDirectionEnabled: isCrosshairDualDirectionEnabled,
-                               tooltipTextOptions: tooltipTextOptions)
+                               tooltipTextOptions: tooltipTextOptions,
+                               viewportUpdatePolicy: viewportUpdatePolicy,
+                               onSeriesVisibilityChanged: onSeriesVisibilityChanged)
     }
 }
 
@@ -94,6 +104,8 @@ public struct BarChartRepresentable: UIViewRepresentable {
     private let crosshairDashStyle: LineDashStyle
     private let isCrosshairDualDirectionEnabled: Bool
     private let tooltipTextOptions: HYMChartTooltipTextOptions
+    private let onSeriesVisibilityChanged: ((String, Bool) -> Void)?
+    private let viewportUpdatePolicy: HYMChartViewportUpdatePolicy
 
     public init(model: CartesianChartModel, theme: CartesianChartTheme, playsAnimationOnAppear: Bool, onHit: ((BarHitTarget, HYMChartGesture) -> Void)?, isZoomEnabled: Bool, minimumVisibleCategories: Int,
                 isDragDecelerationEnabled: Bool,
@@ -106,7 +118,9 @@ public struct BarChartRepresentable: UIViewRepresentable {
                 crosshairLineWidth: CGFloat,
                 crosshairDashStyle: LineDashStyle,
                 isCrosshairDualDirectionEnabled: Bool,
-                tooltipTextOptions: HYMChartTooltipTextOptions) {
+                tooltipTextOptions: HYMChartTooltipTextOptions,
+                viewportUpdatePolicy: HYMChartViewportUpdatePolicy = .preserve,
+                onSeriesVisibilityChanged: ((String, Bool) -> Void)? = nil) {
         self.model = model
         self.theme = theme
         self.playsAnimationOnAppear = playsAnimationOnAppear
@@ -124,10 +138,13 @@ public struct BarChartRepresentable: UIViewRepresentable {
         self.crosshairDashStyle = crosshairDashStyle
         self.isCrosshairDualDirectionEnabled = isCrosshairDualDirectionEnabled
         self.tooltipTextOptions = tooltipTextOptions
+        self.onSeriesVisibilityChanged = onSeriesVisibilityChanged
+        self.viewportUpdatePolicy = viewportUpdatePolicy
     }
 
     public func makeUIView(context: Context) -> HYMChartView<BarChartRenderer> {
         let chart = HYMChartView<BarChartRenderer>(frame: .zero)
+        chart.onSeriesVisibilityChanged = onSeriesVisibilityChanged
         chart.showsTooltipOnHit = true
         chart.isZoomEnabled = isZoomEnabled
         chart.minimumVisibleCategories = minimumVisibleCategories
@@ -153,6 +170,7 @@ public struct BarChartRepresentable: UIViewRepresentable {
     }
 
     public func updateUIView(_ uiView: HYMChartView<BarChartRenderer>, context: Context) {
+        uiView.onSeriesVisibilityChanged = onSeriesVisibilityChanged
         // 交互开关同步：demo 里拨动开关时 SwiftUI 不重建 UIView，须在此回写才实时生效
         uiView.isZoomEnabled = isZoomEnabled
         uiView.minimumVisibleCategories = minimumVisibleCategories
@@ -167,6 +185,12 @@ public struct BarChartRepresentable: UIViewRepresentable {
         uiView.crosshairDashStyle = crosshairDashStyle
         uiView.isCrosshairDualDirectionEnabled = isCrosshairDualDirectionEnabled
         uiView.tooltipTextOptions = tooltipTextOptions
-        uiView.configure(model: model, theme: theme)
+        // 每次更新替换回调，避免继续调用 makeUIView 时捕获的旧闭包。
+        uiView.onHit = onHit.map { callback in
+            { target, gesture in
+                if let hit = target as? BarHitTarget { callback(hit, gesture) }
+            }
+        }
+        uiView.update(model: model, theme: theme, viewportPolicy: viewportUpdatePolicy)
     }
 }

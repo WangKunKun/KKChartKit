@@ -1,14 +1,16 @@
 # HYMCharts 柱状图与条形图使用指南
 
+> 内置图例已接入：详见 [图例、显隐与尺寸分配](charts-legend-guide.md)。高密度 Column 可接入 [时间聚合与区间明细](charts-time-grouping-guide.md)。
+
 > 快速上手柱系图表：柱状图（Column Chart）与条形图（Bar Chart）。
-> 适用版本：2026-08-27（阶段 1 交付物：柱状图/条形图 + 堆叠）。
+> 更新：2026-09-24。当前范围与限制见 [能力清单](charts-capability-status.md)。
 
 ## 概述
 
 柱状图和条形图是 HYMCharts 轴系图表的柱系实现，基于 Cartesian 轴系基础层提供：
 - 垂直/水平两种柱体方向
 - 正负值混合渲染（零轴自适应）
-- 普通堆叠（累积高度）
+- 并排多系列、正负分链堆叠、百分比/固定基准百分比堆叠与总量标签
 - 柱体样式定制（宽度、圆角、边框）
 - 入场动画（柱体从零轴升起）
 
@@ -83,8 +85,9 @@ BarChart(model: model)
 | 选项 | 说明 |
 |---|---|
 | `.none` | 不堆叠（默认） |
-| `.normal` | 普通堆叠（阶段 1 实现） |
-| `.percent` | 百分比堆叠（预留） |
+| `.normal` | 同轴内正负各自从零累计 |
+| `.percent` | 同轴每类目按有效原值绝对值之和归一化，保留正负号 |
+| `.percentFixed(max:)` | 按统一基准归一化，可不满或超过 100% |
 | `.grouped(groupCount:)` | 分组堆叠（预留） |
 
 ### CartesianSeriesElement
@@ -141,6 +144,22 @@ let model = CartesianChartModel(
     stacking: .normal  // 启用普通堆叠
 )
 ```
+
+### 堆叠总量标签
+
+```swift
+var theme = CartesianChartTheme()
+theme.showsStackTotalLabels = true
+theme.stackTotalLabelFormatter = { "合计 " + String(format: "%.1f", $0) }
+```
+
+- Column/Bar 均支持；正链和负链分别显示原值合计，Column 双轴独立累计。
+- 普通、百分比和固定基准百分比堆叠均标原值总量；空值/缺位不计入，小于一个像素的段仍计入。
+- 非堆叠、全零链不显示。标签随入场动画移动，每帧替换，不重复叠加。
+- 链端在当前视口外时隐藏；边缘标签移入绘图区，避免覆盖标题和轴刻度。放不下的长文案跳过。
+- 可见链端数量（包含双轴）超过 `dataLabelMaxMarkCount` 时跳过总量标签；缩放后数量降低会恢复。
+- 字号/颜色沿用 `dataLabelFontSize` / `dataLabelColor`；总量格式化与各段标签格式化独立。
+- 暂不做总量标签之间的碰撞排布；双轴链端接近或类目过密时可能重叠。
 
 ### 负值堆叠
 
@@ -304,11 +323,11 @@ theme.columnWidthRatio = 1.0  // 柱体占 100%，无间距
 
 ### Q: 柱状图和条形图有什么区别？
 
-A: 方向不同。柱状图（ColumnChart）是垂直柱体，条形图（BarChart）是水平柱体。API 完全相同，仅方向不同。
+A: 方向不同，并共享数据模型与主题。Column 支持双值轴，Bar 暂不支持；轴向缩放参数按屏幕 X/Y 解释。
 
 ### Q: 如何实现分组柱状图（并排显示）？
 
-A: 阶段 1 暂不支持，计划在阶段 3（混合图）中实现。当前只能通过堆叠实现多系列。
+A: 提供多个 series 并保持 stacking 为 nil 或 .none，即可并排显示。多个独立堆叠组尚未实现，`.grouped(groupCount:)` 仍是预留。
 
 ### Q: 负值柱体的零轴位置如何确定？
 
@@ -323,5 +342,6 @@ A: 系列按数组顺序堆叠。第一个系列在最底部，最后一个系�
 
 ---
 
-**版本**：2026-08-27（阶段 1）
-**后续计划**：阶段 2（样条曲线 + 面积图），阶段 3（混合图 + 图例）
+**更新**：2026-09-24
+**更新行为**：ColumnChart / BarChart 默认保留缩放窗口，详见 [更新指南](charts-update-guide.md)。
+**后续计划**：统一命中值字段、主体选中反馈与选择恢复、混合图。稳定系列 ID 和内置图例已完成。

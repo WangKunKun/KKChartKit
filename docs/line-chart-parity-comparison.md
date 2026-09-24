@@ -72,19 +72,19 @@
 | 弹窗内容自定义（popupContentProvider）       | ✅（等价 ChartMarker）           | ✅              | ✅                    |
 | 整列 shared / 逐点+吸附 双模式 + 自动档         | ✅                           | ✅ shared       | 部分                   |
 | 十字准线（逐点/整列统一）                       | ✅ 样式可配（颜色/线宽/虚线，2026-08-31） | ✅              | ✅ 竖/横指示线             |
-| 准线横+竖双向指示                           | ❌（当前单向：垂直图竖线/水平图横线）         | ✅              | ✅                    |
+| 准线横+竖双向指示                           | ✅（isCrosshairDualDirectionEnabled）         | ✅              | ✅                    |
 | 捏合缩放轴向 x/y/xy                       | ✅                           | ✅ zoomType     | ✅（可锁拖拽方向）            |
 | 锚点跟手/平移/惯性减速/橡皮筋回弹                  | ✅                           | 部分（WebView 手势） | ✅                    |
 | 双击重置（两轴）                            | ✅                           | ✅ + reset 按钮回调 | ⚠️ 双击是放大（语义不同）       |
 | 滑动选中（全量视图拖拽=划过高亮）                   | ✅                           | ❌              | ✅                    |
 | 多图联动 sync                           | ❌                           | ❌              | 第三方 SyncChartGesture |
-| 弹窗文本模板（header/valueSuffix/decimals） | ❌（tooltipText 固定格式）         | ✅              | ✅                    |
+| 弹窗文本模板（header/valueSuffix/decimals） | ✅（HYMChartTooltipTextOptions）         | ✅              | ✅                    |
 
 ### 7. 周边能力
 
 | 能力 | 我们 | AAChartKit | Charts |
 |---|---|---|---|
-| 图例 legend（点击隐藏系列） | ❌ | ✅ | ✅（可滚动/自定义） |
+| 图例 legend（点击隐藏系列） | ✅ 四向布局、换行/滚动、样式覆盖 | ✅ | ✅（可滚动/自定义） |
 | 动画 easing 可选 | ❌（单一 ease） | ✅ 多种 | ❌ |
 | 极坐标 polar | ❌ | ✅ | ❌ |
 | 描述文本 / 无数据占位文案 | ❌ | ✅ | ✅ noDataText |
@@ -94,7 +94,6 @@
 ### 第 2 档（中成本，下一个建议批次）
 | 缺口 | 价值 | 预估成本 | 备注 |
 |---|---|---|---|
-| 图例 legend（点击隐藏系列） | 高：系列多时必须能关；demo 也需要 | 中 | 需系列显隐状态进 model 渲染层过滤；点击交互区（顶部条） |
 | zones 分段变色（按值区间换色） | 高：超标变色与标线同源 | 中 | 数据结构与 plotLines 同构（value 区间 → 颜色）；曲线形态切分同 negativeColor 限制 |
 
 ### 第 3 档（高成本，按需）

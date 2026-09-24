@@ -13,6 +13,9 @@ public final class HYMChartValueAnimator {
 
     public init() {}
 
+    /// 内部生命周期判断；更新数据时仅对正在播放的入场动画执行收尾。
+    var isRunning: Bool { displayLink != nil }
+
     /// 启动一次 0→1 的 easeOut 动画。
     /// - Parameters:
     ///   - duration: 时长（秒）

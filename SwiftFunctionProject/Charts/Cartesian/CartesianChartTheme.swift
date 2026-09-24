@@ -21,6 +21,10 @@ public enum LineConnectionStyle: String, CaseIterable, Equatable {
 /// 轴系图表主题（纯值类型；所有外观集中于此）。折线/柱状等共用，
 /// 各类型特有外观（如柱宽）由该类型 Theme 扩展属性补充——阶段 1 起按需拆分。
 public struct CartesianChartTheme: HYMChartTheme {
+    public var legend = ChartLegendConfiguration()
+    /// 非堆叠直线/面积图的 Min/Max 绘制降采样；nil 默认关闭，原始数据始终用于命中。
+    public var lineSampling: LineChartSampling? = nil
+
     // —— 整体 ——
     /// 背景（nil 透明）。
     public var backgroundColor: UIColor?
@@ -120,6 +124,14 @@ public struct CartesianChartTheme: HYMChartTheme {
     /// 堆叠柱体间的分隔线宽度（默认 1）
     public var stackSeparatorWidth: CGFloat
 
+    /// 堆叠总量标签（Highcharts stackLabels 同款）：堆叠模式下每类目在链端标注
+    /// 该链**原值合计**（正链顶端、负链底端；百分比堆叠也标原值合计而非 100）。
+    /// 非堆叠/全零链忽略；可见链端标签数（含双轴）超过 dataLabelMaxMarkCount 时跳过。
+    /// 视口外链端不显示；边缘标签收敛到绘图区内，放不下的长文案跳过。默认 false。
+    public var showsStackTotalLabels: Bool
+    /// 总量标签数值格式化（nil = 与数据标签同款自动格式）
+    public var stackTotalLabelFormatter: ((Double) -> String)?
+
     // ===== 系列阴影 =====
     /// 系列阴影默认样式（nil = 无阴影；系列级 `shadow` 可覆盖）。
     /// 作用于系列主体层：柱/条体、折线。建议浅偏移低透明度。
@@ -173,8 +185,11 @@ public struct CartesianChartTheme: HYMChartTheme {
         columnBorderWidth: CGFloat = 1,
         stackSeparatorColor: UIColor? = nil,
         stackSeparatorWidth: CGFloat = 1,
+        showsStackTotalLabels: Bool = false,
+        stackTotalLabelFormatter: ((Double) -> String)? = nil,
         seriesShadow: CartesianShadowStyle? = nil,
-        showsColumnEntranceAnimation: Bool = true
+        showsColumnEntranceAnimation: Bool = true,
+        lineSampling: LineChartSampling? = nil
     ) {
         self.backgroundColor = backgroundColor
         self.backgroundCornerRadius = max(0, backgroundCornerRadius)
@@ -219,7 +234,10 @@ public struct CartesianChartTheme: HYMChartTheme {
         self.columnBorderWidth = max(0, columnBorderWidth)
         self.stackSeparatorColor = stackSeparatorColor
         self.stackSeparatorWidth = max(0, stackSeparatorWidth)
+        self.showsStackTotalLabels = showsStackTotalLabels
+        self.stackTotalLabelFormatter = stackTotalLabelFormatter
         self.seriesShadow = seriesShadow
         self.showsColumnEntranceAnimation = showsColumnEntranceAnimation
+        self.lineSampling = lineSampling
     }
 }

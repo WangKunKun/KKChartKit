@@ -22,12 +22,6 @@ public struct HeatmapChart: View {
                 popup: ((HYMChartHitContext) -> AnyView)? = nil) {
         self.model = model
         self.theme = theme
-        self.theme.colorScale = .alpha(UIColor(named: "Green")!)
-        self.theme.showsRowLabels = false
-        self.theme.showsColumnLabels = false
-        self.theme.rowSpacing = 0
-        self.theme.columnSpacing = 0
-        self.theme.cellCornerRadius = 0
         self.playsAnimationOnAppear = playsAnimationOnAppear
         self.tooltipTheme = tooltipTheme
         self.onHit = onHit

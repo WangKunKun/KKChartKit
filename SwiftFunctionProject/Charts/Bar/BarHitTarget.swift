@@ -3,13 +3,15 @@ import UIKit
 
 /// 条形图命中目标
 public struct BarHitTarget: HYMChartHitTarget {
+    public let seriesID: String?
     public let seriesIndex: Int
     public let categoryIndex: Int
     public let value: Double
     /// 系列名（nil = "系列N" 兜底；弹窗模板数据源用）
     public let name: String?
 
-    public init(seriesIndex: Int, categoryIndex: Int, value: Double, name: String? = nil) {
+    public init(seriesIndex: Int, categoryIndex: Int, value: Double, name: String? = nil, seriesID: String? = nil) {
+        self.seriesID = seriesID
         self.seriesIndex = seriesIndex
         self.categoryIndex = categoryIndex
         self.value = value

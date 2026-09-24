@@ -1,6 +1,8 @@
 import SwiftUI
 
 /// 折线图 SwiftUI 封装（demo 配套最小版；完备参数面在路线图阶段 10 统一补齐）。
+/// 数据/主题更新默认保留窗口；viewportUpdatePolicy 设为 .reset 可恢复逐次重置行为。
+/// 更新时替换 onHit（包括移除闭包），入场动画只在首次创建时触发。
 public struct LineChart: View {
     private let model: CartesianChartModel
     private let theme: CartesianChartTheme
@@ -19,6 +21,8 @@ public struct LineChart: View {
     private let crosshairDashStyle: LineDashStyle
     private let isCrosshairDualDirectionEnabled: Bool
     private let tooltipTextOptions: HYMChartTooltipTextOptions
+    private let onSeriesVisibilityChanged: ((String, Bool) -> Void)?
+    private let viewportUpdatePolicy: HYMChartViewportUpdatePolicy
 
     public init(model: CartesianChartModel,
                 theme: CartesianChartTheme = CartesianChartTheme(),
@@ -36,7 +40,9 @@ public struct LineChart: View {
                 crosshairLineWidth: CGFloat = 0.75,
                 crosshairDashStyle: LineDashStyle = .solid,
                 isCrosshairDualDirectionEnabled: Bool = false,
-                tooltipTextOptions: HYMChartTooltipTextOptions = HYMChartTooltipTextOptions()) {
+                tooltipTextOptions: HYMChartTooltipTextOptions = HYMChartTooltipTextOptions(),
+                viewportUpdatePolicy: HYMChartViewportUpdatePolicy = .preserve,
+                onSeriesVisibilityChanged: ((String, Bool) -> Void)? = nil) {
         self.model = model
         self.theme = theme
         self.playsAnimationOnAppear = playsAnimationOnAppear
@@ -54,6 +60,8 @@ public struct LineChart: View {
         self.crosshairDashStyle = crosshairDashStyle
         self.isCrosshairDualDirectionEnabled = isCrosshairDualDirectionEnabled
         self.tooltipTextOptions = tooltipTextOptions
+        self.onSeriesVisibilityChanged = onSeriesVisibilityChanged
+        self.viewportUpdatePolicy = viewportUpdatePolicy
     }
 
     public var body: some View {
@@ -72,7 +80,9 @@ public struct LineChart: View {
                                crosshairLineWidth: crosshairLineWidth,
                                crosshairDashStyle: crosshairDashStyle,
                                isCrosshairDualDirectionEnabled: isCrosshairDualDirectionEnabled,
-                               tooltipTextOptions: tooltipTextOptions)
+                               tooltipTextOptions: tooltipTextOptions,
+                               onSeriesVisibilityChanged: onSeriesVisibilityChanged,
+                               viewportUpdatePolicy: viewportUpdatePolicy)
     }
 }
 
@@ -94,9 +104,12 @@ private struct LineChartRepresentable: UIViewRepresentable {
     let crosshairDashStyle: LineDashStyle
     let isCrosshairDualDirectionEnabled: Bool
     let tooltipTextOptions: HYMChartTooltipTextOptions
+    let onSeriesVisibilityChanged: ((String, Bool) -> Void)?
+    let viewportUpdatePolicy: HYMChartViewportUpdatePolicy
 
     func makeUIView(context: Context) -> HYMChartView<LineChartRenderer> {
         let chart = HYMChartView<LineChartRenderer>(frame: .zero)
+        chart.onSeriesVisibilityChanged = onSeriesVisibilityChanged
         chart.showsTooltipOnHit = true
         chart.isZoomEnabled = isZoomEnabled
         chart.minimumVisibleCategories = minimumVisibleCategories
@@ -122,6 +135,7 @@ private struct LineChartRepresentable: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: HYMChartView<LineChartRenderer>, context: Context) {
+        uiView.onSeriesVisibilityChanged = onSeriesVisibilityChanged
         // 交互开关同步：demo 里拨动开关时 SwiftUI 不重建 UIView，须在此回写才实时生效
         uiView.isZoomEnabled = isZoomEnabled
         uiView.minimumVisibleCategories = minimumVisibleCategories
@@ -136,6 +150,12 @@ private struct LineChartRepresentable: UIViewRepresentable {
         uiView.crosshairDashStyle = crosshairDashStyle
         uiView.isCrosshairDualDirectionEnabled = isCrosshairDualDirectionEnabled
         uiView.tooltipTextOptions = tooltipTextOptions
-        uiView.configure(model: model, theme: theme)
+        // 每次更新替换回调，避免继续调用 makeUIView 时捕获的旧闭包。
+        uiView.onHit = onHit.map { callback in
+            { target, gesture in
+                if let hit = target as? LineHitTarget { callback(hit, gesture) }
+            }
+        }
+        uiView.update(model: model, theme: theme, viewportPolicy: viewportUpdatePolicy)
     }
 }

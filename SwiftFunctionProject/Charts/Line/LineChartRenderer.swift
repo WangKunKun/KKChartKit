@@ -4,6 +4,7 @@ import UIKit
 public struct LineHitTarget: HYMChartHitTarget {
     public let identifier: String
     public let index: Int
+    public let seriesID: String?
     public let seriesIndex: Int
     /// 命中数据点的值。
     public let value: Double
@@ -13,7 +14,8 @@ public struct LineHitTarget: HYMChartHitTarget {
     /// 系列名（弹窗模板数据源用）
     public let name: String
 
-    public init(seriesIndex: Int, index: Int, value: Double, label: String?, yAxisIndex: Int = 0) {
+    public init(seriesIndex: Int, index: Int, value: Double, label: String?, yAxisIndex: Int = 0, seriesID: String? = nil) {
+        self.seriesID = seriesID
         self.seriesIndex = seriesIndex
         self.index = index
         self.value = value
@@ -40,10 +42,18 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
 
     /// 命中检测缓存：各数据点 frame（view 坐标系，正方形=命中半径直径）。
     private var lastPointFrames: [(series: Int, index: Int, frame: CGRect)] = []
+    /// 内部诊断（测试检查绘制规模，不改变公开命中值语义）。
+    private(set) var renderedIndices: [Int: [[Int]]] = [:]
+    private(set) var denseSeries: Set<Int> = []
+    private var usesSampling = false
     /// 折线层（入场动画 strokeEnd 驱动）。
     private var lineLayers: [CAShapeLayer] = []
     /// 命中半径（pt）。
     private let hitRadius: CGFloat = 10
+
+    public override func legendSymbol(for series: CartesianSeriesElement, theme: CartesianChartTheme) -> ChartLegendSymbol {
+        theme.showsPoints ? .lineWithMarker(series.pointSymbol ?? theme.pointSymbol) : .line
+    }
 
     // MARK: - drawSeries（模板方法扩展点）
     public override func drawSeries(model: CartesianChartModel,
@@ -52,14 +62,19 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
         // 清空旧内容（render 与动画/手势的逐帧重画共用本方法，必须先清后画）
         seriesLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
         lastPointFrames.removeAll()
+        renderedIndices.removeAll()
+        denseSeries.removeAll()
+        usesSampling = theme.lineSampling != nil && !model.isStacked
+            && theme.lineConnectionStyle == .straight
+        if case .grouped = model.stacking { usesSampling = false }
         lineLayers.removeAll()
         clearSeriesShadowCasters()
 
         // 堆叠：normal=符号链累计 / percent=百分比累计；非堆叠用原值
-        let dataToDraw = model.stackedDrawValues
+        let dataToDraw = currentDrawValues
 
         for (s, element) in model.series.enumerated() {
-            guard !element.data.isEmpty else { continue }
+            guard element.isVisible, !element.data.isEmpty else { continue }
             let color = element.color ?? theme.seriesColor
             let axisIdx = element.effectiveYAxisIndex
             let values = dataToDraw[s]
@@ -71,19 +86,21 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
 
             // 空值（NaN）分段：有效索引按连续性切分（connectNulls 合成一段全直连）；
             // 每段独立成子路径——线断、面积分段、点与命中只取有效点
-            let finiteIndices = values.indices.filter { values[$0].isFinite }
-            guard !finiteIndices.isEmpty else { continue }
-            var segments: [[Int]] = []
-            if element.connectNulls {
-                segments = [finiteIndices]
+            let selection: LineRenderSelection
+            if usesSampling, let configuration = theme.lineSampling {
+                selection = LineMinMaxSampler.select(values: values, connectNulls: element.connectNulls,
+                    visibleRange: currentViewport.xDomain, plotWidth: plotFrame.width, configuration: configuration)
             } else {
-                var run: [Int] = []
-                for idx in finiteIndices {
-                    if let last = run.last, idx == last + 1 { run.append(idx) }
-                    else { if !run.isEmpty { segments.append(run) }; run = [idx] }
-                }
-                if !run.isEmpty { segments.append(run) }
+                let original = LineMinMaxSampler.segments(values: values, connectNulls: element.connectNulls)
+                selection = LineRenderSelection(segments: original,
+                    visiblePointCount: original.reduce(0) { $0 + $1.count }, isDense: false)
             }
+            let segments = selection.segments
+            guard !segments.isEmpty else { continue }
+            renderedIndices[s] = segments
+            if selection.isDense { denseSeries.insert(s) }
+            let showsMarkers = theme.showsPoints && !(selection.isDense && theme.lineSampling?.hidesDenseMarkers == true)
+            let showsLabels = !(selection.isDense && theme.lineSampling?.hidesDenseDataLabels == true)
 
             // 每段屏幕坐标（命中 frame 按数据点，与阶梯形态无关）
             var segmentPoints: [[CGPoint]] = []
@@ -92,11 +109,13 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
                     screenPoint(x: Double(idx), y: values[idx], yAxisIndex: axisIdx)
                 })
             }
-            for (segIdx, seg) in segments.enumerated() {
-                for (k, p) in segmentPoints[segIdx].enumerated() {
-                    let r = max(hitRadius, theme.pointRadius)   // 命中半径 ≥ 视觉点半径
-                    lastPointFrames.append((s, seg[k],
-                        CGRect(x: p.x - r, y: p.y - r, width: r * 2, height: r * 2)))
+            if !usesSampling {
+                for (segIdx, seg) in segments.enumerated() {
+                    for (k, p) in segmentPoints[segIdx].enumerated() {
+                        let r = max(hitRadius, theme.pointRadius)
+                        lastPointFrames.append((s, seg[k],
+                            CGRect(x: p.x - r, y: p.y - r, width: r * 2, height: r * 2)))
+                    }
                 }
             }
 
@@ -166,7 +185,7 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
             if theme.showsArea, !path.isEmpty {
                 var base: [Double]? = nil
                 if model.isStacked {
-                    let rawBaseFull = model.rawBaseValues(forSeries: s)
+                    let rawBaseFull = currentBaseValues[s]
                     let rawBase = rawBaseFull + [Double](repeating: 0,
                         count: max(0, values.count - rawBaseFull.count))
                     base = zip(values, rawBase).map { $0 - $1 }
@@ -255,12 +274,15 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
             // 数据点（画在有效数据点位置，与阶梯形态无关；空值处不画点）。
             // 标记符号：圆/方/菱/正三角/倒三角（系列级覆盖主题）；负值点换 negativeColor；
             // 空心内芯（pointHoleRadius > 0）：同形状缩小版叠在点上（Charts holeRadius 同款）
-            if theme.showsPoints {
+            // 密集模式也保留孤立有效点的标记，否则“一点一缺测”会变成完全空白。
+            if showsMarkers || (theme.showsPoints && segments.contains(where: { $0.count == 1 })) {
                 let symbol = element.pointSymbol ?? theme.pointSymbol
                 let holeR = min(theme.pointHoleRadius, theme.pointRadius - 0.5)
                 for (segIdx, seg) in segments.enumerated() {
+                    if !showsMarkers && seg.count > 1 { continue }
                     for (k, p) in segmentPoints[segIdx].enumerated() {
                         let i = seg[k]
+                        if usesSampling && !currentViewport.xDomain.contains(Double(i)) { continue }
                         let dotColor = theme.pointColor
                             ?? (values[i] < 0 ? negativeColor : color)
                         let dot = CAShapeLayer()
@@ -281,9 +303,9 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
 
             // 数据标签：数值 = 系列原值（堆叠时也标各段自身值，位置在累计后的点上）；
             // outsideEnd = 点上方，center/insideEnd = 点下方。挂 rootLayer（不被 plot 裁剪）。
-            if dataLabelsAllowed(for: element, theme: theme) {
+            if showsLabels && dataLabelsAllowed(for: element, theme: theme) {
                 let labelColor = dataLabelColor(theme: theme, inside: false)
-                let radius = theme.showsPoints ? theme.pointRadius : 0
+                let radius = showsMarkers ? theme.pointRadius : 0
                 for (segIdx, seg) in segments.enumerated() {
                     let pts = segmentPoints[segIdx]
                     for (k, p) in pts.enumerated()
@@ -308,37 +330,74 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
     // MARK: - 命中（近者优先；正方形 frame 含点即命中）
     public override func seriesHitTest(_ point: CGPoint) -> HYMChartHitTarget? {
         guard let model = currentModel else { return nil }
+        if usesSampling { return originalPointHit(at: point) }
         // 后面的 series 画在上层 → 倒序先查
         for hit in lastPointFrames.reversed() where hit.frame.contains(point) {
             // 堆叠时命中报累计值（与柱状现状对齐）
             let value: Double
-            if model.stacking == .normal || model.stacking == .percent {
-                value = model.stackedDrawValues[hit.series][hit.index]
+            if model.isStacked {
+                value = currentDrawValues[hit.series][hit.index]
             } else {
                 value = model.series[hit.series].data[hit.index]
             }
             return LineHitTarget(seriesIndex: hit.series, index: hit.index,
                                  value: value,
                                  label: model.series[hit.series].name,
-                                 yAxisIndex: model.series[hit.series].effectiveYAxisIndex)
+                                 yAxisIndex: model.series[hit.series].effectiveYAxisIndex,
+                                 seriesID: model.series[hit.series].id)
         }
         return nil
     }
 
     // MARK: - 弹窗锚点（数据点正方形 frame，上下避让）
     public override func tooltipAnchor(for target: HYMChartHitTarget) -> HYMChartTooltipAnchor? {
-        guard let t = target as? LineHitTarget,
-              currentTheme?.showsTooltipOnHit == true,
-              let hit = lastPointFrames.first(where: { $0.series == t.seriesIndex && $0.index == t.index })
-        else { return nil }
-        return HYMChartTooltipAnchor(frame: hit.frame, preferredPlacements: [.top, .bottom])
+        guard currentTheme?.showsTooltipOnHit == true, let frame = hitFrame(for: target) else { return nil }
+        return HYMChartTooltipAnchor(frame: frame, preferredPlacements: [.top, .bottom])
     }
 
     public override func hitFrame(for target: HYMChartHitTarget) -> CGRect? {
-        guard let t = target as? LineHitTarget,
-              let hit = lastPointFrames.first(where: { $0.series == t.seriesIndex && $0.index == t.index })
-        else { return nil }
-        return hit.frame
+        guard let t = target as? LineHitTarget else { return nil }
+        if usesSampling { return originalPointFrame(series: t.seriesIndex, index: t.index) }
+        return lastPointFrames.first(where: { $0.series == t.seriesIndex && $0.index == t.index })?.frame
+    }
+
+    /// 只在点击容差所覆盖的原始索引范围内查找。省略的绘制点仍可命中，不为所有原始点建 frame。
+    private func originalPointHit(at point: CGPoint) -> LineHitTarget? {
+        guard let model = currentModel, currentPlotFrame.contains(point), currentPlotFrame.width > 0 else { return nil }
+        let radius = max(hitRadius, currentTheme?.pointRadius ?? 0)
+        let span = currentViewport.xMax - currentViewport.xMin
+        let lo = currentViewport.xMin + Double((point.x - radius - currentPlotFrame.minX) / currentPlotFrame.width) * span
+        let hi = currentViewport.xMin + Double((point.x + radius - currentPlotFrame.minX) / currentPlotFrame.width) * span
+        guard lo.isFinite, hi.isFinite else { return nil }
+        for s in model.series.indices.reversed() where model.series[s].isVisible {
+            let count = model.series[s].data.count
+            guard count > 0 else { continue }
+            let lower = Int(max(0, min(Double(count), ceil(lo))))
+            let upper = Int(max(0, min(Double(count - 1), floor(hi))))
+            guard lower <= upper else { continue }
+            var closest: (index: Int, distance: CGFloat)?
+            for i in lower...upper {
+                guard let frame = originalPointFrame(series: s, index: i), frame.contains(point) else { continue }
+                let distance = hypot(frame.midX - point.x, frame.midY - point.y)
+                if closest == nil || distance < closest!.distance { closest = (i, distance) }
+            }
+            if let hit = closest {
+                let element = model.series[s]
+                return LineHitTarget(seriesIndex: s, index: hit.index, value: element.data[hit.index],
+                    label: element.name, yAxisIndex: element.effectiveYAxisIndex, seriesID: element.id)
+            }
+        }
+        return nil
+    }
+
+    private func originalPointFrame(series: Int, index: Int) -> CGRect? {
+        guard let model = currentModel, model.series.indices.contains(series) else { return nil }
+        let element = model.series[series]
+        guard element.isVisible, element.data.indices.contains(index), element.data[index].isFinite,
+              currentViewport.xDomain.contains(Double(index)) else { return nil }
+        let p = screenPoint(x: Double(index), y: element.data[index], yAxisIndex: element.effectiveYAxisIndex)
+        let radius = max(hitRadius, currentTheme?.pointRadius ?? 0)
+        return CGRect(x: p.x - radius, y: p.y - radius, width: radius * 2, height: radius * 2)
     }
 
     // MARK: - 入场动画：折线 strokeEnd 0→1 生长（点/网格随 rootLayer opacity 淡入）
@@ -356,8 +415,8 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
         }
         // 堆叠模式返回累计值位置（与绘制同源）
         let value: Double
-        if model.stacking == .normal || model.stacking == .percent {
-            value = model.stackedDrawValues[series][index]
+        if model.isStacked {
+            value = currentDrawValues[series][index]
         } else {
             value = model.series[series].data[index]
         }
@@ -375,6 +434,6 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
         let element = model.series[seriesIndex]
         return LineHitTarget(seriesIndex: seriesIndex, index: categoryIndex,
                              value: value, label: element.name,
-                             yAxisIndex: element.effectiveYAxisIndex)
+                             yAxisIndex: element.effectiveYAxisIndex, seriesID: element.id)
     }
 }

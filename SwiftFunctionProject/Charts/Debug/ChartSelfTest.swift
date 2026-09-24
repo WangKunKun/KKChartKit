@@ -846,6 +846,9 @@ public enum ChartSelfTest {
         // —— 色带（plotBands）+ 系列阴影 ——
         runPlotBandShadowSelfTest()
 
+        // —— 堆叠总量标签（stackLabels）——
+        runStackTotalLabelSelfTest()
+
         // —— 轴标签旋转（类目轴底部标签；默认 0 不旋转）——
         runTickLabelRotationSelfTest()
 
@@ -1150,6 +1153,100 @@ public enum ChartSelfTest {
             .filter { $0.shadowPath != nil && $0.shadowOpacity > 0 }
         assert(castersL.count == 1 && abs(castersL[0].shadowRadius - 3) < 1e-6,
                "折线一根 caster 且半径取系列级样式，got \(castersL.count)")
+    }
+
+    /// 堆叠总量标签（stackLabels）：链端原值合计（正链顶端/负链底端）、
+    /// 百分比堆叠标原值、非堆叠忽略、Bar 水平镜像、formatter 自定义。
+    static func runStackTotalLabelSelfTest() {
+        func walkLayers(_ l: CALayer, _ visit: (CALayer) -> Void) {
+            visit(l)
+            l.sublayers?.forEach { walkLayers($0, visit) }
+        }
+        func allTexts(of host: UIView) -> [String] {
+            var out: [String] = []
+            walkLayers(host.layer) { if let t = $0 as? CATextLayer, let s = t.string as? String { out.append(s) } }
+            return out
+        }
+        func textLayer(_ host: UIView, _ text: String) -> CATextLayer? {
+            var found: CATextLayer?
+            walkLayers(host.layer) {
+                if let t = $0 as? CATextLayer, t.string as? String == text, found == nil { found = t }
+            }
+            return found
+        }
+        // 数据设计：cat0 正链 27、cat1 负链 -13、cat2 正链 51（刻度文本不会撞这三个数）
+        let data0 = [12.0, -5, 20], data1 = [15.0, -8, 31]
+        var theme = CartesianChartTheme()
+        theme.showsStackTotalLabels = true
+
+        // 1) 普通堆叠：三条总量文本，负链标签在正链标签下方
+        let rc = ColumnChartRenderer()
+        let hostC = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        rc.mount(into: hostC)
+        rc.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: data0),
+                     CartesianSeriesElement(name: "b", data: data1)],
+            stacking: .normal),
+                  theme: theme,
+                  context: HYMChartRenderContext(bounds: hostC.bounds, center: hostC.center))
+        let textsC = allTexts(of: hostC)
+        for expected in ["27", "-13", "51"] {
+            assert(textsC.contains(expected), "普通堆叠应含总量文本 \(expected)，got \(textsC)")
+        }
+        let pos27 = textLayer(hostC, "27"), neg13 = textLayer(hostC, "-13")
+        assert(pos27!.position.y < neg13!.position.y, "负链总量标签应在正链之下")
+
+        // 2) 百分比堆叠：标签仍标原值合计（而非 100）
+        let rc2 = ColumnChartRenderer()
+        let hostC2 = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        rc2.mount(into: hostC2)
+        rc2.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: data0),
+                     CartesianSeriesElement(name: "b", data: data1)],
+            stacking: .percent),
+                   theme: theme,
+                   context: HYMChartRenderContext(bounds: hostC2.bounds, center: hostC2.center))
+        assert(allTexts(of: hostC2).contains("27") && allTexts(of: hostC2).contains("-13"),
+               "百分比堆叠总量标原值合计")
+
+        // 3) 非堆叠：开关开启也不出标签
+        let rc3 = ColumnChartRenderer()
+        let hostC3 = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        rc3.mount(into: hostC3)
+        rc3.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: data0),
+                     CartesianSeriesElement(name: "b", data: data1)]),
+                   theme: theme,
+                   context: HYMChartRenderContext(bounds: hostC3.bounds, center: hostC3.center))
+        assert(!allTexts(of: hostC3).contains("27"), "非堆叠不出总量标签")
+
+        // 4) Bar：水平镜像（正链标签在右端、负链在左端）
+        let rb = BarChartRenderer()
+        let hostB = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        rb.mount(into: hostB)
+        rb.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: data0),
+                     CartesianSeriesElement(name: "b", data: data1)],
+            stacking: .normal),
+                  theme: theme,
+                  context: HYMChartRenderContext(bounds: hostB.bounds, center: hostB.center))
+        assert(allTexts(of: hostB).contains("27") && allTexts(of: hostB).contains("-13"),
+               "Bar 堆叠总量标签存在")
+        let posB = textLayer(hostB, "27"), negB = textLayer(hostB, "-13")
+        assert(posB!.position.x > negB!.position.x, "Bar 负链总量标签应在正链之左")
+
+        // 5) formatter 自定义
+        theme.stackTotalLabelFormatter = { "Σ\(Int($0))" }
+        let rc5 = ColumnChartRenderer()
+        let hostC5 = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
+        rc5.mount(into: hostC5)
+        rc5.render(model: CartesianChartModel(
+            series: [CartesianSeriesElement(name: "a", data: data0),
+                     CartesianSeriesElement(name: "b", data: data1)],
+            stacking: .normal),
+                   theme: theme,
+                   context: HYMChartRenderContext(bounds: hostC5.bounds, center: hostC5.center))
+        assert(allTexts(of: hostC5).contains("Σ27"), "formatter 生效，got \(allTexts(of: hostC5))")
     }
 
     /// 堆叠平滑面积：下边界 = 前一层平滑曲线的倒序回走（旧实现为直连线，

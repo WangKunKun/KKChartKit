@@ -1,221 +1,78 @@
 import SwiftUI
 
-/// 雷达图样式测试页面：实时配置 + 预览（覆盖 RadarChartTheme 全部可配置项）。
 struct RadarChartStyleDemo: View {
-    @State private var theme = RadarChartTheme()
-    @State private var labelFontSize: Double = 14
-    @State private var scoreFontSize: Double = 36
-    @State private var perDimEnabled: Bool = false
-
-    // gridRingFill（enum 不便直接绑）用独立 @State 合成
-    @State private var gridRingMode: Int = 0          // 0=none 1=gradient 2=colors
-    @State private var gridRingColorA: Color = .red
-    @State private var gridRingColorB: Color = .blue
-    // decorativeRingRadiusRatio（Optional）用独立 @State 合成
-    @State private var decorRatioEnabled: Bool = false
-    @State private var decorRatio: Double = 0.9
-
-    // 维度数据；perDimEnabled 时前 3 维用独立 label/数据点/标题顶点 颜色
-    private var model: RadarChartModel {
-        let labels = ["进攻", "防守", "速度", "技巧", "体力", "意识"]
-        let values: [Double] = [80, 60, 90, 50, 70, 85]
-        var dims = zip(labels, values).map { RadarDimension(label: $0, value: $1) }
-        if perDimEnabled {
-            let colors: [UIColor] = [.systemRed, .systemGreen, .systemBlue]
-            for i in 0..<min(3, dims.count) {
-                dims[i].labelColor = colors[i]
-                dims[i].dataDotColor = colors[i]
-                dims[i].labelDotColor = colors[i]
-            }
-        }
-        return RadarChartModel(dimensions: dims, showsCenterScore: true, centerScore: nil)
+    @State private var reset = UUID()
+    var body: some View {
+        RadarDemoEditor().id(reset).toolbar { Button("恢复默认") { reset = UUID() } }
     }
+}
 
-    /// 合成最终 theme（字体 + gridRingFill + decorativeRingRadiusRatio）
+private struct RadarDemoEditor: View {
+    @State private var theme = RadarChartTheme()
+    @State private var tooltipTheme = HYMChartTooltipTheme()
+    @State private var report = DemoChartReport()
+    @State private var interaction = DemoInteractionSettings()
+    @State private var dimensions = (0..<12).map { RadarDimension(label: "维度 \($0 + 1)", value: Double(40 + $0 * 7 % 60)) }
+    @State private var count = 6
+    @State private var selected = 0
+    @State private var showsScore = true
+    @State private var score: Double?
+    @State private var ringFill = "不填充"
+    @State private var fillA = UIColor.systemPurple.withAlphaComponent(0.5)
+    @State private var fillB = UIColor.systemBlue.withAlphaComponent(0.1)
+    @State private var height = 320.0
+    @State private var animation = 0
+    @State private var query = ""
+    private var dimension: Binding<RadarDimension> {
+        Binding(get: { dimensions[min(selected, count - 1)] }, set: { dimensions[min(selected, count - 1)] = $0 })
+    }
+    private var model: RadarChartModel {
+        RadarChartModel(dimensions: Array(dimensions.prefix(count)), showsCenterScore: showsScore, centerScore: score)
+    }
     private var builtTheme: RadarChartTheme {
         var t = theme
-        t.labelFont = .systemFont(ofSize: CGFloat(labelFontSize))
-        t.scoreFont = .boldSystemFont(ofSize: CGFloat(scoreFontSize))
-        switch gridRingMode {
-        case 1: t.gridRingFill = .gradient(from: UIColor(gridRingColorA), to: UIColor(gridRingColorB))
-        case 2: t.gridRingFill = .colors([UIColor(gridRingColorA), UIColor(gridRingColorB)])
+        switch ringFill {
+        case "渐变": t.gridRingFill = .gradient(from: fillA, to: fillB)
+        case "逐圈配色": t.gridRingFill = .colors((0..<max(1, t.gridRingCount)).map { $0.isMultiple(of: 2) ? fillA : fillB })
         default: t.gridRingFill = .none
         }
-        t.decorativeRingRadiusRatio = decorRatioEnabled ? CGFloat(decorRatio) : nil
         return t
     }
-
     var body: some View {
-        VStack(spacing: 12) {
-            RadarChart(model: model, theme: builtTheme, playsAnimationOnAppear: false)
-                .frame(height: 340)
-                .background(Color.black)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .padding(.horizontal)
-
-            Form {
-                Section("① 数据点（数据值顶点）") {
-                    Toggle("显示数据点", isOn: $theme.showsVertexDots)
-                    colorRow("点颜色", colorBinding(\.vertexDotColor))
-                    colorRow("外圈色", colorBinding(\.vertexDotRingColor))
-                    sliderRow("点半径", value: Binding(get: { Double(theme.vertexDotRadius) },
-                                                    set: { theme.vertexDotRadius = CGFloat($0) }),
-                              range: 1...12, format: "%.0f")
-                }
-
-                Section("② 数据连线 / 区域") {
-                    Toggle("显示数据多边形", isOn: $theme.showsData)
-                    colorRow("连线颜色", colorBinding(\.dataStrokeColor))
-                    colorRow("区域填充色", colorBinding(\.dataFillColor))
-                    sliderRow("连线线宽", value: Binding(get: { Double(theme.dataLineWidth) },
-                                                    set: { theme.dataLineWidth = CGFloat($0) }),
-                              range: 0.5...6, format: "%.1f")
-                }
-
-                Section("③ 标题顶点圆点（最外圈顶点；per-dim 见 ⑫）") {
-                    Toggle("显示标题顶点", isOn: $theme.showsLabelDots)
-                    colorRow("标题顶点色（统一）", colorBinding(\.labelDotColor))
-                    sliderRow("半径", value: Binding(get: { Double(theme.labelDotRadius) },
-                                                    set: { theme.labelDotRadius = CGFloat($0) }),
-                              range: 1...12, format: "%.0f")
-                }
-
-                Section("④ 标题字体 / 间距") {
-                    colorRow("标题颜色", colorBinding(\.labelColor))
-                    sliderRow("字号", value: $labelFontSize, range: 8...24, format: "%.0f")
-                    sliderRow("外间距 padding", value: Binding(get: { Double(theme.labelOuterPadding) },
-                                                    set: { theme.labelOuterPadding = CGFloat($0) }),
-                              range: 0...40, format: "%.0f")
-                    sliderRow("左右换行宽（<=0 不换行）", value: Binding(get: { Double(theme.labelMaxLineLength) },
-                                                    set: { theme.labelMaxLineLength = CGFloat($0) }),
-                              range: 0...120, format: "%.0f")
-                }
-
-                Section("⑤ 最外圈边框（独立于网格线）") {
-                    Toggle("显示最外圈", isOn: $theme.showsOuterRing)
-                    colorRow("最外圈色", colorBinding(\.outerRingColor))
-                    sliderRow("线宽", value: Binding(get: { Double(theme.outerRingLineWidth) },
-                                                    set: { theme.outerRingLineWidth = CGFloat($0) }),
-                              range: 0.5...5, format: "%.1f")
-                    Picker("最外圈线型", selection: lineStyleBinding(\.outerRingLineStyle)) {
-                        Text("实线").tag(0); Text("虚线").tag(1)
-                    }
-                }
-
-                Section("⑥ 网格 / 放射轴") {
-                    Toggle("显示内圈网格", isOn: $theme.showsGridLines)
-                    colorRow("网格色", colorBinding(\.gridColor))
-                    Picker("网格线型", selection: lineStyleBinding(\.gridLineStyle)) {
-                        Text("实线").tag(0); Text("虚线").tag(1)
-                    }
-                    Toggle("显示放射轴", isOn: $theme.showsAxes)
-                    colorRow("轴色", colorBinding(\.axisColor))
-                    Picker("轴线型", selection: lineStyleBinding(\.axisLineStyle)) {
-                        Text("实线").tag(0); Text("虚线").tag(1)
-                    }
-                    Stepper("网格圈数 \(theme.gridRingCount)", value: $theme.gridRingCount, in: 1...10)
-                }
-
-                Section("⑦ 网格每圈底色（gridRingFill）") {
-                    Picker("模式", selection: $gridRingMode) {
-                        Text("不填充").tag(0); Text("渐变").tag(1); Text("多色").tag(2)
-                    }
-                    if gridRingMode != 0 {
-                        colorRow("色 A", Binding(get: { gridRingColorA }, set: { gridRingColorA = $0 }))
-                        colorRow("色 B", Binding(get: { gridRingColorB }, set: { gridRingColorB = $0 }))
-                    }
-                }
-
-                Section("⑧ 装饰 ring（最外圈外）") {
-                    Toggle("显示装饰 ring", isOn: $theme.showsDecorativeRing)
-                    colorRow("装饰 ring 色", colorBinding(\.decorativeRingColor))
-                    colorRow("填充色", colorBindingOptional(\.decorativeRingFillColor))
-                    sliderRow("线宽", value: Binding(get: { Double(theme.decorativeRingLineWidth) },
-                                                    set: { theme.decorativeRingLineWidth = CGFloat($0) }),
-                              range: 0.5...5, format: "%.1f")
-                    Picker("线型", selection: lineStyleBinding(\.decorativeRingLineStyle)) {
-                        Text("实线").tag(0); Text("虚线").tag(1)
-                    }
-                    sliderRow("外间距 inset", value: Binding(get: { Double(theme.decorativeRingInset) },
-                                                    set: { theme.decorativeRingInset = CGFloat($0) }),
-                              range: 0...30, format: "%.0f")
-                    Picker("形状", selection: $theme.decorativeRingSides) {
-                        Text("跟随维度").tag(-1); Text("圆形").tag(0); Text("正六边形").tag(6)
-                    }
-                    Toggle("自定义半径比例", isOn: $decorRatioEnabled)
-                    if decorRatioEnabled {
-                        sliderRow("比例（相对 viewHalf）", value: $decorRatio, range: 0.1...1, format: "%.2f")
-                    }
-                }
-
-                Section("⑨ 选中态（顶点点击高亮）") {
-                    Toggle("数据顶点可点击", isOn: $theme.dataVertexTappable)
-                    Toggle("标题顶点可点击", isOn: $theme.labelVertexTappable)
-                    sliderRow("放大倍数", value: Binding(get: { Double(theme.selectionScale) },
-                                                    set: { theme.selectionScale = CGFloat($0) }),
-                              range: 1...3, format: "%.1f")
-                    colorRow("选中描边色", colorBindingOptional(\.selectionStrokeColor))
-                    sliderRow("描边线宽", value: Binding(get: { Double(theme.selectionStrokeWidth) },
-                                                    set: { theme.selectionStrokeWidth = CGFloat($0) }),
-                              range: 0.5...6, format: "%.1f")
-                    colorRow("选中变色", colorBindingOptional(\.selectionColor))
-                    sliderRow("命中容差", value: Binding(get: { Double(theme.selectionHitPadding) },
-                                                    set: { theme.selectionHitPadding = CGFloat($0) }),
-                              range: 0...30, format: "%.0f")
-                }
-
-                Section("⑩ 中心分数样式") {
-                    colorRow("分数颜色", colorBinding(\.scoreColor))
-                    sliderRow("分数字号", value: $scoreFontSize, range: 16...48, format: "%.0f")
-                }
-
-                Section("⑪ 背景") {
-                    Toggle("显示背景渐变", isOn: $theme.showsBackground)
-                    colorRow("渐变起始色", colorBinding(\.backgroundGradientStart))
-                    colorRow("渐变结束色", colorBinding(\.backgroundGradientEnd))
-                    sliderRow("卡片圆角", value: Binding(get: { Double(theme.cardCornerRadius) },
-                                                    set: { theme.cardCornerRadius = CGFloat($0) }),
-                              range: 0...40, format: "%.0f")
-                }
-
-                Section("⑫ per-dimension 独立样式（前 3 维 label/数据点/标题顶点）") {
-                    Toggle("启用 per-dim（红/绿/蓝）", isOn: $perDimEnabled)
+        GeometryReader { geometry in
+            VStack(spacing: 6) {
+                DemoChartHost<RadarChartRenderer>(model: model, theme: builtTheme, interaction: interaction,
+                    tooltipTheme: tooltipTheme, report: report, animation: animation)
+                    .frame(height: min(height, geometry.size.height * 0.6))
+                    .background(theme.showsBackground ? Color(uiColor: theme.backgroundGradientEnd) : .clear)
+                    .clipShape(RoundedRectangle(cornerRadius: theme.cardCornerRadius)).padding(.horizontal, 12)
+                DemoHitReadout(report: report)
+                Button("重播动画") { animation += 1 }.buttonStyle(.bordered)
+                Form {
+                    TextField("搜索属性名或分组", text: $query)
+                    ChartDemoPanel(sections: sections, query: query)
                 }
             }
         }
-        .navigationTitle("样式扩展测试")
+        .navigationTitle("雷达图").navigationBarTitleDisplayMode(.inline)
+        .onChange(of: count) { selected = min(selected, $0 - 1) }
     }
-
-    // MARK: - 绑定辅助
-
-    private func colorBinding(_ keyPath: WritableKeyPath<RadarChartTheme, UIColor>) -> Binding<Color> {
-        Binding(get: { Color(theme[keyPath: keyPath]) },
-                set: { theme[keyPath: keyPath] = UIColor($0) })
-    }
-
-    private func colorBindingOptional(_ keyPath: WritableKeyPath<RadarChartTheme, UIColor?>) -> Binding<Color> {
-        Binding(get: { Color(theme[keyPath: keyPath] ?? .clear) },
-                set: { theme[keyPath: keyPath] = UIColor($0) })
-    }
-
-    private func lineStyleBinding(_ keyPath: WritableKeyPath<RadarChartTheme, ChartLineStyle>) -> Binding<Int> {
-        Binding(get: { if case .dashed = theme[keyPath: keyPath] { return 1 }; return 0 },
-                set: { theme[keyPath: keyPath] = ($0 == 1) ? .dashed() : .solid })
-    }
-
-    private func colorRow(_ title: String, _ binding: Binding<Color>) -> some View {
-        HStack {
-            Text(title)
-            Spacer()
-            ColorPicker("", selection: binding).labelsHidden().frame(width: 60)
-        }
-    }
-
-    private func sliderRow(_ title: String, value: Binding<Double>, range: ClosedRange<Double>, format: String) -> some View {
-        HStack {
-            Text(title)
-            Slider(value: value, in: range)
-            Text(String(format: format, value.wrappedValue)).foregroundStyle(.secondary).frame(width: 40)
-        }
+    private var sections: [ChartDemoPanel.DemoSection] {
+        let d = dimension
+        var dimensionItems: [ChartDemoPanel.Item] = [
+            DemoProperty.integer("编辑维度（从0开始）", $selected, 0...Double(count - 1)),
+            .textField(label: "标签", value: d.label), DemoProperty.number("数值", d.value, 0...200), DemoProperty.number("满分", d.maxValue, 1...200),
+            DemoProperty.triState("标题顶点显隐覆盖", d.showsLabelDot)]
+        dimensionItems += DemoProperty.color("标签颜色", d.labelColor) + DemoProperty.color("数据点颜色", d.dataDotColor) + DemoProperty.color("标题点颜色", d.labelDotColor)
+        dimensionItems += [DemoProperty.enabled("覆盖维度字体", d.labelFont, default: .systemFont(ofSize: 14))]
+        if d.wrappedValue.labelFont != nil { dimensionItems += DemoProperty.font("维度字体", DemoProperty.optional(d.labelFont, default: .systemFont(ofSize: 14))) }
+        let scoreItems: [ChartDemoPanel.Item] = [.toggle(label: "显示中心分数", value: $showsScore), DemoProperty.enabled("手动中心分数", $score, default: 80), DemoProperty.number("中心分数", DemoProperty.optional($score, default: 80), 0...200)]
+        return [
+            .init(title: "数据与布局", items: [DemoProperty.integer("维度数量", $count, 3...12), DemoProperty.number("预览高度", $height, 180...500, step: 10)] + scoreItems),
+            .init(title: "维度独立样式", items: dimensionItems),
+            .init(title: "雷达主题（颜色/网格/选中/装饰环）", items: DemoThemeFields.items($theme)),
+            .init(title: "网格填充", items: [.picker(label: "填充模式", selection: $ringFill, options: ["不填充", "渐变", "逐圈配色"]), .color(label: "填充色 A", value: $fillA), .color(label: "填充色 B", value: $fillB)]),
+            .init(title: "弹窗与回调", items: [.toggle(label: "弹窗", value: $interaction.tooltip), .picker(label: "弹窗预设", selection: $interaction.popupMode, options: ["内置", "自定义内容", "位置回调"])]),
+            .init(title: "弹窗外观", items: DemoThemeFields.items($tooltipTheme))]
     }
 }

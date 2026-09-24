@@ -18,18 +18,28 @@ struct ChartDemoPanel: View {
         case toggle(label: String, value: Binding<Bool>)
         case picker(label: String, selection: Binding<String>, options: [String])
         case color(label: String, value: Binding<UIColor>)
+        case date(label: String, value: Binding<Date>)
         case textField(label: String, value: Binding<String>)
         case button(label: String, action: () -> Void)
     }
 
     let sections: [DemoSection]
+    var query = ""
 
     var body: some View {
         ForEach(sections) { section in
-            Section(section.title) {
-                ForEach(Array(section.items.enumerated()), id: \.offset) { _, item in
-                    row(item)
-                }
+            let matchesTitle = section.title.localizedCaseInsensitiveContains(query)
+            let items = query.isEmpty || matchesTitle ? section.items : section.items.filter { $0.label.localizedCaseInsensitiveContains(query) }
+            if !items.isEmpty {
+                Section {
+                    if query.isEmpty {
+                        DisclosureGroup(section.title) {
+                            ForEach(Array(items.enumerated()), id: \.offset) { _, item in row(item) }
+                        }
+                    } else {
+                        ForEach(Array(items.enumerated()), id: \.offset) { _, item in row(item) }
+                    }
+                } header: { if !query.isEmpty { Text(section.title) } }
             }
         }
     }
@@ -65,10 +75,15 @@ struct ChartDemoPanel: View {
                             selection: Binding(
                                 get: { Color(uiColor: value.wrappedValue) },
                                 set: { value.wrappedValue = UIColor($0) }),
-                            supportsOpacity: false)
+                            supportsOpacity: true)
             }
+        case .date(let label, let value):
+            DatePicker(label, selection: value)
         case .textField(let label, let value):
-            TextField(label, text: value)
+            VStack(alignment: .leading) {
+                Text(label).font(.caption).foregroundStyle(.secondary)
+                TextField(label, text: value).textInputAutocapitalization(.never).autocorrectionDisabled()
+            }
         case .button(let label, let action):
             Button(label, action: action)
         }
@@ -90,5 +105,15 @@ extension ChartDemoPanel {
         guard count > 0 else { return "" }
         let minutes = Int(round(Double(index) / Double(count) * 24 * 60))
         return String(format: "%02d:%02d", (minutes / 60) % 24, minutes % 60)
+    }
+}
+
+
+extension ChartDemoPanel.Item {
+    var label: String {
+        switch self {
+        case .slider(let label, _, _, _), .stepper(let label, _, _), .toggle(let label, _),
+             .picker(let label, _, _), .color(let label, _), .date(let label, _), .textField(let label, _), .button(let label, _): return label
+        }
     }
 }

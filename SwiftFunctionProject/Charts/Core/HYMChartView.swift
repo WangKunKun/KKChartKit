@@ -10,12 +10,16 @@ import UIKit
 /// chart.playEntranceAnimation()
 /// chart.onHit = { target, gesture in ... }
 /// ```
-public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
+public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRecognizerDelegate {
 
     // MARK: - 状态
     private var model: Renderer.Model?
     private var theme: Renderer.Theme?
+    private var interactionRevision = 0
     private var pendingAnimation = false
+    private var seriesVisibilityOverrides: [String: Bool] = [:]
+    /// 图例点击或 setSeriesVisible 修改有效显隐时回调。仅轴系图表提供此能力。
+    public var onSeriesVisibilityChanged: ((String, Bool) -> Void)?
     private let animator = HYMChartValueAnimator()
 
     /// 命中交互单元时回调（带手势类型，为扩展留位）
@@ -33,8 +37,8 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     /// 设置后内置 tooltip 自动不显示（见 `updateTooltip` 互斥）。
     public var onHitLocated: ((HYMChartHitContext?, HYMChartGesture) -> Void)?
 
-    /// 缩放手势启用（默认 false）。仅 X 轴（宽度方向）参与缩放/平移，
-    /// Y 轴视口始终由数据驱动；renderer 需实现 `HYMChartXAxisZoomable`。
+    /// 缩放手势启用（默认 false）。轴向由 zoomAxisMode 决定；
+    /// renderer 需实现对应的 X/Y 视口协议。
     public var isZoomEnabled: Bool = false {
       didSet {
         zoomGesture.isEnabled = isZoomEnabled
@@ -109,6 +113,8 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     public var popupContentProvider: ((HYMChartHitContext) -> UIView?)?
     /// 弹窗控制器（首次显示时懒创建）。
     private var tooltipController: HYMChartTooltipController?
+    /// 外部位置弹窗已显示时，数据更新需发送一次失效通知。
+    private var locatedSelectionGesture: HYMChartGesture?
 
     // MARK: - 轴视口手势状态
     /// 当前 renderer 若实现 `HYMChartXAxisZoomable`（轴系图表）则支持 X 视口手势；
@@ -154,6 +160,9 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         clipsToBounds = false
         isUserInteractionEnabled = true
         renderer.mount(into: self)
+        (renderer as? HYMChartLegendProviding)?.onLegendToggle = { [weak self] id, visible in
+            self?.setSeriesVisible(visible, for: id)
+        }
         // 样式初值来自实例属性（didSet 在 init 阶段不触发，这里显式应用一次）
         crosshairLayer.strokeColor = crosshairColor.cgColor
         crosshairLayer.fillColor = nil
@@ -168,6 +177,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         addGestureRecognizer(zoomGesture)
         addGestureRecognizer(panGesture)
         addGestureRecognizer(doubleTapGesture)
+        gestureRecognizers?.forEach { $0.delegate = self }
         doubleTapGesture.numberOfTapsRequired = 2
         zoomGesture.isEnabled = isZoomEnabled
         panGesture.isEnabled = isZoomEnabled
@@ -177,15 +187,117 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     // MARK: - 公开 API
     /// 配置并刷新（model + theme 一起传入）。
     ///
-    /// 外部数据/主题变化会重置 X 轴视口到全量（手势缩放状态不跨数据更新保留）。
+    /// 重置全部视口到全量；保留窗口请改用 update。必须在主线程调用。
     public func configure(model: Renderer.Model, theme: Renderer.Theme) {
+        seriesVisibilityOverrides.removeAll()
+        update(model: model, theme: theme, viewportPolicy: .reset)
+    }
+
+    /// 更新数据和样式，默认保留用户的缩放/平移窗口。
+    ///
+    /// - Parameters:
+    ///   - model: 新数据模型；也可用于首次配置。
+    ///   - theme: 新主题。
+    ///   - viewportPolicy: 保留窗口并限制到新数据域，或重置到全量。
+    /// - Note: 必须在主线程调用。下一次布局时绘制；不自动播放入场动画。
+    ///   停止旧动画，清除旧选择、准线和弹窗，避免显示旧数据。
+    ///   当前未提供跨数据更新的选择身份保持；不支持视口协议的 renderer 仍正常刷新。
+    public func update(model: Renderer.Model, theme: Renderer.Theme,
+                       viewportPolicy: HYMChartViewportUpdatePolicy = .preserve) {
+        interactionRevision &+= 1
         stopDeceleration()
+        if animator.isRunning { finishEntranceAnimationIfNeeded() }
+        pendingAnimation = false
         hideCrosshair()
+        tooltipController?.hide(animated: false)
+        renderer.applySelection(nil)
+        if let next = model as? CartesianChartModel {
+            let previous = self.model as? CartesianChartModel
+            let ids = Set(next.series.map(\.id))
+            seriesVisibilityOverrides = seriesVisibilityOverrides.filter { ids.contains($0.key) }
+            for series in next.series {
+                if let old = previous?.series.first(where: { $0.id == series.id }),
+                   old.isVisible != series.isVisible {
+                    seriesVisibilityOverrides.removeValue(forKey: series.id)
+                }
+            }
+        }
         self.model = model
         self.theme = theme
-        xAxisZoomable?.resetXAxisViewport()
-        yAxisZoomable?.resetYAxisViewport()
+        if let updating = renderer as? any HYMChartViewportUpdating {
+            updating.prepareViewportForUpdate(viewportPolicy)
+        } else if viewportPolicy == .reset {
+            xAxisZoomable?.resetXAxisViewport()
+            yAxisZoomable?.resetYAxisViewport()
+        }
         setNeedsLayout()
+        if let gesture = locatedSelectionGesture {
+            locatedSelectionGesture = nil
+            onHitLocated?(nil, gesture)
+        }
+    }
+
+    /// 只更新数据，沿用已配置主题；首次配置前调用不生效。必须在主线程调用。
+    public func update(model: Renderer.Model,
+                       viewportPolicy: HYMChartViewportUpdatePolicy = .preserve) {
+        guard let theme else { return }
+        update(model: model, theme: theme, viewportPolicy: viewportPolicy)
+    }
+
+    /// 只更新样式，沿用已配置数据；首次配置前调用不生效。必须在主线程调用。
+    public func update(theme: Renderer.Theme,
+                       viewportPolicy: HYMChartViewportUpdatePolicy = .preserve) {
+        guard let model else { return }
+        update(model: model, theme: theme, viewportPolicy: viewportPolicy)
+    }
+
+    /// 主动恢复全部视口（含次轴），不修改数据或主题。必须在主线程调用。
+    public func resetViewport() {
+        guard let model, let theme else { return }
+        update(model: model, theme: theme, viewportPolicy: .reset)
+    }
+
+    /// 按稳定系列 ID 设置显隐；不改变原始数据。重复 ID 不可独立切换，应由调用方保证唯一。
+    public func setSeriesVisible(_ visible: Bool, for seriesID: String) {
+        guard let cartesian = model as? CartesianChartModel,
+              let series = cartesian.series.first(where: { $0.id == seriesID }),
+              (seriesVisibilityOverrides[seriesID] ?? series.isVisible) != visible,
+              let model, let theme else { return }
+        seriesVisibilityOverrides[seriesID] = visible
+        update(model: model, theme: theme)
+        layoutIfNeeded()
+        onSeriesVisibilityChanged?(seriesID, visible)
+    }
+
+    public func isSeriesVisible(_ seriesID: String) -> Bool? {
+        guard let cartesian = model as? CartesianChartModel,
+              let series = cartesian.series.first(where: { $0.id == seriesID }) else { return nil }
+        return seriesVisibilityOverrides[seriesID] ?? series.isVisible
+    }
+
+    /// 清除图例本地状态，恢复为模型的 isVisible。
+    public func resetSeriesVisibility() {
+        seriesVisibilityOverrides.removeAll()
+        guard let model, let theme else { return }
+        update(model: model, theme: theme)
+    }
+
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        var view = touch.view
+        while let current = view, current !== self {
+            if current is ChartLegendView { return false }
+            view = current.superview
+        }
+        return true
+    }
+
+    /// 按原始类目索引进入明细；聚合不会改变该坐标。需先 configure/update。
+    public func showCategoryRange(_ range: Range<Int>) {
+        guard !range.isEmpty, let model, let theme,
+              let controlling = renderer as? HYMChartCategoryViewportControlling else { return }
+        update(model: model, theme: theme)
+        layoutIfNeeded()
+        controlling.showCategoryRange(range)
     }
 
     /// 播放入场动画（幂等，可重复调用）
@@ -199,7 +311,16 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
     public override func layoutSubviews() {
         super.layoutSubviews()
         guard let model, let theme else { return }
-        renderer.render(model: model, theme: theme,
+        var renderModel = model
+        if var cartesian = model as? CartesianChartModel {
+            for i in cartesian.series.indices {
+                if let visible = seriesVisibilityOverrides[cartesian.series[i].id] {
+                    cartesian.series[i].isVisible = visible
+                }
+            }
+            if let typed = cartesian as? Renderer.Model { renderModel = typed }
+        }
+        renderer.render(model: renderModel, theme: theme,
                         context: HYMChartRenderContext(
                             bounds: bounds,
                             center: CGPoint(x: bounds.midX, y: bounds.midY)))
@@ -295,6 +416,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
 
     /// 与 tap 手势同一分发路径（整列优先、回落逐点）；供测试与无手势环境驱动。
     func performTap(at point: CGPoint) {
+        layoutIfNeeded()   // update 后同一轮事件也必须命中新模型，不能读取旧缓存。
         if !handleSharedIfActive(at: point, gesture: .tap) {
             handleHit(at: point, gesture: .tap)
         }
@@ -319,6 +441,9 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         (renderer as? HYMChartXAxisZoomable)?.xAxisViewport
     }
 
+    /// 供 @testable 验证容器更新后的实际 renderer 状态。
+    var rendererForTesting: Renderer { renderer }
+
     /// 准线当前是否可见（供单测断言；展示逻辑见 showCrosshair/hideCrosshair）。
     var isCrosshairVisibleForTesting: Bool {
         !crosshairLayer.isHidden && crosshairLayer.superlayer != nil
@@ -335,7 +460,10 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         let useShared = isSharedTooltipOnTapEnabled ?? (entryCount > 1)
         guard useShared else { return false }
         renderer.applySelection(shared.target)
+        let revision = interactionRevision
         onHit?(shared.target, gesture)
+        // 回调可能直接进入明细/更新数据；不得继续展示旧区间的准线和弹窗。
+        guard revision == interactionRevision else { return true }
         // 整列弹窗伴随准线：单向 = 类目向；双向 = 叠加跟触点的值向分量
         showCrosshair(isCrosshairDualDirectionEnabled
                       ? [shared.crosshair, shared.valueCrosshair]
@@ -373,7 +501,9 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
         }
 
         if let target {
+            let revision = interactionRevision
             onHit?(target, gesture)                      // 始终：命中事件通知
+            guard revision == interactionRevision else { return }
 
             let ctx = HYMChartHitContext(
                 target: target,
@@ -389,6 +519,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
                     tooltipController?.hide()
                 }
             } else if onHitLocated != nil {            // ② onHitLocated 外部全权
+                locatedSelectionGesture = gesture
                 onHitLocated?(ctx, gesture)
                 tooltipController?.hide()
             } else {                                   // ③ 内置 text tooltip
@@ -396,6 +527,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
             }
         } else {
             // 未命中：按激活模式镜像处理（popup 模式不触发 onHitLocated，与命中分支对称）
+            locatedSelectionGesture = nil
             tooltipController?.hide()
             if popupContentProvider == nil, onHitLocated != nil {
                 onHitLocated?(nil, gesture)
@@ -557,9 +689,8 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
 
     /// 双击重置视口到全量数据（X/Y 两轴一起重置）。
     @objc private func onDoubleTap(_ gr: UITapGestureRecognizer) {
-        guard isZoomEnabled, let zoomable = xAxisZoomable else { return }
-        zoomable.resetXAxisViewport()
-        yAxisZoomable?.resetYAxisViewport()
+        guard isZoomEnabled, xAxisZoomable != nil else { return }
+        resetViewport()
     }
 
     /// 手势开始前的统一收尾：
@@ -597,6 +728,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView {
             return target.tooltipText
         }
         var lines: [String] = []
+        if let context = dataSource.tooltipContextText { lines.append(context) }
         if let header = tooltipTextOptions.header, let key = dataSource.tooltipHeaderKey {
             lines.append(header.replacingOccurrences(of: "{key}", with: key))
         }

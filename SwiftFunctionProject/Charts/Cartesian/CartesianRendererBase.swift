@@ -4,12 +4,14 @@ import UIKit
 public struct CartesianSharedHitTarget: HYMChartHitTarget {
     public struct Entry {
         /// 系列序号
+        public let seriesID: String
         public let seriesIndex: Int
         public let name: String
         /// 该列的数据值（堆叠模式下为原始值，非累计）
         public let value: Double
         /// 是否绑右轴（弹窗标注用）
         public let isSecondaryAxis: Bool
+        public let timeBucket: CartesianTimeBucket?
     }
 
     /// 类目索引
@@ -34,19 +36,26 @@ public struct CartesianSharedHitTarget: HYMChartHitTarget {
     public var identifier: String { "sharedColumn:\(categoryIndex)" }
     public var index: Int { categoryIndex }
     public var tooltipText: String? {
-        entries.map { entry in
-            var text = "\(entry.name): \(AxisRenderer.format(entry.value))"
+        let rows = entries.map { entry in
+            var text = entry.timeBucket?.tooltipRow(name: entry.name)
+                ?? "\(entry.name): \(AxisRenderer.format(entry.value))"
             if entry.isSecondaryAxis { text += " (右轴)" }
             return text
         }.joined(separator: "\n")
+        if let interval = entries.first?.timeBucket?.intervalLabel { return interval + "\n" + rows }
+        return rows
     }
 }
 
 extension CartesianSharedHitTarget: HYMChartTooltipDataSource {
     public var tooltipRows: [(name: String, value: Double, isSecondaryAxis: Bool)] {
-        entries.map { ($0.name, $0.value, $0.isSecondaryAxis) }
+        entries.map {
+            let detail = $0.timeBucket.map { " · " + $0.detailLabel + ($0.unit.map { " (" + $0 + ")" } ?? "") } ?? ""
+            return ($0.name + detail, $0.value, $0.isSecondaryAxis)
+        }
     }
     public var tooltipHeaderKey: String? { headerKey }
+    public var tooltipContextText: String? { entries.first?.timeBucket?.intervalLabel }
 }
 
 /// 轴系图表渲染基类（模板方法）。
@@ -60,11 +69,25 @@ extension CartesianSharedHitTarget: HYMChartTooltipDataSource {
 ///
 /// 遵循 `HYMChartXAxisZoomable`：所有轴系子类（Column/Bar/Line…）自动获得
 /// X 轴视口缩放/平移能力（Y 轴视口始终数据驱动，不参与手势）。
-open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, HYMChartXAxisZoomable, HYMChartYAxisZoomable {
+open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, HYMChartXAxisZoomable, HYMChartYAxisZoomable, HYMChartViewportUpdating, HYMChartLegendProviding, HYMChartCategoryViewportControlling {
     public typealias Model = CartesianChartModel
     public typealias Theme = ChartTheme
 
     public required init() {}
+
+    var onLegendToggle: ((String, Bool) -> Void)?
+    let legendView = ChartLegendView()
+    private var sourceModel: CartesianChartModel?
+    let renderDataCache = CartesianRenderDataCache()
+    private var currentPrimaryBounds: (min: Double, max: Double)?
+    private var currentSecondaryBounds: (min: Double, max: Double)?
+    private var previousGroupingStride: Int?
+
+    private(set) var legendItems: [ChartLegendItem] = []
+    open func legendSymbol(for series: CartesianSeriesElement, theme: CartesianChartTheme) -> ChartLegendSymbol {
+        .roundedRectangle
+    }
+
 
     // MARK: - 图表方向
     /// 值轴是否水平（条形图为 true）。决定轴系编排的方向分支：
@@ -91,6 +114,18 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
     /// 当前 plot 区（view 坐标系）。
     var currentPlotFrame: CGRect = .zero
     var currentModel: CartesianChartModel?
+    var currentCategoryLabels: [String] = []
+    var currentDrawValues: [[Double]] = []
+    var currentBaseValues: [[Double]] = []
+    public private(set) var timeGroupingStatus: CartesianTimeGroupingStatus = .disabled
+    open var supportsTimeGrouping: Bool { false }
+
+    public func showCategoryRange(_ range: Range<Int>) {
+        guard !range.isEmpty else { return }
+        let domain = Double(range.lowerBound) - 0.5...Double(range.upperBound) - 0.5
+        if isHorizontalValueAxis { setYAxisViewport(domain) } else { setXAxisViewport(domain) }
+    }
+
     var currentTheme: ChartTheme?
     var lastContext: HYMChartRenderContext?
     /// 当前值轴刻度（网格与值轴 label 同源；垂直图沿 Y 映射、水平图沿 X 映射）。
@@ -114,21 +149,51 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
     /// 次值轴（右）全量域与用户窗口（仅垂直图双轴；与主轴同手势、各自锚点换算）。
     private var fullSecondaryYRange: ClosedRange<Double>?
     private var userSecondaryYRange: ClosedRange<Double>?
+    /// 仅数据/样式更新时严格收回窗口；普通手势 render 保留橡皮筋行为。
+    private var constrainsViewportOnNextRender = false
+
+    /// 在下一次 render 中应用新数据域，避免主轴/次轴分次重绘旧模型。
+    /// 必须在主线程调用；保留策略按当前数值窗口处理，类目身份仍为索引。
+    public func prepareViewportForUpdate(_ policy: HYMChartViewportUpdatePolicy) {
+        switch policy {
+        case .reset:
+            userXRange = nil
+            userYRange = nil
+            userSecondaryYRange = nil
+        case .preserve:
+            if userXRange != nil {
+                userXRange = currentViewport.xDomain == fullXRange ? nil : currentViewport.xDomain
+            }
+            if userYRange != nil {
+                userYRange = currentViewport.yDomain == fullYRange ? nil : currentViewport.yDomain
+            }
+            if userSecondaryYRange != nil {
+                userSecondaryYRange = currentSecondaryYDomain == fullSecondaryYRange
+                    ? nil : currentSecondaryYDomain
+            }
+        }
+        constrainsViewportOnNextRender = true
+    }
 
     // MARK: - mount / unmount
     public func mount(into view: UIView) {
         hostView = view
         view.layer.addSublayer(backgroundLayer)
         view.layer.addSublayer(rootLayer)
+        view.addSubview(legendView)
+        legendView.onToggle = { [weak self] id, visible in self?.onLegendToggle?(id, visible) }
     }
 
     public func unmount(from view: UIView) {
+        renderDataCache.invalidate()
         titleLabels.forEach { $0.removeFromSuperview() }
         tickLabels.forEach { $0.removeFromSuperview() }
         titleLabels.removeAll()
         tickLabels.removeAll()
         rootLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
         [backgroundLayer, rootLayer].forEach { $0.removeFromSuperlayer() }
+        legendView.removeFromSuperview()
+        legendView.onToggle = nil
         hostView = nil
     }
 
@@ -349,22 +414,85 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
 
     /// 手势视口变化后的整体重排（禁用隐式动画，保证跟手）。
     private func relayout() {
-        guard let model = currentModel, let theme = currentTheme, let context = lastContext else { return }
-        render(model: model, theme: theme, context: context)
+        guard let model = sourceModel, let theme = currentTheme, let context = lastContext else { return }
+        renderFrame(model: model, theme: theme, context: context)
     }
 
     /// 可见类目索引范围（部分可见即计入；子类据此跳过视口外元素的 layer 创建）。
     /// 仅对垂直图有意义（类目在 X、参与手势缩放）；水平图类目在 Y（不参与手势、
     /// 恒全量可见），水平子类（Bar）无需此裁剪。
     var visibleCategoryRange: Range<Int> {
-        CartesianGeometry.visibleCategoryRange(viewport: currentViewport,
-                                               count: currentModel?.maxPointCount ?? 0)
+        let range = CartesianGeometry.visibleCategoryRange(viewport: currentViewport,
+                                                           count: currentModel?.maxPointCount ?? 0)
+        guard !range.isEmpty, let model = currentModel else { return range }
+        return model.bucketAnchor(for: range.lowerBound)..<range.upperBound
     }
 
     // MARK: - render（模板方法；子类不得 override，扩展点在 drawSeries）
     public final func render(model: CartesianChartModel, theme: ChartTheme,
                              context: HYMChartRenderContext) {
+        // 外部 render 可传任意新值或捕获状态变化的闭包；保守失效，避免旧统计泄漏。
+        renderDataCache.invalidate()
+        previousGroupingStride = nil
+        sourceModel = model
+        renderFrame(model: model, theme: theme, context: context)
+    }
+
+    private func renderFrame(model: CartesianChartModel, theme: ChartTheme, context: HYMChartRenderContext) {
+        let cacheEnabled = model.timeGrouping?.isCacheEnabled ?? true
+        currentCategoryLabels = renderDataCache.categoryLabels(model: model, enabled: cacheEnabled)
+        guard supportsTimeGrouping, model.timeGrouping != nil, let cartTheme = theme as? CartesianChartTheme else {
+            timeGroupingStatus = .disabled
+            let data = renderDataCache.prepared(stride: 1, enabled: cacheEnabled) { model }
+            renderPrepared(data: data, theme: theme, context: context)
+            return
+        }
+        let full = (model.xAxis.min ?? -0.5)...max(model.xAxis.min ?? -0.5, model.xAxis.max ?? Double(max(1, model.maxPointCount)) - 0.5)
+        let range = userXRange ?? full
+        // 手势中沿用上帧实际 plot 宽度，减少从容器宽度重复试排。
+        var width = previousGroupingStride == nil
+            ? max(1, context.bounds.width - cartTheme.contentInset.left - cartTheme.contentInset.right)
+            : max(1, currentPlotFrame.width)
+        func plan(width: CGFloat, range: ClosedRange<Double>) -> CartesianTimeGroupingPlan {
+            let candidate = CartesianTimeGrouper.plan(model: model, theme: cartTheme, plotWidth: width, visibleRange: range)
+            guard case .active = candidate.status, let previous = previousGroupingStride,
+                  candidate.samplesPerBucket < previous else { return candidate }
+            let configured = model.timeGrouping?.granularityHysteresis ?? 0
+            let margin = configured.isFinite ? min(0.5, max(0, configured)) : 0
+            let buffered = CartesianTimeGrouper.plan(model: model, theme: cartTheme,
+                plotWidth: width * (1 - margin), visibleRange: range)
+            if margin > 0, buffered.samplesPerBucket > candidate.samplesPerBucket {
+                let retained = min(previous, buffered.samplesPerBucket)
+                return CartesianTimeGroupingPlan(samplesPerBucket: retained, status: .active(samplesPerBucket: retained))
+            }
+            return candidate
+        }
+        var selected = plan(width: width, range: range)
+        // 只在实际绘图区更窄且粒度变化时再次试排；同粒度直接命中缓存。
+        while true {
+            timeGroupingStatus = selected.status
+            let data = renderDataCache.prepared(stride: selected.samplesPerBucket, enabled: cacheEnabled) {
+                CartesianTimeGrouper.group(model: model, plan: selected).model
+            }
+            renderPrepared(data: data, theme: theme, context: context)
+            let actualWidth = max(1, currentPlotFrame.width)
+            if actualWidth >= width { break }
+            width = actualWidth
+            let next = plan(width: width, range: currentViewport.xDomain)
+            if next.samplesPerBucket == selected.samplesPerBucket { break }
+            selected = next
+        }
+        if case .active(let stride) = timeGroupingStatus { previousGroupingStride = stride }
+        else { previousGroupingStride = nil }
+    }
+
+    private func renderPrepared(data: CartesianRenderDataCache.Prepared, theme: ChartTheme, context: HYMChartRenderContext) {
+        let model = data.model
         currentModel = model
+        currentDrawValues = data.drawValues
+        currentBaseValues = data.baseValues
+        currentPrimaryBounds = data.primaryBounds
+        currentSecondaryBounds = data.secondaryBounds
         currentTheme = theme
         lastContext = context
 
@@ -402,10 +530,16 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
                 currentSecondaryYDomain = nil
                 currentSecondaryValueTicks = []
                 fullSecondaryYRange = nil
+                userSecondaryYRange = nil
             } else {
-                let bounds = model.dataBounds(yAxisIndex: 1)
+                let bounds = currentSecondaryBounds
                 let full = makeValueDomain(axis: secondary, bounds: bounds)
                 fullSecondaryYRange = full
+                if constrainsViewportOnNextRender {
+                    userSecondaryYRange = CartesianViewport.constrainedUserRange(
+                        userSecondaryYRange, fullDomain: full,
+                        minimumSpan: (full.upperBound - full.lowerBound) / max(maximumYAxisZoomScale, 1))
+                }
                 // Y 缩放窗口（与主轴同手势、独立域）：clamp 语义与主轴一致
                 var domain = full
                 if let user = userSecondaryYRange {
@@ -429,7 +563,9 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
             currentSecondaryYDomain = nil
             currentSecondaryValueTicks = []
             fullSecondaryYRange = nil
+            userSecondaryYRange = nil
         }
+        constrainsViewportOnNextRender = false
 
         // 3) 值轴刻度 + 布局（左侧标签宽度：水平图量类目标签、垂直图量值刻度文本；
         //    底部标签高度两种方向同为刻度字体行高）
@@ -439,16 +575,16 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
         currentValueTicks = valueDomainDegenerate ? []
             : makeValueTicks(axis: model.yAxis,
                              domain: isHorizontalValueAxis ? currentViewport.xDomain : currentViewport.yDomain,
-                             bounds: model.dataBounds(yAxisIndex: 0))
+                             bounds: currentPrimaryBounds)
         let leadingLabelWidth: CGFloat = isHorizontalValueAxis
-            ? model.categoryLabels.map { textSize($0, font: cartTheme.tickLabelFont).width }.max() ?? 0
+            ? currentCategoryLabels.map { textSize($0, font: cartTheme.tickLabelFont).width }.max() ?? 0
             : currentValueTicks.map { textSize(AxisRenderer.tickText($0, formatter: model.yAxis.labelFormatter),
                                                font: cartTheme.tickLabelFont).width }.max() ?? 0
         // 底部让高：默认刻度字体行高；垂直图类目标签旋转时按旋转包围盒加高
         // （水平图底部是数值刻度，不参与旋转）
         let xTickHeight: CGFloat
         if !isHorizontalValueAxis, model.xAxis.tickLabelRotation != 0 {
-            let labels = model.categoryLabels
+            let labels = currentCategoryLabels
             let w = labels.map { textSize($0, font: cartTheme.tickLabelFont).width }.max() ?? 0
             let h = textSize("0", font: cartTheme.tickLabelFont).height
             xTickHeight = CartesianGeometry.rotatedBounds(
@@ -470,6 +606,24 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
             axisLabelGap: cartTheme.axisLabelGap,
             titleHeight: titleHeight,
             rightAxisLabelWidth: rightAxisLabelWidth)
+
+        // 图例先测量并预留区域，轴标签仍由最终 plotFrame 排列。
+        let configuration = cartTheme.legend
+        legendItems = ChartLegendItem.orderedSeries(in: sourceModel ?? model).map { series in
+            let override = configuration.itemOverrides[series.id]
+            return ChartLegendItem(id: series.id, title: override?.title ?? series.name,
+                                   symbol: override?.symbol ?? legendSymbol(for: series, theme: cartTheme),
+                                   color: override?.symbolColor ?? series.color ?? cartTheme.seriesColor,
+                                   dashStyle: series.lineDashStyle ?? cartTheme.lineDashStyle,
+                                   isVisible: series.isVisible)
+        }
+        var available = context.bounds.inset(by: cartTheme.contentInset)
+        available.origin.y += titleHeight + cartTheme.axisLabelGap
+        available.size.height = max(0, available.height - titleHeight - cartTheme.axisLabelGap)
+        let legendLayout = ChartLegendLayout.make(items: legendItems, configuration: configuration,
+                                                  available: available, plot: currentPlotFrame)
+        currentPlotFrame = legendLayout.plotFrame
+        legendView.update(items: legendItems, configuration: configuration, layout: legendLayout)
 
         // 4) 网格 + 轴 + 标题（挂在 series 之下）。
         // 空数据也画空坐标系（规格：防御式兜底），只是跳过 series 绘制。
@@ -661,7 +815,10 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
     open func seriesHitTest(_ point: CGPoint) -> HYMChartHitTarget? { nil }
 
     // MARK: - 命中契约（witness 固定在基类，子类实现 seriesHitTest 即可）
-    public func hitTest(_ point: CGPoint) -> HYMChartHitTarget? { seriesHitTest(point) }
+    public func hitTest(_ point: CGPoint) -> HYMChartHitTarget? {
+        guard currentPlotFrame.contains(point) else { return nil }
+        return seriesHitTest(point)
+    }
 
     // MARK: - 弹窗/命中 frame 契约
     // witness 锚定在基类（与 hitTest 同理）：若只在子类实现而不在基类提供转发，
@@ -675,6 +832,13 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
     /// 由子类把吸附结果包装成各自的 HitTarget（Line/Column/Bar 的 target 类型不同）。
     open func makeHitTarget(seriesIndex: Int, categoryIndex: Int, value: Double)
         -> (any HYMChartHitTarget)? { nil }
+
+    /// 部分可见的聚合桶中心可能在视口外，准线和弹窗锚点应留在绘图区边界。
+    func categoryScreenX(_ index: Int) -> CGFloat {
+        let x = CartesianGeometry.point(x: currentModel?.categoryPosition(index) ?? Double(index), y: 0,
+                                        viewport: currentViewport, plotFrame: currentPlotFrame).x
+        return min(max(x, currentPlotFrame.minX), currentPlotFrame.maxX)
+    }
 
     /// 值 → 屏幕（view 坐标系），用当前 viewport/plotFrame；须在 render 之后调用。
     /// 按系列绑定的值轴选域：0 = 主轴 viewport.yDomain，1 = 次轴域。
@@ -690,8 +854,9 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
     func dataLabelsAllowed(for element: CartesianSeriesElement,
                            theme: CartesianChartTheme) -> Bool {
         guard element.dataLabelsEnabled ?? theme.showsDataLabels else { return false }
-        let visible = visibleCategoryRange.count
-        return visible * max(currentModel?.series.count ?? 0, 1) <= theme.dataLabelMaxMarkCount
+        let step = currentModel?.timeBucketStride ?? 1
+        let visible = (visibleCategoryRange.count + step - 1) / step
+        return visible * max(currentModel?.visibleSeriesCount ?? 0, 1) <= theme.dataLabelMaxMarkCount
     }
 
     /// 标签文本尺寸（与 makeDataLabelLayer 同字体，供先量尺寸再算中心）。
@@ -744,12 +909,16 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
 
         // 值域：显式 min/max 同显式时直接用；否则 nice scale（显式端单独生效时与自动端合并）。
         // 注意：显式端与自动刻度不对齐时，首/末刻度与轴线间会有空隙（显式端优先的语义，与 Highcharts 一致）。
-        let fullValue = makeValueDomain(axis: model.yAxis, bounds: model.dataBounds(yAxisIndex: 0))
+        let fullValue = makeValueDomain(axis: model.yAxis, bounds: currentPrimaryBounds)
 
         // 手势窗口只作用于 X 轴：垂直图缩放类目域、水平图缩放数值域。
         // Y 轴（垂直图 = 值域，水平图 = 类目域）默认数据驱动；
         // zoomAxisMode .y/.xy 时由 userYRange 接管（同 X 的钳制与橡皮筋语义）。
         fullXRange = isHorizontalValueAxis ? fullValue : fullCategory
+        if constrainsViewportOnNextRender {
+            userXRange = CartesianViewport.constrainedUserRange(
+                userXRange, fullDomain: fullXRange, minimumSpan: minimumXSpan)
+        }
         var effectiveX = fullXRange
         if let user = userXRange {
             let fullSpan = fullXRange.upperBound - fullXRange.lowerBound
@@ -764,6 +933,10 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
         }
 
         fullYRange = isHorizontalValueAxis ? fullCategory : fullValue
+        if constrainsViewportOnNextRender {
+            userYRange = CartesianViewport.constrainedUserRange(
+                userYRange, fullDomain: fullYRange, minimumSpan: minimumYSpan)
+        }
         var effectiveY = fullYRange
         if let user = userYRange {
             let fullSpan = fullYRange.upperBound - fullYRange.lowerBound
@@ -802,7 +975,7 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
                 plotFrame: currentPlotFrame, theme: theme,
                 formatter: model.yAxis.labelFormatter))
             tickLabels.append(contentsOf: AxisRenderer.makeLeftCategoryLabels(
-                labels: model.categoryLabels, viewport: currentViewport,
+                labels: currentCategoryLabels, viewport: currentViewport,
                 plotFrame: currentPlotFrame, theme: theme))
         } else {
             tickLabels.append(contentsOf: AxisRenderer.makeYTickLabels(
@@ -816,10 +989,24 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
                     formatter: secondary.labelFormatter,
                     secondaryDomain: currentSecondaryYDomain))
             }
-            tickLabels.append(contentsOf: AxisRenderer.makeCategoryLabels(
-                labels: model.categoryLabels, viewport: currentViewport,
+            let categoryLabels = AxisRenderer.makeCategoryLabels(
+                labels: currentCategoryLabels, viewport: currentViewport,
                 plotFrame: currentPlotFrame, theme: theme,
-                rotation: model.xAxis.tickLabelRotation))
+                rotation: model.xAxis.tickLabelRotation)
+            // 日期边缘与相邻文字留出空隙；缩放时非整数类目跨度可能使抽稀后的标签挤在一起。
+            if model.timeAxis == nil {
+                tickLabels.append(contentsOf: categoryLabels)
+            } else {
+                var previousMaxX = -CGFloat.greatestFiniteMagnitude
+                for label in categoryLabels {
+                    guard label.frame.minX >= view.bounds.minX, label.frame.maxX <= view.bounds.maxX else { continue }
+                    if model.xAxis.tickLabelRotation == 0 {
+                        guard label.frame.minX >= previousMaxX + 4 else { continue }
+                        previousMaxX = label.frame.maxX
+                    }
+                    tickLabels.append(label)
+                }
+            }
         }
         tickLabels.forEach { view.addSubview($0) }
     }
@@ -862,7 +1049,7 @@ extension CartesianRendererBase {
             categoryIndex = Int(x.rounded())
         }
         guard categoryIndex >= 0, categoryIndex < model.maxPointCount else { return nil }
-        return categoryIndex
+        return model.bucketAnchor(for: categoryIndex)
     }
 }
 
@@ -890,9 +1077,7 @@ extension CartesianRendererBase {
             return CGRect(x: currentPlotFrame.minX, y: y - 0.5,
                           width: currentPlotFrame.width, height: 1)
         }
-        let x = CartesianGeometry.point(x: Double(categoryIndex), y: 0,
-                                        viewport: currentViewport,
-                                        plotFrame: currentPlotFrame).x
+        let x = categoryScreenX(categoryIndex)
         return CGRect(x: x - 0.5, y: currentPlotFrame.minY,
                       width: 1, height: currentPlotFrame.height)
     }
@@ -940,11 +1125,12 @@ extension CartesianRendererBase: HYMChartSharedHitProvider {
 
         var entries: [CartesianSharedHitTarget.Entry] = []
         for (i, s) in model.series.enumerated()
-        where categoryIndex < s.data.count && s.data[categoryIndex].isFinite {
+        where s.isVisible && categoryIndex < s.data.count && s.data[categoryIndex].isFinite {
             let isSecondary = s.effectiveYAxisIndex == 1
-            entries.append(CartesianSharedHitTarget.Entry(seriesIndex: i, name: s.name,
+            entries.append(CartesianSharedHitTarget.Entry(seriesID: s.id, seriesIndex: i, name: s.name,
                                                           value: s.data[categoryIndex],
-                                                          isSecondaryAxis: isSecondary))
+                                                          isSecondaryAxis: isSecondary,
+                                                          timeBucket: model.timeBucket(series: i, category: categoryIndex)))
         }
         guard !entries.isEmpty else { return nil }
 
@@ -966,9 +1152,7 @@ extension CartesianRendererBase: HYMChartSharedHitProvider {
             valueCrosshair = CGRect(x: vx - 0.5, y: currentPlotFrame.minY,
                                     width: 1, height: currentPlotFrame.height)
         } else {
-            let x = CartesianGeometry.point(x: Double(categoryIndex), y: 0,
-                                            viewport: currentViewport,
-                                            plotFrame: currentPlotFrame).x
+            let x = categoryScreenX(categoryIndex)
             band = CGRect(x: x - 1, y: point.y - 1, width: 2, height: 2)
             crosshair = CGRect(x: x - 0.5, y: currentPlotFrame.minY,
                                width: 1, height: currentPlotFrame.height)
@@ -976,8 +1160,8 @@ extension CartesianRendererBase: HYMChartSharedHitProvider {
             valueCrosshair = CGRect(x: currentPlotFrame.minX, y: vy - 0.5,
                                     width: currentPlotFrame.width, height: 1)
         }
-        let headerKey = categoryIndex < model.categoryLabels.count
-            ? model.categoryLabels[categoryIndex] : nil
+        let headerKey = entries.first?.timeBucket?.intervalLabel ?? (categoryIndex < currentCategoryLabels.count
+            ? currentCategoryLabels[categoryIndex] : nil)
         let target = CartesianSharedHitTarget(categoryIndex: categoryIndex,
                                               entries: entries,
                                               crosshairX: band.midX,
@@ -997,12 +1181,13 @@ extension CartesianRendererBase: HYMChartSnapHitProvider {
         guard let model = currentModel,
               let categoryIndex = categoryIndex(at: point) else { return nil }
         var best: (series: Int, value: Double, dist: CGFloat)?
+        let drawn = currentDrawValues
         for (i, s) in model.series.enumerated()
-        where categoryIndex < s.data.count && s.data[categoryIndex].isFinite {
-            let v = s.data[categoryIndex]
+        where s.isVisible && categoryIndex < s.data.count && s.data[categoryIndex].isFinite {
+            let v = drawn[i][categoryIndex]
             let p = isHorizontalValueAxis
                 ? screenPoint(x: v, y: Double(categoryIndex))
-                : screenPoint(x: Double(categoryIndex), y: v,
+                : screenPoint(x: model.categoryPosition(categoryIndex), y: v,
                               yAxisIndex: s.effectiveYAxisIndex)
             let d = hypot(p.x - point.x, p.y - point.y)
             if best == nil || d < best!.dist { best = (i, v, d) }

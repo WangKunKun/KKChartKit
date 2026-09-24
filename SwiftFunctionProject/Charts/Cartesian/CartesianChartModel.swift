@@ -64,6 +64,14 @@ public struct CartesianAxisModel {
 
 /// 单个数据系列（阶段 0：等距数值数组，按索引对位类目）。
 public struct CartesianSeriesElement {
+    /// 跨更新保持稳定且唯一。SwiftUI 重建模型时应显式传入业务 ID。
+    public var id: String
+    public var isVisible: Bool
+    public var showsInLegend: Bool
+    /// 仅影响图例顺序；同值按原始系列顺序排列。
+    public var aggregation: CartesianAggregation?
+    public var unit: String?
+    public var legendOrder: Int
     public var name: String
     public var data: [Double]
     /// nil → 用主题默认系列色。
@@ -96,7 +104,16 @@ public struct CartesianSeriesElement {
                 connectNulls: Bool = false, pointSymbol: PointMarkerSymbol? = nil,
                 dataLabelsEnabled: Bool? = nil,
                 barColors: [UIColor]? = nil,
-                shadow: CartesianShadowStyle? = nil) {
+                shadow: CartesianShadowStyle? = nil,
+                id: String = UUID().uuidString, isVisible: Bool = true,
+                showsInLegend: Bool = true, legendOrder: Int = 0,
+                aggregation: CartesianAggregation? = nil, unit: String? = nil) {
+        self.id = id
+        self.isVisible = isVisible
+        self.showsInLegend = showsInLegend
+        self.legendOrder = legendOrder
+        self.aggregation = aggregation
+        self.unit = unit
         self.name = name
         self.data = data
         self.color = color
@@ -188,6 +205,21 @@ public struct CartesianShadowStyle {
 
 /// 轴系图表数据（折线/柱状等共用）。
 public struct CartesianChartModel: HYMChartModel {
+    public var timeAxis: CartesianTimeAxis?
+    public var timeGrouping: CartesianTimeGrouping?
+    // 聚合渲染仍使用原始索引坐标；仅桶首索引承载绘制值。
+    var timeBucketStride = 1
+    var timeBucketMetadata: [[Int: CartesianTimeBucket]] = []
+    func bucketAnchor(for index: Int) -> Int { index / timeBucketStride * timeBucketStride }
+    func categoryPosition(_ index: Int) -> Double {
+        Double(index) + Double(min(timeBucketStride, maxPointCount - index) - 1) / 2
+    }
+    func categorySpan(_ index: Int) -> Double { Double(min(timeBucketStride, maxPointCount - index)) }
+    func timeBucket(series: Int, category: Int) -> CartesianTimeBucket? {
+        guard timeBucketMetadata.indices.contains(series) else { return nil }
+        return timeBucketMetadata[series][category]
+    }
+
     public var title: String?
     public var series: [CartesianSeriesElement]
     public var xAxis: CartesianAxisModel
@@ -208,7 +240,8 @@ public struct CartesianChartModel: HYMChartModel {
                 secondaryYAxis: CartesianAxisModel? = nil,
                 stacking: StackConfig? = nil,
                 plotLines: [CartesianPlotLine] = [],
-                plotBands: [CartesianPlotBand] = []) {
+                plotBands: [CartesianPlotBand] = [],
+                timeAxis: CartesianTimeAxis? = nil, timeGrouping: CartesianTimeGrouping? = nil) {
         self.title = title
         self.series = series
         self.xAxis = xAxis
@@ -217,6 +250,8 @@ public struct CartesianChartModel: HYMChartModel {
         self.stacking = stacking
         self.plotLines = plotLines
         self.plotBands = plotBands
+        self.timeAxis = timeAxis
+        self.timeGrouping = timeGrouping
     }
 
     /// 最长 series 的点数（类目数）。
@@ -227,7 +262,7 @@ public struct CartesianChartModel: HYMChartModel {
     /// 指定值轴的绑定系列全局 (min, max)；堆叠模式下按轴分组累计后取边界。
     /// 任一有效数据都没有时为 nil。轴无绑定系列时：显式 min/max 由渲染层兜底，此处返回 nil。
     public func dataBounds(yAxisIndex: Int = 0) -> (min: Double, max: Double)? {
-        let group = series.filter { $0.effectiveYAxisIndex == yAxisIndex }
+        let group = series.filter { $0.isVisible && $0.effectiveYAxisIndex == yAxisIndex }
         guard !group.isEmpty else { return nil }
         let dataToUse: [[Double]]
         switch stacking {
@@ -255,6 +290,7 @@ public struct CartesianChartModel: HYMChartModel {
 
     /// 渲染用累计数据（normal → 符号链累计；percent 系 → 百分比累计；其余原值）。与系列同序。
     public var stackedDrawValues: [[Double]] {
+        let series = renderingSeries
         switch stacking {
         case .normal: return CartesianGeometry.stackedValuesByAxis(series: series)
         case .percent: return CartesianGeometry.stackedPercentValues(series: series)
@@ -264,9 +300,20 @@ public struct CartesianChartModel: HYMChartModel {
         }
     }
 
+    /// 一次性计算所有系列基准值，渲染/命中复用，避免逐柱归一化。
+    var allBaseValues: [[Double]] {
+        let series = renderingSeries
+        switch stacking {
+        case .percent: return CartesianGeometry.percentNormalizedValues(series: series)
+        case .percentFixed(let max): return CartesianGeometry.percentNormalizedValues(series: series, fixedMax: max)
+        default: return series.map(\.data)
+        }
+    }
+
     /// 堆叠基准原值（面积下边界/柱基准 = 累计 − 本值）：percent 系为归一化原值，否则原值。
     public func rawBaseValues(forSeries seriesIndex: Int) -> [Double] {
-        guard seriesIndex < series.count else { return [] }
+        guard series.indices.contains(seriesIndex) else { return [] }
+        let series = renderingSeries
         switch stacking {
         case .percent:
             return CartesianGeometry.percentNormalizedValues(series: series)[seriesIndex]
@@ -277,6 +324,21 @@ public struct CartesianChartModel: HYMChartModel {
         }
     }
 
+    /// 保留系列/类目索引和颜色；隐藏数据用缺值占位，不参与数学运算。
+    var renderingSeries: [CartesianSeriesElement] {
+        series.map { element in
+            guard !element.isVisible else { return element }
+            var hidden = element
+            hidden.data = Array(repeating: .nan, count: element.data.count)
+            return hidden
+        }
+    }
+
+    var visibleSeriesCount: Int { series.filter(\.isVisible).count }
+    func visibleSlot(for index: Int) -> Int {
+        series.prefix(index).filter(\.isVisible).count
+    }
+
     /// 实际生效的类目标签：显式非空优先；否则自动 "1"..."n"（1-based，用户友好）。
     /// 锯齿 series（各系列长度不一）时以最长 series 为准；短系列的空位语义由渲染层决定。
     /// 空 series 返回 []（`1...0` 会触发 Range 构造崩溃，必须先判空）。
@@ -285,6 +347,7 @@ public struct CartesianChartModel: HYMChartModel {
             return Array(labels.prefix(maxPointCount))
         }
         guard maxPointCount > 0 else { return [] }
+        if let timeAxis, timeAxis.isValid(count: maxPointCount) { return timeAxis.labels(count: maxPointCount) }
         return (1...maxPointCount).map { String($0) }
     }
 }

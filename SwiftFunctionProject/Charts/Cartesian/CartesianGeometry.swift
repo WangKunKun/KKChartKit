@@ -469,8 +469,8 @@ public enum CartesianGeometry {
             for s in series {
                 let axis = s.effectiveYAxisIndex
                 var t = totals[axis] ?? [Double](repeating: 0, count: maxLength)
-                for j in 0..<maxLength where j < s.data.count {
-                    t[j] += abs(s.data[j])   // NaN 参与加法得 NaN，下方 isFinite 过滤按 0 计
+                for j in 0..<maxLength where j < s.data.count && s.data[j].isFinite {
+                    t[j] += abs(s.data[j])
                 }
                 totals[axis] = t.map { $0.isFinite ? $0 : 0 }
             }
@@ -522,10 +522,11 @@ public enum CartesianGeometry {
         zeroY: CGFloat,
         baselineValue: Double? = nil,
         seriesIndex: Int = 0,
-        seriesCount: Int = 1
+        seriesCount: Int = 1,
+        categoryPosition: Double? = nil, categorySpan: Double = 1
     ) -> CGRect {
         // 1. 槽宽按视口跨度计算（可见类目平分 plot 宽；缩放时柱体随之变宽）
-        let slotWidth = plotArea.width / CGFloat(max(viewport.xSpan, 1e-9))
+        let slotWidth = plotArea.width / CGFloat(max(viewport.xSpan, 1e-9)) * CGFloat(categorySpan)
         let subSlotWidth = slotWidth / CGFloat(seriesCount)  // 每个 series 的子槽宽度
         let columnWidth = subSlotWidth * theme.columnWidthRatio
 
@@ -554,7 +555,7 @@ public enum CartesianGeometry {
             gap *= scale
         }
         let groupWidth = barWidth * count + gap * CGFloat(max(seriesCount - 1, 0))
-        let centerX = point(x: Double(categoryIndex), y: 0, viewport: viewport, plotFrame: plotArea).x
+        let centerX = point(x: categoryPosition ?? Double(categoryIndex), y: 0, viewport: viewport, plotFrame: plotArea).x
         let groupStart = centerX - groupRegion / 2 + (groupRegion - groupWidth) / 2
         let columnX = groupStart + CGFloat(seriesIndex) * (barWidth + gap)
 
@@ -623,7 +624,8 @@ public enum CartesianGeometry {
 
         // 2. Y 位置（考虑系列偏移；类目 0 在顶部）
         let seriesOffset = CGFloat(seriesIndex) * subSlotHeight  // 系列偏移
-        let barY = plotArea.minY + CGFloat(categoryIndex) * slotHeight + seriesOffset + (subSlotHeight - barHeight) / 2
+        let centerY = horizontalCategoryY(category: Double(categoryIndex), viewport: viewport, plotFrame: plotArea)
+        let barY = centerY - slotHeight / 2 + seriesOffset + (subSlotHeight - barHeight) / 2
 
         // 3. 计算数据点对应的 X 坐标（水平图的 X 轴对应数值，随 X 视口缩放）
         let valueX = point(x: dataPoint, y: Double(categoryIndex), viewport: viewport, plotFrame: plotArea).x

@@ -137,6 +137,7 @@ public final class HeatmapChartRenderer: HYMChartRenderer {
                                range: ClosedRange<Double>, span: Double,
                                theme: HeatmapChartTheme) -> UIColor {
         if let override = cell.color { return override }
+        if case .none = theme.colorScale { return theme.baseColor }
         let t = span > 0 ? (cell.value - range.lowerBound) / span : 1.0
         let c = theme.colorScale.color(at: CGFloat(t))
         return c == .clear ? theme.emptyColor : c

@@ -36,6 +36,8 @@ public extension HYMChartHitTarget {
 /// 未实现或模板未配置时，内置弹窗回落到 `tooltipText` 固定格式。
 /// （不约束 AnyObject：各图表 HitTarget 均为 struct。）
 public protocol HYMChartTooltipDataSource {
+    /// 聚合区间等不可被普通数值模板省略的上下文。
+    var tooltipContextText: String? { get }
     /// 弹窗数据行（系列名 + 值 + 是否次轴）
     var tooltipRows: [(name: String, value: Double, isSecondaryAxis: Bool)] { get }
     /// 表头键（类目标签等；nil = 无表头可代入 `{key}`，配置了表头也不拼该行）
@@ -87,4 +89,8 @@ public struct HYMChartHitContext {
         self.frame = frame
         self.location = location
     }
+}
+
+public extension HYMChartTooltipDataSource {
+    var tooltipContextText: String? { nil }
 }

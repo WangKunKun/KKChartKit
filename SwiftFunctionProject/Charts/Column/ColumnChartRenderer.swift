@@ -4,6 +4,11 @@ import Foundation
 /// 柱状图渲染器（垂直柱体）
 public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartTheme> {
 
+    public override var supportsTimeGrouping: Bool { true }
+
+    /// 系列标签独立挂载，逐帧替换，避免动画过程中累积旧标签。
+    private let annotationLayer = CALayer()
+
     // MARK: - Override
 
     /// 子类实现：绘制 series
@@ -16,24 +21,28 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
         theme: CartesianChartTheme,
         plotFrame: CGRect
     ) {
-        guard !model.series.isEmpty else { return }
-
         // 清空旧柱体（render 与动画/手势的逐帧重画共用本方法，必须先清后画）
         seriesLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
         clearSeriesShadowCasters()
+        annotationLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
+        if annotationLayer.superlayer == nil { rootLayer.addSublayer(annotationLayer) }
+        guard !model.series.isEmpty else { return }
 
         // 1. 计算零轴位置（次轴系列在循环内按所属值域另算）
 
         // 2. 如果堆叠，计算累计值（normal=符号链累计 / percent=百分比累计）
-        let dataToDraw = model.stackedDrawValues
+        let dataToDraw = currentDrawValues
 
         // 3. 可见类目范围（视口缩放后跳过视口外柱体的 path 构造）
         let visible = visibleCategoryRange
-        let seriesCount = model.isStacked ? 1 : model.series.count
+        let seriesCount = model.isStacked ? 1 : model.visibleSeriesCount
 
-        // 4. 每系列：复合 path 收集 → 单 layer 输出
+        let wantsStackTotals = model.isStacked && theme.showsStackTotalLabels
+        var stackTotals = CartesianStackTotalLabels()
+
         for (seriesIndex, oneSeries) in dataToDraw.enumerated() {
             let element = model.series[seriesIndex]
+            guard element.isVisible else { continue }
             let baseColor = element.color ?? theme.seriesColor
             let negativeColor = element.negativeColor ?? baseColor
             let axisIdx = element.effectiveYAxisIndex
@@ -48,14 +57,17 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
 
             for index in visible where index < oneSeries.count && oneSeries[index].isFinite {
                 let value = oneSeries[index]
+                // 堆叠数组会补齐短系列；占位不绘制，也不能反查不存在的原值。
+                guard index < element.data.count, element.data[index].isFinite,
+                      element.data[index] != 0 else { continue }
 
                 // 基准值（堆叠）：同符号链前累计 = 自身累计 − 自身原值（正链贴零轴向上、
                 // 负链贴零轴向下；与 Highcharts 正负分开堆叠一致）。基准 ≈ 0 → 从零轴起。
                 let baselineValue: Double?
-                if model.stacking == .normal || model.stacking == .percent {
-                    let rawBase = model.rawBaseValues(forSeries: seriesIndex)
+                if model.isStacked {
+                    let rawBase = currentBaseValues[seriesIndex]
                     let base = value - (index < rawBase.count ? rawBase[index] : 0)
-                    baselineValue = abs(base) < 1e-9 ? nil : base
+                    baselineValue = base
                 } else {
                     baselineValue = nil
                 }
@@ -69,8 +81,9 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
                     theme: theme,
                     zeroY: seriesZeroY,
                     baselineValue: baselineValue,
-                    seriesIndex: model.isStacked ? 0 : seriesIndex,
-                    seriesCount: seriesCount
+                    seriesIndex: model.isStacked ? 0 : model.visibleSlot(for: seriesIndex),
+                    seriesCount: seriesCount,
+                    categoryPosition: model.categoryPosition(index), categorySpan: model.categorySpan(index)
                 )
                 rect = animatedRect(from: rect, zeroY: seriesZeroY, progress: currentAnimationProgress)
 
@@ -81,7 +94,7 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
                 if model.isStacked {
                     // 同轴同符号链上方还有非零段 → 本段是中间段，不圆角
                     let hasSegmentAbove = model.series[(seriesIndex + 1)...].contains { s2 in
-                        guard s2.effectiveYAxisIndex == axisIdx,
+                        guard s2.isVisible, s2.effectiveYAxisIndex == axisIdx,
                               index < s2.data.count, abs(s2.data[index]) > 1e-9 else { return false }
                         return (s2.data[index] >= 0) == (value >= 0)
                     }
@@ -111,9 +124,15 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
                 if pathsByColor[fillColor] == nil { pathsByColor[fillColor] = UIBezierPath() }
                 pathsByColor[fillColor]!.append(columnPath)
 
+                if wantsStackTotals {
+                    stackTotals.add(rawValue: element.data[index], category: index,
+                                    axis: axisIdx, rect: rect,
+                                    horizontal: false)
+                }
+
                 // 堆叠且非同轴最后一个系列：记录分隔线 y
                 if model.isStacked,
-                   model.series[(seriesIndex + 1)...].contains(where: { $0.effectiveYAxisIndex == axisIdx }) {
+                   model.series[(seriesIndex + 1)...].contains(where: { $0.isVisible && $0.effectiveYAxisIndex == axisIdx }) {
                     separatorPath.move(to: CGPoint(x: plotFrame.minX, y: rect.maxY))
                     separatorPath.addLine(to: CGPoint(x: plotFrame.maxX, y: rect.maxY))
                 }
@@ -128,7 +147,7 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
                     let center = CartesianDataLabelGeometry.labelCenter(
                         rect: rect, textSize: size, position: theme.dataLabelPosition,
                         isHorizontal: false, isPositive: value >= 0)
-                    rootLayer.addSublayer(makeDataLabelLayer(
+                    annotationLayer.addSublayer(makeDataLabelLayer(
                         text: text, fontSize: theme.dataLabelFontSize,
                         color: dataLabelColor(theme: theme,
                                               inside: theme.dataLabelPosition != .outsideEnd),
@@ -157,6 +176,10 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
                 seriesLayer.addSublayer(line)
             }
         }
+
+        if wantsStackTotals {
+            drawStackTotalLabels(stackTotals, theme: theme, into: annotationLayer)
+        }
     }
 
     /// 柱体复合 path → 填充层（带可选边框）。
@@ -174,70 +197,57 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
     /// 子类实现：命中测试
     public override func seriesHitTest(_ point: CGPoint) -> HYMChartHitTarget? {
         guard let model = currentModel else { return nil }
-        guard let theme = currentTheme as? CartesianChartTheme else { return nil }
         guard !model.series.isEmpty else { return nil }
 
         // 1. 视口驱动反推类目索引：屏幕点 → x 值 → 最近类目中心
         //    （缩放/平移后与绘制同源，天然一致）
         let xValue = CartesianGeometry.value(at: point, viewport: currentViewport, plotFrame: currentPlotFrame).x
-        let categoryIndex = Int(xValue.rounded())
+        let rawIndex = Int(xValue.rounded())
+        guard rawIndex >= 0, rawIndex < model.maxPointCount else { return nil }
+        let categoryIndex = model.bucketAnchor(for: rawIndex)
 
         guard categoryIndex >= 0 && categoryIndex < model.maxPointCount else { return nil }
 
-        // 2. 确定系列索引（堆叠时需要判断 point.y 落在哪个柱体段）
-        let dataToCheck = (model.stacking == .normal || model.stacking == .percent)
-            ? model.stackedDrawValues
-            : model.series.map { $0.data }
-
-        for (seriesIndex, oneSeries) in dataToCheck.enumerated() {
-            guard categoryIndex < oneSeries.count, oneSeries[categoryIndex].isFinite else { continue }
-            let value = oneSeries[categoryIndex]
-            let axisIdx = model.series[seriesIndex].effectiveYAxisIndex
-            let seriesZeroY = CartesianGeometry.zeroAxisPosition(
-                viewport: currentViewport, plotArea: currentPlotFrame, isHorizontal: false,
-                valueDomain: axisIdx == 1 ? currentSecondaryYDomain : nil)
-            let rect = CartesianGeometry.columnRect(
-                dataPoint: value,
-                categoryIndex: categoryIndex,
-                viewport: currentViewport,
-                valueDomain: axisIdx == 1 ? currentSecondaryYDomain : nil,
-                plotArea: currentPlotFrame,
-                theme: theme,
-                zeroY: seriesZeroY,
-                seriesIndex: model.isStacked ? 0 : seriesIndex,
-                seriesCount: model.isStacked ? 1 : model.series.count
-            )
-
-            if rect.contains(point) {
-                return ColumnHitTarget(seriesIndex: seriesIndex, categoryIndex: categoryIndex,
-                                       value: value, yAxisIndex: axisIdx,
-                                       name: model.series[seriesIndex].name)
+        for seriesIndex in model.series.indices.reversed() {
+            if let rect = markRect(seriesIndex: seriesIndex, categoryIndex: categoryIndex), rect.contains(point) {
+                return makeHitTarget(seriesIndex: seriesIndex, categoryIndex: categoryIndex,
+                                     value: currentDrawValues[seriesIndex][categoryIndex])
             }
         }
-
         return nil
     }
 
-    // MARK: - 弹窗锚点（命中柱体 rect，上下避让）
-    public override func tooltipAnchor(for target: HYMChartHitTarget) -> HYMChartTooltipAnchor? {
-        guard let t = target as? ColumnHitTarget,
-              let model = currentModel,
-              let theme = currentTheme as? CartesianChartTheme,
-              theme.showsTooltipOnHit else { return nil }
+    /// 与绘制同源：显隐分组槽位、堆叠段基线和次轴都在这里统一。
+    private func markRect(seriesIndex: Int, categoryIndex: Int) -> CGRect? {
+        guard let model = currentModel, let theme = currentTheme,
+              model.series.indices.contains(seriesIndex) else { return nil }
+        let element = model.series[seriesIndex]
+        guard element.isVisible, element.data.indices.contains(categoryIndex),
+              element.data[categoryIndex].isFinite, element.data[categoryIndex] != 0 else { return nil }
+        let value = currentDrawValues[seriesIndex][categoryIndex]
+        guard value.isFinite else { return nil }
+        let axis = element.effectiveYAxisIndex
+        let zero = CartesianGeometry.zeroAxisPosition(
+            viewport: currentViewport, plotArea: currentPlotFrame, isHorizontal: false,
+            valueDomain: axis == 1 ? currentSecondaryYDomain : nil)
+        return CartesianGeometry.columnRect(
+                dataPoint: value, categoryIndex: categoryIndex, viewport: currentViewport,
+                valueDomain: axis == 1 ? currentSecondaryYDomain : nil,
+                plotArea: currentPlotFrame, theme: theme, zeroY: zero,
+                baselineValue: model.isStacked ? value - currentBaseValues[seriesIndex][categoryIndex] : nil,
+                seriesIndex: model.isStacked ? 0 : model.visibleSlot(for: seriesIndex),
+                seriesCount: model.isStacked ? 1 : model.visibleSeriesCount,
+                categoryPosition: model.categoryPosition(categoryIndex), categorySpan: model.categorySpan(categoryIndex))
+    }
 
-        // 与 hitTest 同源几何：非堆叠多系列时定位到具体系列的子槽
-        let zeroY = CartesianGeometry.zeroAxisPosition(
-            viewport: currentViewport, plotArea: currentPlotFrame, isHorizontal: false)
-        let rect = CartesianGeometry.columnRect(
-            dataPoint: t.value,
-            categoryIndex: t.categoryIndex,
-            viewport: currentViewport,
-            plotArea: currentPlotFrame,
-            theme: theme,
-            zeroY: zeroY,
-            seriesIndex: model.isStacked ? 0 : t.seriesIndex,
-            seriesCount: model.isStacked ? 1 : model.series.count)
+    public override func tooltipAnchor(for target: HYMChartHitTarget) -> HYMChartTooltipAnchor? {
+        guard currentTheme?.showsTooltipOnHit == true, let rect = hitFrame(for: target) else { return nil }
         return HYMChartTooltipAnchor(frame: rect, preferredPlacements: [.top, .bottom])
+    }
+
+    public override func hitFrame(for target: HYMChartHitTarget) -> CGRect? {
+        guard let target = target as? ColumnHitTarget else { return nil }
+        return markRect(seriesIndex: target.seriesIndex, categoryIndex: target.categoryIndex)
     }
 
     // MARK: - Private
@@ -289,7 +299,8 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
         return ColumnHitTarget(seriesIndex: seriesIndex, categoryIndex: categoryIndex,
                                value: value,
                                yAxisIndex: model.series[seriesIndex].effectiveYAxisIndex,
-                               name: model.series[seriesIndex].name)
+                               name: model.series[seriesIndex].name, seriesID: model.series[seriesIndex].id,
+                               timeBucket: model.timeBucket(series: seriesIndex, category: categoryIndex))
     }
 
     /// DEBUG 自检辅助：seriesLayer 子层（圆角曲线数量断言用）。

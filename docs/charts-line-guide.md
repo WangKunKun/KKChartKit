@@ -1,14 +1,18 @@
 # HYMCharts 折线图使用指南
 
+> 高密度直线/面积图已支持可选 Min/Max 降采样，保留原始命中；配置和限制见 [降采样指南](charts-line-sampling-guide.md)。
+
+> 内置图例已接入：详见 [图例、显隐与尺寸分配](charts-legend-guide.md)。
+
 > 快速上手轴系图表的首个类型：折线图（Line Chart）。
-> 适用版本：2026-08-26（阶段 0 交付物：Cartesian 轴系基础层 + 折线图）。
+> 更新：2026-09-24。当前范围与限制见 [能力清单](charts-capability-status.md)。
 
 ## 概述
 
 折线图是 HYMCharts 轴系图表的首个实现，基于 Cartesian 轴系基础层（`CartesianRendererBase`）提供：
 - 等距类目 X 轴 + 数值 Y 轴（自动 nice scale）
-- 单系列数据可视化（多系列配色阶段 3）
-- 数据点命中 + 内置 tooltip/自定义弹窗（三层机制）
+- 多系列直线/平滑/阶梯、面积与堆叠，系列可独立设色
+- 数据点/整列提示、双向准线与缩放平移；UIKit 容器支持三层弹窗，SwiftUI LineChart 暂未完整透传自定义内容入口
 - 入场动画（折线 strokeEnd 生长）
 
 ---
@@ -76,7 +80,7 @@ chart.configure(model: model, theme: theme)
 | 属性 | 类型 | 默认值 | 说明 |
 |---|---|---|---|
 | `title` | `String?` | `nil` | 图表标题（渲染于顶部居中） |
-| `series` | `[CartesianSeriesElement]` | 必填 | 数据系列数组（阶段 0 主用单系列） |
+| `series` | `[CartesianSeriesElement]` | 必填 | 数据系列数组（支持多个系列） |
 | `xAxis` | `CartesianAxisModel` | `.category(labels: [])` | X 轴配置（阶段 0 仅类目轴） |
 | `yAxis` | `CartesianAxisModel` | `.value` | Y 轴配置（数值轴） |
 
@@ -163,7 +167,7 @@ public enum CartesianAxisKind {
 |---|---|---|
 | `identifier` | `String` | 唯一标识（格式 "系列名:索引"） |
 | `index` | `Int` | 数据点索引（0-based） |
-| `seriesIndex` | `Int` | 系列索引（阶段 0 固定为 0） |
+| `seriesIndex` | `Int` | 系列索引（与输入数组一致） |
 | `value` | `Double` | 命中数据点的值 |
 | `tooltipText` | `String?` | 内置 tooltip 文本（格式 "系列名 · 格式化值"） |
 
@@ -237,30 +241,15 @@ y.tickPositions = [0, 30, 60, 100]                              // 完全显式�
 
 ---
 
-## 阶段 0 边界
+## 当前边界与后续
 
-**已实现**（阶段 0）：
-- ✅ 类目 X 轴（自动数字标签或显式 labels）
-- ✅ 数值 Y 轴（nice scale 自动刻度）
-- ✅ 单系列折线渲染（strokeEnd 生长动画）
-- ✅ 数据点命中 + 内置 tooltip/自定义弹窗
-- ✅ 完整主题系统（26 个可调属性）
+已有多系列、平滑/阶梯、面积、堆叠、双轴、标线/色带、数据标签和 x/y/xy 缩放平移。
+惯性减速目前仅 X 轴；内置图例与显隐已实现（默认关闭）；混合图、真实数值/时间 X、增量与流式刷新尚未实现。
+`configure` 保留重置视口的旧语义；新增 `update` 默认保留窗口，SwiftUI LineChart 也默认保留。
+数据/样式更新、显式重置和回调同步见 [更新指南](charts-update-guide.md)。
 
-**未实现**（路线图后续阶段）：
-- ❌ 多系列配色（阶段 3）
-- ❌ 图例/手势/动态刷新（阶段 4）
-- ❌ 数值 X 轴/散点图（阶段 5）
-- ❌ CartesianViewport 缩放/平移底座（阶段 4）
-
-> 阶段 4 起，`CartesianViewport` 将成为缩放/平移底座（`xMin/xMax/yMin/yMax` 可动态调整）。
-
----
-
-## 下一步
-
-阶段 1（柱状图/条形图）即将启动：`docs/superpowers/specs/2026-08-26-chart-parity-roadmap-design.md` §6.1。
-
-柱状图将在不修改 Cartesian 层的前提下实现（`ColumnChartRenderer` 复用 `CartesianRendererBase`，仅重写 `drawSeries`/`seriesHitTest`），验证轴系基础层的可扩展性。
+后续按 [现状与路线图](2026-09-24-charts-status-and-roadmap.md) 推进；旧阶段记录保留在 specs/plans 中。
+完整适配端差异与验证状态见 [能力清单](charts-capability-status.md)。
 
 ---
 
