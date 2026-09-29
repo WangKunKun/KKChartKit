@@ -85,7 +85,7 @@ struct CartesianChartDemo: View {
                 showsInLegend: s.showsInLegend, legendOrder: s.legendOrder, aggregation: s.reducer, unit: s.unit.isEmpty ? nil : s.unit,
                 groupID: s.groupID.isEmpty ? nil : s.groupID, valueFormat: s.valueFormat,
                 kind: kind == .combined ? s.kind : nil, stackID: s.stackID.isEmpty ? nil : s.stackID,
-                participatesInStack: s.participatesInStack, style: s.style)
+                participatesInStack: s.participatesInStack, style: s.style, gapPolicy: s.gapPolicy, colorZones: s.colorZones)
         }
         let stack: StackConfig? = stacking == "普通" ? .normal : stacking == "百分比" ? .percent : stacking == "固定基准百分比" ? .percentFixed(max: percentBase) : stacking == "序号分组" ? .grouped(groupCount: stackGroupCount) : nil
         var config = groupingConfig
@@ -231,6 +231,16 @@ struct CartesianChartDemo: View {
             .button(label: "更新样本数据") { seed += 1; report.selectedRange = nil },
             .toggle(label: "正负混合", value: $negative), .toggle(label: "包含缺测", value: $missing),
             DemoProperty.number("基础图表高度", $height, 160...500, step: 10), .toggle(label: "测量并追加图例高度", value: $autoLegendHeight)]))
+        if kind == .line || kind == .combined {
+            result.append(.init(title: "缺测连接预设", items: [
+                .button(label: "11/12/13 空点 autoGap 场景") { autoGapPreset() }
+            ]))
+            result.append(.init(title: "颜色分区预设 zones", items: [
+                .button(label: "X 分区曲线面积 zones 场景") { colorZonesPreset(axis: .x) },
+                .button(label: "Y 分区曲线面积 zones 场景") { colorZonesPreset(axis: .y) },
+                .button(label: "曲线负值换色 zones 场景") { colorZonesPreset(axis: nil) }
+            ]))
+        }
         result.append(.init(title: "分组堆叠预设", items: [.button(label: "两组堆叠与目标线") { groupedPreset() }]))
         result.append(.init(title: "当前系列（逐系列配置）", items: [DemoProperty.index("编辑系列序号（从0开始）", $selectedSeries, count: seriesCount)] + DemoSeriesSettings.items(seriesBinding, kind: kind)))
         result.append(.init(title: "堆叠与双轴", items: [
@@ -303,6 +313,40 @@ struct CartesianChartDemo: View {
         result.append(.init(title: "交互与弹窗行为", items: DemoInteractionSettings.items($interaction)))
         result.append(.init(title: "弹窗外观", items: DemoThemeFields.items($tooltipTheme)))
         return result
+    }
+    private func autoGapPreset() {
+        pointCount = 40; seriesCount = 2; selectedSeries = 0
+        stacking = "无"; grouping = false; dualAxis = false
+        timeEnabled = true; daily = false; interval = 300
+        theme.columnSpacing = nil; theme.lineSampling = nil; theme.lineConnectionStyle = .straight
+        theme.legend.isEnabled = true; theme.showsPoints = true; theme.showsArea = true
+        for i in 0..<2 {
+            series[i] = DemoSeriesSettings(name: i == 0 ? "允许 11 个空点" : "允许 55 分钟缺测",
+                                           color: i == 0 ? .systemBlue : .systemOrange)
+            series[i].kind = i == 0 ? .area : .spline
+            series[i].gapMode = i == 0 ? "按空点数量" : "按缺测时长"
+            series[i].dataText = DemoSeriesSettings.autoGapSample
+            if i == 1 {
+                series[i].style.lineConnectionStyle = .smooth
+                series[i].style.showsArea = false
+            }
+        }
+        range = nil; command += 1
+    }
+    private func colorZonesPreset(axis: CartesianZoneAxis?) {
+        pointCount = 9; seriesCount = 1; selectedSeries = 0
+        stacking = "无"; grouping = false; dualAxis = false; timeEnabled = false
+        categoryAxis.manualRange = false; primaryAxis.manualRange = false
+        theme.columnSpacing = nil; theme.lineSampling = nil; theme.lineConnectionStyle = .smooth
+        theme.legend.isEnabled = true; theme.showsPoints = true; theme.showsArea = true
+        series[0] = DemoSeriesSettings(name: "跨零曲线与面积", color: .systemBlue)
+        series[0].kind = .areaspline
+        series[0].negativeColor = .systemRed
+        series[0].dataText = "-30,25,60,15,-40,-10,45,nan,30"
+        series[0].zoneMode = axis.map { $0 == .x ? "X 原始索引" : "Y 绘制值" } ?? "关闭"
+        series[0].zoneThreshold = axis == .x ? 3.5 : 0
+        series[0].zoneFill = axis != nil
+        range = nil; report.selectedRange = nil; command += 1
     }
     private func groupedPreset() {
         pointCount = 6; seriesCount = kind == .combined ? 5 : 4

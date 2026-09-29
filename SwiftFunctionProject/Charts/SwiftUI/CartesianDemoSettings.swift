@@ -46,6 +46,42 @@ struct DemoSeriesSettings {
     var dash = "跟随主题"
     var marker = "跟随主题"
     var connectNulls = false
+    var gapMode = "跟随跨空值连线"
+    var zoneMode = "关闭"
+    var zoneThreshold = 0.0
+    var lowerZoneColor: UIColor = .systemRed
+    var upperZoneColor: UIColor = .systemGreen
+    var zoneFill = false
+    var colorZones: CartesianColorZones? {
+        guard zoneMode != "关闭" else { return nil }
+        func fill(_ color: UIColor) -> [UIColor]? {
+            zoneFill ? [color.withAlphaComponent(0.45), color.withAlphaComponent(0.08)] : nil
+        }
+        return .init(axis: zoneMode == "X 原始索引" ? .x : .y, zones: [
+            .init(upperBound: zoneThreshold, color: lowerZoneColor, areaGradientColors: fill(lowerZoneColor)),
+            .init(color: upperZoneColor, areaGradientColors: fill(upperZoneColor))
+        ])
+    }
+    var maximumMissingPoints = 11
+    var maximumMissingDuration = 3300.0
+    var gapPolicy: CartesianGapPolicy? {
+        switch gapMode {
+        case "全部断开": return .breakAll
+        case "全部连接": return .connectAll
+        case "按空点数量": return .autoGap(maximumMissingPoints: maximumMissingPoints)
+        case "按缺测时长": return .autoGapDuration(maximumMissingDuration: maximumMissingDuration)
+        default: return nil
+        }
+    }
+    /// 三段连续缺测分别为 11、12、13 点；两端始终是原始有效点。
+    static let autoGapSample: String = {
+        var samples = ["20"]
+        for (count, endpoint) in [(11, "50"), (12, "30"), (13, "70")] {
+            samples.append(contentsOf: Array(repeating: "nan", count: count))
+            samples.append(endpoint)
+        }
+        return samples.joined(separator: ",")
+    }()
     var labels: Bool?
     var shadow: CartesianShadowStyle?
     var palette = false
@@ -96,6 +132,25 @@ struct DemoSeriesSettings {
         if kind != .bar { items.append(DemoProperty.integer("值轴（0 主轴 / 1 次轴）", b.axis, 0...1)) }
         if kind == .line || kind == .combined {
             items += [.picker(label: "系列虚线", selection: b.dash, options: ["跟随主题"] + LineDashStyle.allCases.map(\.rawValue)), .picker(label: "系列点形状", selection: b.marker, options: ["跟随主题"] + PointMarkerSymbol.allCases.map(\.rawValue)), .toggle(label: "跨空值连线", value: b.connectNulls)]
+        }
+        if kind == .line || kind == .combined {
+            items += [.picker(label: "缺测策略 autoGap", selection: b.gapMode,
+                              options: ["跟随跨空值连线", "全部断开", "全部连接", "按空点数量", "按缺测时长"])]
+            if b.wrappedValue.gapMode == "按空点数量" {
+                items += [DemoProperty.integer("缺测点数上限（含等号）", b.maximumMissingPoints, 0...30)]
+            } else if b.wrappedValue.gapMode == "按缺测时长" {
+                items += [DemoProperty.number("缺测时长上限秒（需时间轴）", b.maximumMissingDuration, 0...86400, step: 300)]
+            }
+        }
+        if kind == .line || kind == .combined {
+            items += [.picker(label: "颜色分区 zones", selection: b.zoneMode,
+                              options: ["关闭", "X 原始索引", "Y 绘制值"])]
+            if b.wrappedValue.zoneMode != "关闭" {
+                items += [DemoProperty.number("分区阈值（等于归上段）", b.zoneThreshold, -100...3000, step: 0.5),
+                          .color(label: "阈值以下线色", value: b.lowerZoneColor),
+                          .color(label: "阈值以上线色", value: b.upperZoneColor),
+                          .toggle(label: "分区面积渐变", value: b.zoneFill)]
+            }
         }
         if kind != .line {
             items += [.toggle(label: "逐柱配色", value: b.palette), .color(label: "调色板 A", value: b.paletteA), .color(label: "调色板 B", value: b.paletteB)]
