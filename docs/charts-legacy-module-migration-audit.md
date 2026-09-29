@@ -1,6 +1,8 @@
 # 旧图表模块替换评估
 
-> 最新进度：旧模块迁移第 2 步已接入混合图、分组堆叠、系列独立样式和 Demo/OC 调试入口，详见 [混合图指南](charts-combined-and-stacks-guide.md)。下文的缺口描述保留为当时评估基线。
+> 最新进度（2026-09-29）：迁移第 3 阶段已接入 autoGap、X/Y 连续颜色分区与平滑曲线负值着色，含 Swift/OC 与 Demo。分区不修改原始数据；复杂堆叠面积基准切换接缝仍待后续处理。见 [缺测策略指南](charts-gap-policy-guide.md) 与 [颜色分区指南](charts-color-zones-guide.md)。
+
+> 旧模块迁移第 2 步已接入混合图、分组堆叠、系列独立样式和 Demo/OC 调试入口，详见 [混合图指南](charts-combined-and-stacks-guide.md)。下文的缺口描述保留为当时评估基线。
 
 > 后续进度：迁移第 1 步的数据语义、业务组元数据、每系列格式与最小 OC 桥接已接入，见 [实施指南](charts-data-semantics-guide.md)。下文保留实施前的审计基线，不代表这些子项仍全部缺失。
 
