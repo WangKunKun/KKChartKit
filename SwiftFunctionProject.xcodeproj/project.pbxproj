@@ -29,9 +29,87 @@
 		A7D8FD2130109211006D58A8 /* SwiftFunctionProjectUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftFunctionProjectUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		A12B34C56D78E90F12345678 /* Exceptions for "SwiftFunctionProject" folder in "SwiftFunctionProject" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"参考图表/HMAAChartUtil.m",
+				"参考图表/HMAAChartView/AAChartKit/AAChartCreator/AAChartModel.m",
+				"参考图表/HMAAChartView/AAChartKit/AAChartCreator/AAChartView.m",
+				"参考图表/HMAAChartView/AAChartKit/AAChartCreator/AAOptions.m",
+				"参考图表/HMAAChartView/AAChartKit/AAChartCreator/AASeriesElement.m",
+				"参考图表/HMAAChartView/AAChartKit/AAJSFiles.bundle",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAAxis/AAAxisOption/AACrosshair.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAAxis/AAAxisOption/AALineStyle.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAAxis/AAAxisOption/AAPlotBandsElement.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAAxis/AAAxisOption/AAPlotLinesElement.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAAxis/AAXAxis.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAAxis/AAYAxis.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAChart.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AACredits.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AALabel/AADataLabels.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AALabel/AADateTimeLabelFormats.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AALabel/AALabel.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AALabel/AALabels.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AALabel/AAStyle.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AALang.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AALegend.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAPane.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAPlotOptions/AAChartType/AAArea.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAPlotOptions/AAChartType/AAArearange.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAPlotOptions/AAChartType/AAAreaspline.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAPlotOptions/AAChartType/AABar.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAPlotOptions/AAChartType/AABoxplot.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAPlotOptions/AAChartType/AAColumn.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAPlotOptions/AAChartType/AAColumnrange.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAPlotOptions/AAChartType/AALine.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAPlotOptions/AAChartType/AAPie.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAPlotOptions/AAChartType/AAScatter.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAPlotOptions/AAChartType/AASpline.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAPlotOptions/AAPlotOptions.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAPlotOptions/AASeries/AASeries.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAPlotOptions/AASeries/AASeriesOption/AAAnimation.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAPlotOptions/AASeries/AASeriesOption/AAMarker.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAPlotOptions/AASeries/AASeriesOption/AAShadow.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AAPlotOptions/AASeries/AASeriesOption/AAStates.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AATitle.m",
+				"参考图表/HMAAChartView/AAChartKit/AAOptionsModel/AATooltip.m",
+				"参考图表/HMAAChartView/AAChartKit/AATool/Category/NSArray+toJSArray.m",
+				"参考图表/HMAAChartView/AAChartKit/AATool/Category/NSString+toPureJSString.m",
+				"参考图表/HMAAChartView/AAChartKit/AATool/Color/AAColor.m",
+				"参考图表/HMAAChartView/AAChartKit/AATool/Color/AAGradientColor.m",
+				"参考图表/HMAAChartView/AAChartKit/AATool/Color/AAGradientColor+DefaultThemes.m",
+				"参考图表/HMAAChartView/AAChartKit/AATool/Color/AAGradientColor+LinearGradient.m",
+				"参考图表/HMAAChartView/AAChartKit/AATool/Color/AAGradientColor+RadialGradient.m",
+				"参考图表/HMAAChartView/HMAAChartFullScreenVC.m",
+				"参考图表/HMAAChartView/HMAAChartTool/HMAAChartManager.m",
+				"参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.m",
+				"参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.m",
+				"参考图表/HMAAChartView/HMAAChartTool/HMAASeries.m",
+				"参考图表/HMAAChartView/HMAAChartTool/HMChartTool.m",
+				"参考图表/HMAAChartView/HMAAChartView.m",
+				"参考图表/HMAAChartView/HMChartCrosshairView.m",
+				"参考图表/HMAAChartView/HMChartHeaderView.m",
+				"参考图表/HMAAChartView/HMChartIcon.xcassets",
+				"参考图表/HMAAChartView/HMChartLegengView.m",
+				"参考图表/HMAAChartView/HMChartSunView.m",
+				"参考图表/HMAAChartView/HMChartTitleView.m",
+				"参考图表/HMAAChartView/HMLGAAChartView.m",
+				"参考图表/HMAAChartView/HMMTAAChartView.m",
+				"参考图表/HMAAChartView/HMTooltipTool/HMIconTooltip.m",
+				"参考图表/HMAAChartView/HMTooltipTool/HMTooltip.m",
+				"参考图表/HMAAChartView/HMTooltipTool/HMTooltipTool.m",
+			);
+			target = A7D8FD0930109210006D58A8 /* SwiftFunctionProject */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A7D8FD0C30109210006D58A8 /* SwiftFunctionProject */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A12B34C56D78E90F12345678 /* Exceptions for "SwiftFunctionProject" folder in "SwiftFunctionProject" target */,
+			);
 			path = SwiftFunctionProject;
 			sourceTree = "<group>";
 		};
