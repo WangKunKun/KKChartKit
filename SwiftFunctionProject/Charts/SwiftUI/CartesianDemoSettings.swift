@@ -58,6 +58,13 @@ struct DemoSeriesSettings {
     var legendMarker: PointMarkerSymbol = .circle
     var legendColor: UIColor?
     var dataText = ""
+    var groupID = ""
+    var groupName = ""
+    var valueFormat: CartesianValueFormat?
+    var kind: CartesianSeriesKind = .column
+    var stackID = ""
+    var participatesInStack = true
+    var style = CartesianSeriesStyle()
     var reducer: CartesianAggregation? {
         switch aggregation {
         case "求和": return .sum
@@ -87,15 +94,24 @@ struct DemoSeriesSettings {
         var items: [ChartDemoPanel.Item] = [.textField(label: "名称", value: b.name), .toggle(label: "显示系列", value: b.visible), .toggle(label: "加入图例", value: b.showsInLegend), DemoProperty.integer("图例排序", b.legendOrder, 0...10)]
         items += DemoProperty.color("系列颜色", b.color) + DemoProperty.color("负值颜色", b.negativeColor)
         if kind != .bar { items.append(DemoProperty.integer("值轴（0 主轴 / 1 次轴）", b.axis, 0...1)) }
-        if kind == .line {
+        if kind == .line || kind == .combined {
             items += [.picker(label: "系列虚线", selection: b.dash, options: ["跟随主题"] + LineDashStyle.allCases.map(\.rawValue)), .picker(label: "系列点形状", selection: b.marker, options: ["跟随主题"] + PointMarkerSymbol.allCases.map(\.rawValue)), .toggle(label: "跨空值连线", value: b.connectNulls)]
-        } else {
+        }
+        if kind != .line {
             items += [.toggle(label: "逐柱配色", value: b.palette), .color(label: "调色板 A", value: b.paletteA), .color(label: "调色板 B", value: b.paletteB)]
         }
+        if kind == .combined { items += [DemoProperty.choice("系列图形 kind", b.kind)] }
+        items += [.textField(label: "堆叠组 stackID（空为默认组）", value: b.stackID),
+                  .toggle(label: "参与堆叠 participatesInStack", value: b.participatesInStack)]
+        if kind == .line || kind == .combined { items += DemoThemeFields.seriesStyleItems(b.style) }
         items += [DemoProperty.triState("数据标签", b.labels)] + DemoProperty.shadow("系列阴影", b.shadow)
         if kind == .column {
-            items += [.picker(label: "聚合规则", selection: b.aggregation, options: ["不配置", "求和", "平均", "最小", "最大", "末值", "自定义：极差"]), .textField(label: "单位", value: b.unit)]
+            items += [.picker(label: "聚合规则", selection: b.aggregation, options: ["不配置", "求和", "平均", "最小", "最大", "末值", "自定义：极差"])]
         }
+        items += [.textField(label: "单位", value: b.unit),
+            .textField(label: "业务组 ID（空为不分组）", value: b.groupID),
+            .textField(label: "业务组名称（同 ID 使用首项名称）", value: b.groupName)]
+        items += DemoThemeFields.valueFormatItems(b.valueFormat)
         items += [.textField(label: "图例标题覆盖（空为系列名）", value: b.legendTitle), .picker(label: "图例符号", selection: b.legendSymbol, options: ["自动", "线", "线和标记", "标记", "矩形", "圆角矩形"]), DemoProperty.choice("图例标记形状", b.legendMarker)]
         items += DemoProperty.color("图例符号颜色", b.legendColor)
         items += [.textField(label: "数据覆盖：逗号分隔，nan 缺测，空为生成数据", value: b.dataText)]
@@ -104,7 +120,7 @@ struct DemoSeriesSettings {
 }
 
 enum CartesianDemoKind: String, CaseIterable {
-    case line = "折线图", column = "柱状图", bar = "条形图"
+    case line = "折线图", column = "柱状图", bar = "条形图", combined = "混合图"
 }
 
 struct DemoInteractionSettings {

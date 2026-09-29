@@ -32,6 +32,7 @@ struct DemoChartHost<R: HYMChartRenderer>: UIViewRepresentable {
     func makeCoordinator() -> Coordinator { Coordinator() }
     func makeUIView(context: Context) -> HYMChartView<R> {
         let chart = HYMChartView<R>(frame: .zero)
+        chart.accessibilityIdentifier = "demo.chart.preview"
         apply(chart)
         chart.configure(model: model, theme: theme)
         return chart
@@ -69,6 +70,11 @@ struct DemoChartHost<R: HYMChartRenderer>: UIViewRepresentable {
         chart.onSeriesVisibilityChanged = onVisibility
         chart.onHit = { target, gesture in
             report.text = "\(gesture) · " + (target.tooltipText ?? target.identifier)
+            if let data = (target as? CartesianHitDataSource)?.chartData.first {
+                let raw = data.rawValue.map { String($0) } ?? "nil（聚合）"
+                let percent = data.percentage.map { String(format: "%.2f%%", $0) } ?? "—"
+                report.text += "\n原值 \(raw) · 绘制 \(data.drawValue) · 起点 \(data.stackBase) · 占比 \(percent)\n组 \(data.groupName ?? data.groupID ?? "无") · 原始索引 \(data.sourceRange)"
+            }
             report.selectedRange = (target as? ColumnHitTarget)?.timeBucket?.sourceRange
                 ?? (target as? CartesianSharedHitTarget)?.entries.first?.timeBucket?.sourceRange
         }

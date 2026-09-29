@@ -2,6 +2,21 @@ import SwiftUI
 
 /// 可编辑基础字段的集中登记；复杂枚举/闭包在各专属面板选择预设。
 enum DemoThemeFields {
+    static func valueFormatItems(_ v: Binding<CartesianValueFormat?>) -> [ChartDemoPanel.Item] {
+        var items = [DemoProperty.enabled("每系列数值格式（覆盖全局模板）", v, default: CartesianValueFormat())]
+        if v.wrappedValue != nil {
+            let f = DemoProperty.optional(v, default: CartesianValueFormat())
+            items += [DemoProperty.choice("进位 none/engineering", f.scale),
+                DemoProperty.choice("舍入 nearest/towardZero", f.rounding),
+                DemoProperty.integer("最多小数位", f.maximumFractionDigits, 0...12),
+                .toggle(label: "仅展示绝对值", value: f.showsAbsoluteValue),
+                .toggle(label: "千位分隔符", value: f.usesGroupingSeparator),
+                .textField(label: "货币符号（空为关闭）", value: f.currencySymbol),
+                .textField(label: "Locale（空为系统，例如 en_US/de_DE）", value: Binding(get: { f.wrappedValue.localeIdentifier ?? "" }, set: { f.wrappedValue.localeIdentifier = $0.isEmpty ? nil : $0 }))]
+        }
+        return items
+    }
+
     static func lineSamplingItems(_ v: Binding<LineChartSampling?>) -> [ChartDemoPanel.Item] {
         var items = [DemoProperty.enabled("启用 Min/Max 降采样（非堆叠直线）", v, default: LineChartSampling())]
         if v.wrappedValue != nil {
@@ -16,6 +31,7 @@ enum DemoThemeFields {
 
     static func items(_ v: Binding<CartesianChartTheme>) -> [ChartDemoPanel.Item] {
         var items: [ChartDemoPanel.Item] = []
+        items += [.toggle(label: "复用图层与标签 reusesRenderingObjects", value: v.reusesRenderingObjects)]
         items += DemoProperty.color("backgroundColor", v.backgroundColor)
         items += [DemoProperty.number("backgroundCornerRadius", v.backgroundCornerRadius, 0...40)]
         items += DemoProperty.insets("contentInset", v.contentInset)
@@ -48,10 +64,21 @@ enum DemoThemeFields {
         items += [DemoProperty.integer("dataLabelMaxMarkCount", v.dataLabelMaxMarkCount, 0...1000)]
         items += [.toggle(label: "showsEntranceAnimation", value: v.showsEntranceAnimation)]
         items += [.toggle(label: "showsTooltipOnHit", value: v.showsTooltipOnHit)]
-        items += [DemoProperty.number("columnWidthRatio", v.columnWidthRatio, 0.1...1, step: 0.05)]
-        items += [DemoProperty.number("columnGroupSpacingRatio", v.columnGroupSpacingRatio, 0...0.5, step: 0.05)]
-        items += [DemoProperty.enabled("自定义 columnInnerSpacingRatio", v.columnInnerSpacingRatio, default: 0.5)]
-        if v.columnInnerSpacingRatio.wrappedValue != nil { items.append(DemoProperty.number("columnInnerSpacingRatio", DemoProperty.optional(v.columnInnerSpacingRatio, default: 0.5), 0...0.5, step: 0.05)) }
+        items += [DemoProperty.enabled("固定间距 columnSpacing（pt）", v.columnSpacing, default: CartesianColumnSpacing(columnWidth: 12))]
+        if v.columnSpacing.wrappedValue != nil {
+            let spacing = DemoProperty.optional(v.columnSpacing, default: CartesianColumnSpacing(columnWidth: 12))
+            items += [DemoProperty.enabled("固定柱宽 columnSpacing.columnWidth（pt）", spacing.columnWidth, default: CGFloat(12))]
+            if spacing.columnWidth.wrappedValue != nil {
+                items += [DemoProperty.number("柱宽 columnSpacing.columnWidth（pt）", DemoProperty.optional(spacing.columnWidth, default: 12), 1...60)]
+            }
+            items += [DemoProperty.number("同组柱间距 columnSpacing.inner（pt）", spacing.inner, 0...40)]
+            items += [DemoProperty.number("两组间距 columnSpacing.group（pt）", spacing.group, 0...80)]
+        } else {
+            items += [DemoProperty.number("columnWidthRatio", v.columnWidthRatio, 0.1...1, step: 0.05)]
+            items += [DemoProperty.number("columnGroupSpacingRatio", v.columnGroupSpacingRatio, 0...0.5, step: 0.05)]
+            items += [DemoProperty.enabled("自定义 columnInnerSpacingRatio", v.columnInnerSpacingRatio, default: 0.5)]
+            if v.columnInnerSpacingRatio.wrappedValue != nil { items.append(DemoProperty.number("columnInnerSpacingRatio", DemoProperty.optional(v.columnInnerSpacingRatio, default: 0.5), 0...0.5, step: 0.05)) }
+        }
         items += [DemoProperty.number("columnMinPointLength", v.columnMinPointLength, 0...40)]
         items += [DemoProperty.number("columnCornerRadius", v.columnCornerRadius, 0...40)]
         items += DemoProperty.color("columnBorderColor", v.columnBorderColor)
@@ -171,6 +198,35 @@ enum DemoThemeFields {
         items += [DemoProperty.number("maxWidth", v.maxWidth, 40...400)]
         items += DemoProperty.size("minimumPlotSize", v.minimumPlotSize, 0...200)
         items += [.toggle(label: "allowsToggling", value: v.allowsToggling)]
+        return items
+    }
+}
+
+// 每系列新增字段集中登记：所有覆盖均可恢复继承。
+extension DemoThemeFields {
+    static func seriesStyleItems(_ b: Binding<CartesianSeriesStyle>) -> [ChartDemoPanel.Item] {
+        var items: [ChartDemoPanel.Item] = [
+            .picker(label: "系列连线覆盖", selection: Binding(get: { b.wrappedValue.lineConnectionStyle?.rawValue ?? "继承" }, set: { b.wrappedValue.lineConnectionStyle = LineConnectionStyle(rawValue: $0) }), options: ["继承"] + LineConnectionStyle.allCases.map(\.rawValue)),
+            DemoProperty.enabled("自定义系列线宽", b.lineWidth, default: 2),
+            DemoProperty.triState("系列标记可见", b.showsPoints),
+            DemoProperty.enabled("自定义系列标记半径", b.pointRadius, default: 4),
+            DemoProperty.triState("系列面积填充", b.showsArea),
+            DemoProperty.enabled("自定义系列填充透明度", b.fillOpacity, default: 1),
+            DemoProperty.enabled("自定义系列填充颜色", b.areaGradientColors, default: [.systemBlue, .clear])]
+        if b.wrappedValue.lineWidth != nil { items.append(DemoProperty.number("系列线宽 pt", DemoProperty.optional(b.lineWidth, default: 2), 0...10)) }
+        if b.wrappedValue.pointRadius != nil { items.append(DemoProperty.number("系列标记半径 pt", DemoProperty.optional(b.pointRadius, default: 4), 0...12)) }
+        if b.wrappedValue.fillOpacity != nil { items.append(DemoProperty.number("系列填充透明度", DemoProperty.optional(b.fillOpacity, default: 1), 0...1, step: 0.05)) }
+        if b.wrappedValue.areaGradientColors != nil {
+            for index in 0..<2 {
+                items.append(.color(label: index == 0 ? "系列渐变起色" : "系列渐变末色", value: Binding(get: { b.wrappedValue.areaGradientColors?.indices.contains(index) == true ? b.wrappedValue.areaGradientColors![index] : .clear }, set: { color in
+                    var colors = b.wrappedValue.areaGradientColors ?? []
+                    while colors.count < 2 { colors.append(.clear) }
+                    colors[index] = color; b.wrappedValue.areaGradientColors = colors
+                })))
+            }
+            items.append(.button(label: "恢复系列默认渐变（忽略主题渐变）") { b.wrappedValue.areaGradientColors = [] })
+        }
+        items.append(.button(label: "重置当前系列样式覆盖") { b.wrappedValue = .init() })
         return items
     }
 }
