@@ -1,5 +1,7 @@
 # HYMCharts 柱状图与条形图使用指南
 
+> 固定 pt 柱宽/间距及自动滚动已接入，使用 `theme.columnSpacing`，详见 [固定布局指南](charts-fixed-column-layout-guide.md)。
+
 > 内置图例已接入：详见 [图例、显隐与尺寸分配](charts-legend-guide.md)。高密度 Column 可接入 [时间聚合与区间明细](charts-time-grouping-guide.md)。
 
 > 快速上手柱系图表：柱状图（Column Chart）与条形图（Bar Chart）。
@@ -88,7 +90,7 @@ BarChart(model: model)
 | `.normal` | 同轴内正负各自从零累计 |
 | `.percent` | 同轴每类目按有效原值绝对值之和归一化，保留正负号 |
 | `.percentFixed(max:)` | 按统一基准归一化，可不满或超过 100% |
-| `.grouped(groupCount:)` | 分组堆叠（预留） |
+| `.grouped(groupCount:)` | 序号分组普通堆叠（推荐显式 stackID） |
 
 ### CartesianSeriesElement
 
@@ -327,7 +329,7 @@ A: 方向不同，并共享数据模型与主题。Column 支持双值轴，Bar 
 
 ### Q: 如何实现分组柱状图（并排显示）？
 
-A: 提供多个 series 并保持 stacking 为 nil 或 .none，即可并排显示。多个独立堆叠组尚未实现，`.grouped(groupCount:)` 仍是预留。
+A: 提供多个 series 并保持 stacking 为 nil 或 .none，即可并排显示。多个独立堆叠组可使用 `.normal` / `.percent` + 每系列 `stackID`；`.grouped(groupCount:)` 按原始序号分区。见 [混合图与分组堆叠](charts-combined-and-stacks-guide.md)。
 
 ### Q: 负值柱体的零轴位置如何确定？
 

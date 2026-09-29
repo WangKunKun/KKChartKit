@@ -55,7 +55,7 @@ let reducer = CartesianAggregation.custom(name: "范围") { samples in
 - 所有**可见**系列必须显式设置 reducer，否则整张图回退原始展示，避免不同系列区间错位。隐藏且未配置的系列不会阻止聚合。
 - 恢复原始分辨率时直接使用原值，不执行 custom。custom 必须无副作用，布局/缩放会重新计算。
 - 普通堆叠与百分比堆叠：先聚合各系列原值，再计算累计值/可见系列占比。仅应堆叠单位和统计口径相容的系列。
-- 固定基准百分比 `.percentFixed` 和未实现的 `.grouped` 堆叠回退原始展示，避免擅自把固定目标乘以区间长度。
+- 固定基准百分比 `.percentFixed` 堆叠回退原始展示，避免擅自把固定目标乘以区间长度。
 
 纯数据入口 `CartesianTimeGrouper.group(model:theme:plotWidth:visibleRange:)` 返回 `status`、`samplesPerBucket`、`buckets`，供业务验证计算结果。`visibleRange` 单位为原始索引，例如完整 288 点为 `-0.5...287.5`。`buckets` 的第一维保持原始系列索引，隐藏系列为空数组。
 
@@ -138,3 +138,7 @@ model.timeGrouping = grouping
 新增 [平移缓存对照记录](benchmarks/2026-09-24-column-pan-cache-simulator.csv)：3000 点、6 系列、预热后 30 次 renderer 平移，Debug 模拟器单次 CPU 计时，不含 GPU 呈现/实际触控帧率。
 
 非堆叠直线/面积图的 [Min/Max 降采样](charts-line-sampling-guide.md) 已接入。下一步：真机手势性能测量、图层/标签复用及更丰富的采样组合。Bar 聚合、不等间隔时间戳、时间加权平均、日历对齐、正负拆桶与累计表复位暂未实现。
+
+固定尺寸配合：`theme.columnSpacing` 生效时，容量预算包含固定组内/组间距；指定 `columnWidth` 时该宽度优先于 `minimumColumnWidth`，聚合末桶保留完整几何槽位而不补充原始数据。见 [固定布局指南](charts-fixed-column-layout-guide.md)。
+
+迁移第 2 步：Column 的普通/百分比分组、`.grouped` 已支持按实际柱组数预算宽度。分桶保留 stackID、每系列 reducer；混合图暂不启用时间聚合。

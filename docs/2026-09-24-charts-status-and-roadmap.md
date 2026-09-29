@@ -1,5 +1,13 @@
 # 图表库现状核对与后续路线图
 
+> 最新进度：旧模块迁移第 2 步已接入混合图、分组堆叠、系列独立样式和 Demo/OC 调试入口，详见 [混合图指南](charts-combined-and-stacks-guide.md)。下文的缺口描述保留为当时评估基线。
+
+> 旧模块迁移第 1 步已接入统一命中数据语义、业务组元数据、每系列格式与最小 OC 桥接；详见 [数据语义指南](charts-data-semantics-guide.md)。
+
+> 第 9 步已接入固定 pt 柱宽/间距与默认从最早数据开始的滚动窗口，保留手动区间定位。见 [固定布局指南](charts-fixed-column-layout-guide.md)。
+
+> 第 8 步已接入 Line / Column / Bar 图层与标签复用，并同步三个 Demo 属性开关。见 [复用指南](charts-rendering-reuse-guide.md)；真机分析、几何缓存与局部更新仍待完成。
+
 > 第 7 步已接入非堆叠直线/面积图 Min/Max 降采样，原始命中与缩放恢复已覆盖；所有选项同步到折线 Demo，见 [使用指南](charts-line-sampling-guide.md)。
 
 > 第 5、6 步已接入统一 Demo 属性面板、手势聚合缓存和粒度切换缓冲。见 [调试指南](charts-demo-guide.md) 与 [最新状态](charts-capability-status.md)。

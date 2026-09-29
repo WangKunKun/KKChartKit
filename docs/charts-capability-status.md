@@ -10,8 +10,10 @@
 | 热力图 | 已实现 | Heatmap/；SwiftUI 与 OCBridge；支持无效占位格 |
 | 折线/平滑/阶梯/面积 | 已实现 | LineChartRenderer；支持多系列、空值、正负堆叠 |
 | 折线 Min/Max 降采样 | 已实现，第 7 步 | 非堆叠直线/面积，多系列/双轴/缺测；默认关闭，原始数据命中；曲线/阶梯/堆叠保持原始绘制 |
+| 绘制图层/标签复用 | 已实现，第 8 步 | Line/Column/Bar 默认开启；支持开关对照，逐帧回收未用对象；不含图例、tooltip、Radar/Heatmap |
+| 固定柱宽与固定间距 | 已实现，第 9 步 | Column/Bar，pt 配置；默认最早、自动类目滚动、区间定位；Column 时间聚合计入完整尺寸预算 |
 | 柱状/条形 | 已实现 | ColumnChartRenderer / BarChartRenderer；并排、普通/百分比/固定基准堆叠 |
-| 多组分别堆叠 | 未实现 | StackConfig.grouped 仍是预留，并排多系列不是分组堆叠 |
+| 多组分别堆叠 | 已实现，迁移第 2 步 | stackID 按轴/图形族/正负分链；normal/percent/fixed；Column/Bar/Combined 柱槽和总量按组 |
 | 刻度/标线/色带 | 已实现 | Cartesian 层；标签旋转仅垂直图底部类目轴生效 |
 | 双值轴 | 部分实现 | Line/Column 支持；Bar 不支持 |
 | 缩放/平移/回弹/重置 | 已实现 | HYMChartView；支持屏幕 x/y/xy，惯性仅 X 轴 |
@@ -21,10 +23,12 @@
 | 点/柱主体选中视觉 | 待实现 | 轴系已有命中/准线；Radar/Heatmap 已有主体选中反馈 |
 | 更新时保留视口 | 已实现，第 2 步回归通过 | update 默认保留；configure / resetViewport 显式重置；轴系 SwiftUI 默认保留且同步最新回调 |
 | 系列稳定 ID、图例与显隐 | 已实现，第 3 步 | 四向布局、符号/颜色覆盖、换行滚动；Line/Column/Bar，默认关闭 |
-| 混合图 | 待实现 | 首个目标为柱 + 线 + 双轴 + shared tooltip |
+| 混合图 | 已实现，迁移第 2 步 | CombinedChartRenderer / CombinedChart / OC；柱、线、曲线、面积共轴/图例/命中；不做混合时间聚合 |
 | 数值/时间 X、流式追加 | 部分实现 | 等间隔时间标签和区间元数据已接入；X 仍为原始索引，不等间隔/真实数值 X/流式追加待实现 |
 | 高密度 Column 时间聚合 | 已实现第一版 | 按宽度/可见系列数分桶；每系列 reducer、区间 tooltip、总览/明细定位 |
-| SDK 独立分发 | 待实现 | 当前为 App 工程，尚未独立 SPM 库；Cartesian OCBridge 未补齐 |
+| 轴系命中数据语义 | 已实现，迁移第 1 步 | raw/aggregated/draw/base/percentage 与源范围统一；旧 value 兼容，Tooltip 显示原值/统计值 |
+| 业务组与每系列格式 | 已实现基础，迁移第 1 步 | 稳定组 ID/名称、单位、k/M/G、金额、Locale；复杂分组 Tooltip 与组小计待后续 |
+| SDK 独立分发 | 待实现 | 当前为 App 工程，尚未独立 SPM 库；Cartesian 已有最小 OCBridge，完整透传待补齐 |
 
 ## 第 1 步：总量标签收尾
 
@@ -118,7 +122,7 @@
 
 性能记录：[24 组模拟器布局耗时](benchmarks/2026-09-24-column-layout-simulator.csv)。这是 Debug 单次 UIView 创建到 layout 的观测，测试为普通堆叠，非真机帧率/内存基准。原始/聚合两种模式都已包含本步重复计算修复，不能作为修改前后的完整速度对比。
 
-边界：仅 Column 自动聚合；必须有合法等间隔时间轴，所有可见系列须显式选择 reducer。固定基准百分比与 grouped 堆叠回退原始数据。不等间隔、时间加权平均、累计表复位、正负拆桶、日历整点对齐仍待实现（手势缓存已在第 6 步接入；非堆叠直线降采样见第 7 步）。
+边界：仅 Column 自动聚合；必须有合法等间隔时间轴，所有可见系列须显式选择 reducer。固定基准百分比回退原始数据；grouped 已在迁移第 2 步接入。不等间隔、时间加权平均、累计表复位、正负拆桶、日历整点对齐仍待实现（手势缓存已在第 6 步接入；非堆叠直线降采样见第 7 步）。
 
 第 4 步结束时的计划：跨渲染缓存和粒度切换缓冲（现已在第 6 步接入）、真机手势/内存基准；随后折线 Min/Max 降采样。统一全部命中值字段、主体选中反馈和混合图仍在路线图内。
 
@@ -146,7 +150,7 @@
 
 性能观测见 [模拟器平移缓存对照](benchmarks/2026-09-24-column-pan-cache-simulator.csv)。3000 点、6 系列、连续 30 次 renderer 平移调用；不包含初始布局，Debug、单次观测。统计 CPU 同步调用耗时，非 GPU 呈现时间/触控 FPS/真机内存基准。
 
-仍待完成：真机手势与峰值内存验证、图层/标签复用、跨 update 的精细失效（非堆叠直线 Min/Max 已在第 7 步接入）。不等间隔时间、Bar 自动聚合与混合图继续按路线图推进。
+仍待完成：真机手势与峰值内存验证、跨 update 的精细失效（图层/标签复用已在第 8 步接入）（非堆叠直线 Min/Max 已在第 7 步接入）。不等间隔时间、Bar 自动聚合与混合图继续按路线图推进。
 
 最终验证（2026-09-24）：**84 项单元测试 + 2 项界面测试全部通过**。本次新增 3 项 Demo 配置/主题测试、8 项缓存/缓冲/对照测试、1 项时间标签间距回归；界面测试遍历五类页面并切换真实属性，覆盖 3000 点预设、总览/明细与恢复默认。已检查五类实时属性截图及密集柱状图总览/明细截图。
 
@@ -172,3 +176,65 @@
 边界：仍扫描原始有效段，尚无多层采样索引缓存；大量缺测段会削弱点数压缩比例。近似路径保留组内极值，但不保证保留所有高频振荡/过零时刻。下一步优先完善可复用绘制层/标签和真机分析，再扩展曲线/阶梯/堆叠采样与命中主体高亮。
 
 测试产物：`/tmp/hymcharts-step1-build/Logs/Test/Test-SwiftFunctionProject-2026.09.24_16-24-55-+0800.xcresult`；日志 `/tmp/hymcharts-line-sampling-final.log`；截图 `/tmp/hymcharts-line-sampling-evidence/`。`git diff --check` 通过。
+
+
+## 第 8 步：绘制图层与标签复用
+
+前置：已将前 7 步累计成果提交为 `3e8571d`（本地提交）。
+
+- 新增渲染器独占对象池，公共装饰与系列绘制独立；复用轴/网格、标题/刻度、标线/色带、线/柱/条形、渐变/mask、阴影与文字。
+- 逐帧释放未使用对象，卸载清理；Column/Bar 入场动画复用系列标签和总量标签。
+- 重置可变样式及旋转，避免关闭虚线/边框/阴影或切换形状后残留。空数据继续调用子类清理，修复旧 series 图层/命中缓存未清空的问题。
+- 新增 `CartesianChartTheme.reusesRenderingObjects`，默认 true；在三个统一 Demo 的主题面板实时切换。
+- 仍重建 path 并重新挂载图层；几何缓存、局部更新、真机性能分析尚未完成。接入与验证范围见 [复用指南](charts-rendering-reuse-guide.md)。
+
+
+验证：新增 8 项单元测试、1 项界面测试；完整 107 项单元测试与 4 项界面测试通过。三个 Demo 的复用开关与图表截图已检查；开启/关闭复用跨样式、空数据、显隐更新的图片一致。原始 3000 点 × 2 系列、12 次布局的池内创建数 72,252 → 0；平均 CPU 布局约 26.94 → 25.28 ms。启用 Min/Max 后约 14.67 → 13.74 ms。仅 Debug 模拟器单次观测，详见 [原始 CSV](benchmarks/2026-09-24-render-object-reuse-simulator.csv)。
+
+最终单元测试：`/tmp/hymcharts-step1-build/Logs/Test/Test-SwiftFunctionProject-2026.09.24_16-53-11-+0800.xcresult`。界面测试：`Test-SwiftFunctionProject-2026.09.24_16-47-35-+0800.xcresult` 中 4 项 UI 测试通过；该批次曾有 1 项对象释放时机断言失败，补充事务提交/autoreleasepool 后在最终单元测试中通过。UI 截图：`/tmp/hymcharts-reuse-evidence/`。日志 `/tmp/hymcharts-reuse-optimized.log`。
+
+
+## 第 9 步：固定尺寸与默认最早滚动窗口
+
+按用户要求新增 `CartesianColumnSpacing(columnWidth:inner:group:)`，设置到 `theme.columnSpacing`，覆盖旧比例布局。固定柱宽后自动启用类目滚动，默认最早；现有 `showCategoryRange` 定位指定区间起点，可见跨度按实际空间决定。Column 横向、Bar 纵向；更新保留位置，重置返回最早。
+
+- 间距与柱宽在拖动、视口/尺寸更新后保持 pt 值，隐藏系列和堆叠重新计算容量。
+- 时间聚合按完整固定尺寸预算分桶，末尾短桶仅扩展几何占位，真实原始数据和命中区间不补点。
+- Bar 按 Y 类目窗口裁剪条形、标签与网格，避免滚动后仍创建全量可视对象。
+- 两个 Demo 同步固定尺寸控件、60 点 × 3 系列滚动预设、起止索引与定位按钮；不生效的比例控件隐藏。
+- 详细语义和只固定间距时空间不足的处理见 [固定布局指南](charts-fixed-column-layout-guide.md)。
+
+
+验证：新增 12 项单元测试、1 项界面测试；最终 119 项单元测试与 5 项 Demo 界面测试通过。截图检查发现并修复 Bar 滚动后视口外刻度/网格越界，针对性界面复测通过。固定尺寸、间距、默认最早、手动起点、重置、更新、容器尺寸变化、隐藏系列、堆叠、短末桶命中元数据及旧比例模式回退均有覆盖。
+
+最终单元与滚动界面复测：`/tmp/hymcharts-step1-build/Logs/Test/Test-SwiftFunctionProject-2026.09.24_17-20-46-+0800.xcresult`。完整 5 项界面测试：`Test-SwiftFunctionProject-2026.09.24_17-15-54-+0800.xcresult`。日志 `/tmp/hymcharts-fixed-layout-boundary.log`；修复后截图 `/tmp/hymcharts-fixed-layout-boundary-evidence/`。`git diff --check` 通过。
+
+
+## 旧模块迁移第 1 步：数据语义、分组与格式、最小 OC 接入
+
+- Line/Column/Bar 逐点、吸附、共享命中统一提供 CartesianDatum：原值、聚合统计、绘制终点、堆叠起点、有符号百分比、源索引范围与聚合元数据。旧 value 保持兼容；内置 Tooltip 使用 displayValue，修正堆叠值误作原值的问题。
+- 新增业务组 ID/名称，不改变数学堆叠或自动跨单位求和；格式支持每系列单位、k/M/G、绝对值展示、货币、截断/舍入、精度和 Locale。
+- 新增轴系最小 NSObject/UIView OC facade；包含数据转换、配置校验、更新、窗口与显隐命令、语义快照回调。混合图后续已在第 2 步接入；旧 API 适配/独立分发仍待后续。
+- 同步三个轴系 Demo 属性面板与命中读数；Objective-C 接入页增加单个轴系验证入口。
+- 参考目录排除 App target，避免依赖老项目宏与 vendor 代码的参考资料混入新库构建。
+
+用法与边界见 [数据语义与 OC 接入指南](charts-data-semantics-guide.md)。
+
+验证：新增 13 项数据语义/OC XCTest。首轮平均值精度断言调整为容差后，全量 131 项单元 + 7 项 Demo UI 通过；最终兼容性补充后 **132 项单元 + 2 项新增 UI 复查全部通过**。检查了单点 100+50 堆叠截图及三种 OC 图表截图，原值与绘制终点正确分离。`git diff --check` 通过，未做真机或老项目集成验收。
+
+- 全量 UI 结果：`/tmp/hymcharts-step1-build/Logs/Test/Test-SwiftFunctionProject-2026.09.24_18-05-54-+0800.xcresult`。
+- 最终复查：`/tmp/hymcharts-step1-build/Logs/Test/Test-SwiftFunctionProject-2026.09.24_18-09-34-+0800.xcresult`。
+- 最终截图：`/tmp/hymcharts-semantics-evidence-final/`（临时产物）。
+
+
+## 旧模块迁移第 2 步：混合图与分组堆叠
+
+- 新增 CombinedChartRenderer 与 SwiftUI/OC 入口；沿用 Column/Line 绘制 pass，共用一套轴、图例和命中上下文。
+- series.kind、stackID、participatesInStack、CartesianSeriesStyle 支持独立图形/连线/标记/填充；业务 groupID 与数学 stackID 分离。
+- 分组堆叠同步修正百分比分母、值域、柱槽、固定尺寸预算、组总量、圆角/分隔线和命中；隐藏整组释放槽位。
+- 首页只新增一个混合图调试页；其他轴系页同步新属性，OC 页面增加混合类型。
+- 使用方式、继承规则及时间聚合边界见 [混合图与分组堆叠指南](charts-combined-and-stacks-guide.md)。
+
+验证：新增 18 项混合图/分组/样式 XCTest，最终 **150 项单元测试全部通过**。完整 **8 项 Demo UI 回归通过**；接缝修正后再次通过混合图与 OC 的 2 项 UI 测试。已检查双组柱 + 双轴曲线、柱/线/面积混合和 OC shared tooltip 截图。最终结果：`Test-SwiftFunctionProject-2026.09.24_18-41-02-+0800.xcresult`；完整 UI 结果：`Test-SwiftFunctionProject-2026.09.24_18-34-56-+0800.xcresult`。`git diff --check` 通过；未提交代码，未做老项目接入或真机性能验收。
+
+仍有边界：混合图时间聚合未启用；缺测/换符号导致面积一段内基准切换时的复杂接缝，以及曲线负值颜色，在迁移第 3 步处理。

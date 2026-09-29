@@ -1,0 +1,5 @@
+mode,points,series,frames,mean_layout_ms,created_objects,reused_objects
+raw-fresh,3000,2,12,26.942392360979284,72252,0
+raw-reuse,3000,2,12,25.284586805355502,0,72252
+minmax-fresh,3000,2,12,14.668871527950008,252,0
+minmax-reuse,3000,2,12,13.740548611167469,0,252
