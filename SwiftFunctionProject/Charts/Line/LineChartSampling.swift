@@ -29,20 +29,19 @@ struct LineRenderSelection {
 
 /// 无 UIKit/图层依赖的纯算法，分组锚定原始索引 0，同跨度平移不移动桶边界。
 enum LineMinMaxSampler {
-    static func segments(values: [Double], connectNulls: Bool) -> [[Int]] {
-        var result: [[Int]] = []
-        var run: [Int] = []
-        for i in values.indices {
-            if values[i].isFinite { run.append(i) }
-            else if !connectNulls && !run.isEmpty { result.append(run); run = [] }
-        }
-        if !run.isEmpty { result.append(run) }
-        return result
+    static func segments(values: [Double], connectNulls: Bool,
+                         gapPolicy: CartesianGapPolicy? = nil,
+                         sampleInterval: TimeInterval? = nil) -> [[Int]] {
+        CartesianGapSegmenter.segments(values: values,
+            policy: gapPolicy ?? (connectNulls ? .connectAll : .breakAll), sampleInterval: sampleInterval)
     }
 
     static func select(values: [Double], connectNulls: Bool, visibleRange: ClosedRange<Double>,
-                       plotWidth: CGFloat, configuration: LineChartSampling) -> LineRenderSelection {
-        let original = segments(values: values, connectNulls: connectNulls)
+                       plotWidth: CGFloat, configuration: LineChartSampling,
+                       gapPolicy: CartesianGapPolicy? = nil,
+                       sampleInterval: TimeInterval? = nil) -> LineRenderSelection {
+        let original = segments(values: values, connectNulls: connectNulls,
+                                gapPolicy: gapPolicy, sampleInterval: sampleInterval)
         let lo = visibleRange.lowerBound, hi = visibleRange.upperBound
         let span = hi - lo
         guard lo.isFinite, hi.isFinite, span.isFinite, span > 0,

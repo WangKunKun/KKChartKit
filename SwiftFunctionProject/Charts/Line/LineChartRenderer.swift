@@ -94,6 +94,7 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
         // 堆叠：normal=符号链累计 / percent=百分比累计；非堆叠用原值
         let dataToDraw = currentDrawValues
         let inheritedTheme = theme
+        let sampleInterval = model.timeAxis.flatMap { $0.isValid(count: model.maxPointCount) ? $0.interval : nil }
 
         for (s, element) in model.series.enumerated() {
             guard element.isVisible, includesSeries(s), !element.data.isEmpty else { continue }
@@ -107,14 +108,16 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
                 viewport: currentViewport, plotArea: plotFrame, isHorizontal: false,
                 valueDomain: axisIdx == 1 ? currentSecondaryYDomain : nil)
 
-            // 空值（NaN）分段：有效索引按连续性切分（connectNulls 合成一段全直连）；
+            // 在原始索引上按缺测策略分段，再进行降采样；nil 策略兼容 connectNulls。
             // 每段独立成子路径——线断、面积分段、点与命中只取有效点
             let selection: LineRenderSelection
             if usesSampling, let configuration = theme.lineSampling {
                 selection = LineMinMaxSampler.select(values: values, connectNulls: element.connectNulls,
-                    visibleRange: currentViewport.xDomain, plotWidth: plotFrame.width, configuration: configuration)
+                    visibleRange: currentViewport.xDomain, plotWidth: plotFrame.width, configuration: configuration,
+                    gapPolicy: element.gapPolicy, sampleInterval: sampleInterval)
             } else {
-                let original = LineMinMaxSampler.segments(values: values, connectNulls: element.connectNulls)
+                let original = LineMinMaxSampler.segments(values: values, connectNulls: element.connectNulls,
+                                                         gapPolicy: element.gapPolicy, sampleInterval: sampleInterval)
                 selection = LineRenderSelection(segments: original,
                     visiblePointCount: original.reduce(0) { $0 + $1.count }, isDense: false)
             }
@@ -142,63 +145,21 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
                 }
             }
 
-            // 折线 path（连接形态在此应用：直线/阶梯 = 过渡点折线，曲线 = 单调插值；
-            // 每段一个子路径，视口外的点也连线，溢出由 seriesLayer 裁剪）
-            //
-            // 负值换色（negativeColor ≠ color 且非曲线形态）：按符号把折线切成正/负两条 path。
-            // 直线形态在跨零处插值切分（颜色恰在 y=0 切换，Highcharts 同款）；
-            // 阶梯在跨零后的数据点切分；曲线形态不切（F-C 切线估算对半段子路径不稳定，用系列色）。
-            let negativeColor = element.negativeColor ?? color
-            let useSplit = negativeColor != color && theme.lineConnectionStyle != .smooth
+            // 先生成完整路径，再按 X/Y 条带裁剪上色。曲线只插值一次，换色不会改变切线。
+            let zones = CartesianResolvedColorZones(configuration: element.colorZones,
+                negativeColor: element.negativeColor, baseColor: color)
+            let regions = zones?.regions(viewport: currentViewport,
+                yDomain: axisIdx == 1 ? currentSecondaryYDomain : nil, plot: plotFrame) ?? []
             let path = UIBezierPath()
-            var negativePath = UIBezierPath()
-            if useSplit {
-                var chunks: [(negative: Bool, points: [CGPoint])] = []
-                for (segIdx, seg) in segments.enumerated() {
-                    let pts = segmentPoints[segIdx]
-                    guard let firstIdx = seg.first, let firstPt = pts.first else { continue }
-                    var curNeg = values[firstIdx] < 0
-                    var cur: [CGPoint] = [firstPt]
-                    for k in 0..<(pts.count - 1) {
-                        let v1 = values[seg[k]], v2 = values[seg[k + 1]]
-                        cur.append(pts[k + 1])
-                        if (v2 < 0) != curNeg {
-                            if theme.lineConnectionStyle == .straight,
-                               let t = CartesianGeometry.zeroCrossingRatio(v1, v2) {
-                                let p1 = pts[k], p2 = pts[k + 1]
-                                let split = CGPoint(x: p1.x + CGFloat(t) * (p2.x - p1.x), y: zeroY)
-                                cur[cur.count - 1] = split
-                                chunks.append((curNeg, cur))
-                                cur = [split, pts[k + 1]]
-                            } else {
-                                chunks.append((curNeg, cur))
-                                cur = [pts[k + 1]]
-                            }
-                            curNeg = v2 < 0
-                        }
-                    }
-                    chunks.append((curNeg, cur))
-                }
-                for c in chunks {
-                    let target = c.negative ? negativePath : path
-                    let pathPts = theme.lineConnectionStyle == .straight
-                        ? c.points
-                        : CartesianGeometry.steppedScreenPoints(c.points, style: theme.lineConnectionStyle)
+            for pts in segmentPoints {
+                guard let first = pts.first else { continue }
+                if theme.lineConnectionStyle == .smooth {
+                    path.move(to: first)
+                    CartesianGeometry.appendSmoothCurve(to: path, points: pts)
+                } else {
+                    let pathPts = CartesianGeometry.steppedScreenPoints(pts, style: theme.lineConnectionStyle)
                     for (i, p) in pathPts.enumerated() {
-                        i == 0 ? target.move(to: p) : target.addLine(to: p)
-                    }
-                }
-            } else {
-                for pts in segmentPoints {
-                    guard let first = pts.first else { continue }
-                    if theme.lineConnectionStyle == .smooth {
-                        path.move(to: first)
-                        CartesianGeometry.appendSmoothCurve(to: path, points: pts)
-                    } else {
-                        let pathPts = CartesianGeometry.steppedScreenPoints(pts, style: theme.lineConnectionStyle)
-                        for (i, p) in pathPts.enumerated() {
-                            i == 0 ? path.move(to: p) : path.addLine(to: p)
-                        }
+                        i == 0 ? path.move(to: p) : path.addLine(to: p)
                     }
                 }
             }
@@ -254,52 +215,41 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
                     areaPath.close()
                 }
 
-                let gradient = seriesObjects.gradient()
-                gradient.frame = plotFrame
-                // 坐标系对齐（与 seriesLayer 同技巧）：mask 的 path 是 view 绝对坐标
-                gradient.bounds.origin = plotFrame.origin
-                // colors 必须用 CGColor：直接传 UIColor 数组在某些渲染路径（离屏/无分辨上下文）不出色
-                var colors = theme.areaGradientColors ?? [color.withAlphaComponent(0.35), color.withAlphaComponent(0.04)]
-                if colors.count == 1 { colors.append(colors[0]) }
-                gradient.colors = colors.map { $0.withAlphaComponent($0.cgColor.alpha * element.style.resolvedFillOpacity).cgColor }
-                gradient.startPoint = CGPoint(x: 0.5, y: 0)
-                gradient.endPoint = CGPoint(x: 0.5, y: 1)
-
-                let mask = seriesObjects.shape()
-                mask.path = areaPath.cgPath
-                mask.fillColor = UIColor.black.cgColor
-                mask.strokeColor = nil
-                gradient.mask = mask
-                seriesLayer.addSublayer(gradient)
-            }
-
-            // 线层：常规色（+ 负值换色时叠加负段层）；虚线/点线（圆头线帽下 1pt 段呈现为点）
-            let lineOutlines: [(UIBezierPath, UIColor)] = useSplit
-                ? [(path, color), (negativePath, negativeColor)]
-                : [(path, color)]
-            for (linePath, lineColor) in lineOutlines where !linePath.isEmpty {
-                let line = seriesObjects.shape()
-                line.path = linePath.cgPath
-                line.strokeColor = lineColor.cgColor
-                line.fillColor = nil
-                line.lineWidth = theme.lineWidth
-                line.lineJoin = .round
-                line.lineCap = .round
-                line.lineDashPattern = (element.lineDashStyle ?? theme.lineDashStyle).dashPattern
-                seriesLayer.addSublayer(line)
-                lineLayers.append(line)
-            }
-            // 阴影走隐形 caster（挂裁剪层外）：贴 plot 边缘的线段投影不被裁剪
-            if let shadowStyle = element.shadow ?? theme.seriesShadow {
-                let union = UIBezierPath()
-                for (p, _) in lineOutlines where !p.isEmpty { union.append(p) }
-                if !union.isEmpty {
-                    addSeriesShadowCaster(path: union.cgPath, style: shadowStyle)
+                if zones?.overridesArea == true {
+                    for region in regions {
+                        LineChartColorLayers.area(path: areaPath.cgPath,
+                            color: region.zone.areaGradientColors != nil ? (region.zone.color ?? color) : color,
+                            colors: region.zone.areaGradientColors ?? theme.areaGradientColors,
+                            opacity: element.style.resolvedFillOpacity, plot: plotFrame, clip: region.clip,
+                            parent: seriesLayer, pool: seriesObjects)
+                    }
+                } else {
+                    // 只设置线色（包括旧 negativeColor）时保持既有面积渐变。
+                    LineChartColorLayers.area(path: areaPath.cgPath, color: color, colors: theme.areaGradientColors,
+                        opacity: element.style.resolvedFillOpacity, plot: plotFrame, clip: nil,
+                        parent: seriesLayer, pool: seriesObjects)
                 }
             }
 
+            if !path.isEmpty {
+                let dash = element.lineDashStyle ?? theme.lineDashStyle
+                if zones != nil {
+                    for region in regions {
+                        lineLayers.append(LineChartColorLayers.line(path: path.cgPath,
+                            color: region.zone.color ?? color, theme: theme, dash: dash, clip: region.clip,
+                            parent: seriesLayer, pool: seriesObjects))
+                    }
+                } else {
+                    lineLayers.append(LineChartColorLayers.line(path: path.cgPath, color: color,
+                        theme: theme, dash: dash, clip: nil, parent: seriesLayer, pool: seriesObjects))
+                }
+                // 阴影使用完整路径一次，不因分区叠加加深。
+                if let shadowStyle = element.shadow ?? theme.seriesShadow {
+                    addSeriesShadowCaster(path: path.cgPath, style: shadowStyle)
+                }
+            }
             // 数据点（画在有效数据点位置，与阶梯形态无关；空值处不画点）。
-            // 标记符号：圆/方/菱/正三角/倒三角（系列级覆盖主题）；负值点换 negativeColor；
+            // 标记符号：圆/方/菱/正三角/倒三角（系列级覆盖主题）；点色优先级为 pointColor、分区、系列色；
             // 空心内芯（pointHoleRadius > 0）：同形状缩小版叠在点上（Charts holeRadius 同款）
             // 密集模式也保留孤立有效点的标记，否则“一点一缺测”会变成完全空白。
             if showsMarkers || (theme.showsPoints && segments.contains(where: { $0.count == 1 })) {
@@ -311,7 +261,7 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
                         let i = seg[k]
                         if usesSampling && !currentViewport.xDomain.contains(Double(i)) { continue }
                         let dotColor = theme.pointColor
-                            ?? (values[i] < 0 ? negativeColor : color)
+                            ?? (zones?.color(x: Double(i), y: values[i]) ?? color)
                         let dot = seriesObjects.shape()
                         dot.path = symbol.path(center: p, radius: theme.pointRadius)
                         dot.fillColor = dotColor.cgColor

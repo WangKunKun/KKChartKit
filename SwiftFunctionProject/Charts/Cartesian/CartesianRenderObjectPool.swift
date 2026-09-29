@@ -49,6 +49,8 @@ final class CartesianRenderObjectPool {
     func begin(reusing: Bool) {
         // mask 不在 sublayers 中；先解除旧关联，避免旧渐变持有下一帧的线/标记。
         for gradient in gradients.objects { gradient.mask = nil }
+        // 分区容器必须在取出任一子层前解除旧关联，避免下一帧重排时移除已复用子层。
+        for layer in layers.objects { layer.sublayers = nil; layer.mask = nil }
         if !reusing { detachAll() }
         shapes.begin(reusing: reusing); gradients.begin(reusing: reusing)
         texts.begin(reusing: reusing); layers.begin(reusing: reusing); labels.begin(reusing: reusing)
@@ -108,6 +110,7 @@ final class CartesianRenderObjectPool {
     private func resetLayer(_ layer: CALayer) {
         if layer.animationKeys() != nil { layer.removeAllAnimations() }
         if layer.mask != nil { layer.mask = nil }
+        if layer.masksToBounds { layer.masksToBounds = false }
         if layer.bounds != .zero { layer.bounds = .zero }
         if layer.position != .zero { layer.position = .zero }
         if layer.shadowOpacity != 0 { layer.shadowOpacity = 0 }

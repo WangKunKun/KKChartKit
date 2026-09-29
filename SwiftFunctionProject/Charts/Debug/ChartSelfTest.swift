@@ -1464,7 +1464,7 @@ public enum ChartSelfTest {
         assert(bboxB != nil && bboxB!.height > 100 && bboxB!.width < 1,
                "Bar 标线应为竖线，got \(String(describing: bboxB))")
 
-        // 3) 折线负值换色：直线形态在跨零处切分 → 正/负两条线层，负层为 negativeColor
+        // 3) 折线负值换色：完整路径按零轴裁剪 → 正/负两条线层，负层为 negativeColor
         let rn = LineChartRenderer()
         let hostN = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 200))
         rn.mount(into: hostN)
@@ -1473,11 +1473,16 @@ public enum ChartSelfTest {
                                             negativeColor: .systemRed)]),
                   theme: CartesianChartTheme(),
                   context: HYMChartRenderContext(bounds: hostN.bounds, center: hostN.center))
-        let lineLayers = rn.seriesLayerSublayersForTesting().compactMap { $0 as? CAShapeLayer }
+        func descendants(_ layer: CALayer) -> [CALayer] {
+            [layer] + (layer.sublayers ?? []).flatMap(descendants)
+        }
+        let lineLayers = rn.seriesLayerSublayersForTesting().flatMap(descendants).compactMap { $0 as? CAShapeLayer }
             .filter { $0.strokeColor != nil && $0.fillColor == nil }
         assert(lineLayers.count == 2, "正/负两条线层，got \(lineLayers.count)")
         assert(lineLayers.contains { $0.strokeColor == UIColor.systemRed.cgColor },
                "负段线层应为 negativeColor")
+        assert(lineLayers.allSatisfy { $0.superlayer?.masksToBounds == true }, "正负线层应使用裁剪容器")
+        assert(lineLayers[0].path == lineLayers[1].path, "换色不应重新插值或改变原路径")
         // 负值点填充红
         let negDots = rn.seriesLayerSublayersForTesting().compactMap { $0 as? CAShapeLayer }
             .filter { $0.fillColor == UIColor.systemRed.cgColor }

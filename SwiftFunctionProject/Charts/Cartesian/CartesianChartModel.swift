@@ -99,6 +99,10 @@ public struct CartesianSeriesElement {
     /// 空值（数据中的 `.nan`）是否跨空连线：false = 断线留缺口（默认，Highcharts 同款）；
     /// true = 忽略空值直接连到下一个有效点。柱状/条形忽略本参数（空值恒不画柱）。
     public var connectNulls: Bool
+    /// nil 兼容 connectNulls；非 nil 优先使用显式策略，仅影响折线/面积路径。
+    public var gapPolicy: CartesianGapPolicy?
+    /// 逐系列 X/Y 线色与面积分区；nil 保持旧行为，柱/条忽略。
+    public var colorZones: CartesianColorZones?
     /// 逐柱/逐条颜色（Column/Bar 消费；nil = 系列色）。按类目索引循环取色——
     /// 传调色板即 AAChartKit colorByPoint 形态。负值柱优先系列 negativeColor。
     public var barColors: [UIColor]?
@@ -124,7 +128,8 @@ public struct CartesianSeriesElement {
                 aggregation: CartesianAggregation? = nil, unit: String? = nil,
                 groupID: String? = nil, valueFormat: CartesianValueFormat? = nil,
                 kind: CartesianSeriesKind? = nil, stackID: String? = nil,
-                participatesInStack: Bool = true, style: CartesianSeriesStyle = .init()) {
+                participatesInStack: Bool = true, style: CartesianSeriesStyle = .init(),
+                gapPolicy: CartesianGapPolicy? = nil, colorZones: CartesianColorZones? = nil) {
         self.kind = kind; self.stackID = stackID
         self.participatesInStack = participatesInStack; self.style = style
         self.id = id
@@ -142,6 +147,8 @@ public struct CartesianSeriesElement {
         self.yAxisIndex = yAxisIndex
         self.lineDashStyle = lineDashStyle
         self.connectNulls = connectNulls
+        self.gapPolicy = gapPolicy
+        self.colorZones = colorZones
         self.pointSymbol = pointSymbol
         self.dataLabelsEnabled = dataLabelsEnabled
         self.barColors = barColors
