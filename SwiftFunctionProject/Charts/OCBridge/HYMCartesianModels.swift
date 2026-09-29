@@ -54,6 +54,47 @@ import UIKit
     }
 }
 
+/// OC 缺测策略；系列 gapPolicy 为 nil 时沿用 connectNulls。
+@objc public enum HYMCartesianGapMode: Int { case breakAll, connectAll, autoGap, autoGapDuration }
+
+/// 配置时复制为 Swift 值；之后修改此对象须重新 configure/update。
+@objcMembers public final class HYMCartesianGapPolicy: NSObject {
+    public var mode: HYMCartesianGapMode = .autoGap
+    public var maximumMissingPoints = 11
+    public var maximumMissingDuration: TimeInterval = 3300
+    func build() -> CartesianGapPolicy {
+        switch mode {
+        case .breakAll: return .breakAll
+        case .connectAll: return .connectAll
+        case .autoGap: return .autoGap(maximumMissingPoints: maximumMissingPoints)
+        case .autoGapDuration: return .autoGapDuration(maximumMissingDuration: maximumMissingDuration)
+        }
+    }
+}
+
+/// 连续折线/面积分区轴；X 是原始采样索引，Y 是所属轴绘制值。
+@objc public enum HYMCartesianZoneAxis: Int { case x, y }
+
+/// 半开区间的线色/填充；upperBound 为 nil 时无上限且必须为末段。
+@objcMembers public final class HYMCartesianColorZone: NSObject {
+    public var upperBound: NSNumber?
+    public var color: UIColor?
+    public var areaGradientColors: [UIColor]?
+    func build() -> CartesianColorZone {
+        .init(upperBound: upperBound?.doubleValue, color: color, areaGradientColors: areaGradientColors)
+    }
+}
+
+/// 逐系列分区配置；非法边界整份回退旧行为。configure/update 时复制为 Swift 值。
+@objcMembers public final class HYMCartesianColorZones: NSObject {
+    public var axis: HYMCartesianZoneAxis = .y
+    public var zones: [HYMCartesianColorZone] = []
+    public var isValid: Bool { build().isValid }
+    func build() -> CartesianColorZones {
+        .init(axis: axis == .x ? .x : .y, zones: zones.map { $0.build() })
+    }
+}
+
 /// NSNumber、数值字符串及 NSNull 数组；非法值保留索引并转为缺测，不转成 0。
 @objcMembers public final class HYMCartesianSeries: NSObject {
     public var identifier = UUID().uuidString
@@ -69,6 +110,8 @@ import UIKit
     public var style: HYMCartesianSeriesStyle?
     public var marker: HYMCartesianMarker = .inherit
     public var connectNulls = false
+    public var gapPolicy: HYMCartesianGapPolicy?
+    public var colorZones: HYMCartesianColorZones?
     public var isVisible = true
     public var showsInLegend = true
     public var yAxisIndex = 0
@@ -85,7 +128,8 @@ import UIKit
             id: identifier, isVisible: isVisible, showsInLegend: showsInLegend,
             unit: unit, groupID: groupID, valueFormat: valueFormat?.build(),
             kind: [nil, .column, .line, .spline, .area, .areaspline][kind.rawValue],
-            stackID: stackID, participatesInStack: participatesInStack, style: style?.build() ?? .init())
+            stackID: stackID, participatesInStack: participatesInStack, style: style?.build() ?? .init(),
+            gapPolicy: gapPolicy?.build(), colorZones: colorZones?.build())
     }
 }
 
@@ -99,6 +143,9 @@ import UIKit
 @objcMembers public final class HYMCartesianModel: NSObject {
     public var title: String?
     public var categories: [String] = []
+    /// 非 nil 时启用等间隔时间轴；缺测必须保留 NSNull 占位。
+    public var samplingStart: Date?
+    public var samplingInterval: TimeInterval = 300
     public var series: [HYMCartesianSeries] = []
     public var groups: [HYMCartesianGroup] = []
     public var stacking: HYMCartesianStacking = .none
@@ -122,7 +169,9 @@ import UIKit
             xAxis: .init(kind: .category(labels: categories)),
             yAxis: .init(kind: .value, min: minimum?.doubleValue, max: maximum?.doubleValue),
             secondaryYAxis: usesSecondaryAxis ? .init(kind: .value, min: secondaryMinimum?.doubleValue, max: secondaryMaximum?.doubleValue) : nil,
-            stacking: stack, groups: groups.map { .init(id: $0.identifier, name: $0.name) })
+            stacking: stack,
+            timeAxis: samplingStart.map { CartesianTimeAxis(start: $0, interval: samplingInterval) },
+            groups: groups.map { .init(id: $0.identifier, name: $0.name) })
     }
 }
 
