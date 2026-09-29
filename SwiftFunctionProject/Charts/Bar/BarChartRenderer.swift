@@ -3,6 +3,13 @@ import Foundation
 
 /// 条形图渲染器（水平柱体）
 public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> {
+    override func resolvedModel(_ model: CartesianChartModel) -> CartesianChartModel {
+        var result = model
+        result.usesMixedSeries = false
+        for i in result.series.indices { result.series[i].stackFamilyIsColumn = true }
+        return result
+    }
+
 
     /// 系列标签独立挂载，逐帧替换，避免动画过程中累积旧标签。
     private let annotationLayer = CALayer()
@@ -23,6 +30,10 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
         plotFrame: CGRect
     ) {
         // 清空旧条形（render 与动画/手势的逐帧重画共用本方法，必须先清后画）
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        seriesObjects.begin(reusing: theme.reusesRenderingObjects)
+        defer { seriesObjects.end(); CATransaction.commit() }
         seriesLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
         clearSeriesShadowCasters()
         annotationLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
@@ -39,16 +50,17 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
         // 2. 如果堆叠，计算累计值（normal=符号链累计 / percent=百分比累计）
         let dataToDraw = currentDrawValues
 
-        // 3. 遍历每个系列（类目在 Y 轴、恒全量可见，无需裁剪；
-        //    条形长度沿 X 数值轴，视口缩放由 seriesLayer 裁剪兜底）
-        let seriesCount = model.isStacked ? 1 : model.visibleSeriesCount
+        // 3. 只绘制 Y 类目窗口内的条形；X 数值方向由 seriesLayer 裁剪。
+        let slots = model.columnSlots
+        let seriesCount = (slots.values.max() ?? -1) + 1
 
         let wantsStackTotals = model.isStacked && theme.showsStackTotalLabels
         var stackTotals = CartesianStackTotalLabels()
 
         for (seriesIndex, oneSeries) in dataToDraw.enumerated() {
             let element = model.series[seriesIndex]
-            guard element.isVisible else { continue }
+            guard element.isVisible, includesSeries(seriesIndex) else { continue }
+            let slot = slots[seriesIndex] ?? 0
             let baseColor = element.color ?? theme.seriesColor
             let negativeColor = element.negativeColor ?? baseColor
 
@@ -56,7 +68,8 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
             var pathsByColor: [UIColor: UIBezierPath] = [:]
             var separatorPath = UIBezierPath()  // 堆叠分隔线（同色同宽合并）
 
-            for (index, value) in oneSeries.enumerated() where value.isFinite {
+            for index in visibleCategoryRange where index < oneSeries.count && oneSeries[index].isFinite {
+                let value = oneSeries[index]
                 // 堆叠数组会补齐短系列；占位不绘制，也不能反查不存在的原值。
                 guard index < element.data.count, element.data[index].isFinite,
                       element.data[index] != 0 else { continue }
@@ -78,15 +91,19 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
                     theme: theme,
                     zeroX: zeroX,
                     baselineValue: baselineValue,
-                    seriesIndex: model.isStacked ? 0 : model.visibleSlot(for: seriesIndex),
+                    seriesIndex: slot,
                     seriesCount: seriesCount
                 )
+                guard !rect.isEmpty else { continue }
                 rect = animatedRect(from: rect, zeroX: zeroX, progress: currentAnimationProgress)
 
-                // 圆角方向：正值左侧圆角（从零轴向右）、负值右侧圆角
-                let corners: UIRectCorner = rect.minX >= zeroX
-                    ? [.topLeft, .bottomLeft]
-                    : [.topRight, .bottomRight]
+                // 同组同符号链仅末段外端圆角。
+                let hasNext = model.isStacked && model.series[(seriesIndex + 1)...].contains {
+                    $0.isVisible && $0.stackKey == model.stackKey(for: seriesIndex)
+                    && index < $0.data.count && $0.data[index].isFinite && $0.data[index] != 0
+                    && ($0.data[index] > 0) == (value > 0)
+                }
+                let corners: UIRectCorner = hasNext ? [] : (value >= 0 ? [.topRight, .bottomRight] : [.topLeft, .bottomLeft])
                 let barPath = UIBezierPath(
                     roundedRect: rect, byRoundingCorners: corners,
                     cornerRadii: CGSize(width: theme.columnCornerRadius, height: theme.columnCornerRadius))
@@ -102,16 +119,17 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
                 if pathsByColor[fillColor] == nil { pathsByColor[fillColor] = UIBezierPath() }
                 pathsByColor[fillColor]!.append(barPath)
 
-                if wantsStackTotals {
+                if wantsStackTotals && element.participatesInStack {
                     stackTotals.add(rawValue: element.data[index], category: index,
                                     axis: 0, rect: rect,
-                                    horizontal: true)
+                                    horizontal: true, stack: slot)
                 }
 
                 // 堆叠且非最后系列：记录分隔线 x
-                if model.isStacked, seriesIndex < model.series.count - 1 {
-                    separatorPath.move(to: CGPoint(x: rect.maxX, y: plotFrame.minY))
-                    separatorPath.addLine(to: CGPoint(x: rect.maxX, y: plotFrame.maxY))
+                if hasNext {
+                    let x = value >= 0 ? rect.maxX : rect.minX
+                    separatorPath.move(to: CGPoint(x: x, y: rect.minY))
+                    separatorPath.addLine(to: CGPoint(x: x, y: rect.maxY))
                 }
 
                 // 数据标签：数值 = 系列原值（堆叠时各段自身值）；水平方向镜像（端部在右/左）。
@@ -127,7 +145,7 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
                         text: text, fontSize: theme.dataLabelFontSize,
                         color: dataLabelColor(theme: theme,
                                               inside: theme.dataLabelPosition != .outsideEnd),
-                        center: center))
+                        center: center, objects: seriesObjects))
                 }
             }
 
@@ -144,7 +162,7 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
                 }
             }
             if !separatorPath.isEmpty, let separatorColor = theme.stackSeparatorColor {
-                let line = CAShapeLayer()
+                let line = seriesObjects.shape()
                 line.path = separatorPath.cgPath
                 line.strokeColor = separatorColor.cgColor
                 line.fillColor = nil
@@ -160,13 +178,11 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
 
     /// 条形复合 path → 填充层（带可选边框）。
     private func makeBarLayer(path: UIBezierPath, color: UIColor, theme: CartesianChartTheme) -> CAShapeLayer {
-        let layer = CAShapeLayer()
+        let layer = seriesObjects.shape()
         layer.path = path.cgPath
         layer.fillColor = color.cgColor
-        if let borderColor = theme.columnBorderColor {
-            layer.strokeColor = borderColor.cgColor
-            layer.lineWidth = theme.columnBorderWidth
-        }
+        layer.strokeColor = theme.columnBorderColor?.cgColor
+        layer.lineWidth = theme.columnBorderWidth
         return layer
     }
 
@@ -198,19 +214,20 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
         guard let model = currentModel, let theme = currentTheme,
               model.series.indices.contains(seriesIndex) else { return nil }
         let element = model.series[seriesIndex]
-        guard element.isVisible, element.data.indices.contains(categoryIndex),
+        guard element.isVisible, includesSeries(seriesIndex), element.data.indices.contains(categoryIndex),
               element.data[categoryIndex].isFinite, element.data[categoryIndex] != 0 else { return nil }
         let value = currentDrawValues[seriesIndex][categoryIndex]
         guard value.isFinite else { return nil }
 
         let zero = CartesianGeometry.zeroAxisPosition(
             viewport: currentViewport, plotArea: currentPlotFrame, isHorizontal: true)
-        return CartesianGeometry.barRect(
+        let rect = CartesianGeometry.barRect(
                 dataPoint: value, categoryIndex: categoryIndex, viewport: currentViewport,
                 plotArea: currentPlotFrame, theme: theme, zeroX: zero,
                 baselineValue: model.isStacked ? value - currentBaseValues[seriesIndex][categoryIndex] : nil,
-                seriesIndex: model.isStacked ? 0 : model.visibleSlot(for: seriesIndex),
-                seriesCount: model.isStacked ? 1 : model.visibleSeriesCount)
+                seriesIndex: model.columnSlot(for: seriesIndex),
+                seriesCount: model.columnSlotCount)
+        return rect.isEmpty ? nil : rect
     }
 
     public override func tooltipAnchor(for target: HYMChartHitTarget) -> HYMChartTooltipAnchor? {
@@ -270,6 +287,7 @@ public final class BarChartRenderer: CartesianRendererBase<CartesianChartTheme> 
         -> (any HYMChartHitTarget)? {
         guard let model = currentModel, seriesIndex < model.series.count else { return nil }
         return BarHitTarget(seriesIndex: seriesIndex, categoryIndex: categoryIndex,
-                            value: value, name: model.series[seriesIndex].name, seriesID: model.series[seriesIndex].id)
+                            value: value, name: model.series[seriesIndex].name, seriesID: model.series[seriesIndex].id,
+                            datum: datum(series: seriesIndex, category: categoryIndex))
     }
 }

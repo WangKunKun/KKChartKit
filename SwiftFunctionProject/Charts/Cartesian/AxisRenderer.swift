@@ -6,8 +6,8 @@ enum AxisRenderer {
     /// 生成轴线层：plot 区左边线（y 轴）+ 底边线（x 轴）。
     static func makeAxisLinesLayer(plotFrame: CGRect,
                                    theme: CartesianChartTheme,
-                                   showsRightAxis: Bool = false) -> CAShapeLayer {
-        let layer = CAShapeLayer()
+                                   showsRightAxis: Bool = false,
+                                   layer: CAShapeLayer = CAShapeLayer()) -> CAShapeLayer {
         let path = UIBezierPath()
         path.move(to: CGPoint(x: plotFrame.minX, y: plotFrame.minY))
         path.addLine(to: CGPoint(x: plotFrame.minX, y: plotFrame.maxY))
@@ -30,9 +30,10 @@ enum AxisRenderer {
                                 viewport: CartesianViewport,
                                 plotFrame: CGRect,
                                 theme: CartesianChartTheme,
-                                formatter: ((Double) -> String)? = nil) -> [UILabel] {
+                                formatter: ((Double) -> String)? = nil,
+                                makeLabel: () -> UILabel = { UILabel() }) -> [UILabel] {
         ticks.map { tick in
-            let lbl = UILabel()
+            let lbl = makeLabel()
             lbl.text = tickText(tick, formatter: formatter)
             lbl.textColor = theme.tickLabelColor
             lbl.font = theme.tickLabelFont
@@ -59,7 +60,8 @@ enum AxisRenderer {
                                    viewport: CartesianViewport,
                                    plotFrame: CGRect,
                                    theme: CartesianChartTheme,
-                                   rotation: CGFloat = 0) -> [UILabel] {
+                                   rotation: CGFloat = 0,
+                                   makeLabel: () -> UILabel = { UILabel() }) -> [UILabel] {
         let visible = CartesianGeometry.visibleCategoryRange(viewport: viewport, count: labels.count)
         guard !visible.isEmpty else { return [] }
 
@@ -77,7 +79,7 @@ enum AxisRenderer {
 
         var out: [UILabel] = []
         for i in visible where i % stride == 0 {
-            let lbl = UILabel()
+            let lbl = makeLabel()
             lbl.text = labels[i]
             lbl.textColor = theme.tickLabelColor
             lbl.font = theme.tickLabelFont
@@ -105,9 +107,10 @@ enum AxisRenderer {
                                          plotFrame: CGRect,
                                          theme: CartesianChartTheme,
                                          formatter: ((Double) -> String)? = nil,
-                                         secondaryDomain: ClosedRange<Double>? = nil) -> [UILabel] {
+                                         secondaryDomain: ClosedRange<Double>? = nil,
+                                         makeLabel: () -> UILabel = { UILabel() }) -> [UILabel] {
         ticks.map { tick in
-            let lbl = UILabel()
+            let lbl = makeLabel()
             lbl.text = tickText(tick, formatter: formatter)
             lbl.textColor = theme.tickLabelColor
             lbl.font = theme.tickLabelFont
@@ -130,9 +133,10 @@ enum AxisRenderer {
                                            viewport: CartesianViewport,
                                            plotFrame: CGRect,
                                            theme: CartesianChartTheme,
-                                           formatter: ((Double) -> String)? = nil) -> [UILabel] {
+                                           formatter: ((Double) -> String)? = nil,
+                                makeLabel: () -> UILabel = { UILabel() }) -> [UILabel] {
         ticks.map { tick in
-            let lbl = UILabel()
+            let lbl = makeLabel()
             lbl.text = tickText(tick, formatter: formatter)
             lbl.textColor = theme.tickLabelColor
             lbl.font = theme.tickLabelFont
@@ -155,7 +159,8 @@ enum AxisRenderer {
     static func makeLeftCategoryLabels(labels: [String],
                                         viewport: CartesianViewport,
                                         plotFrame: CGRect,
-                                        theme: CartesianChartTheme) -> [UILabel] {
+                                        theme: CartesianChartTheme,
+                                        makeLabel: () -> UILabel = { UILabel() }) -> [UILabel] {
         guard !labels.isEmpty else { return [] }
         let fontAttrs: [NSAttributedString.Key: Any] = [.font: theme.tickLabelFont]
         let maxLabelHeight = labels.map { ($0 as NSString).size(withAttributes: fontAttrs).height }.max() ?? 0
@@ -165,15 +170,18 @@ enum AxisRenderer {
                                                            slotWidth: slotHeight)
 
         var out: [UILabel] = []
-        for (i, text) in labels.enumerated() where i % stride == 0 {
-            let lbl = UILabel()
+        let categoryViewport = CartesianViewport(xMin: viewport.yMin, xMax: viewport.yMax, yMin: 0, yMax: 1)
+        let visible = CartesianGeometry.visibleCategoryRange(viewport: categoryViewport, count: labels.count)
+        for i in visible where i % stride == 0 {
+            let y = CartesianGeometry.horizontalCategoryY(category: Double(i),
+                                                          viewport: viewport, plotFrame: plotFrame)
+            guard y >= plotFrame.minY, y <= plotFrame.maxY else { continue }
+            let text = labels[i]
+            let lbl = makeLabel()
             lbl.text = text
             lbl.textColor = theme.tickLabelColor
             lbl.font = theme.tickLabelFont
             lbl.sizeToFit()
-            // 类目 0 在顶部（与 barRect 同一映射，见 horizontalCategoryY）
-            let y = CartesianGeometry.horizontalCategoryY(category: Double(i),
-                                                          viewport: viewport, plotFrame: plotFrame)
             lbl.center = CGPoint(x: plotFrame.minX - theme.axisLabelGap - lbl.bounds.width / 2,
                                  y: y)
             out.append(lbl)

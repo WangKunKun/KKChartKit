@@ -21,6 +21,9 @@ public enum LineConnectionStyle: String, CaseIterable, Equatable {
 /// 轴系图表主题（纯值类型；所有外观集中于此）。折线/柱状等共用，
 /// 各类型特有外观（如柱宽）由该类型 Theme 扩展属性补充——阶段 1 起按需拆分。
 public struct CartesianChartTheme: HYMChartTheme {
+    /// 是否复用轴标签与绘制图层，默认开启；关闭可用于性能/视觉对照。
+    /// 仅影响对象分配，不改变几何、命中或采样。通过主线程图表更新接口应用。
+    public var reusesRenderingObjects: Bool = true
     public var legend = ChartLegendConfiguration()
     /// 非堆叠直线/面积图的 Min/Max 绘制降采样；nil 默认关闭，原始数据始终用于命中。
     public var lineSampling: LineChartSampling? = nil
@@ -96,6 +99,9 @@ public struct CartesianChartTheme: HYMChartTheme {
     public var showsTooltipOnHit: Bool
 
     // ===== 柱体外观 =====
+    /// 固定柱宽及组内/组间距（pt）；非 nil 时忽略三个比例，未指定柱宽时使用剩余空间。
+    /// nil 保留旧比例布局。适用于 Column 与 Bar，堆叠仅使用组间距。
+    public var columnSpacing: CartesianColumnSpacing? = nil
     /// 柱体宽度比例（0.1 ~ 1.0，默认 0.8 = 80% 宽度，20% 间距）
     public var columnWidthRatio: CGFloat
     /// 组间距：相邻类目组之间空隙占槽宽的比例（0...0.5；0 = 组占满槽位，现状）。
@@ -189,7 +195,9 @@ public struct CartesianChartTheme: HYMChartTheme {
         stackTotalLabelFormatter: ((Double) -> String)? = nil,
         seriesShadow: CartesianShadowStyle? = nil,
         showsColumnEntranceAnimation: Bool = true,
-        lineSampling: LineChartSampling? = nil
+        lineSampling: LineChartSampling? = nil,
+        reusesRenderingObjects: Bool = true,
+        columnSpacing: CartesianColumnSpacing? = nil
     ) {
         self.backgroundColor = backgroundColor
         self.backgroundCornerRadius = max(0, backgroundCornerRadius)
@@ -239,5 +247,7 @@ public struct CartesianChartTheme: HYMChartTheme {
         self.seriesShadow = seriesShadow
         self.showsColumnEntranceAnimation = showsColumnEntranceAnimation
         self.lineSampling = lineSampling
+        self.reusesRenderingObjects = reusesRenderingObjects
+        self.columnSpacing = columnSpacing
     }
 }

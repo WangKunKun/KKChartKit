@@ -1,18 +1,19 @@
 import Foundation
 import UIKit
 
-/// 堆叠配置（阶段 1：普通堆叠 + 扩展点预留）
+/// 堆叠配置；同轴同图形族内再按系列 stackID 分组。
 public enum StackConfig: Equatable {
     /// 不堆叠（默认）
     case none
-    /// 普通堆叠（阶段 1 实现）
+    /// 普通堆叠，同轴同族同 stackID 内分别累计。
     case normal
-    /// 百分比堆叠：每列按该列 |v| 总和归一（每列必满 100%，Highcharts 同款）
+    /// 百分比堆叠：各堆叠组按当前类目的 |v| 总和归一（正负共享分母）。
     case percent
     /// 百分比堆叠（统一基准）：所有列按固定 max 归一——列合计可不满/超过 100%，
     /// 适合"对照统一目标/阈值"的占比形态
     case percentFixed(max: Double)
-    /// 分组堆叠（预留，阶段 X）
+    /// 普通分组堆叠：未设置 stackID 的系列按原始序号 % max(1, groupCount) 分组。
+    /// 推荐 normal/percent + 显式 stackID，避免重排序改变分组。
     case grouped(groupCount: Int)
 }
 
@@ -71,6 +72,19 @@ public struct CartesianSeriesElement {
     /// 仅影响图例顺序；同值按原始系列顺序排列。
     public var aggregation: CartesianAggregation?
     public var unit: String?
+    /// 业务组 ID；不改变数学堆叠。
+    public var groupID: String?
+    /// 每系列展示规则；nil 沿用容器模板。
+    public var valueFormat: CartesianValueFormat?
+    /// 混合图选择绘制形态；折线图也可选择默认连线/面积样式。
+    public var kind: CartesianSeriesKind?
+    /// 数学堆叠组；nil 为默认组，空字符串也是独立显式组。与 groupID 无关。
+    public var stackID: String?
+    /// false 时在任意堆叠模式下保持原值及零基线（例如混合图的目标线）。
+    public var participatesInStack: Bool
+    public var style: CartesianSeriesStyle
+    var stackPartition: Int?
+    var stackFamilyIsColumn: Bool?
     public var legendOrder: Int
     public var name: String
     public var data: [Double]
@@ -107,13 +121,20 @@ public struct CartesianSeriesElement {
                 shadow: CartesianShadowStyle? = nil,
                 id: String = UUID().uuidString, isVisible: Bool = true,
                 showsInLegend: Bool = true, legendOrder: Int = 0,
-                aggregation: CartesianAggregation? = nil, unit: String? = nil) {
+                aggregation: CartesianAggregation? = nil, unit: String? = nil,
+                groupID: String? = nil, valueFormat: CartesianValueFormat? = nil,
+                kind: CartesianSeriesKind? = nil, stackID: String? = nil,
+                participatesInStack: Bool = true, style: CartesianSeriesStyle = .init()) {
+        self.kind = kind; self.stackID = stackID
+        self.participatesInStack = participatesInStack; self.style = style
         self.id = id
         self.isVisible = isVisible
         self.showsInLegend = showsInLegend
         self.legendOrder = legendOrder
         self.aggregation = aggregation
         self.unit = unit
+        self.groupID = groupID
+        self.valueFormat = valueFormat
         self.name = name
         self.data = data
         self.color = color
@@ -209,18 +230,25 @@ public struct CartesianChartModel: HYMChartModel {
     public var timeGrouping: CartesianTimeGrouping?
     // 聚合渲染仍使用原始索引坐标；仅桶首索引承载绘制值。
     var timeBucketStride = 1
+    // 固定柱宽时末尾不足一桶也占完整槽；元数据及原始数据不补点。
+    var padsTimeBuckets = false
+    var categoryLayoutCount: Int {
+        padsTimeBuckets ? ((maxPointCount + timeBucketStride - 1) / timeBucketStride) * timeBucketStride : maxPointCount
+    }
     var timeBucketMetadata: [[Int: CartesianTimeBucket]] = []
     func bucketAnchor(for index: Int) -> Int { index / timeBucketStride * timeBucketStride }
     func categoryPosition(_ index: Int) -> Double {
-        Double(index) + Double(min(timeBucketStride, maxPointCount - index) - 1) / 2
+        Double(index) + (categorySpan(index) - 1) / 2
     }
-    func categorySpan(_ index: Int) -> Double { Double(min(timeBucketStride, maxPointCount - index)) }
+    func categorySpan(_ index: Int) -> Double { Double(padsTimeBuckets ? timeBucketStride : min(timeBucketStride, maxPointCount - index)) }
     func timeBucket(series: Int, category: Int) -> CartesianTimeBucket? {
         guard timeBucketMetadata.indices.contains(series) else { return nil }
         return timeBucketMetadata[series][category]
     }
 
     public var title: String?
+    /// 业务组元数据；重复 ID 时命中采用第一项，未找到则 groupName 为 nil。
+    public var groups: [CartesianSeriesGroup]
     public var series: [CartesianSeriesElement]
     public var xAxis: CartesianAxisModel
     public var yAxis: CartesianAxisModel
@@ -241,7 +269,9 @@ public struct CartesianChartModel: HYMChartModel {
                 stacking: StackConfig? = nil,
                 plotLines: [CartesianPlotLine] = [],
                 plotBands: [CartesianPlotBand] = [],
-                timeAxis: CartesianTimeAxis? = nil, timeGrouping: CartesianTimeGrouping? = nil) {
+                timeAxis: CartesianTimeAxis? = nil, timeGrouping: CartesianTimeGrouping? = nil,
+                groups: [CartesianSeriesGroup] = []) {
+        self.groups = groups
         self.title = title
         self.series = series
         self.xAxis = xAxis
@@ -262,28 +292,17 @@ public struct CartesianChartModel: HYMChartModel {
     /// 指定值轴的绑定系列全局 (min, max)；堆叠模式下按轴分组累计后取边界。
     /// 任一有效数据都没有时为 nil。轴无绑定系列时：显式 min/max 由渲染层兜底，此处返回 nil。
     public func dataBounds(yAxisIndex: Int = 0) -> (min: Double, max: Double)? {
-        let group = series.filter { $0.isVisible && $0.effectiveYAxisIndex == yAxisIndex }
-        guard !group.isEmpty else { return nil }
-        let dataToUse: [[Double]]
-        switch stacking {
-        case .normal:
-            dataToUse = CartesianGeometry.stackedValuesByAxis(series: group)
-        case .percent:
-            dataToUse = CartesianGeometry.stackedPercentValues(series: group)
-        case .percentFixed(let max):
-            dataToUse = CartesianGeometry.stackedPercentValues(series: group, fixedMax: max)
-        default:
-            dataToUse = group.map { $0.data }
-        }
-        let flat = dataToUse.flatMap { $0 }.filter { $0.isFinite }
+        let values = stackedDrawValues
+        let flat = series.indices.filter { series[$0].isVisible && series[$0].effectiveYAxisIndex == yAxisIndex }
+            .flatMap { values.indices.contains($0) ? values[$0] : [] }.filter(\.isFinite)
         guard let lo = flat.min(), let hi = flat.max() else { return nil }
         return (lo, hi)
     }
 
-    /// 是否处于堆叠形态（normal / percent / percentFixed）。
+    /// 是否处于堆叠形态（normal / percent / percentFixed / grouped）。
     public var isStacked: Bool {
         switch stacking {
-        case .normal, .percent, .percentFixed: return true
+        case .normal, .percent, .percentFixed, .grouped: return true
         default: return false
         }
     }
@@ -292,7 +311,7 @@ public struct CartesianChartModel: HYMChartModel {
     public var stackedDrawValues: [[Double]] {
         let series = renderingSeries
         switch stacking {
-        case .normal: return CartesianGeometry.stackedValuesByAxis(series: series)
+        case .normal, .grouped: return CartesianGeometry.stackedValuesByAxis(series: series)
         case .percent: return CartesianGeometry.stackedPercentValues(series: series)
         case .percentFixed(let max):
             return CartesianGeometry.stackedPercentValues(series: series, fixedMax: max)
@@ -326,13 +345,43 @@ public struct CartesianChartModel: HYMChartModel {
 
     /// 保留系列/类目索引和颜色；隐藏数据用缺值占位，不参与数学运算。
     var renderingSeries: [CartesianSeriesElement] {
-        series.map { element in
-            guard !element.isVisible else { return element }
-            var hidden = element
-            hidden.data = Array(repeating: .nan, count: element.data.count)
-            return hidden
+        series.enumerated().map { index, element in
+            var result = element
+            if case .grouped(let count) = stacking, result.stackID == nil {
+                result.stackPartition = index % max(1, count)
+            }
+            if !element.isVisible { result.data = Array(repeating: .nan, count: element.data.count) }
+            return result
         }
     }
+
+    var usesMixedSeries = false
+    func stackKey(for index: Int) -> CartesianStackKey {
+        var element = series[index]
+        if case .grouped(let count) = stacking, element.stackID == nil {
+            element.stackPartition = index % max(1, count)
+        }
+        return element.stackKey
+    }
+    var columnSlots: [Int: Int] {
+        var keys: [CartesianStackKey] = []
+        var slots: [Int: Int] = [:]
+        for i in series.indices where series[i].isVisible && (!usesMixedSeries || (series[i].kind?.isColumn ?? true)) {
+            if isStacked && series[i].participatesInStack {
+                let key = stackKey(for: i)
+                if let slot = keys.firstIndex(of: key) { slots[i] = slot }
+                else { slots[i] = keys.count; keys.append(key) }
+            } else {
+                slots[i] = keys.count
+                let key = stackKey(for: i)
+                keys.append(.init(axis: key.axis, stackID: key.stackID, partition: i,
+                                  column: key.column, independentSeries: series[i].id))
+            }
+        }
+        return slots
+    }
+    var columnSlotCount: Int { (columnSlots.values.max() ?? -1) + 1 }
+    func columnSlot(for index: Int) -> Int { columnSlots[index] ?? 0 }
 
     var visibleSeriesCount: Int { series.filter(\.isVisible).count }
     func visibleSlot(for index: Int) -> Int {

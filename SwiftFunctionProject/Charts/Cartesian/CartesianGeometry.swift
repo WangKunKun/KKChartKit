@@ -255,7 +255,7 @@ public enum CartesianGeometry {
     /// 消除层间露白（曲线拱起处）与叠色（曲线下凹处）。
     public static func appendSmoothCurveReversed(to path: UIBezierPath, points: [CGPoint]) {
         guard points.count > 2 else {
-            for p in points.dropFirst().reversed() { path.addLine(to: p) }
+            for p in points.dropLast().reversed() { path.addLine(to: p) }
             return
         }
         let m = monotoneTangents(points)
@@ -426,11 +426,11 @@ public enum CartesianGeometry {
         guard !series.isEmpty else { return [] }
         let maxLength = series.map { $0.data.count }.max() ?? 0
         guard maxLength > 0 else { return [] }
-        var runningPositive: [Int: [Double]] = [:]
-        var runningNegative: [Int: [Double]] = [:]
+        var runningPositive: [CartesianStackKey: [Double]] = [:]
+        var runningNegative: [CartesianStackKey: [Double]] = [:]
         var out: [[Double]] = []
         for s in series {
-            let axis = s.effectiveYAxisIndex
+            let axis = s.stackKey
             let padded = s.data + [Double](repeating: 0, count: max(0, maxLength - s.data.count))
             let zeros = [Double](repeating: 0, count: maxLength)
             let pos = runningPositive[axis] ?? zeros
@@ -440,7 +440,7 @@ public enum CartesianGeometry {
                 // 空值（NaN）：自身该点保持 NaN（断线），且不更新链——后续系列视其为缺位
                 guard padded[j].isFinite else { cum[j] = .nan; continue }
                 // 逐点按符号入链：v ≥ 0 归正链（0 视为正，与 Highcharts 一致）
-                cum[j] = padded[j] >= 0 ? pos[j] + padded[j] : neg[j] + padded[j]
+                cum[j] = s.participatesInStack ? (padded[j] >= 0 ? pos[j] + padded[j] : neg[j] + padded[j]) : padded[j]
             }
             var newPos = pos
             var newNeg = neg
@@ -464,10 +464,10 @@ public enum CartesianGeometry {
         guard !series.isEmpty else { return [] }
         let maxLength = series.map { $0.data.count }.max() ?? 0
         guard maxLength > 0 else { return [] }
-        var totals: [Int: [Double]] = [:]   // axis -> 每列 |v| 总和（fixedMax 模式不用）
+        var totals: [CartesianStackKey: [Double]] = [:]   // axis -> 每列 |v| 总和（fixedMax 模式不用）
         if fixedMax == nil {
-            for s in series {
-                let axis = s.effectiveYAxisIndex
+            for s in series where s.participatesInStack {
+                let axis = s.stackKey
                 var t = totals[axis] ?? [Double](repeating: 0, count: maxLength)
                 for j in 0..<maxLength where j < s.data.count && s.data[j].isFinite {
                     t[j] += abs(s.data[j])
@@ -476,11 +476,12 @@ public enum CartesianGeometry {
             }
         }
         return series.map { s in
-            let axis = s.effectiveYAxisIndex
+            let axis = s.stackKey
             let t = totals[axis] ?? [Double](repeating: 0, count: maxLength)
             return (0..<maxLength).map { j in
                 let raw = j < s.data.count ? s.data[j] : 0
-                guard raw.isFinite else { return .nan }   // 空值保持 NaN（断线）
+                guard raw.isFinite else { return .nan }
+                guard s.participatesInStack else { return raw }   // 空值保持 NaN（断线）
                 let denom = fixedMax ?? t[j]
                 return denom > 1e-9 ? raw / denom * 100 : 0
             }
@@ -491,8 +492,9 @@ public enum CartesianGeometry {
     public static func stackedPercentValues(series: [CartesianSeriesElement],
                                             fixedMax: Double? = nil) -> [[Double]] {
         let normalized = zip(series, percentNormalizedValues(series: series, fixedMax: fixedMax)).map {
-            CartesianSeriesElement(name: $0.name, data: $1, color: $0.color,
-                                   negativeColor: $0.negativeColor, yAxisIndex: $0.yAxisIndex)
+            var element = $0
+            element.data = $1
+            return element
         }
         return stackedValuesByAxis(series: normalized)
     }
@@ -527,37 +529,49 @@ public enum CartesianGeometry {
     ) -> CGRect {
         // 1. 槽宽按视口跨度计算（可见类目平分 plot 宽；缩放时柱体随之变宽）
         let slotWidth = plotArea.width / CGFloat(max(viewport.xSpan, 1e-9)) * CGFloat(categorySpan)
-        let subSlotWidth = slotWidth / CGFloat(seriesCount)  // 每个 series 的子槽宽度
-        let columnWidth = subSlotWidth * theme.columnWidthRatio
-
-        // 2. 组内间距：nil = 柱宽余量（1 - ratio，旧行为）；显式设置则独立可调
-        //    （clamp 到组不超槽：n×柱宽 + (n-1)×间距 ≤ 槽宽）
-        let innerGap: CGFloat
-        if let ratio = theme.columnInnerSpacingRatio {
-            let fit = seriesCount > 1
-                ? (slotWidth - columnWidth * CGFloat(seriesCount)) / CGFloat(seriesCount - 1)
-                : 0
-            innerGap = min(ratio * subSlotWidth, max(0, fit))
+        let barWidth: CGFloat
+        let columnX: CGFloat
+        if let spacing = theme.columnSpacing {
+            guard let placement = spacing.placement(slotWidth: slotWidth, seriesCount: seriesCount,
+                                                    seriesIndex: seriesIndex) else { return .zero }
+            barWidth = placement.width
+            let center = point(x: categoryPosition ?? Double(categoryIndex), y: 0,
+                               viewport: viewport, plotFrame: plotArea).x
+            columnX = center + placement.offset
         } else {
-            innerGap = subSlotWidth - columnWidth
-        }
+            let subSlotWidth = slotWidth / CGFloat(seriesCount)  // 每个 series 的子槽宽度
+            let columnWidth = subSlotWidth * theme.columnWidthRatio
 
-        // 3. X 位置：类目中心经视口映射（缩放/平移自动跟随）；组区域两侧留组间距，
-        //    组内柱按（柱宽 + 间距）排布后整体居中；组放不下时柱与间距等比收窄
-        let groupRegion = slotWidth * (1 - theme.columnGroupSpacingRatio)
-        var barWidth = columnWidth
-        var gap = innerGap
-        let count = CGFloat(max(seriesCount, 1))
-        let desired = barWidth * count + gap * CGFloat(max(seriesCount - 1, 0))
-        if desired > groupRegion, desired > 0 {
-            let scale = groupRegion / desired
-            barWidth *= scale
-            gap *= scale
+            // 2. 组内间距：nil = 柱宽余量（1 - ratio，旧行为）；显式设置则独立可调
+            //    （clamp 到组不超槽：n×柱宽 + (n-1)×间距 ≤ 槽宽）
+            let innerGap: CGFloat
+            if let ratio = theme.columnInnerSpacingRatio {
+                let fit = seriesCount > 1
+                    ? (slotWidth - columnWidth * CGFloat(seriesCount)) / CGFloat(seriesCount - 1)
+                    : 0
+                innerGap = min(ratio * subSlotWidth, max(0, fit))
+            } else {
+                innerGap = subSlotWidth - columnWidth
+            }
+
+            // 3. X 位置：类目中心经视口映射（缩放/平移自动跟随）；组区域两侧留组间距，
+            //    组内柱按（柱宽 + 间距）排布后整体居中；组放不下时柱与间距等比收窄
+            let groupRegion = slotWidth * (1 - theme.columnGroupSpacingRatio)
+            var legacyWidth = columnWidth
+            var gap = innerGap
+            let count = CGFloat(max(seriesCount, 1))
+            let desired = legacyWidth * count + gap * CGFloat(max(seriesCount - 1, 0))
+            if desired > groupRegion, desired > 0 {
+                let scale = groupRegion / desired
+                legacyWidth *= scale
+                gap *= scale
+            }
+            let groupWidth = legacyWidth * count + gap * CGFloat(max(seriesCount - 1, 0))
+            let centerX = point(x: categoryPosition ?? Double(categoryIndex), y: 0, viewport: viewport, plotFrame: plotArea).x
+            let groupStart = centerX - groupRegion / 2 + (groupRegion - groupWidth) / 2
+            columnX = groupStart + CGFloat(seriesIndex) * (legacyWidth + gap)
+            barWidth = legacyWidth
         }
-        let groupWidth = barWidth * count + gap * CGFloat(max(seriesCount - 1, 0))
-        let centerX = point(x: categoryPosition ?? Double(categoryIndex), y: 0, viewport: viewport, plotFrame: plotArea).x
-        let groupStart = centerX - groupRegion / 2 + (groupRegion - groupWidth) / 2
-        let columnX = groupStart + CGFloat(seriesIndex) * (barWidth + gap)
 
         // 3. 计算数据点对应的 Y 坐标（使用现有的 point 函数）
         let valueY = point(x: Double(categoryIndex), y: dataPoint, viewport: viewport,
@@ -617,15 +631,25 @@ public enum CartesianGeometry {
         seriesIndex: Int = 0,
         seriesCount: Int = 1
     ) -> CGRect {
-        // 1. 槽高按类目轴跨度计算（Bar 的类目在 Y 轴；Y 不参与手势，恒为全量）
+        // 1. 槽高按类目轴跨度计算（Bar 类目在 Y，固定厚度时由滚动窗口决定）。
         let slotHeight = plotArea.height / CGFloat(max(viewport.ySpan, 1e-9))
-        let subSlotHeight = slotHeight / CGFloat(seriesCount)  // 每个 series 的子槽高度
-        let barHeight = subSlotHeight * theme.columnWidthRatio
+        let barHeight: CGFloat
+        let barY: CGFloat
+        if let spacing = theme.columnSpacing {
+            guard let placement = spacing.placement(slotWidth: slotHeight, seriesCount: seriesCount,
+                                                    seriesIndex: seriesIndex) else { return .zero }
+            barHeight = placement.width
+            barY = horizontalCategoryY(category: Double(categoryIndex), viewport: viewport,
+                                       plotFrame: plotArea) + placement.offset
+        } else {
+            let subSlotHeight = slotHeight / CGFloat(seriesCount)  // 每个 series 的子槽高度
+            barHeight = subSlotHeight * theme.columnWidthRatio
 
-        // 2. Y 位置（考虑系列偏移；类目 0 在顶部）
-        let seriesOffset = CGFloat(seriesIndex) * subSlotHeight  // 系列偏移
-        let centerY = horizontalCategoryY(category: Double(categoryIndex), viewport: viewport, plotFrame: plotArea)
-        let barY = centerY - slotHeight / 2 + seriesOffset + (subSlotHeight - barHeight) / 2
+            // 2. Y 位置（考虑系列偏移；类目 0 在顶部）
+            let seriesOffset = CGFloat(seriesIndex) * subSlotHeight  // 系列偏移
+            let centerY = horizontalCategoryY(category: Double(categoryIndex), viewport: viewport, plotFrame: plotArea)
+            barY = centerY - slotHeight / 2 + seriesOffset + (subSlotHeight - barHeight) / 2
+        }
 
         // 3. 计算数据点对应的 X 坐标（水平图的 X 轴对应数值，随 X 视口缩放）
         let valueX = point(x: dataPoint, y: Double(categoryIndex), viewport: viewport, plotFrame: plotArea).x

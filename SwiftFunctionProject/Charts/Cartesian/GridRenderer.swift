@@ -20,12 +20,12 @@ enum GridRenderer {
                               theme: CartesianChartTheme,
                               isHorizontalValueAxis: Bool = false,
                               secondaryValueTicks: [Double] = [],
-                              secondaryYDomain: ClosedRange<Double>? = nil) -> CAShapeLayer {
+                              secondaryYDomain: ClosedRange<Double>? = nil,
+                              layer: CAShapeLayer = CAShapeLayer()) -> CAShapeLayer {
         if isHorizontalValueAxis {
             return makeHorizontalGridLayer(valueTicks: valueTicks, categoryCount: categoryCount,
-                                           viewport: viewport, plotFrame: plotFrame, theme: theme)
+                                           viewport: viewport, plotFrame: plotFrame, theme: theme, layer: layer)
         }
-        let layer = CAShapeLayer()
         let path = UIBezierPath()
         // 注意：不设置 layer.frame——path 使用 view 绝对坐标，layer 默认（frame=.zero、
         // 挂到 rootLayer 原点）时两者坐标系一致；若设 frame=plotFrame 会双重偏移。
@@ -74,8 +74,8 @@ enum GridRenderer {
                                                 categoryCount: Int,
                                                 viewport: CartesianViewport,
                                                 plotFrame: CGRect,
-                                                theme: CartesianChartTheme) -> CAShapeLayer {
-        let layer = CAShapeLayer()
+                                                theme: CartesianChartTheme,
+                                                layer: CAShapeLayer) -> CAShapeLayer {
         let path = UIBezierPath()
         // 注意：不设置 layer.frame——path 使用 view 绝对坐标（与垂直分支同理）。
         if theme.showsVerticalGridlines {
@@ -89,10 +89,13 @@ enum GridRenderer {
         if theme.showsHorizontalGridlines {
             let slotHeight = plotFrame.height / CGFloat(max(viewport.ySpan, 1e-9))
             let stride = max(1, Int(ceil(minimumHorizontalGridSpacing / max(slotHeight, 1e-9))))
-            for c in 0..<max(categoryCount, 0) where c % stride == 0 {
+            let categoryViewport = CartesianViewport(xMin: viewport.yMin, xMax: viewport.yMax, yMin: 0, yMax: 1)
+            for c in CartesianGeometry.visibleCategoryRange(viewport: categoryViewport, count: categoryCount)
+            where c % stride == 0 {
                 // 类目 0 在顶部（与条形/左侧标签同一映射，见 horizontalCategoryY）
                 let y = CartesianGeometry.horizontalCategoryY(category: Double(c),
                                                               viewport: viewport, plotFrame: plotFrame)
+                guard y >= plotFrame.minY, y <= plotFrame.maxY else { continue }
                 path.move(to: CGPoint(x: plotFrame.minX, y: y))
                 path.addLine(to: CGPoint(x: plotFrame.maxX, y: y))
             }

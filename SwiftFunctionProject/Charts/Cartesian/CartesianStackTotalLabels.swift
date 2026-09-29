@@ -4,6 +4,7 @@ import UIKit
 struct CartesianStackTotalLabels {
     struct Key: Hashable {
         let axis: Int
+        let stack: Int
         let category: Int
         let positive: Bool
     }
@@ -16,10 +17,10 @@ struct CartesianStackTotalLabels {
     private(set) var entries: [Key: Entry] = [:]
 
     mutating func add(rawValue: Double, category: Int, axis: Int,
-                      rect: CGRect, horizontal: Bool) {
+                      rect: CGRect, horizontal: Bool, stack: Int = 0) {
         guard rawValue.isFinite, rawValue != 0 else { return }
         let positive = rawValue > 0
-        let key = Key(axis: axis, category: category, positive: positive)
+        let key = Key(axis: axis, stack: stack, category: category, positive: positive)
         let endpoint = horizontal
             ? CGPoint(x: positive ? rect.maxX : rect.minX, y: rect.midY)
             : CGPoint(x: rect.midX, y: positive ? rect.minY : rect.maxY)
@@ -37,6 +38,7 @@ struct CartesianStackTotalLabels {
                 && p.y >= plot.minY - 1e-6 && p.y <= plot.maxY + 1e-6
         }.sorted {
             if $0.key.axis != $1.key.axis { return $0.key.axis < $1.key.axis }
+            if $0.key.stack != $1.key.stack { return $0.key.stack < $1.key.stack }
             if $0.key.category != $1.key.category { return $0.key.category < $1.key.category }
             return $0.key.positive && !$1.key.positive
         }
@@ -69,7 +71,7 @@ extension CartesianRendererBase {
                            available.maxY - size.height / 2)
             layer.addSublayer(makeDataLabelLayer(
                 text: text, fontSize: theme.dataLabelFontSize,
-                color: dataLabelColor(theme: theme, inside: false), center: center))
+                color: dataLabelColor(theme: theme, inside: false), center: center, objects: seriesObjects))
         }
     }
 }

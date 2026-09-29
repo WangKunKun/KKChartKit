@@ -138,15 +138,19 @@ public enum CartesianTimeGrouper {
         guard !visible.isEmpty else { return fallback(.noVisibleSeries) }
         guard visible.allSatisfy({ $0.aggregation != nil }) else { return fallback(.missingAggregation) }
         if case .percentFixed = model.stacking { return fallback(.unsupportedStacking) }
-        if case .grouped = model.stacking { return fallback(.unsupportedStacking) }
-        let seriesCount = model.isStacked ? 1 : visible.count
-        // 用真实柱体几何求每个类目占 1pt 时的柱宽比例，保持与主题间距一致。
-        let unitRect = CartesianGeometry.columnRect(dataPoint: 1, categoryIndex: 0,
-            viewport: CartesianViewport(xMin: -0.5, xMax: 0.5, yMin: 0, yMax: 1),
-            plotArea: CGRect(x: 0, y: 0, width: 1, height: 1), theme: theme, zeroY: 1,
-            seriesCount: seriesCount)
+        let seriesCount = model.columnSlotCount
         let minimumWidth = configuration.minimumColumnWidth.isFinite ? max(1, configuration.minimumColumnWidth) : 4
-        let groupWidth = minimumWidth / max(unitRect.width, 0.001)
+        let groupWidth: CGFloat
+        if let spacing = theme.columnSpacing {
+            // 固定 pt 间距不随槽宽缩放，必须直接计入完整组的宽度预算。
+            groupWidth = spacing.requiredSlotWidth(seriesCount: seriesCount, minimumColumnWidth: minimumWidth)
+        } else {
+            let unitRect = CartesianGeometry.columnRect(dataPoint: 1, categoryIndex: 0,
+                viewport: CartesianViewport(xMin: -0.5, xMax: 0.5, yMin: 0, yMax: 1),
+                plotArea: CGRect(x: 0, y: 0, width: 1, height: 1), theme: theme, zeroY: 1,
+                seriesCount: seriesCount)
+            groupWidth = minimumWidth / max(unitRect.width, 0.001)
+        }
         let width = plotWidth.isFinite ? max(1, plotWidth) : 1
         let capacity = max(1, min(count, Int(min(CGFloat(count), floor(width / groupWidth)))))
         let rawSpan = visibleRange.upperBound - visibleRange.lowerBound

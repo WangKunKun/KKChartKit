@@ -3,6 +3,13 @@ import Foundation
 
 /// 柱状图渲染器（垂直柱体）
 public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartTheme> {
+    override func resolvedModel(_ model: CartesianChartModel) -> CartesianChartModel {
+        var result = model
+        result.usesMixedSeries = false
+        for i in result.series.indices { result.series[i].stackFamilyIsColumn = true }
+        return result
+    }
+
 
     public override var supportsTimeGrouping: Bool { true }
 
@@ -22,6 +29,10 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
         plotFrame: CGRect
     ) {
         // 清空旧柱体（render 与动画/手势的逐帧重画共用本方法，必须先清后画）
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        seriesObjects.begin(reusing: theme.reusesRenderingObjects)
+        defer { seriesObjects.end(); CATransaction.commit() }
         seriesLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
         clearSeriesShadowCasters()
         annotationLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
@@ -35,14 +46,16 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
 
         // 3. 可见类目范围（视口缩放后跳过视口外柱体的 path 构造）
         let visible = visibleCategoryRange
-        let seriesCount = model.isStacked ? 1 : model.visibleSeriesCount
+        let slots = model.columnSlots
+        let seriesCount = (slots.values.max() ?? -1) + 1
 
         let wantsStackTotals = model.isStacked && theme.showsStackTotalLabels
         var stackTotals = CartesianStackTotalLabels()
 
         for (seriesIndex, oneSeries) in dataToDraw.enumerated() {
             let element = model.series[seriesIndex]
-            guard element.isVisible else { continue }
+            guard element.isVisible, includesSeries(seriesIndex) else { continue }
+            let slot = slots[seriesIndex] ?? 0
             let baseColor = element.color ?? theme.seriesColor
             let negativeColor = element.negativeColor ?? baseColor
             let axisIdx = element.effectiveYAxisIndex
@@ -81,31 +94,23 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
                     theme: theme,
                     zeroY: seriesZeroY,
                     baselineValue: baselineValue,
-                    seriesIndex: model.isStacked ? 0 : model.visibleSlot(for: seriesIndex),
+                    seriesIndex: slot,
                     seriesCount: seriesCount,
                     categoryPosition: model.categoryPosition(index), categorySpan: model.categorySpan(index)
                 )
+                guard !rect.isEmpty else { continue }
                 rect = animatedRect(from: rect, zeroY: seriesZeroY, progress: currentAnimationProgress)
 
                 // 圆角方向：正值顶部圆角、负值底部圆角；子路径独立圆角。
                 // 堆叠时只有链**末端段**保留圆角（正链最上段顶圆角、负链最下段底圆角），
                 // 中间段直角——整根堆叠柱看起来是一个连续柱体而非逐段圆角。
-                let corners: UIRectCorner
-                if model.isStacked {
-                    // 同轴同符号链上方还有非零段 → 本段是中间段，不圆角
-                    let hasSegmentAbove = model.series[(seriesIndex + 1)...].contains { s2 in
-                        guard s2.isVisible, s2.effectiveYAxisIndex == axisIdx,
-                              index < s2.data.count, abs(s2.data[index]) > 1e-9 else { return false }
-                        return (s2.data[index] >= 0) == (value >= 0)
-                    }
-                    corners = hasSegmentAbove
-                        ? []
-                        : (value >= 0 ? [.topLeft, .topRight] : [.bottomLeft, .bottomRight])
-                } else {
-                    corners = rect.minY < seriesZeroY
-                        ? [.topLeft, .topRight]
-                        : [.bottomLeft, .bottomRight]
+                let hasSegmentAbove = model.isStacked && model.series[(seriesIndex + 1)...].contains { next in
+                    next.isVisible && next.stackKey == model.stackKey(for: seriesIndex)
+                    && index < next.data.count && next.data[index].isFinite && next.data[index] != 0
+                    && (next.data[index] > 0) == (value > 0)
                 }
+                let corners: UIRectCorner = hasSegmentAbove ? [] :
+                    (value >= 0 ? [.topLeft, .topRight] : [.bottomLeft, .bottomRight])
                 let cornerRadius = corners.isEmpty
                     ? 0
                     : theme.columnCornerRadius
@@ -124,17 +129,17 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
                 if pathsByColor[fillColor] == nil { pathsByColor[fillColor] = UIBezierPath() }
                 pathsByColor[fillColor]!.append(columnPath)
 
-                if wantsStackTotals {
+                if wantsStackTotals && element.participatesInStack {
                     stackTotals.add(rawValue: element.data[index], category: index,
                                     axis: axisIdx, rect: rect,
-                                    horizontal: false)
+                                    horizontal: false, stack: slot)
                 }
 
-                // 堆叠且非同轴最后一个系列：记录分隔线 y
-                if model.isStacked,
-                   model.series[(seriesIndex + 1)...].contains(where: { $0.isVisible && $0.effectiveYAxisIndex == axisIdx }) {
-                    separatorPath.move(to: CGPoint(x: plotFrame.minX, y: rect.maxY))
-                    separatorPath.addLine(to: CGPoint(x: plotFrame.maxX, y: rect.maxY))
+                // 分隔线位于同组同符号的相邻段接缝，不能贯穿其他柱组。
+                if hasSegmentAbove {
+                    let y = value >= 0 ? rect.minY : rect.maxY
+                    separatorPath.move(to: CGPoint(x: rect.minX, y: y))
+                    separatorPath.addLine(to: CGPoint(x: rect.maxX, y: y))
                 }
 
                 // 数据标签：数值 = 系列原值（堆叠时各段自身值，位置在累计后的段矩形上），
@@ -151,7 +156,7 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
                         text: text, fontSize: theme.dataLabelFontSize,
                         color: dataLabelColor(theme: theme,
                                               inside: theme.dataLabelPosition != .outsideEnd),
-                        center: center))
+                        center: center, objects: seriesObjects))
                 }
             }
 
@@ -168,7 +173,7 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
                 }
             }
             if !separatorPath.isEmpty, let separatorColor = theme.stackSeparatorColor {
-                let line = CAShapeLayer()
+                let line = seriesObjects.shape()
                 line.path = separatorPath.cgPath
                 line.strokeColor = separatorColor.cgColor
                 line.fillColor = nil
@@ -184,13 +189,11 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
 
     /// 柱体复合 path → 填充层（带可选边框）。
     private func makeColumnLayer(path: UIBezierPath, color: UIColor, theme: CartesianChartTheme) -> CAShapeLayer {
-        let layer = CAShapeLayer()
+        let layer = seriesObjects.shape()
         layer.path = path.cgPath
         layer.fillColor = color.cgColor
-        if let borderColor = theme.columnBorderColor {
-            layer.strokeColor = borderColor.cgColor
-            layer.lineWidth = theme.columnBorderWidth
-        }
+        layer.strokeColor = theme.columnBorderColor?.cgColor
+        layer.lineWidth = theme.columnBorderWidth
         return layer
     }
 
@@ -203,7 +206,7 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
         //    （缩放/平移后与绘制同源，天然一致）
         let xValue = CartesianGeometry.value(at: point, viewport: currentViewport, plotFrame: currentPlotFrame).x
         let rawIndex = Int(xValue.rounded())
-        guard rawIndex >= 0, rawIndex < model.maxPointCount else { return nil }
+        guard rawIndex >= 0, rawIndex < model.categoryLayoutCount else { return nil }
         let categoryIndex = model.bucketAnchor(for: rawIndex)
 
         guard categoryIndex >= 0 && categoryIndex < model.maxPointCount else { return nil }
@@ -222,7 +225,7 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
         guard let model = currentModel, let theme = currentTheme,
               model.series.indices.contains(seriesIndex) else { return nil }
         let element = model.series[seriesIndex]
-        guard element.isVisible, element.data.indices.contains(categoryIndex),
+        guard element.isVisible, includesSeries(seriesIndex), element.data.indices.contains(categoryIndex),
               element.data[categoryIndex].isFinite, element.data[categoryIndex] != 0 else { return nil }
         let value = currentDrawValues[seriesIndex][categoryIndex]
         guard value.isFinite else { return nil }
@@ -230,14 +233,15 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
         let zero = CartesianGeometry.zeroAxisPosition(
             viewport: currentViewport, plotArea: currentPlotFrame, isHorizontal: false,
             valueDomain: axis == 1 ? currentSecondaryYDomain : nil)
-        return CartesianGeometry.columnRect(
+        let rect = CartesianGeometry.columnRect(
                 dataPoint: value, categoryIndex: categoryIndex, viewport: currentViewport,
                 valueDomain: axis == 1 ? currentSecondaryYDomain : nil,
                 plotArea: currentPlotFrame, theme: theme, zeroY: zero,
                 baselineValue: model.isStacked ? value - currentBaseValues[seriesIndex][categoryIndex] : nil,
-                seriesIndex: model.isStacked ? 0 : model.visibleSlot(for: seriesIndex),
-                seriesCount: model.isStacked ? 1 : model.visibleSeriesCount,
+                seriesIndex: model.columnSlot(for: seriesIndex),
+                seriesCount: model.columnSlotCount,
                 categoryPosition: model.categoryPosition(categoryIndex), categorySpan: model.categorySpan(categoryIndex))
+        return rect.isEmpty ? nil : rect
     }
 
     public override func tooltipAnchor(for target: HYMChartHitTarget) -> HYMChartTooltipAnchor? {
@@ -300,7 +304,8 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
                                value: value,
                                yAxisIndex: model.series[seriesIndex].effectiveYAxisIndex,
                                name: model.series[seriesIndex].name, seriesID: model.series[seriesIndex].id,
-                               timeBucket: model.timeBucket(series: seriesIndex, category: categoryIndex))
+                               timeBucket: model.timeBucket(series: seriesIndex, category: categoryIndex),
+                               datum: datum(series: seriesIndex, category: categoryIndex))
     }
 
     /// DEBUG 自检辅助：seriesLayer 子层（圆角曲线数量断言用）。

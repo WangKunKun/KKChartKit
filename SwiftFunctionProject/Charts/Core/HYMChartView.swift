@@ -37,12 +37,12 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
     /// 设置后内置 tooltip 自动不显示（见 `updateTooltip` 互斥）。
     public var onHitLocated: ((HYMChartHitContext?, HYMChartGesture) -> Void)?
 
-    /// 缩放手势启用（默认 false）。轴向由 zoomAxisMode 决定；
+    /// 缩放手势启用（默认 false）。固定柱宽的类目滚动独立自动启用。轴向由 zoomAxisMode 决定；
     /// renderer 需实现对应的 X/Y 视口协议。
     public var isZoomEnabled: Bool = false {
       didSet {
         zoomGesture.isEnabled = isZoomEnabled
-        panGesture.isEnabled = isZoomEnabled
+        panGesture.isEnabled = isZoomEnabled || automaticPanAxis != nil
         doubleTapGesture.isEnabled = isZoomEnabled
       }
     }
@@ -68,6 +68,11 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
     /// `HYMChartYAxisZoomable`（轴系图表均实现）：垂直图 Y = 值轴、水平图 Y = 类目轴。
     /// 锚点取捏合中心在对应方向的分量；`.xy` 时两轴各自钳制（单轴到限另一轴仍可继续）。
     public var zoomAxisMode: HYMChartZoomAxisMode = .x
+    private var automaticPanAxis: HYMChartZoomAxisMode? {
+        (renderer as? HYMChartAutomaticCategoryScrolling)?.automaticCategoryScrollAxis
+    }
+    private var effectivePanAxis: HYMChartZoomAxisMode { automaticPanAxis ?? zoomAxisMode }
+
 
     // MARK: - 手势体验增强（参照 Charts/AAChartKit 交互惯例）
     /// 拖拽松手后的惯性减速（默认开）。
@@ -180,7 +185,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
         gestureRecognizers?.forEach { $0.delegate = self }
         doubleTapGesture.numberOfTapsRequired = 2
         zoomGesture.isEnabled = isZoomEnabled
-        panGesture.isEnabled = isZoomEnabled
+        panGesture.isEnabled = isZoomEnabled || automaticPanAxis != nil
         doubleTapGesture.isEnabled = isZoomEnabled
     }
 
@@ -292,6 +297,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
     }
 
     /// 按原始类目索引进入明细；聚合不会改变该坐标。需先 configure/update。
+    /// 固定柱宽时定位到区间起点，实际可见跨度由绘图区容量决定；靠近末尾时向前收回窗口。
     public func showCategoryRange(_ range: Range<Int>) {
         guard !range.isEmpty, let model, let theme,
               let controlling = renderer as? HYMChartCategoryViewportControlling else { return }
@@ -324,6 +330,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
                         context: HYMChartRenderContext(
                             bounds: bounds,
                             center: CGPoint(x: bounds.midX, y: bounds.midY)))
+        panGesture.isEnabled = isZoomEnabled || automaticPanAxis != nil
         if pendingAnimation {
             pendingAnimation = false
             performEntranceAnimation()
@@ -425,7 +432,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
     /// 供测试：模拟一次"拖视口后松手"（与 onPan 的 .changed/.ended 同分发路径：
     /// 橡皮筋拖拽越界 → 松手回弹 / 惯性减速），无需真实手势。
     func simulateViewportPan(deltaX: CGFloat, velocityX: CGFloat = 0) {
-        guard isZoomEnabled, let zoomable = xAxisZoomable else { return }
+        guard isZoomEnabled || automaticPanAxis != nil, let zoomable = xAxisZoomable else { return }
         finishEntranceAnimationIfNeeded()
         stopDeceleration()
         panIsHighlightMode = false
@@ -566,7 +573,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
     /// - 图表处于全量视口（未缩放/平移过）且开启滑动选中 → 「滑动选中」模式：手指划过逐个高亮数据点；
     /// - 否则 → 拖移视口（橡皮筋可越界），松手时惯性减速（仅 X 轴）/ 回弹。
     @objc private func onPan(_ gr: UIPanGestureRecognizer) {
-        guard isZoomEnabled, let zoomable = xAxisZoomable else { return }
+        guard isZoomEnabled || automaticPanAxis != nil, let zoomable = xAxisZoomable else { return }
 
         switch gr.state {
         case .began:
@@ -576,10 +583,10 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
             // 全量视口时拖视口无意义（clamp 后原地不动）→ 自动切换为滑动选中
             // （参与缩放的轴向全部处于全量才视为"全量视图"）
             var fullyZoomedOut = true
-            if zoomAxisMode.includesX {
+            if effectivePanAxis.includesX {
                 fullyZoomedOut = zoomable.xAxisZoomScale <= 1.0001
             }
-            if fullyZoomedOut, zoomAxisMode.includesY, let yz = yAxisZoomable {
+            if fullyZoomedOut, effectivePanAxis.includesY, let yz = yAxisZoomable {
                 fullyZoomedOut = yz.yAxisZoomScale <= 1.0001
             }
             panIsHighlightMode = isHighlightPerDragEnabled && fullyZoomedOut
@@ -596,17 +603,17 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
             let dx = total.x - lastPanTranslation.x
             let dy = total.y - lastPanTranslation.y
             lastPanTranslation = total
-            if dx != 0, zoomAxisMode.includesX {
+            if dx != 0, effectivePanAxis.includesX {
                 zoomable.panXAxis(screenDeltaX: dx, allowsRubberBand: isRubberBandEnabled)
             }
-            if dy != 0, zoomAxisMode.includesY, let yz = yAxisZoomable {
+            if dy != 0, effectivePanAxis.includesY, let yz = yAxisZoomable {
                 yz.panYAxis(screenDeltaY: dy, allowsRubberBand: isRubberBandEnabled)
             }
         case .ended, .cancelled:
             guard !panIsHighlightMode else { return }
             if isRubberBandEnabled { reboundIfNeeded() }   // 越界 → 回弹优先（不叠加惯性）
             if !isRebounding, isDragDecelerationEnabled, gr.state == .ended,
-               zoomAxisMode.includesX {
+               effectivePanAxis.includesX {
                 startDeceleration(zoomable, velocity: gr.velocity(in: self).x)
             }
         default:
@@ -722,7 +729,11 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
 
     /// 按文本模板组装弹窗内容：target 提供结构化行 + options 配置（表头/后缀/小数位）；
     /// 模板未配置或 target 未实现数据源 → 回落 target.tooltipText 固定格式。
-    private func formattedTooltipText(for target: HYMChartHitTarget) -> String? {
+    func formattedTooltipText(for target: HYMChartHitTarget) -> String? {
+        if let source = target as? CartesianHitDataSource, !source.chartData.isEmpty {
+            return CartesianDatumText.text(source.chartData, options: tooltipTextOptions,
+                header: (target as? HYMChartTooltipDataSource)?.tooltipHeaderKey)
+        }
         guard !tooltipTextOptions.isDefault,
               let dataSource = target as? HYMChartTooltipDataSource else {
             return target.tooltipText
