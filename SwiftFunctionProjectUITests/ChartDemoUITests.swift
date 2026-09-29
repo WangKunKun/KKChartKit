@@ -188,4 +188,70 @@ final class ChartDemoUITests: XCTestCase {
         XCTAssertEqual(toggle.value as? String, "0")
     }
 
+    @MainActor func testAutoGapPresetAndPolicyPickerOnLineAndCombined() {
+        let app = XCUIApplication()
+        for page in ["折线图", "混合图"] {
+            app.launch(); app.buttons[page].tap()
+            let search = app.textFields["搜索属性名或分组"]
+            XCTAssertTrue(search.waitForExistence(timeout: 5))
+            search.tap(); search.typeText("autoGap\n")
+            let preset = app.buttons["11/12/13 空点 autoGap 场景"]
+            XCTAssertTrue(preset.waitForExistence(timeout: 5)); preset.tap()
+            let picker = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "缺测策略 autoGap")).firstMatch
+            XCTAssertTrue(picker.waitForExistence(timeout: 5))
+            XCTAssertTrue(picker.label.contains("按空点数量"), picker.label)
+            for mode in ["全部断开", "全部连接", "按缺测时长", "跟随跨空值连线"] {
+                picker.tap(); app.buttons[mode].tap()
+                XCTAssertTrue(picker.label.contains(mode), picker.label)
+            }
+            picker.tap(); app.buttons["按空点数量"].tap()
+            let evidence = XCTAttachment(screenshot: app.screenshot())
+            evidence.name = "auto-gap-11-12-13-" + page
+            evidence.lifetime = .keepAlways; add(evidence)
+        }
+    }
+
+    @MainActor func testColorZonesAndSmoothNegativePresetsOnLineAndCombined() {
+        let app = XCUIApplication()
+        for page in ["折线图", "混合图"] {
+            app.launch(); app.buttons[page].tap()
+            let field = app.textFields["搜索属性名或分组"]
+            XCTAssertTrue(field.waitForExistence(timeout: 5))
+            func search(_ query: String) {
+                if !field.isHittable { app.collectionViews.firstMatch.swipeDown() }
+                let current = field.value as? String ?? ""
+                // 使用短关键词，避免长文本点中间时将光标放在词中。
+                field.tap()
+                field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue,
+                                      count: current == "搜索属性名或分组" ? 0 : current.count) + query + "\n")
+                XCTAssertEqual(field.value as? String, query)
+            }
+            for (query, preset) in [("X 分区", "X 分区曲线面积 zones 场景"),
+                                    ("Y 分区", "Y 分区曲线面积 zones 场景"),
+                                    ("曲线负值", "曲线负值换色 zones 场景")] {
+                search(query)
+                let button = app.buttons[preset]
+                XCTAssertTrue(button.waitForExistence(timeout: 5)); button.tap()
+                let evidence = XCTAttachment(screenshot: app.screenshot())
+                evidence.name = page + "-" + preset; evidence.lifetime = .keepAlways; add(evidence)
+            }
+            search("颜色分区")
+            let picker = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "颜色分区 zones")).firstMatch
+            XCTAssertTrue(picker.waitForExistence(timeout: 5))
+            XCTAssertTrue(picker.label.contains("关闭"))
+            for mode in ["X 原始索引", "Y 绘制值", "关闭"] {
+                picker.tap(); app.buttons[mode].tap()
+                XCTAssertTrue(picker.label.contains(mode), picker.label)
+            }
+            picker.tap(); app.buttons["X 原始索引"].tap()
+            search("分区面积")
+            let fill = app.switches["分区面积渐变"].firstMatch
+            XCTAssertTrue(fill.waitForExistence(timeout: 5))
+            fill.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
+            XCTAssertEqual(fill.value as? String, "1")
+            fill.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
+            XCTAssertEqual(fill.value as? String, "0")
+        }
+    }
+
 }
