@@ -6,8 +6,8 @@ import SwiftUI
 /// Swift 不编译期依赖 OC 类，**无需 OC bridging header、不改 pbxproj**。
 /// Swift ↔ OC 双向：Swift 这里只创建并展示 VC；VC 内部用 OC 桥接 + Swift-Swift.h 跑图表。
 struct OCChartDemoHost: UIViewControllerRepresentable {
+    var className = "OCChartDemoViewController"
     func makeUIViewController(context: Context) -> UIViewController {
-        let className = "OCChartDemoViewController"
         if let cls = NSClassFromString(className) as? UIViewController.Type {
             return cls.init()
         }
