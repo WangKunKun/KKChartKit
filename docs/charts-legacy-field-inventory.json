@@ -1,0 +1,1593 @@
+{
+  "schemaVersion": 1,
+  "asOf": "2026-09-30",
+  "headers": [
+    "SwiftFunctionProject/参考图表/HMAAChartUtil.h",
+    "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartView.h",
+    "SwiftFunctionProject/参考图表/HMAAChartView/HMLGAAChartView.h",
+    "SwiftFunctionProject/参考图表/HMAAChartView/HMMTAAChartView.h",
+    "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartFullScreenVC.h",
+    "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+    "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+    "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h",
+    "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartManager.h"
+  ],
+  "entries": [
+    {
+      "key": "HMAAChartUtil.createlgaaChartView",
+      "status": "core",
+      "target": "R5 project factory",
+      "note": "外部业务预设/资源/语言注入，旧同名 facade 不与旧库同链",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartUtil.h",
+      "line": 17
+    },
+    {
+      "key": "HMAAChartUtil.createlgaaChartViewWithFrame:",
+      "status": "core",
+      "target": "R5 project factory",
+      "note": "外部业务预设/资源/语言注入，旧同名 facade 不与旧库同链",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartUtil.h",
+      "line": 18
+    },
+    {
+      "key": "HMAAChartUtil.createaaChartView",
+      "status": "core",
+      "target": "R5 project factory",
+      "note": "外部业务预设/资源/语言注入，旧同名 facade 不与旧库同链",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartUtil.h",
+      "line": 21
+    },
+    {
+      "key": "HMAAChartUtil.createaaChartViewWithFrame:",
+      "status": "core",
+      "target": "R5 project factory",
+      "note": "外部业务预设/资源/语言注入，旧同名 facade 不与旧库同链",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartUtil.h",
+      "line": 22
+    },
+    {
+      "key": "HMAAChartUtil.namesWithKey:",
+      "status": "confirm",
+      "target": "R0b business preprocessing",
+      "note": "D07 重叠 key 以第一个分支为准，真实业务意图未知；不下沉 SDK",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartUtil.h",
+      "line": 25
+    },
+    {
+      "key": "HMAAChartUtil.formatNamesWithData:positive:negative:",
+      "status": "confirm",
+      "target": "R0b business preprocessing",
+      "note": "D07 重叠 key 以第一个分支为准，真实业务意图未知；不下沉 SDK",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartUtil.h",
+      "line": 28
+    },
+    {
+      "key": "HMAAChartUtil.keyNeedOpposite",
+      "status": "confirm",
+      "target": "R0b business preprocessing",
+      "note": "D07 重叠 key 以第一个分支为准，真实业务意图未知；不下沉 SDK",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartUtil.h",
+      "line": 31
+    },
+    {
+      "key": "HMAAChartUtil.keyNeedFabsAndOpposite",
+      "status": "confirm",
+      "target": "R0b business preprocessing",
+      "note": "D07 重叠 key 以第一个分支为准，真实业务意图未知；不下沉 SDK",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartUtil.h",
+      "line": 34
+    },
+    {
+      "key": "HMAAChartUtil.fixAIChatData:type:",
+      "status": "confirm",
+      "target": "R0b business preprocessing",
+      "note": "D07 重叠 key 以第一个分支为准，真实业务意图未知；不下沉 SDK",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartUtil.h",
+      "line": 37
+    },
+    {
+      "key": "HMAAChartViewDelegate.hmaaChartView:handlePan:",
+      "status": "core",
+      "target": "R4a interaction lifecycle",
+      "note": "旧 UIPanGestureRecognizer 与新语义事件需明确映射",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartView.h",
+      "line": 16
+    },
+    {
+      "key": "HMAAChartView.delegate",
+      "status": "core",
+      "target": "R4a event facade",
+      "note": "已有 onHit 数据，但旧索引/手势生命周期/清除来源协议尚未完整桥接",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartView.h",
+      "line": 23
+    },
+    {
+      "key": "HMAAChartView.clickBlock",
+      "status": "core",
+      "target": "R4a event facade",
+      "note": "已有 onHit 数据，但旧索引/手势生命周期/清除来源协议尚未完整桥接",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartView.h",
+      "line": 25
+    },
+    {
+      "key": "HMAAChartView.finishLoad",
+      "status": "core",
+      "target": "R4a accepted/layout/animation events",
+      "note": "旧 WebView 加载完成非像素完成；须明确版本、线程、回调次数",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartView.h",
+      "line": 26
+    },
+    {
+      "key": "HMAAChartView.nodImgName",
+      "status": "core",
+      "target": "R5 empty-state presentation",
+      "note": "外部注入图片/文案/样式，不引入 App 宏",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartView.h",
+      "line": 29
+    },
+    {
+      "key": "HMAAChartView.nodText",
+      "status": "core",
+      "target": "R5 empty-state presentation",
+      "note": "外部注入图片/文案/样式，不引入 App 宏",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartView.h",
+      "line": 30
+    },
+    {
+      "key": "HMAAChartView.nodColor",
+      "status": "core",
+      "target": "R5 empty-state presentation",
+      "note": "外部注入图片/文案/样式，不引入 App 宏",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartView.h",
+      "line": 31
+    },
+    {
+      "key": "HMAAChartView.nodFont",
+      "status": "core",
+      "target": "R5 empty-state presentation",
+      "note": "外部注入图片/文案/样式，不引入 App 宏",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartView.h",
+      "line": 32
+    },
+    {
+      "key": "HMAAChartView.initChartViewWithModel:",
+      "status": "mapped",
+      "target": "configure + R2 snapshot conversion",
+      "note": "原生配置后在布局时绘制",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartView.h",
+      "line": 35
+    },
+    {
+      "key": "HMAAChartView.reloadDataWithModel:",
+      "status": "mapped",
+      "target": "configure/update + R2 snapshot conversion",
+      "note": "D01 每次读新模型，不能重用旧打包数据；旧入口适配仍未完成",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartView.h",
+      "line": 38
+    },
+    {
+      "key": "HMAAChartView.onlyRefreshTheChartData",
+      "status": "mapped",
+      "target": "configure/update + R2 snapshot conversion",
+      "note": "D01 每次读新模型，不能重用旧打包数据；旧入口适配仍未完成",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartView.h",
+      "line": 41
+    },
+    {
+      "key": "HMAAChartView.setTouchPointXIndex:",
+      "status": "core",
+      "target": "R4a public selection/clear API",
+      "note": "当前无程序选择公开入口，不能使用 rendererForTesting",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartView.h",
+      "line": 44
+    },
+    {
+      "key": "HMAAChartView.showNoData:",
+      "status": "core",
+      "target": "R5 forced empty state",
+      "note": "退出空态恢复图例/数据且不修改调用方模型",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartView.h",
+      "line": 47
+    },
+    {
+      "key": "HMLGAAChartViewDelegate.hmlgaaChartView:handlePan:",
+      "status": "core",
+      "target": "R4a interaction lifecycle",
+      "note": "旧 UIPanGestureRecognizer 与新语义事件需明确映射",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMLGAAChartView.h",
+      "line": 15
+    },
+    {
+      "key": "HMLGAAChartView.delegate",
+      "status": "core",
+      "target": "R4a event facade",
+      "note": "已有 onHit 数据，但旧索引/手势生命周期/清除来源协议尚未完整桥接",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMLGAAChartView.h",
+      "line": 21
+    },
+    {
+      "key": "HMLGAAChartView.clickBlock",
+      "status": "core",
+      "target": "R4a event facade",
+      "note": "已有 onHit 数据，但旧索引/手势生命周期/清除来源协议尚未完整桥接",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMLGAAChartView.h",
+      "line": 23
+    },
+    {
+      "key": "HMLGAAChartView.legendTapBlock",
+      "status": "mapped",
+      "target": "onSeriesVisibilityChanged + stable ID lookup",
+      "note": "新回调 ID/visible 映射旧业务 element；无虚拟系列",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMLGAAChartView.h",
+      "line": 24
+    },
+    {
+      "key": "HMLGAAChartView.snapClosure",
+      "status": "unsupported",
+      "target": "separate export requirement if actually used",
+      "note": "旧实现占位，不算既有可回归能力；需要真实调用证据再立项",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMLGAAChartView.h",
+      "line": 25
+    },
+    {
+      "key": "HMLGAAChartView.triggerSnap",
+      "status": "unsupported",
+      "target": "separate export requirement if actually used",
+      "note": "旧实现占位，不算既有可回归能力；需要真实调用证据再立项",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMLGAAChartView.h",
+      "line": 27
+    },
+    {
+      "key": "HMLGAAChartView.showEnlargeButton",
+      "status": "core",
+      "target": "R6 host/fullscreen coordinator",
+      "note": "需快照/恢复、横屏、安全区，不在 renderer 做页面跳转",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMLGAAChartView.h",
+      "line": 29
+    },
+    {
+      "key": "HMLGAAChartView.nodImgName",
+      "status": "core",
+      "target": "R5 empty-state presentation",
+      "note": "外部注入图片/文案/样式，不引入 App 宏",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMLGAAChartView.h",
+      "line": 32
+    },
+    {
+      "key": "HMLGAAChartView.nodText",
+      "status": "core",
+      "target": "R5 empty-state presentation",
+      "note": "外部注入图片/文案/样式，不引入 App 宏",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMLGAAChartView.h",
+      "line": 33
+    },
+    {
+      "key": "HMLGAAChartView.nodColor",
+      "status": "core",
+      "target": "R5 empty-state presentation",
+      "note": "外部注入图片/文案/样式，不引入 App 宏",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMLGAAChartView.h",
+      "line": 34
+    },
+    {
+      "key": "HMLGAAChartView.nodFont",
+      "status": "core",
+      "target": "R5 empty-state presentation",
+      "note": "外部注入图片/文案/样式，不引入 App 宏",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMLGAAChartView.h",
+      "line": 35
+    },
+    {
+      "key": "HMLGAAChartView.reloadDataWithModel:",
+      "status": "mapped",
+      "target": "configure/update + R2 snapshot conversion",
+      "note": "D01 每次读新模型，不能重用旧打包数据；旧入口适配仍未完成",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMLGAAChartView.h",
+      "line": 38
+    },
+    {
+      "key": "HMLGAAChartView.onlyRefreshTheChartData",
+      "status": "mapped",
+      "target": "configure/update + R2 snapshot conversion",
+      "note": "D01 每次读新模型，不能重用旧打包数据；旧入口适配仍未完成",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMLGAAChartView.h",
+      "line": 41
+    },
+    {
+      "key": "HMLGAAChartView.setTouchPointXIndex:",
+      "status": "core",
+      "target": "R4a public selection/clear API",
+      "note": "当前无程序选择公开入口，不能使用 rendererForTesting",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMLGAAChartView.h",
+      "line": 44
+    },
+    {
+      "key": "HMChartLGSwitch.element",
+      "status": "mapped",
+      "target": "legend.itemOverrides.symbolViewProvider + visibility callback",
+      "note": "定制图例外观和稳定 ID 绑定；不是直接类名替换",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMLGAAChartView.h",
+      "line": 50
+    },
+    {
+      "key": "HMChartLGSwitch.on",
+      "status": "mapped",
+      "target": "legend.itemOverrides.symbolViewProvider + visibility callback",
+      "note": "定制图例外观和稳定 ID 绑定；不是直接类名替换",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMLGAAChartView.h",
+      "line": 52
+    },
+    {
+      "key": "HMChartLGSwitch.tapSwitchBlock",
+      "status": "mapped",
+      "target": "legend.itemOverrides.symbolViewProvider + visibility callback",
+      "note": "定制图例外观和稳定 ID 绑定；不是直接类名替换",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMLGAAChartView.h",
+      "line": 54
+    },
+    {
+      "key": "HMMTAAChartView.chartModels",
+      "status": "core",
+      "target": "R6 multi-chart container",
+      "note": "domainID/sample key 联动，布局/空态外部负责",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMMTAAChartView.h",
+      "line": 15
+    },
+    {
+      "key": "HMMTAAChartView.width",
+      "status": "core",
+      "target": "R6 multi-chart container",
+      "note": "domainID/sample key 联动，布局/空态外部负责",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMMTAAChartView.h",
+      "line": 18
+    },
+    {
+      "key": "HMMTAAChartView.height",
+      "status": "core",
+      "target": "R6 multi-chart container",
+      "note": "domainID/sample key 联动，布局/空态外部负责",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMMTAAChartView.h",
+      "line": 19
+    },
+    {
+      "key": "HMMTAAChartView.nodImgName",
+      "status": "core",
+      "target": "R6 multi-chart container",
+      "note": "domainID/sample key 联动，布局/空态外部负责",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMMTAAChartView.h",
+      "line": 22
+    },
+    {
+      "key": "HMMTAAChartView.nodText",
+      "status": "core",
+      "target": "R6 multi-chart container",
+      "note": "domainID/sample key 联动，布局/空态外部负责",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMMTAAChartView.h",
+      "line": 23
+    },
+    {
+      "key": "HMMTAAChartView.nodColor",
+      "status": "core",
+      "target": "R6 multi-chart container",
+      "note": "domainID/sample key 联动，布局/空态外部负责",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMMTAAChartView.h",
+      "line": 24
+    },
+    {
+      "key": "HMMTAAChartView.nodFont",
+      "status": "core",
+      "target": "R6 multi-chart container",
+      "note": "domainID/sample key 联动，布局/空态外部负责",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMMTAAChartView.h",
+      "line": 25
+    },
+    {
+      "key": "HMMTAAChartView.initChartView",
+      "status": "core",
+      "target": "R6 multi-chart container",
+      "note": "domainID/sample key 联动，布局/空态外部负责",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMMTAAChartView.h",
+      "line": 28
+    },
+    {
+      "key": "HMAAChartFullScreenVC.chartModel",
+      "status": "core",
+      "target": "R6 fullscreen host",
+      "note": "保存选择/视口/显隐，返回不重置业务状态",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartFullScreenVC.h",
+      "line": 16
+    },
+    {
+      "key": "HMAAChartFullScreenVC.nodImgName",
+      "status": "core",
+      "target": "R6 fullscreen host",
+      "note": "保存选择/视口/显隐，返回不重置业务状态",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartFullScreenVC.h",
+      "line": 19
+    },
+    {
+      "key": "HMAAChartFullScreenVC.nodText",
+      "status": "core",
+      "target": "R6 fullscreen host",
+      "note": "保存选择/视口/显隐，返回不重置业务状态",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartFullScreenVC.h",
+      "line": 20
+    },
+    {
+      "key": "HMAAChartFullScreenVC.nodColor",
+      "status": "core",
+      "target": "R6 fullscreen host",
+      "note": "保存选择/视口/显隐，返回不重置业务状态",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartFullScreenVC.h",
+      "line": 21
+    },
+    {
+      "key": "HMAAChartFullScreenVC.nodFont",
+      "status": "core",
+      "target": "R6 fullscreen host",
+      "note": "保存选择/视口/显隐，返回不重置业务状态",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartFullScreenVC.h",
+      "line": 22
+    },
+    {
+      "key": "HMAAChartModel.name",
+      "status": "mapped",
+      "target": "CartesianChartModel.title / HYMCartesianModel.title",
+      "note": "标题内容可承接；布局由后续卡片负责",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 36
+    },
+    {
+      "key": "HMAAChartModel.chartType",
+      "status": "mapped",
+      "target": "series.kind + HYMCartesianChartKind",
+      "note": "line/column/areaspline 枚举有承接；未知类型诊断，不能静默回落",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 37
+    },
+    {
+      "key": "HMAAChartModel.stackType",
+      "status": "confirm",
+      "target": "R2 compatibility stack policy",
+      "note": "D05/D06：绘制、图例、提示顺序分离；面积正负/百分比策略需页面确认",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 38
+    },
+    {
+      "key": "HMAAChartModel.xAxisArray",
+      "status": "mapped",
+      "target": "xAxis.category / HYMCartesianModel.categories",
+      "note": "保留采样位置；标签不是稳定 sample key",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 39
+    },
+    {
+      "key": "HMAAChartModel.xSeriesArray",
+      "status": "core",
+      "target": "R3 header provider / card presentation",
+      "note": "独立逐点表头未接入内置提示；{key} 模板不能代替另一数组",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 40
+    },
+    {
+      "key": "HMAAChartModel.seriesArray",
+      "status": "mapped",
+      "target": "series + groups / OC model",
+      "note": "需 R2 稳定身份转换，不按显示名称生成 ID",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 41
+    },
+    {
+      "key": "HMAAChartModel.version",
+      "status": "core",
+      "target": "R3/R5 native card preset",
+      "note": "整合 v1/v2 标题、提示和高度预算；不复用 JS 分支",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 44
+    },
+    {
+      "key": "HMAAChartModel.unit",
+      "status": "core",
+      "target": "R3/R5 native card preset",
+      "note": "整合 v1/v2 标题、提示和高度预算；不复用 JS 分支",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 45
+    },
+    {
+      "key": "HMAAChartModel.reverse",
+      "status": "confirm",
+      "target": "R2 compatibility stack policy",
+      "note": "D05/D06：绘制、图例、提示顺序分离；面积正负/百分比策略需页面确认",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 48
+    },
+    {
+      "key": "HMAAChartModel.zoomType",
+      "status": "bridge",
+      "target": "HYMChartView.zoomAxisMode",
+      "note": "Swift 支持 X/Y/XY；OC bridge 当前只按图形选择轴",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 49
+    },
+    {
+      "key": "HMAAChartModel.yAxisMax",
+      "status": "mapped",
+      "target": "primary/secondary axis range / OC model",
+      "note": "副轴仅 0/1；Bar 明确不支持副轴",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 50
+    },
+    {
+      "key": "HMAAChartModel.yAxisMin",
+      "status": "mapped",
+      "target": "primary/secondary axis range / OC model",
+      "note": "副轴仅 0/1；Bar 明确不支持副轴",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 51
+    },
+    {
+      "key": "HMAAChartModel.yAxisTickPositions",
+      "status": "bridge",
+      "target": "CartesianAxisModel.tickPositions",
+      "note": "OC 模型缺显式刻度数组",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 52
+    },
+    {
+      "key": "HMAAChartModel.titleColor",
+      "status": "bridge",
+      "target": "CartesianChartTheme",
+      "note": "颜色/字体/contentInset/gridColor 可承接；OC 需主题入口，旧解析优先级须显式",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 53
+    },
+    {
+      "key": "HMAAChartModel.titleFont",
+      "status": "bridge",
+      "target": "CartesianChartTheme",
+      "note": "颜色/字体/contentInset/gridColor 可承接；OC 需主题入口，旧解析优先级须显式",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 54
+    },
+    {
+      "key": "HMAAChartModel.titleWeight",
+      "status": "bridge",
+      "target": "CartesianChartTheme",
+      "note": "颜色/字体/contentInset/gridColor 可承接；OC 需主题入口，旧解析优先级须显式",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 55
+    },
+    {
+      "key": "HMAAChartModel.yAxisTextColor",
+      "status": "core",
+      "target": "R2 axis style configuration",
+      "note": "现主题 tickLabelColor/font 为共用值，独立主次轴样式需补配置再桥接",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 56
+    },
+    {
+      "key": "HMAAChartModel.yAxisTextFont",
+      "status": "core",
+      "target": "R2 axis style configuration",
+      "note": "现主题 tickLabelColor/font 为共用值，独立主次轴样式需补配置再桥接",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 57
+    },
+    {
+      "key": "HMAAChartModel.yAxisTextWeight",
+      "status": "core",
+      "target": "R2 axis style configuration",
+      "note": "现主题 tickLabelColor/font 为共用值，独立主次轴样式需补配置再桥接",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 58
+    },
+    {
+      "key": "HMAAChartModel.xAxisTextColor",
+      "status": "core",
+      "target": "R2 axis style configuration",
+      "note": "现主题 tickLabelColor/font 为共用值，独立主次轴样式需补配置再桥接",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 59
+    },
+    {
+      "key": "HMAAChartModel.xAxisTextFont",
+      "status": "core",
+      "target": "R2 axis style configuration",
+      "note": "现主题 tickLabelColor/font 为共用值，独立主次轴样式需补配置再桥接",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 60
+    },
+    {
+      "key": "HMAAChartModel.xAxisTextWeight",
+      "status": "core",
+      "target": "R2 axis style configuration",
+      "note": "现主题 tickLabelColor/font 为共用值，独立主次轴样式需补配置再桥接",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 61
+    },
+    {
+      "key": "HMAAChartModel.xAxisType",
+      "status": "confirm",
+      "target": "R0b axis semantics",
+      "note": "当前等距类目/时间，任意数值/对数/不等距时间不得声明兼容",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 62
+    },
+    {
+      "key": "HMAAChartModel.xAxisMax",
+      "status": "bridge",
+      "target": "CartesianAxisModel.min/max",
+      "note": "Swift 能力需 OC 暴露；与 defaultScope 的旧优先级一起核对",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 63
+    },
+    {
+      "key": "HMAAChartModel.xAxisMin",
+      "status": "bridge",
+      "target": "CartesianAxisModel.min/max",
+      "note": "Swift 能力需 OC 暴露；与 defaultScope 的旧优先级一起核对",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 64
+    },
+    {
+      "key": "HMAAChartModel.xAxisTickInterval",
+      "status": "core",
+      "target": "R2 category ticks",
+      "note": "当前 tickInterval 针对值轴，类目间隔不可直接映射",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 65
+    },
+    {
+      "key": "HMAAChartModel.yAxisHidden",
+      "status": "core",
+      "target": "R2 independent axis visibility",
+      "note": "缺完整单独 Y 轴隐藏语义；不能把所有文字透明当兼容",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 66
+    },
+    {
+      "key": "HMAAChartModel.leftMargin",
+      "status": "bridge",
+      "target": "CartesianChartTheme",
+      "note": "颜色/字体/contentInset/gridColor 可承接；OC 需主题入口，旧解析优先级须显式",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 67
+    },
+    {
+      "key": "HMAAChartModel.crosshairColor",
+      "status": "bridge",
+      "target": "HYMChartView.crosshairColor",
+      "note": "OC 缺该外观入口",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 68
+    },
+    {
+      "key": "HMAAChartModel.dashColor",
+      "status": "bridge",
+      "target": "CartesianChartTheme",
+      "note": "颜色/字体/contentInset/gridColor 可承接；OC 需主题入口，旧解析优先级须显式",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 69
+    },
+    {
+      "key": "HMAAChartModel.toolTipBackgroundColor",
+      "status": "bridge",
+      "target": "HYMChartTooltipTheme",
+      "note": "OC tooltipOptions 尚未提供完整主题",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 70
+    },
+    {
+      "key": "HMAAChartModel.toolTipTextColor",
+      "status": "bridge",
+      "target": "HYMChartTooltipTheme",
+      "note": "OC tooltipOptions 尚未提供完整主题",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 71
+    },
+    {
+      "key": "HMAAChartModel.closeDarkStyle",
+      "status": "core",
+      "target": "R5 appearance preset",
+      "note": "外部动态色解析、图层刷新和禁用暗色预设；不同用途数组独立",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 72
+    },
+    {
+      "key": "HMAAChartModel.tooltipPinToTop",
+      "status": "mapped",
+      "target": "tooltipOptions.position / bridge.showsTooltip",
+      "note": "原生 fixedTop、显示开关已具备；旧超时/抬手由 R4 补",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 73
+    },
+    {
+      "key": "HMAAChartModel.tooltipDisable",
+      "status": "mapped",
+      "target": "tooltipOptions.position / bridge.showsTooltip",
+      "note": "原生 fixedTop、显示开关已具备；旧超时/抬手由 R4 补",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 74
+    },
+    {
+      "key": "HMAAChartModel.yAxisPlotLines",
+      "status": "bridge",
+      "target": "CartesianChartModel.plotLines",
+      "note": "Swift 有线与标签，OC 尚缺；详细标签样式另列",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 75
+    },
+    {
+      "key": "HMAAChartModel.nativeTooltip",
+      "status": "core",
+      "target": "R3/R5 native card preset",
+      "note": "整合 v1/v2 标题、提示和高度预算；不复用 JS 分支",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 76
+    },
+    {
+      "key": "HMAAChartModel.defaultScope",
+      "status": "confirm",
+      "target": "showCategoryRange / bridge NSRange",
+      "note": "旧闭区间→新半开范围；D08 半槽差异不能标成像素等价",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 77
+    },
+    {
+      "key": "HMAAChartModel.headerDatas",
+      "status": "core",
+      "target": "R5 card layout/presentation state",
+      "note": "外部卡片、强制空态和布局预算；禁止修改调用方模型 D11",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 80
+    },
+    {
+      "key": "HMAAChartModel.sunDatas",
+      "status": "core",
+      "target": "R5 card layout/presentation state",
+      "note": "外部卡片、强制空态和布局预算；禁止修改调用方模型 D11",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 83
+    },
+    {
+      "key": "HMAAChartModel.titleColorArr",
+      "status": "core",
+      "target": "R5 appearance preset",
+      "note": "外部动态色解析、图层刷新和禁用暗色预设；不同用途数组独立",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 86
+    },
+    {
+      "key": "HMAAChartModel.crosshairColorArr",
+      "status": "core",
+      "target": "R5 appearance preset",
+      "note": "外部动态色解析、图层刷新和禁用暗色预设；不同用途数组独立",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 87
+    },
+    {
+      "key": "HMAAChartModel.dashColorArr",
+      "status": "core",
+      "target": "R5 appearance preset",
+      "note": "外部动态色解析、图层刷新和禁用暗色预设；不同用途数组独立",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 88
+    },
+    {
+      "key": "HMAAChartModel.xAxisTextColorArr",
+      "status": "core",
+      "target": "R5 appearance preset",
+      "note": "外部动态色解析、图层刷新和禁用暗色预设；不同用途数组独立",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 89
+    },
+    {
+      "key": "HMAAChartModel.yAxisTextColorArr",
+      "status": "core",
+      "target": "R5 appearance preset",
+      "note": "外部动态色解析、图层刷新和禁用暗色预设；不同用途数组独立",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 90
+    },
+    {
+      "key": "HMAAChartModel.toolTipBackgroundColorArr",
+      "status": "core",
+      "target": "R5 appearance preset",
+      "note": "外部动态色解析、图层刷新和禁用暗色预设；不同用途数组独立",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 91
+    },
+    {
+      "key": "HMAAChartModel.toolTipTextColorArr",
+      "status": "core",
+      "target": "R5 appearance preset",
+      "note": "外部动态色解析、图层刷新和禁用暗色预设；不同用途数组独立",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 92
+    },
+    {
+      "key": "HMAAChartModel.subYAxis",
+      "status": "mapped",
+      "target": "primary/secondary axis range / OC model",
+      "note": "副轴仅 0/1；Bar 明确不支持副轴",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 95
+    },
+    {
+      "key": "HMAAChartModel.showLegend",
+      "status": "mapped",
+      "target": "theme.legend.isEnabled / bridge.showsLegend",
+      "note": "容器级开关；空态退出需恢复",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 98
+    },
+    {
+      "key": "HMAAChartModel.showNoData",
+      "status": "core",
+      "target": "R5 card layout/presentation state",
+      "note": "外部卡片、强制空态和布局预算；禁止修改调用方模型 D11",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 99
+    },
+    {
+      "key": "HMAAChartModel.chartHeight",
+      "status": "core",
+      "target": "R5 card layout/presentation state",
+      "note": "外部卡片、强制空态和布局预算；禁止修改调用方模型 D11",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 100
+    },
+    {
+      "key": "HMAAChartModel.showSeriesArray",
+      "status": "confirm",
+      "target": "R2 visibility snapshot",
+      "note": "旧派生缓存不是第二份真实数据源；显隐覆盖优先级待业务约定",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 103
+    },
+    {
+      "key": "HMAAYAxis.yAxisMax",
+      "status": "mapped",
+      "target": "secondaryYAxis / OC secondaryMinimum/Maximum",
+      "note": "范围可映射；显式范围裁剪属于调用方配置",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 109
+    },
+    {
+      "key": "HMAAYAxis.yAxisMin",
+      "status": "mapped",
+      "target": "secondaryYAxis / OC secondaryMinimum/Maximum",
+      "note": "范围可映射；显式范围裁剪属于调用方配置",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 110
+    },
+    {
+      "key": "HMAAYAxis.yAxisTextColor",
+      "status": "core",
+      "target": "R2/R5 axis presentation",
+      "note": "独立轴样式/轴单位标题未完整承接；系列单位不能替代轴标题",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 111
+    },
+    {
+      "key": "HMAAYAxis.yAxisTextFont",
+      "status": "core",
+      "target": "R2/R5 axis presentation",
+      "note": "独立轴样式/轴单位标题未完整承接；系列单位不能替代轴标题",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 112
+    },
+    {
+      "key": "HMAAYAxis.yAxisTextWeight",
+      "status": "core",
+      "target": "R2/R5 axis presentation",
+      "note": "独立轴样式/轴单位标题未完整承接；系列单位不能替代轴标题",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 113
+    },
+    {
+      "key": "HMAAYAxis.unit",
+      "status": "core",
+      "target": "R2/R5 axis presentation",
+      "note": "独立轴样式/轴单位标题未完整承接；系列单位不能替代轴标题",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 114
+    },
+    {
+      "key": "HMAAYAxis.yAxisTickPositions",
+      "status": "bridge",
+      "target": "secondaryYAxis.tickPositions",
+      "note": "OC 缺入口",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 115
+    },
+    {
+      "key": "HMChartHeaderModel.title",
+      "status": "core",
+      "target": "R5 functional card",
+      "note": "标题/摘要/日出日落布局与资源注入，不能放入渲染核心",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 121
+    },
+    {
+      "key": "HMChartHeaderModel.data",
+      "status": "core",
+      "target": "R5 functional card",
+      "note": "标题/摘要/日出日落布局与资源注入，不能放入渲染核心",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 122
+    },
+    {
+      "key": "HMChartHeaderModel.unit",
+      "status": "core",
+      "target": "R5 functional card",
+      "note": "标题/摘要/日出日落布局与资源注入，不能放入渲染核心",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 123
+    },
+    {
+      "key": "HMChartHeaderModel.topMargin",
+      "status": "core",
+      "target": "R5 functional card",
+      "note": "标题/摘要/日出日落布局与资源注入，不能放入渲染核心",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 124
+    },
+    {
+      "key": "HMChartHeaderModel.leftMargin",
+      "status": "core",
+      "target": "R5 functional card",
+      "note": "标题/摘要/日出日落布局与资源注入，不能放入渲染核心",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 125
+    },
+    {
+      "key": "HMChartHeaderModel.rightMargin",
+      "status": "core",
+      "target": "R5 functional card",
+      "note": "标题/摘要/日出日落布局与资源注入，不能放入渲染核心",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 126
+    },
+    {
+      "key": "HMChartSunModel.icon",
+      "status": "core",
+      "target": "R5 functional card",
+      "note": "标题/摘要/日出日落布局与资源注入，不能放入渲染核心",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 132
+    },
+    {
+      "key": "HMChartSunModel.title",
+      "status": "core",
+      "target": "R5 functional card",
+      "note": "标题/摘要/日出日落布局与资源注入，不能放入渲染核心",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 133
+    },
+    {
+      "key": "HMChartSunModel.time",
+      "status": "core",
+      "target": "R5 functional card",
+      "note": "标题/摘要/日出日落布局与资源注入，不能放入渲染核心",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 134
+    },
+    {
+      "key": "HMChartSunModel.initSunriseModel",
+      "status": "core",
+      "target": "R5 functional card",
+      "note": "标题/摘要/日出日落布局与资源注入，不能放入渲染核心",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 136
+    },
+    {
+      "key": "HMChartSunModel.initSunsetModel",
+      "status": "core",
+      "target": "R5 functional card",
+      "note": "标题/摘要/日出日落布局与资源注入，不能放入渲染核心",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "line": 138
+    },
+    {
+      "key": "HMAASeries.gname",
+      "status": "mapped",
+      "target": "CartesianSeriesGroup.name / HYMCartesianGroup.name",
+      "note": "静态展示组，与 stackID 分离",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 40
+    },
+    {
+      "key": "HMAASeries.gnames",
+      "status": "core",
+      "target": "R3 group title provider",
+      "note": "内置分组只有静态名称，逐采样组名缺入口",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 41
+    },
+    {
+      "key": "HMAASeries.element",
+      "status": "mapped",
+      "target": "series filtered by groupID",
+      "note": "按稳定身份展平，保留成员顺序",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 42
+    },
+    {
+      "key": "HMAASeries.unitType",
+      "status": "core",
+      "target": "R3 group summary formatter",
+      "note": "旧 float 汇总、独立格式/来源规则不同于通用 subtotal，fractionDigits=100 分支需契约测试",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 43
+    },
+    {
+      "key": "HMAASeries.otherUnit",
+      "status": "core",
+      "target": "R3 group summary formatter",
+      "note": "旧 float 汇总、独立格式/来源规则不同于通用 subtotal，fractionDigits=100 分支需契约测试",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 44
+    },
+    {
+      "key": "HMAASeries.currencySymbol",
+      "status": "core",
+      "target": "R3 group summary formatter",
+      "note": "旧 float 汇总、独立格式/来源规则不同于通用 subtotal，fractionDigits=100 分支需契约测试",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 45
+    },
+    {
+      "key": "HMAASeries.showFabs",
+      "status": "core",
+      "target": "R3 group summary formatter",
+      "note": "旧 float 汇总、独立格式/来源规则不同于通用 subtotal，fractionDigits=100 分支需契约测试",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 46
+    },
+    {
+      "key": "HMAASeries.trunc",
+      "status": "core",
+      "target": "R3 group summary formatter",
+      "note": "旧 float 汇总、独立格式/来源规则不同于通用 subtotal，fractionDigits=100 分支需契约测试",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 47
+    },
+    {
+      "key": "HMAASeries.fractionDigits",
+      "status": "core",
+      "target": "R3 group summary formatter",
+      "note": "旧 float 汇总、独立格式/来源规则不同于通用 subtotal，fractionDigits=100 分支需契约测试",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 50
+    },
+    {
+      "key": "HMAASeries.fgdata",
+      "status": "core",
+      "target": "R3 group summary formatter",
+      "note": "旧 float 汇总、独立格式/来源规则不同于通用 subtotal，fractionDigits=100 分支需契约测试",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 53
+    },
+    {
+      "key": "HMAASeries.formatGroupData",
+      "status": "core",
+      "target": "R3 group summary formatter",
+      "note": "旧 float 汇总、独立格式/来源规则不同于通用 subtotal，fractionDigits=100 分支需契约测试",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 55
+    },
+    {
+      "key": "HMAASeries.onlyNameIntooltip",
+      "status": "mapped",
+      "target": "tooltip rowStyleProvider",
+      "note": "hidesValue 与 title 空串分别映射；text 冒号/来源标签仍须验收",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 57
+    },
+    {
+      "key": "HMAASeries.icon",
+      "status": "core",
+      "target": "R3 group legend/header layout",
+      "note": "现有 series 图例不足以直接承接组图标、分标题和组内分栏",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 60
+    },
+    {
+      "key": "HMAASeries.color",
+      "status": "core",
+      "target": "R3 group legend/header layout",
+      "note": "现有 series 图例不足以直接承接组图标、分标题和组内分栏",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 61
+    },
+    {
+      "key": "HMAASeries.gcname",
+      "status": "core",
+      "target": "R3 group legend/header layout",
+      "note": "现有 series 图例不足以直接承接组图标、分标题和组内分栏",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 62
+    },
+    {
+      "key": "HMAASeries.showElementName",
+      "status": "mapped",
+      "target": "tooltip rowStyleProvider",
+      "note": "hidesValue 与 title 空串分别映射；text 冒号/来源标签仍须验收",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 63
+    },
+    {
+      "key": "HMAASeries.stackGroupInterval",
+      "status": "core",
+      "target": "R3 group legend/header layout",
+      "note": "现有 series 图例不足以直接承接组图标、分标题和组内分栏",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 64
+    },
+    {
+      "key": "HMAASeriesElement.name",
+      "status": "mapped",
+      "target": "CartesianSeriesElement / HYMCartesianSeries",
+      "note": "缺测保位，非法输入诊断；无稳定 ID 须由 R2 提供",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 70
+    },
+    {
+      "key": "HMAASeriesElement.names",
+      "status": "mapped",
+      "target": "tooltip rowStyleProvider / OC provider",
+      "note": "只过滤或覆盖提示；hidePoints 当前索引政策需在 R3 明确",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 71
+    },
+    {
+      "key": "HMAASeriesElement.color",
+      "status": "mapped",
+      "target": "CartesianSeriesElement / HYMCartesianSeries",
+      "note": "缺测保位，非法输入诊断；无稳定 ID 须由 R2 提供",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 72
+    },
+    {
+      "key": "HMAASeriesElement.data",
+      "status": "mapped",
+      "target": "CartesianSeriesElement / HYMCartesianSeries",
+      "note": "缺测保位，非法输入诊断；无稳定 ID 须由 R2 提供",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 73
+    },
+    {
+      "key": "HMAASeriesElement.unitType",
+      "status": "mapped",
+      "target": "CartesianValueFormat / OC format + unit",
+      "note": "单位进位白名单在兼容层；金额/原值/展示值分离，禁止 showFabs 改写 raw",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 74
+    },
+    {
+      "key": "HMAASeriesElement.otherUnit",
+      "status": "mapped",
+      "target": "CartesianValueFormat / OC format + unit",
+      "note": "单位进位白名单在兼容层；金额/原值/展示值分离，禁止 showFabs 改写 raw",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 75
+    },
+    {
+      "key": "HMAASeriesElement.currencySymbol",
+      "status": "mapped",
+      "target": "CartesianValueFormat / OC format + unit",
+      "note": "单位进位白名单在兼容层；金额/原值/展示值分离，禁止 showFabs 改写 raw",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 76
+    },
+    {
+      "key": "HMAASeriesElement.showFabs",
+      "status": "mapped",
+      "target": "CartesianValueFormat / OC format + unit",
+      "note": "单位进位白名单在兼容层；金额/原值/展示值分离，禁止 showFabs 改写 raw",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 77
+    },
+    {
+      "key": "HMAASeriesElement.trunc",
+      "status": "mapped",
+      "target": "CartesianValueFormat / OC format + unit",
+      "note": "单位进位白名单在兼容层；金额/原值/展示值分离，禁止 showFabs 改写 raw",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 78
+    },
+    {
+      "key": "HMAASeriesElement.fractionDigits",
+      "status": "core",
+      "target": "R2/R3 legacy formatting policy",
+      "note": "100 哨兵非普通精度；旧预舍入和 k/M/G 不同位数尚未完整实现",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 81
+    },
+    {
+      "key": "HMAASeriesElement.chartType",
+      "status": "confirm",
+      "target": "R2 concrete type stack partition",
+      "note": "series.kind/stackID 已有；D06 Highcharts 具体类型分链与 HYM 图形族不同",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 84
+    },
+    {
+      "key": "HMAASeriesElement.stackGroup",
+      "status": "confirm",
+      "target": "R2 concrete type stack partition",
+      "note": "series.kind/stackID 已有；D06 Highcharts 具体类型分链与 HYM 图形族不同",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 87
+    },
+    {
+      "key": "HMAASeriesElement.fillColorAlphas",
+      "status": "mapped",
+      "target": "series.style.areaGradientColors/fillOpacity / OC style",
+      "note": "兼容层固定旧优先级，避免重复乘 alpha",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 89
+    },
+    {
+      "key": "HMAASeriesElement.autoGap",
+      "status": "mapped",
+      "target": "gapPolicy / colorZones / OC wrappers",
+      "note": ">=12 空点断开 → maximumMissingPoints=11；修正 D03 分区覆盖",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 91
+    },
+    {
+      "key": "HMAASeriesElement.yAxis",
+      "status": "mapped",
+      "target": "CartesianSeriesElement / HYMCartesianSeries",
+      "note": "缺测保位，非法输入诊断；无稳定 ID 须由 R2 提供",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 93
+    },
+    {
+      "key": "HMAASeriesElement.dashStyle",
+      "status": "bridge",
+      "target": "series.negativeColor/lineDashStyle",
+      "note": "Swift 已支持，OC series 尚缺；非法颜色/虚线必须诊断",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 95
+    },
+    {
+      "key": "HMAASeriesElement.zones",
+      "status": "mapped",
+      "target": "gapPolicy / colorZones / OC wrappers",
+      "note": ">=12 空点断开 → maximumMissingPoints=11；修正 D03 分区覆盖",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 98
+    },
+    {
+      "key": "HMAASeriesElement.zoneAxisX",
+      "status": "mapped",
+      "target": "gapPolicy / colorZones / OC wrappers",
+      "note": ">=12 空点断开 → maximumMissingPoints=11；修正 D03 分区覆盖",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 99
+    },
+    {
+      "key": "HMAASeriesElement.hideInTooltip",
+      "status": "mapped",
+      "target": "tooltip rowStyleProvider / OC provider",
+      "note": "只过滤或覆盖提示；hidePoints 当前索引政策需在 R3 明确",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 102
+    },
+    {
+      "key": "HMAASeriesElement.fillAlpha",
+      "status": "mapped",
+      "target": "series.style.areaGradientColors/fillOpacity / OC style",
+      "note": "兼容层固定旧优先级，避免重复乘 alpha",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 103
+    },
+    {
+      "key": "HMAASeriesElement.fillColor",
+      "status": "mapped",
+      "target": "series.style.areaGradientColors/fillOpacity / OC style",
+      "note": "兼容层固定旧优先级，避免重复乘 alpha",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 104
+    },
+    {
+      "key": "HMAASeriesElement.negativeColor",
+      "status": "bridge",
+      "target": "series.negativeColor/lineDashStyle",
+      "note": "Swift 已支持，OC series 尚缺；非法颜色/虚线必须诊断",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 105
+    },
+    {
+      "key": "HMAASeriesElement.isStep",
+      "status": "mapped",
+      "target": "series.style.connection/showsPoints / OC style",
+      "note": "确认 stepAfter 方向，markerHidden 取反；D09 拆分丢字段不复刻",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 106
+    },
+    {
+      "key": "HMAASeriesElement.markerHidden",
+      "status": "mapped",
+      "target": "series.style.connection/showsPoints / OC style",
+      "note": "确认 stepAfter 方向，markerHidden 取反；D09 拆分丢字段不复刻",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 107
+    },
+    {
+      "key": "HMAASeriesElement.showPrev",
+      "status": "mapped",
+      "target": "tooltip sampleOffsetsBySeriesID + clamp",
+      "note": "仅提示值 -1，命中身份/表头/行名保持当前采样",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 108
+    },
+    {
+      "key": "HMAASeriesElement.formatData",
+      "status": "core",
+      "target": "R2/R3 legacy formatting policy",
+      "note": "100 哨兵非普通精度；旧预舍入和 k/M/G 不同位数尚未完整实现",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 111
+    },
+    {
+      "key": "HMAASeriesElement.fdata",
+      "status": "core",
+      "target": "R2/R3 legacy formatting policy",
+      "note": "100 哨兵非普通精度；旧预舍入和 k/M/G 不同位数尚未完整实现",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 112
+    },
+    {
+      "key": "HMAASeriesElement.hidePoints",
+      "status": "mapped",
+      "target": "tooltip rowStyleProvider / OC provider",
+      "note": "只过滤或覆盖提示；hidePoints 当前索引政策需在 R3 明确",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 113
+    },
+    {
+      "key": "HMAASeriesElement.legendBgColor",
+      "status": "mapped",
+      "target": "legend.itemOverrides / OC legendItemStyles",
+      "note": "资源由宿主解析后注入 UIImage；透明度仅计算一次",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 117
+    },
+    {
+      "key": "HMAASeriesElement.legendBgColorAlpha",
+      "status": "mapped",
+      "target": "legend.itemOverrides / OC legendItemStyles",
+      "note": "资源由宿主解析后注入 UIImage；透明度仅计算一次",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 118
+    },
+    {
+      "key": "HMAASeriesElement.isHidden",
+      "status": "mapped",
+      "target": "series.isVisible + setSeriesVisible",
+      "note": "取反；显式模型变化/用户覆盖优先级已有实现，旧模型适配待做",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 119
+    },
+    {
+      "key": "HMAASeriesElement.icon",
+      "status": "mapped",
+      "target": "legend.itemOverrides / OC legendItemStyles",
+      "note": "资源由宿主解析后注入 UIImage；透明度仅计算一次",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 122
+    },
+    {
+      "key": "HMAASeriesElement.hideNameInTooltip",
+      "status": "mapped",
+      "target": "tooltip rowStyleProvider / OC provider",
+      "note": "只过滤或覆盖提示；hidePoints 当前索引政策需在 R3 明确",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 123
+    },
+    {
+      "key": "HMAASeriesUtil.doubleWithOriginData:showFabs:fractionDigits:",
+      "status": "core",
+      "target": "R2/R3 pure compatibility formatter",
+      "note": "旧精度、单位、负零和进位边界；不直接暴露旧工具类到通用 SDK",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 130
+    },
+    {
+      "key": "HMAASeriesUtil.formatCarryDouble:trunc:fractionDigits:",
+      "status": "core",
+      "target": "R2/R3 pure compatibility formatter",
+      "note": "旧精度、单位、负零和进位边界；不直接暴露旧工具类到通用 SDK",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 133
+    },
+    {
+      "key": "HMAASeriesUtil.formatDouble:trunc:fractionDigits:",
+      "status": "core",
+      "target": "R2/R3 pure compatibility formatter",
+      "note": "旧精度、单位、负零和进位边界；不直接暴露旧工具类到通用 SDK",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 136
+    },
+    {
+      "key": "HMAASeriesUtil.getUnitWithType:",
+      "status": "core",
+      "target": "R2/R3 pure compatibility formatter",
+      "note": "旧精度、单位、负零和进位边界；不直接暴露旧工具类到通用 SDK",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 139
+    },
+    {
+      "key": "HMAASeriesUtil.jsonSerializsWithArray:",
+      "status": "unsupported",
+      "target": "remove JS serialization boundary",
+      "note": "原生不需要 JS 字符串；调用者如直接使用须迁移，不能静默空实现",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 142
+    },
+    {
+      "key": "HMAASeriesUtil.canTranslateToNum:",
+      "status": "mapped",
+      "target": "R2 validated input snapshot",
+      "note": "保留 null 下标，不转 0；轴范围以全部可见 draw/base 重新计算 D12",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 145
+    },
+    {
+      "key": "HMAASeriesUtil.needCarryType:",
+      "status": "core",
+      "target": "R2/R3 pure compatibility formatter",
+      "note": "旧精度、单位、负零和进位边界；不直接暴露旧工具类到通用 SDK",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 148
+    },
+    {
+      "key": "HMAASeriesUtil.formatNullElements:",
+      "status": "mapped",
+      "target": "R2 validated input snapshot",
+      "note": "保留 null 下标，不转 0；轴范围以全部可见 draw/base 重新计算 D12",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 151
+    },
+    {
+      "key": "HMAASeriesUtil.rgbaStringFromHex:withAlpha:",
+      "status": "mapped",
+      "target": "R2 color parser → UIColor",
+      "note": "兼容层解析且错误可见，不把 hex/string 传播到核心",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 154
+    },
+    {
+      "key": "HMAASeriesUtil.calculateMaxMinValueWithNumberArray:",
+      "status": "mapped",
+      "target": "R2 validated input snapshot",
+      "note": "保留 null 下标，不转 0；轴范围以全部可见 draw/base 重新计算 D12",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 157
+    },
+    {
+      "key": "HMAASeriesUtil.formatMoney:withSymbol:",
+      "status": "core",
+      "target": "R2/R3 pure compatibility formatter",
+      "note": "旧精度、单位、负零和进位边界；不直接暴露旧工具类到通用 SDK",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 160
+    },
+    {
+      "key": "HMAASeriesUtil.positiveSplitFromSeriesElement:",
+      "status": "confirm",
+      "target": "R2 sign policy; preserve business series",
+      "note": "D09 空值异常/丢字段必须修正；D06 抵消策略需业务选择，辅助 series 不作为业务身份",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 163
+    },
+    {
+      "key": "HMAASeriesUtil.negativeSplitFromSeriesElement:",
+      "status": "confirm",
+      "target": "R2 sign policy; preserve business series",
+      "note": "D09 空值异常/丢字段必须修正；D06 抵消策略需业务选择，辅助 series 不作为业务身份",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "line": 166
+    },
+    {
+      "key": "HMAAPlotLinesElement.color",
+      "status": "bridge",
+      "target": "CartesianPlotLine",
+      "note": "Swift 已有，OC 需新增包装",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h",
+      "line": 15
+    },
+    {
+      "key": "HMAAPlotLinesElement.dashStyle",
+      "status": "bridge",
+      "target": "CartesianPlotLine",
+      "note": "Swift 已有，OC 需新增包装",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h",
+      "line": 29
+    },
+    {
+      "key": "HMAAPlotLinesElement.width",
+      "status": "bridge",
+      "target": "CartesianPlotLine",
+      "note": "Swift 已有，OC 需新增包装",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h",
+      "line": 30
+    },
+    {
+      "key": "HMAAPlotLinesElement.value",
+      "status": "bridge",
+      "target": "CartesianPlotLine",
+      "note": "Swift 已有，OC 需新增包装",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h",
+      "line": 31
+    },
+    {
+      "key": "HMAAPlotLinesElement.zIndex",
+      "status": "core",
+      "target": "R2 plot-line label/layer options",
+      "note": "当前标签跟随线色、固定层次；不可宣称支持任意标签样式/层级",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h",
+      "line": 32
+    },
+    {
+      "key": "HMAAPlotLinesElement.text",
+      "status": "bridge",
+      "target": "CartesianPlotLine",
+      "note": "Swift 已有，OC 需新增包装",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h",
+      "line": 33
+    },
+    {
+      "key": "HMAAPlotLinesElement.textColor",
+      "status": "core",
+      "target": "R2 plot-line label/layer options",
+      "note": "当前标签跟随线色、固定层次；不可宣称支持任意标签样式/层级",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h",
+      "line": 34
+    },
+    {
+      "key": "HMAAPlotLinesElement.textDarkColor",
+      "status": "core",
+      "target": "R2 plot-line label/layer options",
+      "note": "当前标签跟随线色、固定层次；不可宣称支持任意标签样式/层级",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h",
+      "line": 35
+    },
+    {
+      "key": "HMAAPlotLinesElement.fontSize",
+      "status": "core",
+      "target": "R2 plot-line label/layer options",
+      "note": "当前标签跟随线色、固定层次；不可宣称支持任意标签样式/层级",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h",
+      "line": 36
+    },
+    {
+      "key": "HMAAChartManager.series",
+      "status": "unsupported",
+      "target": "R2 native adapter output",
+      "note": "AASeriesElement/AAOptions 引擎类型退出公开边界；直接调用者须迁移",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartManager.h",
+      "line": 16
+    },
+    {
+      "key": "HMAAChartManager.initWithChartModel:",
+      "status": "core",
+      "target": "R2 snapshot adapter",
+      "note": "不以缓存转换结果替代后续更新",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartManager.h",
+      "line": 19
+    },
+    {
+      "key": "HMAAChartManager.configureAAChartOptions",
+      "status": "unsupported",
+      "target": "R2 native adapter output",
+      "note": "AASeriesElement/AAOptions 引擎类型退出公开边界；直接调用者须迁移",
+      "source": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartManager.h",
+      "line": 22
+    }
+  ]
+}

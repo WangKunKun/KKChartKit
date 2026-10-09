@@ -1,0 +1,2416 @@
+{
+  "matrixVersion": 1,
+  "asOf": "2026-10-09",
+  "specificationVersion": 4,
+  "inventory": "docs/charts-legacy-field-inventory.json",
+  "evidence": {
+    "schema": {
+      "kind": "schema",
+      "path": "SwiftFunctionProject/Charts/Specification/ChartSpecification.swift",
+      "anchor": "public struct ChartSpecification:"
+    },
+    "data": {
+      "kind": "schema",
+      "path": "SwiftFunctionProject/Charts/Specification/ChartDataSpecification.swift",
+      "anchor": "public struct ChartSeriesSpecification:"
+    },
+    "appearance": {
+      "kind": "schema",
+      "path": "SwiftFunctionProject/Charts/Specification/ChartAppearanceSpecification.swift",
+      "anchor": "public struct ChartSeriesAppearance:"
+    },
+    "axis-schema": {
+      "kind": "schema",
+      "path": "SwiftFunctionProject/Charts/Specification/ChartAppearanceSpecification.swift",
+      "anchor": "public struct ChartAxisSpecification:"
+    },
+    "format-schema": {
+      "kind": "schema",
+      "path": "SwiftFunctionProject/Charts/Specification/ChartAppearanceSpecification.swift",
+      "anchor": "public struct ChartValuePresentation:"
+    },
+    "validation": {
+      "kind": "schema",
+      "path": "SwiftFunctionProject/Charts/Specification/ChartSpecificationValidation.swift",
+      "anchor": "func validationIssues()"
+    },
+    "adapter": {
+      "kind": "adapter",
+      "path": "SwiftFunctionProject/Charts/Adapters/HYMChartsSpecificationAdapter.swift",
+      "anchor": "public func makeConfiguration(from specification:"
+    },
+    "diagnostics": {
+      "kind": "adapter",
+      "path": "SwiftFunctionProject/Charts/Adapters/HYMChartsSpecificationAdapter.swift",
+      "anchor": "public func diagnostics(for specification:"
+    },
+    "document": {
+      "kind": "native",
+      "path": "SwiftFunctionProject/Charts/OCBridge/HYMChartSpecificationDocument.swift",
+      "anchor": "public func makeNativeBridge(frame:"
+    },
+    "native-model": {
+      "kind": "native",
+      "path": "SwiftFunctionProject/Charts/Cartesian/CartesianChartModel.swift",
+      "anchor": "public struct CartesianChartModel"
+    },
+    "axis-native": {
+      "kind": "native",
+      "path": "SwiftFunctionProject/Charts/Cartesian/CartesianAxisStyle.swift",
+      "anchor": "public struct CartesianAxisStyle"
+    },
+    "ticks-native": {
+      "kind": "native",
+      "path": "SwiftFunctionProject/Charts/Cartesian/CartesianChartModel.swift",
+      "anchor": "public var categoryLabelInterval: Int?"
+    },
+    "theme-native": {
+      "kind": "native",
+      "path": "SwiftFunctionProject/Charts/Cartesian/CartesianChartTheme.swift",
+      "anchor": "public struct CartesianChartTheme"
+    },
+    "g1-native": {
+      "kind": "native",
+      "path": "SwiftFunctionProject/Charts/Cartesian/CartesianChartTheme.swift",
+      "anchor": "public enum StackedAreaBoundaryMode:"
+    },
+    "zones-native": {
+      "kind": "native",
+      "path": "SwiftFunctionProject/Charts/Cartesian/CartesianColorZones.swift",
+      "anchor": "public struct CartesianColorZones"
+    },
+    "annotations-native": {
+      "kind": "native",
+      "path": "SwiftFunctionProject/Charts/OCBridge/HYMCartesianAnnotations.swift",
+      "anchor": "public final class HYMCartesianPlotLine:"
+    },
+    "labels-native": {
+      "kind": "native",
+      "path": "SwiftFunctionProject/Charts/Cartesian/CartesianAnnotationLabel.swift",
+      "anchor": "public struct CartesianAnnotationLabelStyle"
+    },
+    "selection-native": {
+      "kind": "native",
+      "path": "SwiftFunctionProject/Charts/Cartesian/CartesianSelectionStyle.swift",
+      "anchor": "public struct CartesianSelectionStyle"
+    },
+    "tooltip-native": {
+      "kind": "native",
+      "path": "SwiftFunctionProject/Charts/Cartesian/CartesianTooltipPresentation.swift",
+      "anchor": "public struct CartesianTooltipPresentation"
+    },
+    "tooltip-options": {
+      "kind": "native",
+      "path": "SwiftFunctionProject/Charts/Cartesian/CartesianTooltipOptions.swift",
+      "anchor": "public struct CartesianTooltipOptions"
+    },
+    "tooltip-offset": {
+      "kind": "native",
+      "path": "SwiftFunctionProject/Charts/Cartesian/CartesianTooltipSampleSelection.swift",
+      "anchor": "public struct CartesianTooltipSampleSelection"
+    },
+    "tooltip-theme": {
+      "kind": "native",
+      "path": "SwiftFunctionProject/Charts/Core/HYMChartTooltipTheme.swift",
+      "anchor": "public struct HYMChartTooltipTheme"
+    },
+    "legend-native": {
+      "kind": "native",
+      "path": "SwiftFunctionProject/Charts/OCBridge/HYMCartesianPresentation.swift",
+      "anchor": "public final class HYMCartesianLegendItemStyle:"
+    },
+    "view-native": {
+      "kind": "native",
+      "path": "SwiftFunctionProject/Charts/Core/HYMChartView.swift",
+      "anchor": "public var onHit:"
+    },
+    "zoom-native": {
+      "kind": "native",
+      "path": "SwiftFunctionProject/Charts/Core/HYMChartView.swift",
+      "anchor": "public var zoomAxisMode:"
+    },
+    "viewport-native": {
+      "kind": "native",
+      "path": "SwiftFunctionProject/Charts/Core/HYMChartView.swift",
+      "anchor": "public func showCategoryRange("
+    },
+    "visibility-native": {
+      "kind": "native",
+      "path": "SwiftFunctionProject/Charts/Core/HYMChartView.swift",
+      "anchor": "public func setSeriesVisible("
+    },
+    "legend-order": {
+      "kind": "native",
+      "path": "SwiftFunctionProject/Charts/Cartesian/CartesianChartModel.swift",
+      "anchor": "public var legendOrder:"
+    },
+    "oc-native": {
+      "kind": "native",
+      "path": "SwiftFunctionProject/Charts/OCBridge/HYMCartesianChartViewBridge.swift",
+      "anchor": "public func setSeriesVisible("
+    },
+    "neutral-guide": {
+      "kind": "guide",
+      "path": "docs/charts-neutral-model-guide.md",
+      "anchor": "fractionDigits"
+    },
+    "migration-plan": {
+      "kind": "guide",
+      "path": "docs/charts-legacy-replacement-plan.md",
+      "anchor": "R4"
+    },
+    "legacy-series": {
+      "kind": "legacy",
+      "path": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "anchor": "fractionDigits=100"
+    },
+    "identity-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/ChartSpecificationTests.swift",
+      "anchor": "func testRoundTripKeepsIdentityMissingSignAndPresentationWithoutUIKit("
+    },
+    "sparse-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/ChartSpecificationTests.swift",
+      "anchor": "func testSparseUnorderedSamplesAlignByCategoryIDWithoutInventingIdentities("
+    },
+    "style-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/ChartSpecificationTests.swift",
+      "anchor": "func testStyleAndGapConversionPreserveExplicitChoices("
+    },
+    "percent-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/ChartSpecificationTests.swift",
+      "anchor": "func testSignedPercentUsesAbsoluteDenominatorAndLeavesRawValuesUnchanged("
+    },
+    "axis-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/ChartSpecificationTests.swift",
+      "anchor": "func testSeriesAndAxisReorderingRetainStableBindings("
+    },
+    "reject-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/ChartSpecificationTests.swift",
+      "anchor": "func testUnsupportedCoordinatesAxesAndIgnoredBarStylesAreRejected("
+    },
+    "grid-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/ChartSpecificationTests.swift",
+      "anchor": "func testAxisGridIntentControlsActualScreenDirectionsAndRejectsSecondaryOnlyGrid("
+    },
+    "format-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/ChartSpecificationTests.swift",
+      "anchor": "func testInputStyleRangeAndLegacyPrecisionAreNotSilentlyClamped("
+    },
+    "oc-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/ChartSpecificationTests.swift",
+      "anchor": "func testObjectiveCDocumentAndBridgeKeepLastChartWhenUpdateFails("
+    },
+    "g1-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/DivergingStackRendererTests.swift",
+      "anchor": "func testUnifiedGapsKeepValidRawHitsAndDoNotAddZeroCrossingSamples("
+    },
+    "axes-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/AxisStyleTests.swift",
+      "anchor": "func testIndependentAxisColorsFontsAndLinesAcrossFourRenderers("
+    },
+    "cadence-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/AxisStyleTests.swift",
+      "anchor": "func testExplicitCategoryCadenceIsAbsoluteAndDensityUsesMultiples("
+    },
+    "annotation-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/AnnotationStyleTests.swift",
+      "anchor": "func testObjectiveCSnapshotAndDemoBindingsUseSameAnnotationSettings("
+    },
+    "tooltip-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/RichTooltipTests.swift",
+      "anchor": "func testStructuredContentKeepsGroupsMetadataImagesAndSignedSubtotal("
+    },
+    "offset-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/TooltipSelectionTests.swift",
+      "anchor": "func testPreviousValuesKeepCurrentHeaderHitProviderAndAlignedSubtotal("
+    },
+    "zones-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/CartesianColorZoneTests.swift",
+      "anchor": "func testZonesDoNotFillMissingDataOrChangeHitDomainAndGapPolicy("
+    },
+    "visibility-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/ChartLegendTests.swift",
+      "anchor": "func testVisibilitySurvivesReorderingAndCanBeResetOrDrivenByModel("
+    },
+    "format-native": {
+      "kind": "native",
+      "path": "SwiftFunctionProject/Charts/Cartesian/CartesianValueFormat.swift",
+      "anchor": "public struct CartesianValueFormat"
+    },
+    "legacy-axis-unit": {
+      "kind": "legacy",
+      "path": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartManager.m",
+      "anchor": "NSString *format = [NSString stringWithFormat:@\"{value}%@\", subYAxis.unit];"
+    },
+    "legacy-secondary-ticks": {
+      "kind": "legacy",
+      "path": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartManager.m",
+      "anchor": "rightYAxis.tickPositions = _chartModel.yAxisTickPositions;"
+    },
+    "legacy-secondary-color": {
+      "kind": "legacy",
+      "path": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartManager.m",
+      "anchor": "rightYAxis.lineColorSet(_chartModel.yAxisTextColor);"
+    },
+    "legacy-plot-line": {
+      "kind": "legacy",
+      "path": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartManager.m",
+      "anchor": "- (AAPlotLinesElement *)packagePlotElementWithObject:(HMAAPlotLinesElement *)obj {"
+    },
+    "legacy-fill": {
+      "kind": "legacy",
+      "path": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartManager.m",
+      "anchor": "NSString *endColorString = [HMAASeriesUtil rgbaStringFromHex:fillColor withAlpha:[obj.fillColorAlphas.lastObject floatValue]];"
+    },
+    "legacy-gap": {
+      "kind": "legacy",
+      "path": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartManager.m",
+      "anchor": "if (len >= maxNulls) {"
+    },
+    "legacy-grid": {
+      "kind": "legacy",
+      "path": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartManager.m",
+      "anchor": "aChartOptions.xAxis.lineColor = _chartModel.dashColor;"
+    },
+    "legacy-title": {
+      "kind": "legacy",
+      "path": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartManager.m",
+      "anchor": "if (_chartModel.name.length > 0 && _chartModel.version != 2) {"
+    },
+    "boundary-coding": {
+      "kind": "schema",
+      "path": "SwiftFunctionProject/Charts/Specification/ChartSpecificationVersionCoding.swift",
+      "anchor": "if schemaVersion >= 2 { try c.encode(stackedAreaBoundary, forKey: .stackedAreaBoundary) }"
+    },
+    "g1-model-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/ChartSpecificationBoundaryTests.swift",
+      "anchor": "func testV1CannotSmuggleBoundaryKeyOrSilentlyDowngradeV2("
+    },
+    "g1-adapter-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/ChartSpecificationBoundaryTests.swift",
+      "anchor": "func testDivergingOverridesConnectForGeometryButPreservesRawMissingAndHitIdentity("
+    },
+    "value-zones-schema": {
+      "kind": "schema",
+      "path": "SwiftFunctionProject/Charts/Specification/ChartValueColorZones.swift",
+      "anchor": "public struct ChartValueColorZones:"
+    },
+    "value-zones-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/ChartSpecificationColorZoneTests.swift",
+      "anchor": "func testRaw20Draw70PercentVisibilityAndIdentityInVerticalAndHorizontalBars("
+    },
+    "value-zones-reject-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/ChartSpecificationColorZoneTests.swift",
+      "anchor": "func testRawLineAndAreaAreExplicitlyRejectedIncludingHiddenSeries("
+    },
+    "axis-presentation-schema": {
+      "kind": "schema",
+      "path": "SwiftFunctionProject/Charts/Specification/ChartAxisPresentation.swift",
+      "anchor": "public struct ChartAxisLabelFormat:"
+    },
+    "axis-presentation-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/ChartSpecificationAxisPresentationTests.swift",
+      "anchor": "func testFourRenderersConsumeIndependentAxisTicksFontsAndFormattedLabels("
+    },
+    "axis-version-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/ChartSpecificationAxisPresentationTests.swift",
+      "anchor": "func testPriorVersionsRejectEveryReservedKeyEvenNullThroughBothDecoders("
+    }
+  },
+  "capabilities": [
+    {
+      "id": "title",
+      "title": "图表标题内容",
+      "disposition": "expressed",
+      "nativeSupport": "supported",
+      "adapterSupport": "mapped",
+      "schemaPaths": [
+        "ChartSpecification.title"
+      ],
+      "finding": "标题内容可表达；标题颜色、字号、字重另列。",
+      "nextAction": "R2 将 name 转为 title；不把卡片版本或通用单位拼接规则固化到核心。",
+      "evidence": [
+        "schema",
+        "adapter",
+        "native-model",
+        "identity-test",
+        "legacy-title"
+      ]
+    },
+    {
+      "id": "marks",
+      "title": "图元、插值及组合",
+      "disposition": "expressed",
+      "nativeSupport": "supported",
+      "adapterSupport": "mapped",
+      "schemaPaths": [
+        "ChartSeriesSpecification.mark",
+        "ChartSeriesSpecification.interpolation",
+        "ChartSpecification.orientation"
+      ],
+      "finding": "line/area/bar 与五种连线插值可表达；横向只允许 bar，混合系列由适配器选择 renderer。",
+      "nextAction": "R2 建立显式类型白名单与图表/系列覆盖优先级；未知类型拒绝，不能回退 line。",
+      "evidence": [
+        "schema",
+        "data",
+        "adapter",
+        "native-model",
+        "style-test",
+        "reject-test"
+      ]
+    },
+    {
+      "id": "stacking",
+      "title": "数学堆叠与组键",
+      "disposition": "expressed",
+      "nativeSupport": "supported",
+      "adapterSupport": "mapped",
+      "schemaPaths": [
+        "ChartSpecification.stacking",
+        "ChartSeriesSpecification.stackID",
+        "ChartSeriesSpecification.valueAxisID"
+      ],
+      "finding": "正负分开累计；自动百分比分母为同组可见贡献绝对值总和；业务 groupID 不参与数学组键。",
+      "nextAction": "R2 明确 D06 旧面积净额/具体类型分链与新图形族的取舍，不能声称默认百分比或旧累计等价。G1 插值边界另列。",
+      "evidence": [
+        "schema",
+        "data",
+        "adapter",
+        "native-model",
+        "percent-test"
+      ]
+    },
+    {
+      "id": "categories",
+      "title": "类目身份与标签",
+      "disposition": "expressed",
+      "nativeSupport": "supported",
+      "adapterSupport": "mapped",
+      "schemaPaths": [
+        "ChartSpecification.domain",
+        "ChartCategory.id",
+        "ChartCategory.label"
+      ],
+      "finding": "标签可重复，category ID 唯一，类目按给定顺序展示；标签不能冒充稳定业务 key。",
+      "nextAction": "R2 从真实采样键生成身份；无键需外部身份策略，不能按本次数组排序或名称随意改 ID。",
+      "evidence": [
+        "schema",
+        "data",
+        "adapter",
+        "native-model",
+        "sparse-test"
+      ]
+    },
+    {
+      "id": "series",
+      "title": "系列、采样及缺测",
+      "disposition": "expressed",
+      "nativeSupport": "supported",
+      "adapterSupport": "mapped",
+      "schemaPaths": [
+        "ChartSpecification.series",
+        "ChartSeriesSpecification.id",
+        "ChartSeriesSpecification.samples",
+        "ChartSample.value"
+      ],
+      "finding": "稀疏样本按 category ID 对齐；nil 是缺测；原始符号与数值保留，显式零不是缺测。",
+      "nextAction": "R2 校验输入类型并保留位置/身份；不直接接受 NSNumber/string 混杂数组或旧派生缓存。",
+      "evidence": [
+        "schema",
+        "data",
+        "adapter",
+        "native-model",
+        "identity-test",
+        "sparse-test"
+      ]
+    },
+    {
+      "id": "groups",
+      "title": "业务展示分组",
+      "disposition": "expressed",
+      "nativeSupport": "supported",
+      "adapterSupport": "mapped",
+      "schemaPaths": [
+        "ChartSpecification.groups",
+        "ChartGroupSpecification.name",
+        "ChartSeriesSpecification.groupID"
+      ],
+      "finding": "静态组名与成员关系可表达，嵌套旧数组需要展平；不自动开启分组 Tooltip 或组小计。",
+      "nextAction": "R2 保留稳定组/系列 ID 和成员顺序；逐采样组名、组卡片另列。",
+      "evidence": [
+        "schema",
+        "data",
+        "adapter",
+        "native-model",
+        "identity-test"
+      ]
+    },
+    {
+      "id": "axis-range",
+      "title": "值轴绑定与上下界",
+      "disposition": "expressed",
+      "nativeSupport": "supported",
+      "adapterSupport": "mapped",
+      "schemaPaths": [
+        "ChartSpecification.valueAxes",
+        "ChartAxisSpecification.minimum",
+        "ChartAxisSpecification.maximum",
+        "ChartSeriesSpecification.valueAxisID"
+      ],
+      "finding": "值轴上下界独立自动或显式；纵向最多两轴，横向 bar 一轴；series 以 ID 绑定。",
+      "nextAction": "R2 将旧 0/1 轴下标绑定明确 ID；超过后端轴数报告错误，不丢弃副轴。",
+      "evidence": [
+        "axis-schema",
+        "data",
+        "adapter",
+        "native-model",
+        "axis-test",
+        "reject-test"
+      ]
+    },
+    {
+      "id": "axis-basic",
+      "title": "独立轴颜色、字号与显隐",
+      "disposition": "expressed",
+      "nativeSupport": "supported",
+      "adapterSupport": "mapped",
+      "schemaPaths": [
+        "ChartSpecification.domainAppearance",
+        "ChartAxisSpecification.appearance",
+        "ChartAxisAppearance.labelColor",
+        "ChartAxisAppearance.labelFontSize",
+        "ChartAxisAppearance.showsLabels",
+        "ChartAxisAppearance.showsLine",
+        "ChartAxisAppearance.showsGridlines"
+      ],
+      "finding": "G3 独立轴颜色、字号和轴线/标签/网格开关已映射；v4 另以 axis-weight / ticks / axis-value-format 主题承接系统字重、显式刻度、类目间隔和数字/后缀格式。",
+      "nextAction": "R2 解析颜色/字号并明确旧隐藏是否包含网格；不可仅把标签透明视为完整隐藏。",
+      "evidence": [
+        "schema",
+        "axis-schema",
+        "appearance",
+        "adapter",
+        "axis-native",
+        "style-test",
+        "grid-test",
+        "legacy-secondary-color"
+      ]
+    },
+    {
+      "id": "legend-visible",
+      "title": "图例和系列显隐",
+      "disposition": "expressed",
+      "nativeSupport": "supported",
+      "adapterSupport": "mapped",
+      "schemaPaths": [
+        "ChartSpecification.showsLegend",
+        "ChartSeriesSpecification.isVisible",
+        "ChartSeriesSpecification.showsInLegend"
+      ],
+      "finding": "图例总开关、系列初始显隐、图例成员资格可表达；用户交互后的覆盖是运行时状态。",
+      "nextAction": "R2 对 isHidden 取反，明确数据更新与用户显隐覆盖优先级；不持久化 showSeriesArray。",
+      "evidence": [
+        "schema",
+        "data",
+        "adapter",
+        "visibility-native",
+        "identity-test",
+        "visibility-test"
+      ]
+    },
+    {
+      "id": "color",
+      "title": "系列颜色及负值颜色",
+      "disposition": "expressed",
+      "nativeSupport": "supported",
+      "adapterSupport": "mapped",
+      "schemaPaths": [
+        "ChartSeriesAppearance.color",
+        "ChartSeriesAppearance.negativeColor"
+      ],
+      "finding": "固定 sRGB RGBA 可表达；动态资源、暗色配对、zones 优先级不由这两个字段代替。",
+      "nextAction": "R2 一次解析 hex/alpha，非法输入报错；保留原值符号，负色不是改值。",
+      "evidence": [
+        "appearance",
+        "adapter",
+        "native-model",
+        "style-test"
+      ]
+    },
+    {
+      "id": "units",
+      "title": "系列单位与显示进位",
+      "disposition": "expressed",
+      "nativeSupport": "supported",
+      "adapterSupport": "mapped",
+      "schemaPaths": [
+        "ChartSeriesSpecification.unit",
+        "ChartValuePresentation.scale",
+        "ChartValuePresentation.currencySymbol"
+      ],
+      "finding": "单位字符串、货币符号与 none/engineering 展示缩放可表达；不会自动识别旧 unitType 白名单。",
+      "nextAction": "R2 显式维护旧枚举→单位/进位规则；自定义单位、金额和数学单位不能混淆。",
+      "evidence": [
+        "data",
+        "format-schema",
+        "adapter",
+        "native-model",
+        "identity-test"
+      ]
+    },
+    {
+      "id": "number-presentation",
+      "title": "绝对值展示与截断",
+      "disposition": "expressed",
+      "nativeSupport": "supported",
+      "adapterSupport": "mapped",
+      "schemaPaths": [
+        "ChartValuePresentation.showsAbsoluteValue",
+        "ChartValuePresentation.rounding"
+      ],
+      "finding": "只改变显示，不重写业务原值；nearest/towardZero 的旧边界取舍仍需共享样本验证。",
+      "nextAction": "R2 禁止先 abs/预舍入数据再传 renderer；负零、进位边界进入格式契约测试。",
+      "evidence": [
+        "format-schema",
+        "adapter",
+        "native-model",
+        "identity-test"
+      ]
+    },
+    {
+      "id": "area-fill",
+      "title": "面积纯色或纵向渐变",
+      "disposition": "expressed",
+      "nativeSupport": "supported",
+      "adapterSupport": "mapped",
+      "schemaPaths": [
+        "ChartSeriesAppearance.areaFill",
+        "ChartAreaFill"
+      ],
+      "finding": "纯色/屏幕自上而下两端渐变可表达，alpha 一次合成；非 area 图元设置填充会校验失败。",
+      "nextAction": "R2 明确旧 fillColorAlphas 非空时只取首尾（单值重复），否则走 fillColor/fillAlpha 的优先级；不是任意多色标渐变，alpha 不重复乘。",
+      "evidence": [
+        "appearance",
+        "validation",
+        "adapter",
+        "native-model",
+        "style-test",
+        "legacy-fill"
+      ]
+    },
+    {
+      "id": "gap-policy",
+      "title": "系列缺测连接",
+      "disposition": "expressed",
+      "nativeSupport": "supported",
+      "adapterSupport": "mapped",
+      "schemaPaths": [
+        "ChartSeriesSpecification.missingValues",
+        "ChartMissingValuePolicy"
+      ],
+      "finding": "断开、全部连接、最多 N 个缺失类目可表达；不补原值。G1 同组统一断段是另一能力。",
+      "nextAction": "R2 按旧实际实现 >=12 空点断开映射 connectUpTo(11)，不要仅信旧头注释“不超过12”。",
+      "evidence": [
+        "data",
+        "adapter",
+        "native-model",
+        "style-test",
+        "legacy-gap"
+      ]
+    },
+    {
+      "id": "stroke-marker",
+      "title": "线条与点标记",
+      "disposition": "expressed",
+      "nativeSupport": "supported",
+      "adapterSupport": "mapped",
+      "schemaPaths": [
+        "ChartSeriesAppearance.strokePattern",
+        "ChartSeriesAppearance.marker",
+        "ChartSeriesAppearance.lineWidth",
+        "ChartSeriesAppearance.markerRadius"
+      ],
+      "finding": "solid/dashed/dotted 和基础 marker 可表达；不承诺匹配 Highcharts 全部虚线节奏或图片点。bar 的连线/点样式由适配器拒绝。",
+      "nextAction": "R2 做虚线白名单，旧未知值报错；markerHidden 取反后配置 .none 或明确图形。",
+      "evidence": [
+        "appearance",
+        "adapter",
+        "native-model",
+        "style-test",
+        "reject-test"
+      ]
+    },
+    {
+      "id": "title-style",
+      "title": "标题排版",
+      "disposition": "schema_gap",
+      "nativeSupport": "supported",
+      "adapterSupport": "unmodeled",
+      "schemaPaths": [],
+      "finding": "原生 theme 有标题 UIColor/UIFont；v1–v4 仅含 title 文本，无中立标题外观字段。",
+      "nextAction": "按实际页面新增文字外观语义并处理字体资源，不直接复制字符串 titleFont/titleWeight。",
+      "evidence": [
+        "theme-native",
+        "neutral-guide"
+      ]
+    },
+    {
+      "id": "axis-weight",
+      "title": "轴字体字重",
+      "disposition": "expressed",
+      "nativeSupport": "supported",
+      "adapterSupport": "mapped",
+      "schemaPaths": [
+        "ChartAxisAppearance.labelFontWeight",
+        "ChartFontWeight"
+      ],
+      "finding": "schema v4 支持九种系统字重，域轴、主/次值轴独立映射 UIFont；仅字重继承原生默认字号，仅字号保持 regular。自定义字体资源/任意名称不在此契约。",
+      "nextAction": "R2 解析旧字符串并校验别名/未知值；不能将未知名称静默当 regular。本项已表达不代表 mapper 或自定义字体加载已完成。",
+      "evidence": [
+        "appearance",
+        "axis-native",
+        "axes-test",
+        "axis-presentation-schema",
+        "axis-presentation-test",
+        "axis-version-test",
+        "adapter"
+      ]
+    },
+    {
+      "id": "ticks",
+      "title": "显式值轴刻度与类目间隔",
+      "disposition": "expressed",
+      "nativeSupport": "supported",
+      "adapterSupport": "mapped",
+      "schemaPaths": [
+        "ChartAxisSpecification.tickPositions",
+        "ChartSpecification.categoryLabelInterval"
+      ],
+      "finding": "schema v4 承接有限严格递增的值轴刻度列表（[] 明确隐藏、nil 自动、域外过滤不扩域）与正整数绝对类目候选间隔；窄屏可按整数倍避让，不抽样数据。不包含值轴 tickInterval/tickCount 或类目旋转。",
+      "nextAction": "R2 区分旧 xAxisTickInterval 的类目语义与值轴单位；主/次刻度按轴 ID 分别映射，不复制旧分支读取主轴数组的错误。",
+      "evidence": [
+        "ticks-native",
+        "native-model",
+        "cadence-test",
+        "legacy-secondary-ticks",
+        "axis-presentation-schema",
+        "axis-presentation-test",
+        "axis-version-test",
+        "adapter"
+      ]
+    },
+    {
+      "id": "domain-range",
+      "title": "域范围意图",
+      "disposition": "schema_gap",
+      "nativeSupport": "partial",
+      "adapterSupport": "unmodeled",
+      "schemaPaths": [],
+      "finding": "v1–v4 没有 domain minimum/maximum；原生类目窗口与真实数值 X 范围不是同一能力。",
+      "nextAction": "先区分裁剪域、初始视口与缺数据补域；类目窗口走运行时 showCategoryRange，真实数值域等待 G6。",
+      "evidence": [
+        "viewport-native",
+        "native-model",
+        "neutral-guide"
+      ]
+    },
+    {
+      "id": "axis-value-format",
+      "title": "值轴刻度单位/格式",
+      "disposition": "expressed",
+      "nativeSupport": "supported",
+      "adapterSupport": "mapped",
+      "schemaPaths": [
+        "ChartAxisSpecification.labelFormat",
+        "ChartAxisLabelFormat",
+        "ChartValuePresentation"
+      ],
+      "finding": "旧 HMAAYAxis.unit 是刻度 {value} 后缀，非轴标题。schema v4 提供独立 number + unit 标签格式；HYM 编译为 labelFormatter，后缀前加空格，工程缩写前缀置于单位前。不换算数据、不推断系列单位；locale 可显式指定。",
+      "nextAction": "R2 接入旧 unit 并确认空白/工程前缀差异；任意 JS/闭包不进入通用核心，旧业务单位/金额政策仍属 compat-format，未自动兼容。",
+      "evidence": [
+        "native-model",
+        "axis-schema",
+        "legacy-axis-unit",
+        "axis-presentation-schema",
+        "axis-presentation-test",
+        "axis-version-test",
+        "adapter"
+      ]
+    },
+    {
+      "id": "plot-insets",
+      "title": "图内边距",
+      "disposition": "schema_gap",
+      "nativeSupport": "supported",
+      "adapterSupport": "unmodeled",
+      "schemaPaths": [],
+      "finding": "原生 contentInset 支持逻辑点边距；v1–v4 不含布局留白，旧 leftMargin 与自动轴测量不能假定像素等价。",
+      "nextAction": "先定义最小留白/固定留白优先级，再引入通用 inset 配置；外部卡片 margin 另列。",
+      "evidence": [
+        "theme-native"
+      ]
+    },
+    {
+      "id": "grid-style",
+      "title": "网格颜色与样式",
+      "disposition": "schema_gap",
+      "nativeSupport": "supported",
+      "adapterSupport": "unmodeled",
+      "schemaPaths": [
+        "ChartAxisAppearance.showsGridlines"
+      ],
+      "finding": "旧 dashColor 实际同时影响 X 轴线和 Y 网格。v1–v4 有轴线颜色/网格开关，无网格颜色/虚线；原生 theme 能承接剩余外观。",
+      "nextAction": "新增网格 stroke 语义，明确按 domain/value 还是屏幕方向配置；保留网格方向契约测试。",
+      "evidence": [
+        "appearance",
+        "theme-native",
+        "grid-test",
+        "legacy-grid"
+      ]
+    },
+    {
+      "id": "crosshair-style",
+      "title": "准线外观",
+      "disposition": "schema_gap",
+      "nativeSupport": "supported",
+      "adapterSupport": "unmodeled",
+      "schemaPaths": [],
+      "finding": "原生视图可配 crosshairColor；v1–v4 无中立交互外观字段。",
+      "nextAction": "与选择反馈/Tooltip 的中立交互配置一并设计，禁止透传 UIColor 或 UIKit 视图。",
+      "evidence": [
+        "view-native"
+      ]
+    },
+    {
+      "id": "tooltip",
+      "title": "提示开关、布局与逐采样内容",
+      "disposition": "schema_gap",
+      "nativeSupport": "partial",
+      "adapterSupport": "unmodeled",
+      "schemaPaths": [],
+      "finding": "原生有 Tooltip、逐行 provider、分组及固定顶部；v1–v4 没有提示语义。逐点表头/动态组名和旧超时不是已有 schema 能力。",
+      "nextAction": "以稳定 sample ID 建立声明式覆盖和显示规则；闭包、图片解析、事件生命周期留适配/运行时层，R3 核对 header/name/hidePoints 索引。",
+      "evidence": [
+        "tooltip-native",
+        "tooltip-options",
+        "tooltip-theme",
+        "tooltip-test"
+      ]
+    },
+    {
+      "id": "tooltip-style",
+      "title": "提示颜色主题",
+      "disposition": "schema_gap",
+      "nativeSupport": "partial",
+      "adapterSupport": "unmodeled",
+      "schemaPaths": [],
+      "finding": "Swift 原生 TooltipTheme 支持主题；OC options 仅部分外观，JSON v1–v4 无提示颜色配置。",
+      "nextAction": "统一中立提示文字/背景语义后补两端转换；不可声称现 OC options 已覆盖完整主题。",
+      "evidence": [
+        "tooltip-theme",
+        "tooltip-native"
+      ]
+    },
+    {
+      "id": "tooltip-offset",
+      "title": "提示前值选择",
+      "disposition": "schema_gap",
+      "nativeSupport": "supported",
+      "adapterSupport": "unmodeled",
+      "schemaPaths": [],
+      "finding": "原生偏移/边界政策已有，保持当前命中身份及当前表头；v1–v4 无字段。",
+      "nextAction": "设计可序列化的提示取值偏移及 omit/clamp/current，明确实际时间聚合仍取当前桶。",
+      "evidence": [
+        "tooltip-offset",
+        "offset-test"
+      ]
+    },
+    {
+      "id": "group-summary",
+      "title": "分组小计格式与来源",
+      "disposition": "schema_gap",
+      "nativeSupport": "partial",
+      "adapterSupport": "unmodeled",
+      "schemaPaths": [
+        "ChartSpecification.groups"
+      ],
+      "finding": "通用组只有 ID/name；原生同单位/同轴/同格式小计不等于旧 float 汇总及独立组格式、fractionDigits=100。",
+      "nextAction": "R3 明确小计数据来源、数值精度和单位，再扩展语义或外置兼容格式器；不可先套用系列格式。",
+      "evidence": [
+        "schema",
+        "tooltip-options",
+        "tooltip-test",
+        "legacy-series"
+      ]
+    },
+    {
+      "id": "precision-compatibility",
+      "title": "旧精度哨兵与预舍入",
+      "disposition": "external",
+      "nativeSupport": "partial",
+      "adapterSupport": "external",
+      "schemaPaths": [
+        "ChartValuePresentation.maximumFractionDigits"
+      ],
+      "finding": "v1–v4 普通精度为 0...12；100 不是100位小数且被校验拒绝。旧 M 以上3位/其他2位和预舍入属于待实现兼容政策。",
+      "nextAction": "R2/R3 建独立兼容格式器或提出确有复用价值的精度政策扩展；不能钳制100为12或默认2。",
+      "evidence": [
+        "format-schema",
+        "validation",
+        "format-test",
+        "legacy-series",
+        "format-native"
+      ]
+    },
+    {
+      "id": "legend-style",
+      "title": "逐系列图例符号/背景",
+      "disposition": "schema_gap",
+      "nativeSupport": "supported",
+      "adapterSupport": "unmodeled",
+      "schemaPaths": [
+        "ChartSpecification.showsLegend",
+        "ChartSeriesSpecification.showsInLegend"
+      ],
+      "finding": "原生图例支持 itemOverrides/图片/背景，Swift/OC 已有；v1–v4 只支持显隐，未定义资源引用或图例布局。",
+      "nextAction": "先定义中立资源 ID 与图例外观，宿主解析图片；不能把 UIImage/provider 写入 JSON。",
+      "evidence": [
+        "schema",
+        "data",
+        "legend-native"
+      ]
+    },
+    {
+      "id": "group-legend",
+      "title": "旧分组卡片式图例",
+      "disposition": "external",
+      "nativeSupport": "partial",
+      "adapterSupport": "external",
+      "schemaPaths": [
+        "ChartSpecification.groups"
+      ],
+      "finding": "组图片/分标题/组内分栏/间隔是旧 v2 业务卡片；现逐系列图例不能直接替代整套布局。",
+      "nextAction": "外部 UIView 组合，按 group/series ID 绑定显隐；确认真实页面后再决定通用图例布局扩展。",
+      "evidence": [
+        "schema",
+        "legend-native",
+        "migration-plan"
+      ]
+    },
+    {
+      "id": "annotations",
+      "title": "标线、色带及文字",
+      "disposition": "schema_gap",
+      "nativeSupport": "supported",
+      "adapterSupport": "unmodeled",
+      "schemaPaths": [],
+      "finding": "原生 G4 的标线/色带、轴绑定、标签样式已实现（含 OC）；v1–v4 无 annotation。旧标线转换忽略 dashStyle 且写死 zIndex=3，声明不等于曾生效。",
+      "nextAction": "首切片限定绑定稳定 valueAxisID 的值轴标线/色带及文字外观；原生不是类目/连续 X 标注能力。固定绘制层次，不承接任意 zIndex。",
+      "evidence": [
+        "native-model",
+        "labels-native",
+        "annotations-native",
+        "annotation-test",
+        "legacy-plot-line"
+      ]
+    },
+    {
+      "id": "annotation-order",
+      "title": "任意标注层级",
+      "disposition": "unsupported",
+      "nativeSupport": "unsupported",
+      "adapterSupport": "unmodeled",
+      "schemaPaths": [],
+      "finding": "旧 zIndex 虽声明但转换实现写死3；不是既有已生效的任意层级。新原生仍只有固定绘制层次，v1–v4 无字段，不能宣称支持任意值。",
+      "nextAction": "未来 mapper 遇非默认层级需求须诊断；先确定有限前/后景语义及命中规则，不复制任意数值。",
+      "evidence": [
+        "native-model",
+        "labels-native",
+        "migration-plan",
+        "legacy-plot-line"
+      ]
+    },
+    {
+      "id": "zones",
+      "title": "旧完整 zones（X/Y 与分区填充）",
+      "disposition": "schema_gap",
+      "nativeSupport": "supported",
+      "adapterSupport": "partial",
+      "schemaPaths": [
+        "ChartSeriesAppearance.valueColorZones"
+      ],
+      "finding": "v3 已映射值轴颜色子集：柱/条 raw/draw、线/面积 draw；旧 zones 还含类目 X 原始索引和分区面积填充，不能把整个旧声明算作已表达。",
+      "nextAction": "R2 必须先判断 zoneAxisX、填充和取值语义再映射；X 与分区渐变仍需新契约。未建模额外 JSON 键不等于已提供拒绝诊断。",
+      "evidence": [
+        "value-zones-schema",
+        "adapter",
+        "zones-native",
+        "zones-test",
+        "value-zones-test"
+      ]
+    },
+    {
+      "id": "value-color-zones",
+      "title": "N1 值轴颜色子集（柱 raw/draw、线/面积 draw）",
+      "disposition": "expressed",
+      "nativeSupport": "supported",
+      "adapterSupport": "mapped",
+      "schemaPaths": [
+        "ChartSeriesAppearance.valueColorZones",
+        "ChartValueColorZones.valueSource",
+        "ChartValueColorZone.upperBound",
+        "ChartValueColorZone.color"
+      ],
+      "finding": "显式 v3；半开有序区间，尾部及 nil 颜色继承系列色，不覆盖面积填充。按绑定值轴解释，水平 Bar 同义。线/面积 raw 在 HYM 明确拒绝；不改域、原值、缺测和身份。",
+      "nextAction": "保持 v1/v2/v3 默认与例子兼容；本子集不增加旧声明已表达数，旧 zones/zoneAxisX 仍需 R2 判别。",
+      "evidence": [
+        "value-zones-schema",
+        "adapter",
+        "zones-native",
+        "value-zones-test",
+        "value-zones-reject-test"
+      ]
+    },
+    {
+      "id": "g1-boundary",
+      "title": "G1 正负共享边界与统一缺测",
+      "disposition": "expressed",
+      "nativeSupport": "supported",
+      "adapterSupport": "mapped",
+      "schemaPaths": [
+        "ChartSpecification.schemaVersion",
+        "ChartSpecification.stackedAreaBoundary",
+        "ChartSpecification.stacking",
+        "ChartSeriesSpecification.missingValues"
+      ],
+      "finding": "v2 显式描述 independent/followBaseline/diverging，HYM 逐项映射；v1 解码与默认构造保持 independent，v1 JSON 不允许夹带新字段。diverging 同组统一断段优先于逐系列缺测规则，保留原始值与身份。",
+      "nextAction": "本小切片已有版本、校验、Swift/OC、同页 Demo 和契约测试；第二后端仍须逐模式诊断，不能将 shared-chain 退化为独立插值。",
+      "evidence": [
+        "schema",
+        "boundary-coding",
+        "data",
+        "g1-native",
+        "adapter",
+        "g1-test",
+        "g1-model-test",
+        "g1-adapter-test"
+      ]
+    },
+    {
+      "id": "selection",
+      "title": "G5 主体选中外观",
+      "disposition": "schema_gap",
+      "nativeSupport": "supported",
+      "adapterSupport": "unmodeled",
+      "schemaPaths": [],
+      "finding": "原生点环、柱/条覆盖层支持四种轴系图并默认关闭；v1–v4 无选择外观，跨更新恢复是另一未完成运行时契约。",
+      "nextAction": "按交互外观建中立选择配置；选中对象仍用稳定 ID，不能编码 CALayer。",
+      "evidence": [
+        "selection-native",
+        "annotations-native"
+      ]
+    },
+    {
+      "id": "continuous-domain",
+      "title": "G6 连续数值/时间 X",
+      "disposition": "unsupported",
+      "nativeSupport": "unsupported",
+      "adapterSupport": "rejected",
+      "schemaPaths": [
+        "ChartSpecification.domain",
+        "ChartCoordinate.number",
+        "ChartCoordinate.unixSeconds"
+      ],
+      "finding": "schema 已表达真实数值/时间坐标并检查严格递增，但 HYMCharts 适配器显式拒绝；等距标签时间轴不等价。",
+      "nextAction": "G6 先实现按真实 X 的几何、命中、视口与 OC，再开启适配；不能先把坐标转字符串画等距图。",
+      "evidence": [
+        "schema",
+        "data",
+        "diagnostics",
+        "reject-test"
+      ]
+    },
+    {
+      "id": "reversed-axis",
+      "title": "G6 反向值轴",
+      "disposition": "unsupported",
+      "nativeSupport": "unsupported",
+      "adapterSupport": "rejected",
+      "schemaPaths": [
+        "ChartAxisSpecification.isReversed"
+      ],
+      "finding": "schema 已表达反向值轴，HYMCharts 明确拒绝；不能交换上下界或反转数据数组冒充。",
+      "nextAction": "G6 验证坐标转换/命中/主次轴/横向图后接通，未知后端继续报路径化能力错误。",
+      "evidence": [
+        "axis-schema",
+        "diagnostics",
+        "reject-test"
+      ]
+    },
+    {
+      "id": "backend-limits",
+      "title": "轴数与横向图元限制",
+      "disposition": "unsupported",
+      "nativeSupport": "partial",
+      "adapterSupport": "rejected",
+      "schemaPaths": [
+        "ChartSpecification.valueAxes",
+        "ChartSpecification.orientation",
+        "ChartSeriesSpecification.mark"
+      ],
+      "finding": "schema 可表达的多轴/横向线图并非当前 HYMCharts 支持范围；超两值轴、横向多轴/非 bar 均拒绝。",
+      "nextAction": "第二后端逐项给支持集，不因本后端限制而更改原始数据或丢弃系列。",
+      "evidence": [
+        "schema",
+        "data",
+        "diagnostics",
+        "reject-test"
+      ]
+    },
+    {
+      "id": "secondary-grid",
+      "title": "仅次轴网格",
+      "disposition": "unsupported",
+      "nativeSupport": "partial",
+      "adapterSupport": "rejected",
+      "schemaPaths": [
+        "ChartAxisAppearance.showsGridlines"
+      ],
+      "finding": "模型可分别配置网格，HYMCharts 不能只开次轴而关主轴；已有显式诊断而不是静默无效。",
+      "nextAction": "原生网格独立性改造前保留诊断；不得用主轴网格假装次轴刻度网格。",
+      "evidence": [
+        "appearance",
+        "diagnostics",
+        "grid-test"
+      ]
+    },
+    {
+      "id": "data-labels",
+      "title": "数据标签与堆叠总量",
+      "disposition": "schema_gap",
+      "nativeSupport": "supported",
+      "adapterSupport": "partial",
+      "schemaPaths": [
+        "ChartSeriesAppearance.showsValueLabels"
+      ],
+      "finding": "v1–v4 仅逐系列数据标签开关已映射；G4 背景/避让/总量标签等原生能力没有中立字段。",
+      "nextAction": "按实际标注需求扩充标签格式/布局政策；不得把开关映射写成全套标签已覆盖。",
+      "evidence": [
+        "appearance",
+        "adapter",
+        "theme-native",
+        "annotation-test"
+      ]
+    },
+    {
+      "id": "runtime-create",
+      "title": "配置、刷新与不可变文档",
+      "disposition": "external",
+      "nativeSupport": "supported",
+      "adapterSupport": "external",
+      "schemaPaths": [
+        "ChartSpecification",
+        "ChartSpecification.decodeJSON"
+      ],
+      "finding": "已有 Swift 适配配置和 OC JSON 文档/bridge；旧方法同名 facade 及旧输入 mapper 未实现。失败更新应保留最后有效图。",
+      "nextAction": "R2 每次读取新快照，不复用旧缓存；R4 另外定义 accepted/layout/animation 回调含义。",
+      "evidence": [
+        "schema",
+        "adapter",
+        "document",
+        "oc-test"
+      ]
+    },
+    {
+      "id": "runtime-events",
+      "title": "命中/手势/加载生命周期",
+      "disposition": "external",
+      "nativeSupport": "partial",
+      "adapterSupport": "external",
+      "schemaPaths": [],
+      "finding": "回调不是可序列化图表数据；原生 onHit 等不等价旧 UIPanGestureRecognizer/WebView finishLoad。",
+      "nextAction": "R4 定义线程、次数、取消/清除原因及 ID 映射，不能把 closure 或旧 delegate 放进 schema。",
+      "evidence": [
+        "view-native",
+        "oc-native",
+        "migration-plan"
+      ]
+    },
+    {
+      "id": "runtime-selection",
+      "title": "程序选点与恢复",
+      "disposition": "external",
+      "nativeSupport": "unsupported",
+      "adapterSupport": "external",
+      "schemaPaths": [],
+      "finding": "当前没有完成旧 setTouchPointXIndex 对应的公开程序选择/清除契约；G5 只解决主体视觉，不解决恢复。",
+      "nextAction": "R4 新建以稳定身份定位的公共命令与恢复策略，不能调用 rendererForTesting。",
+      "evidence": [
+        "view-native",
+        "selection-native",
+        "migration-plan"
+      ]
+    },
+    {
+      "id": "runtime-visibility",
+      "title": "图例显隐命令与事件",
+      "disposition": "external",
+      "nativeSupport": "supported",
+      "adapterSupport": "external",
+      "schemaPaths": [
+        "ChartSeriesSpecification.isVisible"
+      ],
+      "finding": "原生有 ID 驱动 setSeriesVisible/onSeriesVisibilityChanged；初始值在 schema，回调和用户覆盖在运行时。",
+      "nextAction": "用 ID 查回旧 element；外部图例按钮同样使用公开显隐接口，不生成虚拟业务系列。",
+      "evidence": [
+        "data",
+        "visibility-native",
+        "oc-native",
+        "visibility-test"
+      ]
+    },
+    {
+      "id": "runtime-viewport",
+      "title": "缩放与初始视口",
+      "disposition": "external",
+      "nativeSupport": "partial",
+      "adapterSupport": "external",
+      "schemaPaths": [],
+      "finding": "Swift 有 X/Y/XY 手势和 showCategoryRange，OC bridge 默认按图形选缩放轴；v1–v4 无视口命令。",
+      "nextAction": "R4 明确旧闭区间→半开范围及半槽差异、状态恢复；不要把交互窗口误写成数据缺测/删点。",
+      "evidence": [
+        "zoom-native",
+        "viewport-native",
+        "oc-native",
+        "migration-plan"
+      ]
+    },
+    {
+      "id": "host-factory",
+      "title": "业务工厂与主题预设",
+      "disposition": "external",
+      "nativeSupport": "external",
+      "adapterSupport": "external",
+      "schemaPaths": [],
+      "finding": "工厂创建 UIView、注入业务资源/语言/样式，不属于引擎无关数据模型。",
+      "nextAction": "R5 保留项目级组合根，使用中立模型+适配器；不发布与旧库冲突的同名类。",
+      "evidence": [
+        "migration-plan",
+        "document"
+      ]
+    },
+    {
+      "id": "host-business",
+      "title": "业务 key 与符号预处理",
+      "disposition": "external",
+      "nativeSupport": "external",
+      "adapterSupport": "external",
+      "schemaPaths": [],
+      "finding": "旧 key 名称/符号转换存在 D07 重叠分支，真实业务意图未确定；模型不会自动修正业务数据。",
+      "nextAction": "R0b 用真实调用确认命名/符号政策；与数学堆叠及显示 abs 分离，不下沉 SDK。",
+      "evidence": [
+        "migration-plan"
+      ]
+    },
+    {
+      "id": "host-empty",
+      "title": "空态资源与强制空态",
+      "disposition": "external",
+      "nativeSupport": "external",
+      "adapterSupport": "external",
+      "schemaPaths": [],
+      "finding": "图片/文案/字体/强制空态是外层展示，不通过修改原值、清空调用者模型来实现。",
+      "nextAction": "R5 宿主保存数据及显隐状态，退出空态恢复；资源由业务注入。",
+      "evidence": [
+        "migration-plan"
+      ]
+    },
+    {
+      "id": "host-container",
+      "title": "全屏、多图和尺寸容器",
+      "disposition": "external",
+      "nativeSupport": "external",
+      "adapterSupport": "external",
+      "schemaPaths": [],
+      "finding": "页面跳转、布局、安全区、多图协调与状态保存不属于单图 schema。",
+      "nextAction": "R6 外部容器持有多份 ChartSpecification 和运行时状态；拿到真实页面再验收横屏/返回恢复。",
+      "evidence": [
+        "migration-plan"
+      ]
+    },
+    {
+      "id": "host-card",
+      "title": "统计表头、日出日落与版本卡片",
+      "disposition": "external",
+      "nativeSupport": "external",
+      "adapterSupport": "external",
+      "schemaPaths": [],
+      "finding": "headerDatas/sunDatas/版本通用单位及布局是业务卡片；不能把这些缓存当图表采样。",
+      "nextAction": "R5 外部 view model + UIView 组合；图内轴标题、Tooltip 表头和注释文字分别审查。",
+      "evidence": [
+        "migration-plan"
+      ]
+    },
+    {
+      "id": "host-appearance",
+      "title": "暗色资源与外观解析",
+      "disposition": "external",
+      "nativeSupport": "partial",
+      "adapterSupport": "external",
+      "schemaPaths": [
+        "ChartRGBA"
+      ],
+      "finding": "v1–v4 只存具体 RGBA，不能自动表达动态 UIColor 或深浅色数组；原生主题可由宿主刷新。",
+      "nextAction": "宿主独立解析各用途颜色并在 trait 改变时更新；后端无对应字段时仍需报告缺口，不能统一混用数组。",
+      "evidence": [
+        "appearance",
+        "theme-native",
+        "neutral-guide"
+      ]
+    },
+    {
+      "id": "derived-cache",
+      "title": "旧格式化和可见系列缓存",
+      "disposition": "external",
+      "nativeSupport": "external",
+      "adapterSupport": "external",
+      "schemaPaths": [],
+      "finding": "showSeriesArray/fdata/fgdata 等是派生结果，不是第二份真实输入；通用核心不持久化这些旧缓存。",
+      "nextAction": "兼容展示层按最新 raw+规则重新计算，禁止缓存掩盖数据更新或将格式化字符串回填 value。",
+      "evidence": [
+        "legacy-series",
+        "migration-plan"
+      ]
+    },
+    {
+      "id": "compat-input",
+      "title": "旧输入校验与转换工具",
+      "disposition": "external",
+      "nativeSupport": "partial",
+      "adapterSupport": "external",
+      "schemaPaths": [
+        "ChartSample.value",
+        "ChartRGBA"
+      ],
+      "finding": "这些方法属于旧输入→中立值的独立 mapper/helper，非 SDK 同名 API。当前仅有新模型校验，没有旧类型自动转换。",
+      "nextAction": "R2 处理 NSNull 保位、非法 string/颜色显式错误；min/max 由真实可见 draw/base 重新求，不能照搬旧首行缓存。",
+      "evidence": [
+        "data",
+        "appearance",
+        "validation",
+        "native-model",
+        "migration-plan"
+      ]
+    },
+    {
+      "id": "compat-format",
+      "title": "旧单位/金额/舍入工具",
+      "disposition": "external",
+      "nativeSupport": "partial",
+      "adapterSupport": "external",
+      "schemaPaths": [
+        "ChartValuePresentation"
+      ],
+      "finding": "普通展示意图已有，旧工具的方法语义、预舍入、负零、单位白名单及哨兵尚未自动兼容。",
+      "nextAction": "R2/R3 做独立格式兼容政策及边界契约，不把工具类名称或 JS 字符串暴露到通用核心。",
+      "evidence": [
+        "format-schema",
+        "legacy-series",
+        "migration-plan",
+        "format-native"
+      ]
+    },
+    {
+      "id": "compat-sign-split",
+      "title": "旧正负虚拟系列拆分",
+      "disposition": "external",
+      "nativeSupport": "partial",
+      "adapterSupport": "external",
+      "schemaPaths": [
+        "ChartSample.value",
+        "ChartSpecification.stacking"
+      ],
+      "finding": "新模型保留有符号原值与单一业务 ID；原生可以内部正负累计/分链，但旧拆分后的数据和提示顺序不能自动等价。",
+      "nextAction": "R2 选择 D06 语义、修复 D09 缺测/丢字段，不向业务增加正负两套系列；G1 新边界现可通过 v2 显式选择，但不会自动兼容旧正负拆分政策。",
+      "evidence": [
+        "data",
+        "schema",
+        "g1-native",
+        "g1-test",
+        "migration-plan"
+      ]
+    },
+    {
+      "id": "compat-order",
+      "title": "旧绘制反序与三类顺序",
+      "disposition": "external",
+      "nativeSupport": "partial",
+      "adapterSupport": "external",
+      "schemaPaths": [
+        "ChartSpecification.series"
+      ],
+      "finding": "输入系列顺序可影响绘制/累计，但 v1–v4 没有独立的绘制、图例、提示顺序；旧 reverse 不是反向值轴。",
+      "nextAction": "R2 用共享样本明确 D05；需要独立顺序时提出中立扩展，不能直接 reverse 所有数组。",
+      "evidence": [
+        "schema",
+        "legend-order",
+        "migration-plan"
+      ]
+    },
+    {
+      "id": "export-placeholder",
+      "title": "旧快照占位入口",
+      "disposition": "unsupported",
+      "nativeSupport": "unsupported",
+      "adapterSupport": "external",
+      "schemaPaths": [],
+      "finding": "旧 snapClosure/triggerSnap 是占位，不能视为已存在的可回归导出功能；schema v1–v4 也不是导出 API。",
+      "nextAction": "有真实调用后单独设计图像导出及资源/权限边界；迁移前拒绝静默空实现。",
+      "evidence": [
+        "migration-plan"
+      ]
+    },
+    {
+      "id": "vendor-output",
+      "title": "JS/AAOptions 引擎产物",
+      "disposition": "unsupported",
+      "nativeSupport": "external",
+      "adapterSupport": "external",
+      "schemaPaths": [],
+      "finding": "AASeriesElement、AAOptions、JS 数组字符串不进入公共中立模型；本任务不提供旧输出对象的伪兼容。",
+      "nextAction": "迁移直接消费者到 ChartSpecification/适配结果；mapper 遇此依赖明确报告，不以 metadata 透传。",
+      "evidence": [
+        "schema",
+        "adapter",
+        "migration-plan"
+      ]
+    }
+  ],
+  "nativeReview": [
+    "g1-boundary",
+    "zones",
+    "value-color-zones",
+    "axis-basic",
+    "axis-weight",
+    "ticks",
+    "axis-value-format",
+    "annotations",
+    "annotation-order",
+    "data-labels",
+    "selection",
+    "continuous-domain",
+    "reversed-axis",
+    "backend-limits",
+    "secondary-grid"
+  ],
+  "entries": [
+    {
+      "key": "HMAAChartUtil.createlgaaChartView",
+      "capability": "host-factory",
+      "rule": "业务工厂组合宿主视图和适配器；不新增同名 SDK facade。"
+    },
+    {
+      "key": "HMAAChartUtil.createlgaaChartViewWithFrame:",
+      "capability": "host-factory",
+      "rule": "业务工厂组合宿主视图和适配器；不新增同名 SDK facade。"
+    },
+    {
+      "key": "HMAAChartUtil.createaaChartView",
+      "capability": "host-factory",
+      "rule": "业务工厂组合宿主视图和适配器；不新增同名 SDK facade。"
+    },
+    {
+      "key": "HMAAChartUtil.createaaChartViewWithFrame:",
+      "capability": "host-factory",
+      "rule": "业务工厂组合宿主视图和适配器；不新增同名 SDK facade。"
+    },
+    {
+      "key": "HMAAChartUtil.namesWithKey:",
+      "capability": "host-business",
+      "rule": "D07 名称/符号政策待真实业务调用确认；不按默认堆叠语义改写值。"
+    },
+    {
+      "key": "HMAAChartUtil.formatNamesWithData:positive:negative:",
+      "capability": "host-business",
+      "rule": "D07 名称/符号政策待真实业务调用确认；不按默认堆叠语义改写值。"
+    },
+    {
+      "key": "HMAAChartUtil.keyNeedOpposite",
+      "capability": "host-business",
+      "rule": "D07 名称/符号政策待真实业务调用确认；不按默认堆叠语义改写值。"
+    },
+    {
+      "key": "HMAAChartUtil.keyNeedFabsAndOpposite",
+      "capability": "host-business",
+      "rule": "D07 名称/符号政策待真实业务调用确认；不按默认堆叠语义改写值。"
+    },
+    {
+      "key": "HMAAChartUtil.fixAIChatData:type:",
+      "capability": "host-business",
+      "rule": "D07 名称/符号政策待真实业务调用确认；不按默认堆叠语义改写值。"
+    },
+    {
+      "key": "HMAAChartViewDelegate.hmaaChartView:handlePan:",
+      "capability": "runtime-events",
+      "rule": "旧 pan 手势对象和新语义事件需单独桥接；非 JSON 字段。"
+    },
+    {
+      "key": "HMAAChartView.delegate",
+      "capability": "runtime-events",
+      "rule": "按稳定 series/sample ID 回传命中；旧索引/生命周期另定契约。"
+    },
+    {
+      "key": "HMAAChartView.clickBlock",
+      "capability": "runtime-events",
+      "rule": "按稳定 series/sample ID 回传命中；旧索引/生命周期另定契约。"
+    },
+    {
+      "key": "HMAAChartView.finishLoad",
+      "capability": "runtime-events",
+      "rule": "WebView load 不等于布局/动画/像素完成；R4 需另定回调次数与线程。"
+    },
+    {
+      "key": "HMAAChartView.nodImgName",
+      "capability": "host-empty",
+      "rule": "宿主注入空态资源；不得清空原数据以制造空态。"
+    },
+    {
+      "key": "HMAAChartView.nodText",
+      "capability": "host-empty",
+      "rule": "宿主注入空态资源；不得清空原数据以制造空态。"
+    },
+    {
+      "key": "HMAAChartView.nodColor",
+      "capability": "host-empty",
+      "rule": "宿主注入空态资源；不得清空原数据以制造空态。"
+    },
+    {
+      "key": "HMAAChartView.nodFont",
+      "capability": "host-empty",
+      "rule": "宿主注入空态资源；不得清空原数据以制造空态。"
+    },
+    {
+      "key": "HMAAChartView.initChartViewWithModel:",
+      "capability": "runtime-create",
+      "rule": "旧输入先转 ChartSpecification，再由适配配置或 OC 文档创建；不是现成同名入口。"
+    },
+    {
+      "key": "HMAAChartView.reloadDataWithModel:",
+      "capability": "runtime-create",
+      "rule": "每次将最新旧输入转换为新快照后更新；旧 mapper 尚未实现。"
+    },
+    {
+      "key": "HMAAChartView.onlyRefreshTheChartData",
+      "capability": "runtime-create",
+      "rule": "每次将最新旧输入转换为新快照后更新；旧 mapper 尚未实现。"
+    },
+    {
+      "key": "HMAAChartView.setTouchPointXIndex:",
+      "capability": "runtime-selection",
+      "rule": "待 R4 公共程序选点/清除命令，不能使用测试接口。"
+    },
+    {
+      "key": "HMAAChartView.showNoData:",
+      "capability": "host-empty",
+      "rule": "外部强制空态，退出时恢复图例/显隐且不改调用方模型。"
+    },
+    {
+      "key": "HMLGAAChartViewDelegate.hmlgaaChartView:handlePan:",
+      "capability": "runtime-events",
+      "rule": "旧 pan 手势对象和新语义事件需单独桥接；非 JSON 字段。"
+    },
+    {
+      "key": "HMLGAAChartView.delegate",
+      "capability": "runtime-events",
+      "rule": "按稳定 series/sample ID 回传命中；旧索引/生命周期另定契约。"
+    },
+    {
+      "key": "HMLGAAChartView.clickBlock",
+      "capability": "runtime-events",
+      "rule": "按稳定 series/sample ID 回传命中；旧索引/生命周期另定契约。"
+    },
+    {
+      "key": "HMLGAAChartView.legendTapBlock",
+      "capability": "runtime-visibility",
+      "rule": "使用 onSeriesVisibilityChanged 的稳定 ID/visible 查回业务对象。"
+    },
+    {
+      "key": "HMLGAAChartView.snapClosure",
+      "capability": "export-placeholder",
+      "rule": "旧占位导出不提供空实现；实际使用须单独立项。"
+    },
+    {
+      "key": "HMLGAAChartView.triggerSnap",
+      "capability": "export-placeholder",
+      "rule": "旧占位导出不提供空实现；实际使用须单独立项。"
+    },
+    {
+      "key": "HMLGAAChartView.showEnlargeButton",
+      "capability": "host-container",
+      "rule": "按钮与全屏控制器由外层宿主实现；保存/恢复状态另验收。"
+    },
+    {
+      "key": "HMLGAAChartView.nodImgName",
+      "capability": "host-empty",
+      "rule": "宿主注入空态资源；不得清空原数据以制造空态。"
+    },
+    {
+      "key": "HMLGAAChartView.nodText",
+      "capability": "host-empty",
+      "rule": "宿主注入空态资源；不得清空原数据以制造空态。"
+    },
+    {
+      "key": "HMLGAAChartView.nodColor",
+      "capability": "host-empty",
+      "rule": "宿主注入空态资源；不得清空原数据以制造空态。"
+    },
+    {
+      "key": "HMLGAAChartView.nodFont",
+      "capability": "host-empty",
+      "rule": "宿主注入空态资源；不得清空原数据以制造空态。"
+    },
+    {
+      "key": "HMLGAAChartView.reloadDataWithModel:",
+      "capability": "runtime-create",
+      "rule": "每次将最新旧输入转换为新快照后更新；旧 mapper 尚未实现。"
+    },
+    {
+      "key": "HMLGAAChartView.onlyRefreshTheChartData",
+      "capability": "runtime-create",
+      "rule": "每次将最新旧输入转换为新快照后更新；旧 mapper 尚未实现。"
+    },
+    {
+      "key": "HMLGAAChartView.setTouchPointXIndex:",
+      "capability": "runtime-selection",
+      "rule": "待 R4 公共程序选点/清除命令，不能使用测试接口。"
+    },
+    {
+      "key": "HMChartLGSwitch.element",
+      "capability": "runtime-visibility",
+      "rule": "外部按钮绑定稳定系列 ID，并使用公开 setSeriesVisible/显隐回调。"
+    },
+    {
+      "key": "HMChartLGSwitch.on",
+      "capability": "runtime-visibility",
+      "rule": "外部按钮绑定稳定系列 ID，并使用公开 setSeriesVisible/显隐回调。"
+    },
+    {
+      "key": "HMChartLGSwitch.tapSwitchBlock",
+      "capability": "runtime-visibility",
+      "rule": "外部按钮绑定稳定系列 ID，并使用公开 setSeriesVisible/显隐回调。"
+    },
+    {
+      "key": "HMMTAAChartView.chartModels",
+      "capability": "host-container",
+      "rule": "多图布局/更新/联动留宿主；每图独立描述，不能按标签误联动。"
+    },
+    {
+      "key": "HMMTAAChartView.width",
+      "capability": "host-container",
+      "rule": "多图布局/更新/联动留宿主；每图独立描述，不能按标签误联动。"
+    },
+    {
+      "key": "HMMTAAChartView.height",
+      "capability": "host-container",
+      "rule": "多图布局/更新/联动留宿主；每图独立描述，不能按标签误联动。"
+    },
+    {
+      "key": "HMMTAAChartView.nodImgName",
+      "capability": "host-empty",
+      "rule": "多图容器外部空态；不属于单图数据模型。"
+    },
+    {
+      "key": "HMMTAAChartView.nodText",
+      "capability": "host-empty",
+      "rule": "多图容器外部空态；不属于单图数据模型。"
+    },
+    {
+      "key": "HMMTAAChartView.nodColor",
+      "capability": "host-empty",
+      "rule": "多图容器外部空态；不属于单图数据模型。"
+    },
+    {
+      "key": "HMMTAAChartView.nodFont",
+      "capability": "host-empty",
+      "rule": "多图容器外部空态；不属于单图数据模型。"
+    },
+    {
+      "key": "HMMTAAChartView.initChartView",
+      "capability": "host-container",
+      "rule": "多图布局/更新/联动留宿主；每图独立描述，不能按标签误联动。"
+    },
+    {
+      "key": "HMAAChartFullScreenVC.chartModel",
+      "capability": "host-container",
+      "rule": "全屏宿主持有图表描述及运行时状态；返回恢复不由 schema 单独保证。"
+    },
+    {
+      "key": "HMAAChartFullScreenVC.nodImgName",
+      "capability": "host-empty",
+      "rule": "全屏宿主注入空态样式，不能影响原值。"
+    },
+    {
+      "key": "HMAAChartFullScreenVC.nodText",
+      "capability": "host-empty",
+      "rule": "全屏宿主注入空态样式，不能影响原值。"
+    },
+    {
+      "key": "HMAAChartFullScreenVC.nodColor",
+      "capability": "host-empty",
+      "rule": "全屏宿主注入空态样式，不能影响原值。"
+    },
+    {
+      "key": "HMAAChartFullScreenVC.nodFont",
+      "capability": "host-empty",
+      "rule": "全屏宿主注入空态样式，不能影响原值。"
+    },
+    {
+      "key": "HMAAChartModel.name",
+      "capability": "title",
+      "rule": "v1 图内标题可转 title；旧 version=2 时标题在外部卡片，mapper 须避免内外重复显示。"
+    },
+    {
+      "key": "HMAAChartModel.chartType",
+      "capability": "marks",
+      "rule": "areaspline→area+monotone，line→line+linear，column→bar+vertical；系列覆盖优先级需校验。"
+    },
+    {
+      "key": "HMAAChartModel.stackType",
+      "capability": "stacking",
+      "rule": "false→none，normal→sum；percent 仅在接受绝对值总分母契约后映射；不宣称旧净额累计兼容。"
+    },
+    {
+      "key": "HMAAChartModel.xAxisArray",
+      "capability": "categories",
+      "rule": "→ domain.categories；保留顺序/重复标签，提供稳定 category ID。"
+    },
+    {
+      "key": "HMAAChartModel.xSeriesArray",
+      "capability": "tooltip",
+      "rule": "独立逐点提示表头；不能拿 category.label 或 metadata 原样塞入后就宣称可展示。"
+    },
+    {
+      "key": "HMAAChartModel.seriesArray",
+      "capability": "series",
+      "rule": "嵌套成员按稳定组/系列 ID 展平；原始值和 NSNull 位置分别处理。"
+    },
+    {
+      "key": "HMAAChartModel.version",
+      "capability": "host-card",
+      "rule": "旧 v1/v2 是业务布局版本，绝不能映射为 schemaVersion。"
+    },
+    {
+      "key": "HMAAChartModel.unit",
+      "capability": "host-card",
+      "rule": "旧 v2 标题通用单位属于卡片；不是每个系列的数学单位或轴标题。"
+    },
+    {
+      "key": "HMAAChartModel.reverse",
+      "capability": "compat-order",
+      "rule": "旧组内绘制反序不等于 isReversed；图例/提示顺序不能随意一起翻转。"
+    },
+    {
+      "key": "HMAAChartModel.zoomType",
+      "capability": "runtime-viewport",
+      "rule": "配置宿主缩放轴/是否启用；OC 的 X/Y/XY 完整入口仍需扩展。"
+    },
+    {
+      "key": "HMAAChartModel.yAxisMax",
+      "capability": "axis-range",
+      "rule": "→ 主 valueAxes[].maximum；有限数且大于显式 minimum。"
+    },
+    {
+      "key": "HMAAChartModel.yAxisMin",
+      "capability": "axis-range",
+      "rule": "→ 主 valueAxes[].minimum；与 maximum 独立自动。"
+    },
+    {
+      "key": "HMAAChartModel.yAxisTickPositions",
+      "capability": "ticks",
+      "rule": "v4 valueAxes[].tickPositions 表达显式主轴刻度；有限、严格递增、域外过滤不扩域。"
+    },
+    {
+      "key": "HMAAChartModel.titleColor",
+      "capability": "title-style",
+      "rule": "原生 theme 标题样式可配，v1 仅标题内容。"
+    },
+    {
+      "key": "HMAAChartModel.titleFont",
+      "capability": "title-style",
+      "rule": "原生 theme 标题样式可配，v1 仅标题内容。"
+    },
+    {
+      "key": "HMAAChartModel.titleWeight",
+      "capability": "title-style",
+      "rule": "原生 theme 标题样式可配，v1 仅标题内容。"
+    },
+    {
+      "key": "HMAAChartModel.yAxisTextColor",
+      "capability": "axis-basic",
+      "rule": "→ 主 valueAxes[].appearance.labelColor，颜色解析在 mapper。"
+    },
+    {
+      "key": "HMAAChartModel.yAxisTextFont",
+      "capability": "axis-basic",
+      "rule": "→ 主 valueAxes[].appearance.labelFontSize，字符串字号先校验。"
+    },
+    {
+      "key": "HMAAChartModel.yAxisTextWeight",
+      "capability": "axis-weight",
+      "rule": "v4 labelFontWeight 表达系统字重；R2 仍需解析旧字符串/未知值，不支持自定义字体资源。"
+    },
+    {
+      "key": "HMAAChartModel.xAxisTextColor",
+      "capability": "axis-basic",
+      "rule": "→ domainAppearance.labelColor，保持与主/次轴独立。"
+    },
+    {
+      "key": "HMAAChartModel.xAxisTextFont",
+      "capability": "axis-basic",
+      "rule": "→ domainAppearance.labelFontSize，非负有限逻辑点。"
+    },
+    {
+      "key": "HMAAChartModel.xAxisTextWeight",
+      "capability": "axis-weight",
+      "rule": "v4 labelFontWeight 表达系统字重；R2 仍需解析旧字符串/未知值，不支持自定义字体资源。"
+    },
+    {
+      "key": "HMAAChartModel.xAxisType",
+      "capability": "continuous-domain",
+      "rule": "category 分支可用；number/datetime 的真实连续语义 HYM 目前拒绝；log/未知类型也不能转字符串蒙混。"
+    },
+    {
+      "key": "HMAAChartModel.xAxisMax",
+      "capability": "domain-range",
+      "rule": "无 domain 范围字段；先区分裁剪域与交互视口，真实数值范围等待 G6。"
+    },
+    {
+      "key": "HMAAChartModel.xAxisMin",
+      "capability": "domain-range",
+      "rule": "无 domain 范围字段；先区分裁剪域与交互视口，真实数值范围等待 G6。"
+    },
+    {
+      "key": "HMAAChartModel.xAxisTickInterval",
+      "capability": "ticks",
+      "rule": "v4 categoryLabelInterval 表达正整数类目候选间隔；非值轴间隔，避让不抽样数据。"
+    },
+    {
+      "key": "HMAAChartModel.yAxisHidden",
+      "capability": "axis-basic",
+      "rule": "按确认后的旧含义组合 valueAxes[].appearance.showsLabels/showsLine；网格开关独立。"
+    },
+    {
+      "key": "HMAAChartModel.leftMargin",
+      "capability": "plot-insets",
+      "rule": "图内左边距≠卡片边距；v1 没有该布局配置。"
+    },
+    {
+      "key": "HMAAChartModel.crosshairColor",
+      "capability": "crosshair-style",
+      "rule": "Swift 原生准线色可配；schema 未建模，不透传 UIColor。"
+    },
+    {
+      "key": "HMAAChartModel.dashColor",
+      "capability": "grid-style",
+      "rule": "旧实际同时设 X 轴线色和 Y 网格色；v1 仅轴线颜色可表达，网格颜色未建模，不能只映射一处后标作全支持。"
+    },
+    {
+      "key": "HMAAChartModel.toolTipBackgroundColor",
+      "capability": "tooltip-style",
+      "rule": "原生 Swift 主题可配；通用描述及 OC 完整提示主题尚未覆盖。"
+    },
+    {
+      "key": "HMAAChartModel.toolTipTextColor",
+      "capability": "tooltip-style",
+      "rule": "原生 Swift 主题可配；通用描述及 OC 完整提示主题尚未覆盖。"
+    },
+    {
+      "key": "HMAAChartModel.closeDarkStyle",
+      "capability": "host-appearance",
+      "rule": "宿主按用途解析深浅色后更新；对应 schema 外观字段缺口仍单独处理，不因解析颜色而算已覆盖。"
+    },
+    {
+      "key": "HMAAChartModel.tooltipPinToTop",
+      "capability": "tooltip",
+      "rule": "原生 fixedTop 已有；schema 未建模，超时/抬手行为另验收。"
+    },
+    {
+      "key": "HMAAChartModel.tooltipDisable",
+      "capability": "tooltip",
+      "rule": "原生提示开关已有；schema 未建模，不能通过隐藏全部系列模拟。"
+    },
+    {
+      "key": "HMAAChartModel.yAxisPlotLines",
+      "capability": "annotations",
+      "rule": "需中立标线数组、稳定目标轴与数值；原生 Swift/OC 已支持。"
+    },
+    {
+      "key": "HMAAChartModel.nativeTooltip",
+      "capability": "host-card",
+      "rule": "旧 Web/native 实现选择不成为新数据字段；目标使用原生提示，旧卡片布局单独兼容。"
+    },
+    {
+      "key": "HMAAChartModel.defaultScope",
+      "capability": "runtime-viewport",
+      "rule": "旧闭区间→showCategoryRange 半开范围；保持采样数据不截断，明确半槽差异。"
+    },
+    {
+      "key": "HMAAChartModel.headerDatas",
+      "capability": "host-card",
+      "rule": "外部统计/日出日落 view model；图表内部标签/Tooltip 内容不由这组字段冒充。"
+    },
+    {
+      "key": "HMAAChartModel.sunDatas",
+      "capability": "host-card",
+      "rule": "外部统计/日出日落 view model；图表内部标签/Tooltip 内容不由这组字段冒充。"
+    },
+    {
+      "key": "HMAAChartModel.titleColorArr",
+      "capability": "host-appearance",
+      "rule": "宿主按用途解析深浅色后更新；对应 schema 外观字段缺口仍单独处理，不因解析颜色而算已覆盖。"
+    },
+    {
+      "key": "HMAAChartModel.crosshairColorArr",
+      "capability": "host-appearance",
+      "rule": "宿主按用途解析深浅色后更新；对应 schema 外观字段缺口仍单独处理，不因解析颜色而算已覆盖。"
+    },
+    {
+      "key": "HMAAChartModel.dashColorArr",
+      "capability": "host-appearance",
+      "rule": "宿主按用途解析深浅色后更新；对应 schema 外观字段缺口仍单独处理，不因解析颜色而算已覆盖。"
+    },
+    {
+      "key": "HMAAChartModel.xAxisTextColorArr",
+      "capability": "host-appearance",
+      "rule": "宿主按用途解析深浅色后更新；对应 schema 外观字段缺口仍单独处理，不因解析颜色而算已覆盖。"
+    },
+    {
+      "key": "HMAAChartModel.yAxisTextColorArr",
+      "capability": "host-appearance",
+      "rule": "宿主按用途解析深浅色后更新；对应 schema 外观字段缺口仍单独处理，不因解析颜色而算已覆盖。"
+    },
+    {
+      "key": "HMAAChartModel.toolTipBackgroundColorArr",
+      "capability": "host-appearance",
+      "rule": "宿主按用途解析深浅色后更新；对应 schema 外观字段缺口仍单独处理，不因解析颜色而算已覆盖。"
+    },
+    {
+      "key": "HMAAChartModel.toolTipTextColorArr",
+      "capability": "host-appearance",
+      "rule": "宿主按用途解析深浅色后更新；对应 schema 外观字段缺口仍单独处理，不因解析颜色而算已覆盖。"
+    },
+    {
+      "key": "HMAAChartModel.subYAxis",
+      "capability": "axis-range",
+      "rule": "创建第二个稳定值轴，系列通过 valueAxisID 绑定；水平 bar 明确拒绝。"
+    },
+    {
+      "key": "HMAAChartModel.showLegend",
+      "capability": "legend-visible",
+      "rule": "→ showsLegend；从空态恢复时不能遗留隐藏状态。"
+    },
+    {
+      "key": "HMAAChartModel.showNoData",
+      "capability": "host-empty",
+      "rule": "外层强制空态状态，不能把数据转全零/全缺测。"
+    },
+    {
+      "key": "HMAAChartModel.chartHeight",
+      "capability": "host-container",
+      "rule": "由宿主 UIView/SwiftUI 布局给高度，不写进数学描述。"
+    },
+    {
+      "key": "HMAAChartModel.showSeriesArray",
+      "capability": "derived-cache",
+      "rule": "从源系列及显隐状态派生；不能当成新的权威输入。"
+    },
+    {
+      "key": "HMAAYAxis.yAxisMax",
+      "capability": "axis-range",
+      "rule": "→ 次值轴 maximum；不隐式扩大显式范围。"
+    },
+    {
+      "key": "HMAAYAxis.yAxisMin",
+      "capability": "axis-range",
+      "rule": "→ 次值轴 minimum；bar 适配时拒绝副轴。"
+    },
+    {
+      "key": "HMAAYAxis.yAxisTextColor",
+      "capability": "axis-basic",
+      "rule": "→ 次 valueAxes[].appearance.labelColor 的合理意图；旧代码误取主轴色去设 lineColor，不应把这个错误当标签色兼容政策。"
+    },
+    {
+      "key": "HMAAYAxis.yAxisTextFont",
+      "capability": "axis-basic",
+      "rule": "→ 次 valueAxes[].appearance.labelFontSize。"
+    },
+    {
+      "key": "HMAAYAxis.yAxisTextWeight",
+      "capability": "axis-weight",
+      "rule": "v4 labelFontWeight 表达系统字重；R2 仍需解析旧字符串/未知值，不支持自定义字体资源。"
+    },
+    {
+      "key": "HMAAYAxis.unit",
+      "capability": "axis-value-format",
+      "rule": "v4 valueAxes[].labelFormat.unit 表达刻度单位后缀；不是系列单位或轴标题，不承诺旧格式空白/业务换算逐字兼容。"
+    },
+    {
+      "key": "HMAAYAxis.yAxisTickPositions",
+      "capability": "ticks",
+      "rule": "v4 按轴 ID 提供独立刻度；R2 不应复制旧次轴分支读取主轴数组的错误。"
+    },
+    {
+      "key": "HMChartHeaderModel.title",
+      "capability": "host-card",
+      "rule": "统计卡片内容/布局在外部 view model；不加入 chart.series。"
+    },
+    {
+      "key": "HMChartHeaderModel.data",
+      "capability": "host-card",
+      "rule": "统计卡片内容/布局在外部 view model；不加入 chart.series。"
+    },
+    {
+      "key": "HMChartHeaderModel.unit",
+      "capability": "host-card",
+      "rule": "统计卡片内容/布局在外部 view model；不加入 chart.series。"
+    },
+    {
+      "key": "HMChartHeaderModel.topMargin",
+      "capability": "host-card",
+      "rule": "统计卡片内容/布局在外部 view model；不加入 chart.series。"
+    },
+    {
+      "key": "HMChartHeaderModel.leftMargin",
+      "capability": "host-card",
+      "rule": "统计卡片内容/布局在外部 view model；不加入 chart.series。"
+    },
+    {
+      "key": "HMChartHeaderModel.rightMargin",
+      "capability": "host-card",
+      "rule": "统计卡片内容/布局在外部 view model；不加入 chart.series。"
+    },
+    {
+      "key": "HMChartSunModel.icon",
+      "capability": "host-card",
+      "rule": "日出日落资源/时间文字/预设在业务卡片；不自动变成时间坐标采样。"
+    },
+    {
+      "key": "HMChartSunModel.title",
+      "capability": "host-card",
+      "rule": "日出日落资源/时间文字/预设在业务卡片；不自动变成时间坐标采样。"
+    },
+    {
+      "key": "HMChartSunModel.time",
+      "capability": "host-card",
+      "rule": "日出日落资源/时间文字/预设在业务卡片；不自动变成时间坐标采样。"
+    },
+    {
+      "key": "HMChartSunModel.initSunriseModel",
+      "capability": "host-card",
+      "rule": "日出日落资源/时间文字/预设在业务卡片；不自动变成时间坐标采样。"
+    },
+    {
+      "key": "HMChartSunModel.initSunsetModel",
+      "capability": "host-card",
+      "rule": "日出日落资源/时间文字/预设在业务卡片；不自动变成时间坐标采样。"
+    },
+    {
+      "key": "HMAASeries.gname",
+      "capability": "groups",
+      "rule": "→ groups[].name；组名可重复但 ID 不能重复。"
+    },
+    {
+      "key": "HMAASeries.gnames",
+      "capability": "tooltip",
+      "rule": "逐采样组标题未建模，现原生静态业务组不能自动替代。"
+    },
+    {
+      "key": "HMAASeries.element",
+      "capability": "groups",
+      "rule": "按 groupID 关联展平后的 series；保留稳定 ID 和成员顺序。"
+    },
+    {
+      "key": "HMAASeries.unitType",
+      "capability": "group-summary",
+      "rule": "旧组小计有独立格式；现 ChartGroupSpecification 无格式，不能偷用系列 valuePresentation。"
+    },
+    {
+      "key": "HMAASeries.otherUnit",
+      "capability": "group-summary",
+      "rule": "旧组小计有独立格式；现 ChartGroupSpecification 无格式，不能偷用系列 valuePresentation。"
+    },
+    {
+      "key": "HMAASeries.currencySymbol",
+      "capability": "group-summary",
+      "rule": "旧组小计有独立格式；现 ChartGroupSpecification 无格式，不能偷用系列 valuePresentation。"
+    },
+    {
+      "key": "HMAASeries.showFabs",
+      "capability": "group-summary",
+      "rule": "旧组小计有独立格式；现 ChartGroupSpecification 无格式，不能偷用系列 valuePresentation。"
+    },
+    {
+      "key": "HMAASeries.trunc",
+      "capability": "group-summary",
+      "rule": "旧组小计有独立格式；现 ChartGroupSpecification 无格式，不能偷用系列 valuePresentation。"
+    },
+    {
+      "key": "HMAASeries.fractionDigits",
+      "capability": "group-summary",
+      "rule": "旧组小计有独立格式；现 ChartGroupSpecification 无格式，不能偷用系列 valuePresentation。"
+    },
+    {
+      "key": "HMAASeries.fgdata",
+      "capability": "derived-cache",
+      "rule": "旧组格式化派生结果由兼容展示层重新计算，不写入 ChartGroupSpecification。"
+    },
+    {
+      "key": "HMAASeries.formatGroupData",
+      "capability": "derived-cache",
+      "rule": "旧组格式化派生结果由兼容展示层重新计算，不写入 ChartGroupSpecification。"
+    },
+    {
+      "key": "HMAASeries.onlyNameIntooltip",
+      "capability": "tooltip",
+      "rule": "需组级隐藏数值规则；逐系列 row provider 不等于已兼容整组。"
+    },
+    {
+      "key": "HMAASeries.icon",
+      "capability": "group-legend",
+      "rule": "旧 v2 分组图例卡片/分栏/间距；外部组合，不把显示组误作 stackID。"
+    },
+    {
+      "key": "HMAASeries.color",
+      "capability": "group-legend",
+      "rule": "旧 v2 分组图例卡片/分栏/间距；外部组合，不把显示组误作 stackID。"
+    },
+    {
+      "key": "HMAASeries.gcname",
+      "capability": "group-legend",
+      "rule": "旧 v2 分组图例卡片/分栏/间距；外部组合，不把显示组误作 stackID。"
+    },
+    {
+      "key": "HMAASeries.showElementName",
+      "capability": "group-legend",
+      "rule": "旧 v2 分组图例卡片/分栏/间距；外部组合，不把显示组误作 stackID。"
+    },
+    {
+      "key": "HMAASeries.stackGroupInterval",
+      "capability": "group-legend",
+      "rule": "旧 v2 分组图例卡片/分栏/间距；外部组合，不把显示组误作 stackID。"
+    },
+    {
+      "key": "HMAASeriesElement.name",
+      "capability": "series",
+      "rule": "→ series[].name；不把显示名称当 ID。"
+    },
+    {
+      "key": "HMAASeriesElement.names",
+      "capability": "tooltip",
+      "rule": "逐采样提示行名需声明式覆盖；不能直接改系列 name。"
+    },
+    {
+      "key": "HMAASeriesElement.color",
+      "capability": "color",
+      "rule": "→ appearance.color；空值继承明确政策，非法 hex 报错。"
+    },
+    {
+      "key": "HMAASeriesElement.data",
+      "capability": "series",
+      "rule": "→ samples[].value；NSNull→nil 保位，零/负数不改，坐标与样本 ID 单独保留。"
+    },
+    {
+      "key": "HMAASeriesElement.unitType",
+      "capability": "units",
+      "rule": "白名单解析为 unit + scale/currencySymbol；未知枚举诊断。"
+    },
+    {
+      "key": "HMAASeriesElement.otherUnit",
+      "capability": "units",
+      "rule": "→ unit；只在确认旧 OTHER 分支时采用。"
+    },
+    {
+      "key": "HMAASeriesElement.currencySymbol",
+      "capability": "units",
+      "rule": "→ valuePresentation.currencySymbol；不要放入数学单位。"
+    },
+    {
+      "key": "HMAASeriesElement.showFabs",
+      "capability": "number-presentation",
+      "rule": "→ valuePresentation.showsAbsoluteValue，仅展示 abs。"
+    },
+    {
+      "key": "HMAASeriesElement.trunc",
+      "capability": "number-presentation",
+      "rule": "→ rounding.towardZero/nearest；原始 value 不预舍入。"
+    },
+    {
+      "key": "HMAASeriesElement.fractionDigits",
+      "capability": "precision-compatibility",
+      "rule": "普通 0...12 可转 maximumFractionDigits；100 必须独立兼容政策，不钳制为12。"
+    },
+    {
+      "key": "HMAASeriesElement.chartType",
+      "capability": "marks",
+      "rule": "显式 line/spline/area/areaspline/column 白名单→mark+interpolation；未知字符串拒绝。"
+    },
+    {
+      "key": "HMAASeriesElement.stackGroup",
+      "capability": "stacking",
+      "rule": "→ stackID；必须保留旧未设置时的默认堆叠取舍，不能把所有 nil 自动作一组。"
+    },
+    {
+      "key": "HMAASeriesElement.fillColorAlphas",
+      "capability": "area-fill",
+      "rule": "先合成单个 ChartAreaFill；明确三者优先级与透明度一次计算，非 area 使用须报错。"
+    },
+    {
+      "key": "HMAASeriesElement.autoGap",
+      "capability": "gap-policy",
+      "rule": "按实际 >=12 空点断段映射 connectUpTo(11)；false 的旧默认另定，不擅自 connect。"
+    },
+    {
+      "key": "HMAASeriesElement.yAxis",
+      "capability": "axis-range",
+      "rule": "旧 0/1→稳定 valueAxisID；未知下标拒绝，不静默回主轴。"
+    },
+    {
+      "key": "HMAASeriesElement.dashStyle",
+      "capability": "stroke-marker",
+      "rule": "仅可明确映射 solid/dashed/dotted；其他旧 dash 值必须诊断或扩展语义。"
+    },
+    {
+      "key": "HMAASeriesElement.zones",
+      "capability": "zones",
+      "rule": "v3 可表达值轴颜色子集；旧 X 分区/分区填充与原值取色必须先判别，不可整字段静默截断后算已覆盖。"
+    },
+    {
+      "key": "HMAASeriesElement.zoneAxisX",
+      "capability": "zones",
+      "rule": "v3 valueColorZones 仅值轴；旧 true 对应类目原始索引，仍未建模，不能借 metadata 透传或当成连续 X。"
+    },
+    {
+      "key": "HMAASeriesElement.hideInTooltip",
+      "capability": "tooltip",
+      "rule": "只过滤提示行，不隐藏绘制或从百分比分母剔除系列。"
+    },
+    {
+      "key": "HMAASeriesElement.fillAlpha",
+      "capability": "area-fill",
+      "rule": "先合成单个 ChartAreaFill；明确三者优先级与透明度一次计算，非 area 使用须报错。"
+    },
+    {
+      "key": "HMAASeriesElement.fillColor",
+      "capability": "area-fill",
+      "rule": "先合成单个 ChartAreaFill；明确三者优先级与透明度一次计算，非 area 使用须报错。"
+    },
+    {
+      "key": "HMAASeriesElement.negativeColor",
+      "capability": "color",
+      "rule": "→ appearance.negativeColor；不得 abs 原始数据。"
+    },
+    {
+      "key": "HMAASeriesElement.isStep",
+      "capability": "marks",
+      "rule": "确认旧方向后设 stepAfter；与 series.chartType 的优先级必须显式。"
+    },
+    {
+      "key": "HMAASeriesElement.markerHidden",
+      "capability": "stroke-marker",
+      "rule": "true→appearance.marker.none；false 恢复明确 marker/引擎默认，不影响原始样本。"
+    },
+    {
+      "key": "HMAASeriesElement.showPrev",
+      "capability": "tooltip-offset",
+      "rule": "仅提示取值偏移 -1 + clamp；命中 ID、当前表头/名字保留，不整体平移数据。"
+    },
+    {
+      "key": "HMAASeriesElement.formatData",
+      "capability": "derived-cache",
+      "rule": "旧格式化缓存归兼容展示层；源 raw 值不能替换为格式字符串。"
+    },
+    {
+      "key": "HMAASeriesElement.fdata",
+      "capability": "derived-cache",
+      "rule": "旧格式化缓存归兼容展示层；源 raw 值不能替换为格式字符串。"
+    },
+    {
+      "key": "HMAASeriesElement.hidePoints",
+      "capability": "tooltip",
+      "rule": "按当前命中采样身份过滤提示；与 showPrev 的取值索引必须区分。"
+    },
+    {
+      "key": "HMAASeriesElement.legendBgColor",
+      "capability": "legend-style",
+      "rule": "原生逐项图例外观/图片已有；v1 无图例外观资源协议，alpha 只算一次。"
+    },
+    {
+      "key": "HMAASeriesElement.legendBgColorAlpha",
+      "capability": "legend-style",
+      "rule": "原生逐项图例外观/图片已有；v1 无图例外观资源协议，alpha 只算一次。"
+    },
+    {
+      "key": "HMAASeriesElement.isHidden",
+      "capability": "legend-visible",
+      "rule": "取反→isVisible；不改变 showsInLegend，不删掉业务系列。"
+    },
+    {
+      "key": "HMAASeriesElement.icon",
+      "capability": "legend-style",
+      "rule": "原生逐项图例外观/图片已有；v1 无图例外观资源协议，alpha 只算一次。"
+    },
+    {
+      "key": "HMAASeriesElement.hideNameInTooltip",
+      "capability": "tooltip",
+      "rule": "只隐藏提示标题，不删除图例名/系列名。"
+    },
+    {
+      "key": "HMAASeriesUtil.doubleWithOriginData:showFabs:fractionDigits:",
+      "capability": "compat-format",
+      "rule": "旧格式化工具不进入 SDK 同名公共边界；单位白名单、预舍入/负零/哨兵按独立兼容政策验收。"
+    },
+    {
+      "key": "HMAASeriesUtil.formatCarryDouble:trunc:fractionDigits:",
+      "capability": "compat-format",
+      "rule": "旧格式化工具不进入 SDK 同名公共边界；单位白名单、预舍入/负零/哨兵按独立兼容政策验收。"
+    },
+    {
+      "key": "HMAASeriesUtil.formatDouble:trunc:fractionDigits:",
+      "capability": "compat-format",
+      "rule": "旧格式化工具不进入 SDK 同名公共边界；单位白名单、预舍入/负零/哨兵按独立兼容政策验收。"
+    },
+    {
+      "key": "HMAASeriesUtil.getUnitWithType:",
+      "capability": "compat-format",
+      "rule": "旧格式化工具不进入 SDK 同名公共边界；单位白名单、预舍入/负零/哨兵按独立兼容政策验收。"
+    },
+    {
+      "key": "HMAASeriesUtil.jsonSerializsWithArray:",
+      "capability": "vendor-output",
+      "rule": "原生无 JS 字符串边界；ChartSpecification.jsonData 是版本化描述，不是同一返回协议。"
+    },
+    {
+      "key": "HMAASeriesUtil.canTranslateToNum:",
+      "capability": "compat-input",
+      "rule": "R2 输入类型校验，非法字符串报错，不把失败转换为0。"
+    },
+    {
+      "key": "HMAASeriesUtil.needCarryType:",
+      "capability": "compat-format",
+      "rule": "旧格式化工具不进入 SDK 同名公共边界；单位白名单、预舍入/负零/哨兵按独立兼容政策验收。"
+    },
+    {
+      "key": "HMAASeriesUtil.formatNullElements:",
+      "capability": "compat-input",
+      "rule": "缺测保留采样位置；展示占位与 raw nil 分离。"
+    },
+    {
+      "key": "HMAASeriesUtil.rgbaStringFromHex:withAlpha:",
+      "capability": "compat-input",
+      "rule": "解析为 ChartRGBA，不生成 JS rgba 字符串；色值/alpha 校验且只合成一次。"
+    },
+    {
+      "key": "HMAASeriesUtil.calculateMaxMinValueWithNumberArray:",
+      "capability": "compat-input",
+      "rule": "重算全部可见 draw/base 的范围；显式值轴上下界优先，不复制旧首数组缓存。"
+    },
+    {
+      "key": "HMAASeriesUtil.formatMoney:withSymbol:",
+      "capability": "compat-format",
+      "rule": "旧格式化工具不进入 SDK 同名公共边界；单位白名单、预舍入/负零/哨兵按独立兼容政策验收。"
+    },
+    {
+      "key": "HMAASeriesUtil.positiveSplitFromSeriesElement:",
+      "capability": "compat-sign-split",
+      "rule": "保留一个业务系列及原始符号；内部几何分链不产生新的业务 ID，缺测和字段不能丢失。"
+    },
+    {
+      "key": "HMAASeriesUtil.negativeSplitFromSeriesElement:",
+      "capability": "compat-sign-split",
+      "rule": "保留一个业务系列及原始符号；内部几何分链不产生新的业务 ID，缺测和字段不能丢失。"
+    },
+    {
+      "key": "HMAAPlotLinesElement.color",
+      "capability": "annotations",
+      "rule": "标线 stroke 颜色需中立 annotation 字段；原生 Swift/OC 已具备。"
+    },
+    {
+      "key": "HMAAPlotLinesElement.dashStyle",
+      "capability": "annotations",
+      "rule": "旧标线转换未消费此声明；新原生可配但 schema 未建模，需明确白名单，不继承静默忽略。"
+    },
+    {
+      "key": "HMAAPlotLinesElement.width",
+      "capability": "annotations",
+      "rule": "标线逻辑点线宽；非负有限值。"
+    },
+    {
+      "key": "HMAAPlotLinesElement.value",
+      "capability": "annotations",
+      "rule": "标线值与绑定值轴共同定义；不是类目下标。"
+    },
+    {
+      "key": "HMAAPlotLinesElement.zIndex",
+      "capability": "annotation-order",
+      "rule": "旧声明未被消费（实现写死3），不是既有可回归层级能力；新后端无任意层级契约，未来 mapper 应报差异。"
+    },
+    {
+      "key": "HMAAPlotLinesElement.text",
+      "capability": "annotations",
+      "rule": "annotation 标签内容；与线条颜色独立。"
+    },
+    {
+      "key": "HMAAPlotLinesElement.textColor",
+      "capability": "annotations",
+      "rule": "annotation 独立 labelStyle.color 原生已支持，schema 未建模。"
+    },
+    {
+      "key": "HMAAPlotLinesElement.textDarkColor",
+      "capability": "host-appearance",
+      "rule": "先由宿主选出当前外观颜色，再输入待扩展 annotation 样式；解析颜色不等于已支持 annotation。"
+    },
+    {
+      "key": "HMAAPlotLinesElement.fontSize",
+      "capability": "annotations",
+      "rule": "annotation labelStyle.font 原生已支持，schema 未建模。"
+    },
+    {
+      "key": "HMAAChartManager.series",
+      "capability": "vendor-output",
+      "rule": "AASeriesElement 引擎输出退出公共输入边界；消费者迁移到中立输入/后端配置。"
+    },
+    {
+      "key": "HMAAChartManager.initWithChartModel:",
+      "capability": "runtime-create",
+      "rule": "创建旧→中立快照转换器属于 R2；后续更新必须重新读取原模型，不能永远缓存第一次结果。"
+    },
+    {
+      "key": "HMAAChartManager.configureAAChartOptions",
+      "capability": "vendor-output",
+      "rule": "AAOptions 不在通用模型中保留；不借 metadata/额外 JSON 键透传。"
+    }
+  ]
+}

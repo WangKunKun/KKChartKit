@@ -16,3 +16,7 @@ xcuserdata/
 
 # 临时文件
 git更新图.png
+
+# Python 校验脚本缓存
+__pycache__/
+*.py[cod]

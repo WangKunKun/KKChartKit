@@ -1,5 +1,12 @@
 # 图表库现状核对与后续路线图
 
+> 2026-09-30 重规划：当前执行队列改为[老项目图表替换计划](charts-legacy-replacement-plan.md)。独立 Swift/OC 接入、旧输入适配和试点页面前置；提示生命周期纳入统一选择/交互状态，再支撑卡片、联动和全屏。下方保留功能开发与历史路线记录。
+
+
+> 最新进度（2026-09-30 后续）：第 4 阶段增加结构化 Tooltip、图标与名称/数值分栏、逐点展示规则、超高滚动，SwiftUI/OC/Demo 同步。已继续完成前值/偏移/固定顶部；后续按顶部替换计划推进。见[富内容提示](charts-rich-tooltip-guide.md)及[前值与置顶](charts-tooltip-selection-guide.md)。
+
+> 进度（2026-09-30）：完成分组文本 Tooltip、原值小计/过滤、图片和自定义符号图例的基础能力，含 OC、Demo。堆叠共享边界已修复，目标点数采样可选，宽度模式保持默认。参见 [分组展示](charts-grouped-presentation-guide.md)、[接缝边界](charts-stacked-area-seams-guide.md)、[采样](charts-line-sampling-guide.md)。下方为历史记录。
+
 > 最新进度（2026-09-29）：迁移第 3 阶段已接入 autoGap、X/Y 连续颜色分区与平滑曲线负值着色，含 Swift/OC 与 Demo。分区不修改原始数据；复杂堆叠面积基准切换接缝仍待后续处理。见 [缺测策略指南](charts-gap-policy-guide.md) 与 [颜色分区指南](charts-color-zones-guide.md)。
 
 > 旧模块迁移第 2 步已接入混合图、分组堆叠、系列独立样式和 Demo/OC 调试入口，详见 [混合图指南](charts-combined-and-stacks-guide.md)。下文的缺口描述保留为当时评估基线。
@@ -148,7 +155,9 @@
 
 每种新增图表都应同时交付数据模型、渲染、命中、标签/图例契约、Demo 和针对性验证，避免只完成静态绘制。
 
-## 6. 下一批可执行任务
+## 6. 原计划任务（2026-09-24，历史记录）
+
+以下保留原始顺序，不再作为当前待办；下一编码批次以[替换实施计划](charts-legacy-replacement-plan.md#下一编码批次)为准。
 
 1. 验证已有堆叠总量标签修改并补齐当前能力矩阵。
 2. 建立状态保持回归：缩放 → 数据更新 → 样式更新 → 选择仍有效。

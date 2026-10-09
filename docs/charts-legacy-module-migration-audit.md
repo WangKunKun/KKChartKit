@@ -1,20 +1,18 @@
 # 旧图表模块替换评估
 
-> 最新进度（2026-09-29）：迁移第 3 阶段已接入 autoGap、X/Y 连续颜色分区与平滑曲线负值着色，含 Swift/OC 与 Demo。分区不修改原始数据；复杂堆叠面积基准切换接缝仍待后续处理。见 [缺测策略指南](charts-gap-policy-guide.md) 与 [颜色分区指南](charts-color-zones-guide.md)。
+> [参考源码旧图表 Demo](../Examples/LegacyChartDemo/README.md) 的 11 场景运行基线已完成；[对照结果](charts-legacy-demo-parity-results.md)补充本轮真实点值、提示、配置与新侧同输入样本。下方“未运行”等表述属于原静态审计范围，不覆盖本轮运行记录。
 
-> 旧模块迁移第 2 步已接入混合图、分组堆叠、系列独立样式和 Demo/OC 调试入口，详见 [混合图指南](charts-combined-and-stacks-guide.md)。下文的缺口描述保留为当时评估基线。
+更新：2026-09-30。原始静态审计：2026-09-24。本轮重新核对当前源码和旧封装接口，更新第 3 节的现状及第 7 节的实施顺序。后续任务以[老项目替换实施计划](charts-legacy-replacement-plan.md)为唯一执行队列；[三方对比](line-chart-parity-comparison.md)用于技术取舍。
 
-> 后续进度：迁移第 1 步的数据语义、业务组元数据、每系列格式与最小 OC 桥接已接入，见 [实施指南](charts-data-semantics-guide.md)。下文保留实施前的审计基线，不代表这些子项仍全部缺失。
-
-日期：2026-09-24。基准：当前工作区源码，包含尚未提交的固定柱宽、间距、滚动及绘制对象复用功能。
+**当前已具备大部分绘图核心和通用提示/图例能力，尚未完成老项目模块替换。** 独立 framework 与 Swift/纯 OC 宿主已通过 Debug/Release；按用户最新要求，接下来先完善图表展现形式；正式旧输入转换、真实页面及外围 UIView 组合后置。
 
 ## 1. 范围与结论
 
 本次检查 `SwiftFunctionProject/参考图表/` 下的自定义封装，排除所有 `AAChartKit/` 内容。非 vendor 的 Objective-C 文件共 19 个头文件、18 个实现文件，约 6496 行；另外包含 7 组图标资源。
 
-这是一次静态代码与接口对照，没有运行旧模块，没有读取或验证 AAChartKit 内部实现。下文“已实现”指自定义封装中存在实际调用链；依赖底层 AAChartKit 的最终显示效果仍需老项目场景验收。在当前工程参考目录之外未找到这些旧类的业务调用点，因此不能确认每个配置在老项目中的使用频率，也不能承诺零改调用代码即可替换。
+本审计以本地非 vendor 封装的静态代码与接口为依据，没有运行旧模块，也没有验证旧项目内嵌 AAChartKit/Highcharts 的运行行为。下文“已实现”指自定义封装中存在实际调用链；依赖底层 AAChartKit 的最终显示效果仍需老项目场景验收。在当前工程参考目录之外未找到这些旧类的业务调用点，因此不能确认每个配置在老项目中的使用频率，也不能承诺零改调用代码即可替换。
 
-**当前 HYMCharts 可以承接基础图表场景，但还不能完整替换这个目录。** 旧模块实际包含“图表绘制适配 + 分组数据和单位语义 + 原生展示组件 + 老项目业务约定”。必须同时覆盖这几层，不能只对比图表类型。
+**具备绘图能力与完成模块替换需要分别验收。** 旧模块实际包含“图表绘制适配 + 分组数据和单位语义 + 原生展示组件 + 老项目业务约定”。必须同时覆盖这几层，不能只对比图表类型。
 
 不需要先实现 AAChartKit 的全部图表类型。本次封装顶层只明确配置曲线面积、柱状、折线；系列类型还有字符串透传扩展。饼图、散点等没有在这批封装中发现专用调用场景，暂不列为替换前置条件。
 
@@ -41,48 +39,46 @@
 - [多图索引联动](</Users/hoymiles/Desktop/AI编程项目/Swift/SwiftFunctionProject/SwiftFunctionProject/参考图表/HMAAChartView/HMMTAAChartView.m:36>)；[全屏实现](</Users/hoymiles/Desktop/AI编程项目/Swift/SwiftFunctionProject/SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartFullScreenVC.m:21>)。
 - [业务指标适配](</Users/hoymiles/Desktop/AI编程项目/Swift/SwiftFunctionProject/SwiftFunctionProject/参考图表/HMAAChartUtil.m:55>)。
 
-## 3. 和当前库逐项对照
+## 3. 和当前库逐项对照（2026-09-30）
 
-“部分”表示已有底层或扩展入口，但不能直接提供旧模块的完整行为。P0 为覆盖相应旧场景的阻塞项；实际启用顺序仍应由老项目调用清单决定。
+“已具备”表示有当前源码及本仓库回归记录，仍需旧输入/真实页面验收；“部分”表示不能直接覆盖旧契约。R 编号对应新的替换计划。Swift 核心、OC 配置和业务适配的状态分别说明，避免将功能存在误认为页面已经可迁移。
 
-| 旧能力                                   | HYMCharts 现状                                       | 需要补充/迁移                                                                              | 优先级   |
-| ------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------ | ----- |
-| 多系列折线、平滑线、阶梯线、面积、柱状                   | 已有                                                 | 默认样式映射、代表场景视觉比对                                                                      | 已有基础  |
-| 同图 column + line/spline/areaspline    | 缺失；目前每个 Renderer 一种主体类型                            | 系列级类型、共享坐标/值域/命中/图例、绘制顺序                                                             | P0    |
-| 多个 stackGroup 分别堆叠并排                  | 缺失；`StackConfig.grouped` 只是预留                      | 堆叠组 ID、按轴/组/正负累计、组内百分比分母、柱槽位与命中                                                      | P0    |
-| 每个系列独立平滑/阶梯、面积开关、填充色/透明度/渐变、隐藏 marker | 部分；连接方式、面积、渐变、marker 显示主要是全图 Theme                 | 加系列覆盖配置；已有系列颜色、虚线、marker 形状保留                                                        | P0    |
-| 按 X 或 Y 阈值切换线色和填充色 `zones`            | 缺失；逐柱颜色和 `negativeColor` 不能替代连续线段分区                | 分区配置、边界交点、曲线/面积裁剪；负值曲线换色也需补齐                                                         | P0    |
-| `autoGap` 短缺测连接、长缺测断开                 | 部分；只有全连接/全断开 `connectNulls`                        | 按连续缺测数量或时长配置；不伪造补点值                                                                  | P0    |
-| 普通/百分比正负堆叠                            | 已有基础                                               | 用老项目正负混合样例核对百分比分母、面积边界与绘制顺序；不复制透明虚拟系列技巧                                              | P0 验收 |
-| 双 Y 轴、范围、指定刻度、单位                      | Line/Column 已有基础                                   | 轴独立字号/颜色/显隐、主次轴格式策略；现有轴 Theme 多为共用样式                                                 | P1    |
-| X 轴类别、刻度间隔、默认显示范围                     | 部分                                                 | 旧 `defaultScope` 端点与新 `Range` 语义转换；显式类目刻度间隔需核对实现；`xAxisType` 字符串透传无法直接等价             | P1    |
-| 标线及文字                                 | 已有线色/宽度/虚线/数值/标签                                   | 独立标签颜色、字号/暗色方案；绘制层次按需求扩展                                                             | P1    |
-| 业务分组、组总值、组标题、逐点名称                     | 缺失专用模型；当前系列为扁平列表                                   | `groupID`、稳定系列 ID、逐点展示元数据、分组汇总策略                                                     | P0    |
-| 每系列/每组单位、k/M/G、绝对值、货币、截断、Locale       | 部分；有单位字段、轴 formatter、Tooltip 全局后缀/精度               | 可复用格式化策略；每系列独立；原始值与展示值分开                                                             | P0    |
-| Tooltip 显示原值、汇总值、百分比                  | 尚未统一                                               | shared target 已给原值，但单点 Column 的 `value` 在堆叠时仍是累计值；统一 `rawValue/drawValue/percentage` | P0    |
-| 分组 Tooltip、组小计、图标、双栏、仅名称、逐点名称、前一采样值   | 部分；UIKit 自定义内容与定位回调已有                              | 结构化 Tooltip section/row/presentation；`xSeriesArray` 独立标题、`showPrev` 显示偏移策略           | P0    |
-| 不隐藏图形但隐藏 Tooltip 中的系列/点               | 缺失专用配置                                             | Tooltip inclusion/filter 策略，与 `isVisible` 分离                                         | P0    |
-| 置顶 Tooltip、表头替换、抬手隐藏/超时消失             | 部分；有锚点上下放置和外部定位                                    | 位置策略、交互生命周期、外部表头联动；`.top` 不是固定图表顶部                                                   | P1    |
-| 图例换行、颜色/符号、自定义顺序、显隐、测量                | 已有，且支持四向布局、滚动和真实宽高                                 | 保留现有统一测量引擎                                                                           | 已有基础  |
-| 图例图片、开关式样、单项背景、按业务组分行                 | 缺失                                                 | 可扩展图例 item 内容/样式、分组布局；测量与渲染用同一配置                                                     | P0/P1 |
-| 主动选择某个索引、多个图同步准线与 Tooltip             | 缺失公开的索引选择入口；已有手势命中与区间定位                            | `select/clearSelection`、选择回调来源、防循环；之后增加可选联动协调器                                       | P0    |
-| 垂直 pan 交给外层页面                         | 尚无旧 delegate 对等接口                                  | 方向仲裁、ScrollView 手势协调、触摸开始/结束事件                                                       | P1    |
-| 图表标题+单位、统计表头、日出日落信息行、空态               | 只有普通图表标题                                           | 通用卡片容器与 header/footer/empty 插槽；能源 UI 在适配层                                            | P0    |
-| 全屏放大/恢复                               | 缺失现成容器                                             | UIKit 全屏组件、尺寸变化、窗口/显隐/选择状态共享与恢复                                                      | P1    |
-| 深浅色自动切换                               | 部分；主题可传 UIColor，默认也有系统色                            | 验证并补齐 trait 改变时 CGColor 图层刷新、Tooltip/图例更新，映射旧关闭策略                                    | P1    |
-| 初始化、刷新数据、渲染完成回调                       | 有 configure/update，支持保留窗口                          | OC 语义映射、明确 render completion；数据更新不是 append API                                       | P0/P1 |
-| OC 调用与 SDK 分发                         | 轴系桥接缺失；现有 OCBridge 只覆盖 Radar/Heatmap；仍是 App target | NSObject 模型、非泛型 UIView facade、block/delegate、独立库产物与资源加载                              | P0    |
-| 截图导出                                  | 当前无标准 API；旧实现也未完成                                  | 按新需求另做 snapshot，不算旧已成功能回归                                                            | 后续    |
+| 旧能力 | 当前 HYMCharts | 剩余处理 / 任务 |
+| --- | --- | --- |
+| 多系列线/曲线/阶梯/面积/柱状 | 已具备，含系列样式 | 默认主题、形态和真实输入对照，R2/R7 |
+| 同图 column + line/spline/areaspline | 已具备 CombinedChartRenderer | 旧类型字符串映射与未知值诊断，R2 |
+| 多个 stackGroup 分别堆叠 | 已具备 stackID 和按轴/组/正负计算 | 对照百分比分母、显隐、槽位与顺序；展示分组另处理，R2/R3 |
+| 每系列样式、marker、填充 | Swift 已具备主要覆盖，OC 仅部分 | 虚线、颜色/填充等逐字段核查透传，R2 |
+| X/Y zones、曲线负值颜色 | 已具备，含连续裁剪与面积；[指南](charts-color-zones-guide.md) | 样本对照，R2/R7 |
+| autoGap | 已具备数量/时长策略，边界明确；[指南](charts-gap-policy-guide.md) | 旧 12 点断开映射与缺测来源验证，R2 |
+| 正负/百分比堆叠与面积 | 已具备；共享边界复用已修复 | 无共同底边过渡仍有限制，按真实样本检查；[接缝指南](charts-stacked-area-seams-guide.md) |
+| 双 Y 轴、值域、刻度、单位 | 核心有主/次轴数据配置；独立外观和 OC 配置不完整 | 轴字体/色彩/显隐/格式与指定刻度实际生效，R2 |
+| X 类目、刻度间隔、默认范围 | 核心有类目/范围与区间命令；显式类目间隔并非值轴间隔 | 核对 defaultScope 端点与 xAxisType 透传，R2 |
+| 标线/色带 | Swift 核心已具备基础 | OC 透传、独立标签样式、次轴绑定核对，R2 |
+| 业务组、组名、组汇总 | 已有稳定组 ID、静态名称和受约束的小计 | 逐点 gnames、组自己的单位/格式/fgdata 不能视为已完整覆盖，R3 |
+| k/M/G、绝对值、货币、截断、Locale | 已有通用每系列格式 | `fractionDigits=100` 分级精度及组级格式、旧单位表/金额语义，R2/R3 |
+| raw/aggregated/draw/base/percentage | 四轴系统一快照，Swift/OC 可读 | 旧回调映射与统计语义验收；[数据语义](charts-data-semantics-guide.md) |
+| 分组提示/图标/分栏/逐点行名/过滤/仅名称/前值 | 已具备通用链路，含 SwiftUI/OC/Demo | 独立 xSeriesArray、逐点组标题、分组排布与汇总策略还需映射，R3；[富内容](charts-rich-tooltip-guide.md)、[前值](charts-tooltip-selection-guide.md) |
+| Tooltip 置顶/偏移 | 已具备，原始命中与取值来源分开 | 默认布局与原版对照，R3/R7 |
+| 抬手/超时消失、表头替换 | 无统一公开生命周期；旧原生分支存在抬手隐藏和 5 秒计时 | 与选择/清除/取消事件统一，R4 |
+| 图例布局、顺序、显隐、测量 | 已具备四向/换行/滚动、稳定 ID | 保留统一测量，补组标题/旧整行语义中实际使用部分，R3/R5 |
+| 图例图片/开关/背景/业务组分行 | 已有图片与自定义符号/背景/组变化换行 | `gcname/showElementName/stackGroupInterval` 等不能只靠换行等价替代，R3 |
+| 主动索引选点、多图联动 | 有内部手势命中，无公开选择/清除和协调器 | 选择来源、防循环、同域/异域映射，R4/R6 |
+| 外部垂直滚动 | 图表自身手势已具备，无完整外层方向仲裁契约 | ScrollView 嵌套、拖动开始/结束/取消，R4/R5 |
+| 标题/单位、统计表头、日出日落、空态 | 有内部普通标题，无完整卡片 | 通用插槽和统一高度；业务内容/资源由适配层注入，R5 |
+| 全屏进入/返回 | 无现成组件和完整公开状态恢复 | 视口/显隐/选择保存与恢复，R4/R6 |
+| 深浅色自动更新 | 可传动态 UIColor，但未发现完整轴系 trait 重绘链路 | 图层 CGColor、提示/图例与外层组件同步；closeDarkStyle 映射，R5 |
+| 初始化/刷新/渲染完成 | configure/update 已有，保留视口；无明确公开渲染完成事件 | 当前 OC 对象重新转换、完成事件版本与时机，R2/R4 |
+| OC 与独立 SDK | 四轴系已有最小桥接；独立 HYMCharts.framework 与 Swift/纯 OC 宿主已通过 | R1 最小验收完成；R2 旧使用字段透传与兼容入口仍待做，见[197 项清单](charts-legacy-field-inventory.md) |
+| 截图导出 | 旧实现是占位，新库无标准 API | 不能计为旧已成功能；若真实使用则另列任务 |
 
-当前源码核对依据：
+当前核对入口：
 
-- [模型、轴与堆叠预留](</Users/hoymiles/Desktop/AI编程项目/Swift/SwiftFunctionProject/SwiftFunctionProject/Charts/Cartesian/CartesianChartModel.swift:5>)。
-- [折线按全局主题绘制及负值曲线限制](</Users/hoymiles/Desktop/AI编程项目/Swift/SwiftFunctionProject/SwiftFunctionProject/Charts/Line/LineChartRenderer.swift:129>)。
-- [现有图例配置与测量](</Users/hoymiles/Desktop/AI编程项目/Swift/SwiftFunctionProject/SwiftFunctionProject/Charts/Cartesian/ChartLegend.swift:14>)。
-- [现有 Tooltip 数据与模板](</Users/hoymiles/Desktop/AI编程项目/Swift/SwiftFunctionProject/SwiftFunctionProject/Charts/Core/HYMChartInteraction.swift:34>)；[单柱命中值语义](</Users/hoymiles/Desktop/AI编程项目/Swift/SwiftFunctionProject/SwiftFunctionProject/Charts/Column/ColumnHitTarget.swift:4>)。
-- [通用 UIKit 入口](</Users/hoymiles/Desktop/AI编程项目/Swift/SwiftFunctionProject/SwiftFunctionProject/Charts/Core/HYMChartView.swift:13>)。
+- [模型和轴](../SwiftFunctionProject/Charts/Cartesian/CartesianChartModel.swift)、[系列样式](../SwiftFunctionProject/Charts/Cartesian/CartesianSeriesStyle.swift)、[混合渲染](../SwiftFunctionProject/Charts/Combined/CombinedChartRenderer.swift)。
+- [格式化](../SwiftFunctionProject/Charts/Cartesian/CartesianValueFormat.swift)、[结构化提示](../SwiftFunctionProject/Charts/Cartesian/CartesianTooltipPresentation.swift)、[取值策略](../SwiftFunctionProject/Charts/Cartesian/CartesianTooltipSampleSelection.swift)、[图例](../SwiftFunctionProject/Charts/Cartesian/ChartLegend.swift)。
+- [通用视图/手势/更新](../SwiftFunctionProject/Charts/Core/HYMChartView.swift)、[OC 模型](../SwiftFunctionProject/Charts/OCBridge/HYMCartesianModels.swift)、[OC 桥接](../SwiftFunctionProject/Charts/OCBridge/HYMCartesianChartViewBridge.swift)。
 
-当前库已经增加、但不应误算为旧模块迁移缺口的能力：固定 pt 柱宽和间距、溢出自动滚动、可配置初始区间、按系列 reducer 的时间聚合、折线 Min/Max 降采样、绘制对象复用、图例完整尺寸测量。迁移时初始关闭聚合更容易核对原始点、索引、Tooltip；验收后再按指标启用。
+固定柱宽/间距、溢出滚动、区间定位、Column 时间聚合、折线采样和绘制复用继续保留。迁移初始先关闭聚合和采样以核对原始点/索引，再按页面需要启用；不会因为旧模块没有相同优化就删除它们。
 
 ## 4. 旧实现中的占位和不一致
 
@@ -102,7 +98,7 @@
 
 ## 5. 建议分层与高度语义
 
-建议分成三层：
+按新的实施计划分成三层：
 
 1. **HYMCharts 通用核心**：混合图、分组堆叠、系列样式、缺测/分段策略、命中值语义、选择控制、格式化与结构化 Tooltip、图例测量/扩展。
 2. **HYMCharts UIKit 组件及 OCBridge**：图表卡片、header/footer/empty 插槽、全屏、选择联动、OC 模型/视图/回调。独立组件可以按需使用，不要求每张图带业务 UI。
@@ -120,7 +116,7 @@
 
 ## 6. 兼容与接入边界
 
-“功能替换”允许老项目改调用；“直接删目录替换、尽量不改调用”还需要旧 API facade。建议先保留/重建 HMAAChartModel/HMAASeries 等数据契约，内部转换到 HYM 模型，逐步迁移业务调用；若目录必须整体移除，facade 可以属于单独的兼容模块。
+“功能替换”允许老项目改调用；“直接删目录替换、尽量不改调用”还需要旧 API facade。默认以薄适配层承接实际使用的旧输入和调用，内部转换到 HYM 模型；如需保留同名 facade，必要数据契约归兼容模块，避免重复类定义。旧入口的保留范围由调用清单决定，不复制整套未使用 API。
 
 适配应覆盖：
 
@@ -134,23 +130,32 @@
 
 目录之外依赖包括 `Language`、`colorNamed`、`Font_Size_weight`、`CHECK_NULL_EXEC_BLOCK`；空壳图例还使用 Masonry。空态图片 `img_chart_nodata` 和命名颜色依赖老项目资源。提供的七组图片仅包含能源图标和日出日落，不构成完整资源包。应使用资源 Bundle 或外部注入，而非默认主 Bundle 字符串查找。
 
-当前工程最低部署配置是 iOS 15，只有 App/测试 targets，没有独立发布的图表库产物。老项目最低系统、Swift/OC 编译配置、包管理方式、现有调用签名和资源位置仍需后续接入时核对。
+当前工程最低部署配置是 iOS 15；后续已建立独立 HYMCharts.framework 和 Swift/纯 OC 宿主，最小接入验收通过，尚未正式发布。老项目最低系统、Swift/OC 编译配置、包管理方式、现有调用签名和资源位置仍需后续接入时核对。
 
-另：参考目录位于 Xcode 自动同步的源码根目录内，当前项目配置没有显示针对它的排除记录。后续开始构建或集成前，应检查 target membership，避免参考 OC/vendor 代码意外进入新库编译；本次只记录，不改工程配置。
+参考目录在后续实现中已从 App target 的同步成员中排除，记录位于 `project.pbxproj`。独立库建设时仍须再次核查 source/resource membership，确保 Demo、Debug、参考 OC/vendor 与 JS bundle 不进入库产品。
 
-## 7. 建议实施顺序及验收
+## 7. 重新规划后的执行入口
 
-| 阶段                 | 交付                                                 | 关键验收                                                   |
-| ------------------ | -------------------------------------------------- | ------------------------------------------------------ |
-| 1. 数据语义与 OC 接入最小链路 | 统一 raw/draw/percentage；业务组元数据、格式化策略；最小轴系 OC facade | OC 页面显示多系列；堆叠 Tooltip 显示原值；W/Wh/%/金额各自格式正确；NSNull 不变 0 |
-| 2. 绘图核心补齐          | 系列独立类型/样式、混合图、分组堆叠                                 | 柱+线+双轴；两个堆叠组并排；显隐后的组宽/值域/分母/命中正确                       |
-| 3. 缺测与颜色分区         | autoGap 阈值、X/Y zones、曲线负值颜色                        | 11/12/13 空点，跨零/跨阈值，渐变与面积边界，不能凭空生成采样                    |
-| 4. Tooltip 与图例     | 分组/图标/过滤/偏移/置顶；图片或自定义图例、业务组布局、统一测量                 | 原值和组小计、独立单位、隐藏点、长名称、多语言、全隐藏后恢复、宽度变化                    |
-| 5. 卡片和联动           | header/footer/empty、选择 API、联动、手势协调、全屏              | 高度测量一致；上下滚动不卡；多图选点不循环；全屏返回保持状态；深浅色实时更新                 |
-| 6. 独立分发和真实迁移       | SDK 产物、资源、完整 OC facade、旧 API 映射、逐页面切换              | 老项目编译与代表页面对照；移除旧目录后无 AA/JS 依赖；3000 点真机交互检查             |
+原六阶段按“语义 → 绘图 → 缺测/颜色 → 提示/图例 → 卡片/联动 → 分发”推进，已积累可复用的核心能力。独立产物已完成最小验收。按用户最新要求，当前优先 G1–G5 图表本体，正式旧适配、外围组件和真实页面后置。
 
-每阶段新增配置都进入现有对应图表 Demo 属性面板；混合图需要独立类型入口时只保留一个统一调试页。闭包使用可选择的命名预设。不要新增一堆不可配置的重复场景页面。
+| 原阶段 | 当前判定 | 新任务去向 |
+| --- | --- | --- |
+| 1 数据语义与最小 OC | 通用语义已有；旧输入转换及完整 OC 未完成 | R0/R1/R2 |
+| 2 绘图核心 | 混合/分组堆叠/系列样式已具备 | G1/G3/G4/G5 先补绘制；后续 R2/R7 接入 |
+| 3 缺测与颜色 | 已具备；复杂堆叠过渡边界明确 | G1/G2 绘制完善；后续 R2/R7 接入 |
+| 4 提示与图例 | 通用展示已具备；独立表头/组级语义/生命周期仍有缺口 | R3/R4/R5 |
+| 5 卡片和联动 | 尚未形成完整能力 | R4/R5/R6，按试点页面需要推进 |
+| 6 分发与真实迁移 | R1 最小接入验收完成，真实分发/业务迁移未完成 | R0b 确认约束，R7 尽早试点，R8 最终退出旧依赖 |
 
-验收样例至少包括：双轴混合；正负面积堆叠；两个堆叠组；多单位分组 Tooltip；跨阈值颜色；长短缺测；全部无数据/全部图例隐藏；三个以上业务组；超过 10 项图例；不同长度系列；全屏和深浅色；手动初始区间；288/1440/2000/3000 点及聚合开关。
+当时（2026-09-30）的编码顺序是 G1 面积/堆叠，随后 G2–G5 柱条颜色、坐标轴、标注和选择；这些常用绘制能力现已按文末 2026-10-02 增量交付，此处表格保留历史任务分配。统计表头、卡片、日出日落、空态装饰及全屏 view 可在图表外组合，暂不建设；197 项字段清单保留为后续兼容输入。
 
-这里的阶段是本次迁移建议，不表示实现已开始。本次只新增本评估文档，不改图表源码，不提交代码；未运行构建、单元测试或旧项目视觉验收。
+完整队列、依赖、字段映射和 F01–F10 验收样本见[老项目替换实施计划](charts-legacy-replacement-plan.md)。目前仍缺真实老项目路径、调用和运行基线，因此只能确认参考源码覆盖情况，不能将本仓库测试通过标记为老项目迁移完成。
+
+每次实现继续同步对应现有 Demo 面板、Swift/OC 入口、使用文档与受影响测试。闭包采用命名预设，每种图表维持单一调试页。独立集成宿主用于验证打包与 OC 接入，不作为重复的产品 Demo 入口。
+
+本轮修改评估与计划文档，没有新增图表运行时代码，也未运行旧项目。后续任务状态和验证结果统一写入替换计划与能力清单。
+
+
+## 2026-10-02 图表本体增量
+
+G2–G5 已落地柱/条分区、每轴独立样式、标线/色带标签和主体选择，并同步公开 OC 入口；上文日期下的缺口判断保留为历史审计。真实旧字段适配并未因此全部完成。当前范围、验证和未做事项见 [G2–G5 记录](charts-presentation-g2-g5-2026-10-02.md)。

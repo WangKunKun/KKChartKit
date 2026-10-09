@@ -1,36 +1,45 @@
 # HYMCharts 当前能力清单
 
-更新：2026-09-29。以当前工作区源码为准；历史 specs/plans 记录设计过程，不代表当前待办。
+更新：2026-10-03。以当前工作区源码为准；历史 specs/plans 记录设计过程，不代表当前待办。
+
+最新任务入口：[通用模型任务进度与交接](charts-neutral-model-task-progress-2026-10-03.md)。本批最终 384 项单元 + 2 项相关 UI、独立 Release Swift/纯 OC 宿主 2 项均通过；验证范围及未完成项见该交接，不能与下方历史轮次计数混用。
+
+2026-10-03 新增独立于绘图库的 [ChartSpecification 通用模型](charts-neutral-model-guide.md)：Foundation 值类型、明确数据/身份/样式、结构化校验、版本化 JSON、适配协议及 HYMCharts 转换、OC 文档快照和同页 Demo。其他第三方适配器及旧 HMAA 输入 mapper 尚未实现；此批不将正式旧模型迁移 R2 标为完成。
+
+执行方向按“替换老项目 AAChartKit 封装”推进。[旧图表运行 Demo](../Examples/LegacyChartDemo/README.md) 基线与[11 场景对照结果](charts-legacy-demo-parity-results.md)已完成；同输入堆叠/缺测初验通过。[独立 framework 与 Swift/纯 OC 宿主](../Examples/ChartsIntegration/README.md)已通过 Debug/Release，197 个声明见[字段清单](charts-legacy-field-inventory.md)。按[替换实施计划](charts-legacy-replacement-plan.md)优先完善图表本体，G1 常用组合和 G2–G5（柱条阈值、独立轴、图内标注、主体选中）已落地，详见 [2026-10-02 验证记录](charts-presentation-g2-g5-2026-10-02.md)；G1 受限组合已通过[显式正负分链契约](charts-diverging-stacks-guide.md)完成实现与验收，最终 364 单元 + 33 UI 分批全通过，见[任务进度与边界](charts-g1-task-progress-2026-10-02.md)；旧模式保持兼容；正式适配和外围 UIView 继续单列。下方能力实现状态不等于老项目迁移完成。
 
 ## 能力与接入范围
 
 | 能力 | 当前状态 | 入口与限制 |
 |---|---|---|
+| 引擎无关模型与适配层 | 首版轴系模型已实现，2026-10-03 | `ChartSpecification` / `ChartAdapter`；Foundation-only、版本化 JSON、结构化诊断、HYMCharts 与 OC 接入。仅 HYMCharts 后端已交付；其他后端、完整原生能力透传、旧 HMAA mapper 尚未实现，详见[模型指南](charts-neutral-model-guide.md) |
 | 雷达图 | 已实现 | Radar/；SwiftUI 与 OCBridge；当前单组维度模型 |
 | 热力图 | 已实现 | Heatmap/；SwiftUI 与 OCBridge；支持无效占位格 |
+| 复杂堆叠面积过渡 | G1 显式正负分链及旧模式均已实现 | 新 `.diverging`：真实过零、共享正负边界、同组缺测统一断段；混合线型/非面积贡献、自动百分比零分母与整组直线降级均有明确规则。默认独立插值不变，沿基线兼容语义保留。Swift/OC、现有 Demo 与诊断见[新模式指南](charts-diverging-stacks-guide.md)，历史模式见[接缝指南](charts-stacked-area-seams-guide.md) |
 | 折线/平滑/阶梯/面积 | 已实现 | LineChartRenderer；支持多系列、空值、正负堆叠 |
 | 缺测 autoGap | 已实现，迁移第 3 阶段首个子项 | 按连续空点数或等间隔缺测时长；Line/Combined 线族；默认兼容 connectNulls，不补点 |
 | 连续颜色分区 / 曲线负值着色 | 已实现，迁移第 3 阶段 | Line/Combined 线族；X 原始索引 / Y 所属轴绘制值；独立线色与渐变，路径裁剪不补点；复杂堆叠基准接缝另行处理 |
 | 折线 Min/Max 降采样 | 已实现，第 7 步 | 非堆叠直线/面积，多系列/双轴/缺测；默认关闭，原始数据命中；曲线/阶梯/堆叠保持原始绘制 |
 | 绘制图层/标签复用 | 已实现，第 8 步 | Line/Column/Bar 默认开启；支持开关对照，逐帧回收未用对象；不含图例、tooltip、Radar/Heatmap |
 | 固定柱宽与固定间距 | 已实现，第 9 步 | Column/Bar，pt 配置；默认最早、自动类目滚动、区间定位；Column 时间聚合计入完整尺寸预算 |
+| 柱/条阈值分区着色 | 已实现，G2 | Column/Bar/Combined；Y raw/draw 或 X 原始索引整段选色，有效 zones 优先，关闭/非法配置保持原配色 |
 | 柱状/条形 | 已实现 | ColumnChartRenderer / BarChartRenderer；并排、普通/百分比/固定基准堆叠 |
 | 多组分别堆叠 | 已实现，迁移第 2 步 | stackID 按轴/图形族/正负分链；normal/percent/fixed；Column/Bar/Combined 柱槽和总量按组 |
-| 刻度/标线/色带 | 已实现 | Cartesian 层；标签旋转仅垂直图底部类目轴生效 |
-| 双值轴 | 部分实现 | Line/Column 支持；Bar 不支持 |
+| 刻度/标线/色带 | 已实现，G3/G4 | 主次轴独立样式/显隐、类目间隔；标注文字样式/对齐/偏移/clamp 或 hide；旋转仅垂直图底部类目轴 |
+| 双值轴 | 按图形支持 | Line/Column/Combined 支持；Bar 不支持 |
 | 缩放/平移/回弹/重置 | 已实现 | HYMChartView；支持屏幕 x/y/xy，惯性仅 X 轴 |
 | 双向准线/弹窗文本模板 | 已实现 | isCrosshairDualDirectionEnabled / HYMChartTooltipTextOptions |
-| 自定义内容弹窗 | 部分接入 | UIKit 通用容器支持；Radar/Heatmap SwiftUI/OC 支持；三个轴系 SwiftUI 包装未完整透传 |
-| 堆叠总量标签 | 已实现，本次回归通过 | Column/Bar；原值正负分链，Column 双轴独立；详见下节 |
-| 点/柱主体选中视觉 | 待实现 | 轴系已有命中/准线；Radar/Heatmap 已有主体选中反馈 |
+| 自定义内容弹窗 | 部分接入 | UIKit 通用容器支持；Radar/Heatmap SwiftUI/OC 支持；四个轴系 SwiftUI 包装未完整透传 |
+| 堆叠总量标签 | 已实现，G4 补背景与避让 | Column/Bar/Combined；原值正负分链，双轴独立；可选避开标注、总量优先省略碰撞数据标签 |
+| 点/柱/条主体选中视觉 | 已实现，G5 | 四轴系点环/真实柱条覆盖层，单点/共享、重播/更新/取消清理；默认关闭，不含跨更新选点恢复 |
 | 更新时保留视口 | 已实现，第 2 步回归通过 | update 默认保留；configure / resetViewport 显式重置；轴系 SwiftUI 默认保留且同步最新回调 |
 | 系列稳定 ID、图例与显隐 | 已实现，第 3 步 | 四向布局、符号/颜色覆盖、换行滚动；Line/Column/Bar，默认关闭 |
 | 混合图 | 已实现，迁移第 2 步 | CombinedChartRenderer / CombinedChart / OC；柱、线、曲线、面积共轴/图例/命中；不做混合时间聚合 |
 | 数值/时间 X、流式追加 | 部分实现 | 等间隔时间标签和区间元数据已接入；X 仍为原始索引，不等间隔/真实数值 X/流式追加待实现 |
 | 高密度 Column 时间聚合 | 已实现第一版 | 按宽度/可见系列数分桶；每系列 reducer、区间 tooltip、总览/明细定位 |
 | 轴系命中数据语义 | 已实现，迁移第 1 步 | raw/aggregated/draw/base/percentage 与源范围统一；旧 value 兼容，Tooltip 显示原值/统计值 |
-| 业务组与每系列格式 | 已实现基础，迁移第 1 步 | 稳定组 ID/名称、单位、k/M/G、金额、Locale；复杂分组 Tooltip 与组小计待后续 |
-| SDK 独立分发 | 待实现 | 当前为 App 工程，尚未独立 SPM 库；Cartesian 已有最小 OCBridge，完整透传待补齐 |
+| 业务组与每系列格式 | 已实现基础，迁移第 1/4 步 | 稳定组 ID/名称、每系列格式、分组、小计、图标/名称数值分栏、逐点隐藏/改名/仅名称、超高滚动、逐系列前值/索引偏移与固定顶部；生命周期待后续 |
+| SDK 独立分发 | 最小 framework 验收完成，正式发布待接入 | Swift/纯 OC Debug/Release 宿主与设备构建通过；尚未发布 SPM/CocoaPods/XCFramework，完整旧字段透传待补 |
 
 ## 第 1 步：总量标签收尾
 
@@ -44,7 +53,7 @@
 - 修复相关底层问题：百分比归一化遇到 NaN/Infinity 不再清掉其他有效贡献；Column 固定基准堆叠使用正确的段基线；Bar 类目位置随 Y 视口正确映射。
 - 补充使用指南，并纠正旧指南对多系列、百分比堆叠和手势能力的过时描述。
 
-限制：不做总量标签之间的碰撞排布，双轴同位置或密集类目可能重叠。标签颜色/字号复用现有数据标签配置；不新增独立样式 API。
+当时限制：未做总量标签之间的碰撞排布。2026-10-02 的 G4 已新增可选 `dataLabelAvoidsOverlap`（默认 false）和标签背景；总量仍共用数据标签颜色/字号，采用确定性省略而非全局排版。
 
 ## 第 1 步验证记录
 
@@ -95,7 +104,7 @@
 
 最终测试结果：`/tmp/hymcharts-step1-build/Logs/Test/Test-SwiftFunctionProject-2026.09.24_14-23-01-+0800.xcresult`；日志 `/tmp/hymcharts-step3-final.log`。
 
-边界：本版不支持自动总高度、自定义 View/任意图片图例、单点图例或 Radar/Heatmap 图例；保留旧 target.identifier 和逐点累计值语义。显隐不代表跨更新恢复选择。
+当时边界：不支持自动总高度、自定义 View/图片图例、单点图例或 Radar/Heatmap 图例。后续已接入图片/自定义符号，以及原值与绘制值分离；显隐仍不代表跨更新恢复选择。
 
 下一步：统一命中数据的 rawValue / 累计绘制值 / percentage 字段，并实现主体选中反馈，再进入跨更新选择恢复和混合图。
 
@@ -248,7 +257,7 @@
 - 明确包含上限：设为 11 时，11 个空点连接，12/13 个断开；时间模式按缺失采样槽数 × 采样间隔计算。
 - 原始索引先分段再降采样；路径、面积、命中及数学数据分离，不填补业务数据。
 - OC 新增可选策略包装及等间隔时间轴配置；折线/混合 Demo 具备真实绑定和 11/12/13 预设。
-- 本节记录缺测子项；同日后续已完成 X/Y zones 和曲线负值颜色，见下节。复杂堆叠面积基准切换接缝仍待专门处理。
+- 本节记录缺测子项；同日后续已完成 X/Y zones 和曲线负值颜色，见下节。同日后续已修复堆叠面积共享边界的路径复用，剩余过渡区间限制见 [接缝指南](charts-stacked-area-seams-guide.md)。
 
 使用与边界见 [autoGap 指南](charts-gap-policy-guide.md)。
 
@@ -266,7 +275,7 @@
 - 完整路径按可见轴向区间裁剪，支持平滑/阶梯、缺测与原始索引采样；保持曲率、虚线相位、入场动画进度及命中数据不变。
 - 负值换色覆盖平滑曲线，修正原正/负路径拆分对全负值面积的影响；未指定填充分区时继承旧渐变。
 - 图层池同步支持分区容器生命周期；OC 快照、逐系列 Demo 控件与三个预设同步接入。
-- 本次完成颜色子项；复杂堆叠面积因缺测/混合符号在段内切换基准链的接缝仍待专门修正，未做真机性能或老项目集成验收。
+- 本次完成颜色子项；同日后续已修复可共享堆叠面积边界的切线/样式不一致；无共同前层路径的过渡区间仍不保证全域无缝，见 [接缝指南](charts-stacked-area-seams-guide.md)。未做真机性能或老项目集成验收。
 
 用法、边界和性能取舍见 [颜色分区指南](charts-color-zones-guide.md)。
 
@@ -276,3 +285,42 @@
 - 单元测试及既有 UI 回归：`/tmp/SwiftFunctionProject-zones-final-20260929.xcresult`（该次总结果含上述已修正的新增 UI 输入失败）；同名 `.log` 可查 185 项单元测试结果。
 - 新增 UI 修正后复测：`/tmp/SwiftFunctionProject-zones-ui-recheck-20260929.xcresult`（成功）；同名 `.log`。
 - 6 张 UI 截图：`/tmp/SwiftFunctionProject-zones-evidence-20260929/`（临时产物）。
+
+
+## 2026-09-29：折线目标点数采样
+
+- `LineChartSampling.targetPointCount` 可选，默认 nil 保持原宽度模式；非 nil 时按每系列当前视口预算选点，优先于宽度与启动门槛。
+- 数量为 `min(候选点数, max(必保点数, max(2, 目标)))`，候选包含边缘邻点；每段首尾/最低/最高点优先，保护点超额时明确提示，不补点、不错误连接缺测。
+- Demo 增加整数输入、目标 200 的 3000 点预设和逐系列实际绘制数；两种模式的互斥在面板上直接说明。
+- 不扩展平滑、阶梯、堆叠的采样范围，不改变模型、值域或命中的原始值。详情见 [降采样指南](charts-line-sampling-guide.md)。
+
+## 2026-09-30：迁移第 4 阶段基础展示能力
+
+- 新增内置文本 Tooltip 按业务组排列、零值/系列过滤，以及可选的同单位/值轴/格式原始值小计。默认保持平铺，小计不汇总聚合值、累计终点或百分比。
+- 图例新增图片、隐藏态图片、自定义符号视图、背景/圆角和相邻业务组变化换行；复用公开测量引擎与系列显隐事件。
+- SwiftUI、OC 桥接、四个轴系 Demo 和使用文档同步。原宽度降采样仍为默认可选模式。
+- 此条记录基础能力交付；同日后续的富内容和前值/置顶提示见下节；生命周期、分组图例标题、整行模板仍待后续。见 [使用指南](charts-grouped-presentation-guide.md)。
+
+验证：完整 **234 项单元测试 + 17 项 Demo UI 测试通过**，新增分组展示 10 项单元测试与 1 项跨四页面 UI 测试。绑定清单 241 项 / 2,597 次读写，场景切换 169 组，渲染矩阵 750 组。并修复超出 Int 范围的有限值显示崩溃。截图、边界和结果包见 [分组展示验证](charts-grouped-presentation-guide.md#2026-09-30-验证结果)。补齐中英文 README，Swift 示例通过类型检查。
+
+收尾改动后复测全部 234 项单元测试及 2 项相关 UI 测试，均通过；最终结果包：`/tmp/SwiftFunctionProject-presentation-final-20260930.xcresult`。本轮代码与文档保留在工作区，未提交或推送。
+
+
+## 2026-09-30：迁移第 4 阶段富内容提示
+
+- 新增 `CartesianTooltipContent` 展示快照及 `CartesianTooltipPresentation`：复用分组/格式/过滤/小计语义；支持图标、名称/数值分栏、逐点改名/隐藏/仅名称。
+- 仅名称行不参与小计；聚合保留源范围和区间信息。长名称换行、窄宽度上下排版，超高提示内部滚动，图表手势不抢占。
+- UIKit、四轴系 SwiftUI、OC、单点/吸附/共享提示全部接入；新增 Demo 命名预设与 7 个面板字段。Radar/Heatmap 继续使用各自的弹窗面板。
+- 默认保持文本布局。修复旧淡出完成回调误隐藏新提示的竞态。详见[富内容提示指南](charts-rich-tooltip-guide.md)。
+
+验证：243 项单元测试与 4 项相关 UI 测试通过；新增富内容单测 9 项，四轴系滚动 UI 1 项。当前清单为 248 项控件、2,685 次绑定读写、196 组场景切换；Swift 示例类型检查及本地链接检查通过。结果包与精确范围见[富内容提示验证](charts-rich-tooltip-guide.md#2026-09-30-验证记录)。
+
+
+## 2026-09-30：迁移第 4 阶段前值与固定顶部
+
+- 新增 `CartesianTooltipSampleSelection`：全局/逐系列原始索引偏移、omit/clamp/current 首尾策略、可本地化来源标签；缺测不搜索更早有效值，实际时间聚合保留当前桶。
+- 行分别提供命中 `datum` 和取值 `displayedDatum`；表头、准线与 raw/draw/base/percentage 回调仍为当前命中。过滤/小计依据展示值，不合计不同来源范围。
+- 通用主题新增 automatic/fixedTop、屏幕 offset 与顶部间距；固定顶部隐藏箭头，约束宽高并在 bounds 改变时重测，columns 保持超高滚动。
+- 四轴系 SwiftUI、OC 和现有 Demo 同步，新增前值与置顶预设及 9 个面板字段。生命周期/外部表头联动和图例整行模板仍未交付。
+
+验证：最终 **256 项单元 + 1 项遍历四页面的新 UI 通过**；既有富内容/滚动和弹窗模式 2 项 UI 在前一轮通过。新增单测 13 项。当前清单 257 项 / 2,793 次读写 / 225 组场景切换 / 750 组渲染矩阵，Swift 示例、链接与空白检查通过。截图和各结果包的准确范围见[前值与置顶验证](charts-tooltip-selection-guide.md#2026-09-30-验证记录)。代码与文档保留在工作区，未提交或推送。
