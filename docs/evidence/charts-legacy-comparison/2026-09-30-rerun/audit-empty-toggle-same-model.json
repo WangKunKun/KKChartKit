@@ -1,0 +1,209 @@
+[
+  {
+    "axes" : [
+      {
+        "max" : 3549.7000000000003,
+        "min" : 0,
+        "opposite" : false
+      }
+    ],
+    "categories" : 48,
+    "max" : 47,
+    "min" : 0,
+    "modelShowLegend" : false,
+    "modelShowNoData" : false,
+    "nativeTooltips" : [
+
+    ],
+    "plotHeight" : 348,
+    "plotLeft" : 47,
+    "plotTop" : 10,
+    "plotWidth" : 543,
+    "series" : [
+      {
+        "color" : "#F2A93B",
+        "connectNulls" : false,
+        "count" : 48,
+        "first" : 400,
+        "name" : "屋顶光伏",
+        "nulls" : 0,
+        "samples" : [
+          {
+            "index" : 0,
+            "percentage" : null,
+            "raw" : 400,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 12,
+            "percentage" : null,
+            "raw" : 1866,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 24,
+            "percentage" : null,
+            "raw" : 2747,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 25,
+            "percentage" : null,
+            "raw" : 2641,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 36,
+            "percentage" : null,
+            "raw" : 2258,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 47,
+            "percentage" : null,
+            "raw" : 400,
+            "stackY" : null,
+            "total" : null
+          }
+        ],
+        "stack" : null,
+        "stackKey" : null,
+        "type" : "areaspline",
+        "visible" : true,
+        "zoneAxis" : null,
+        "zones" : [
+
+        ]
+      },
+      {
+        "color" : "#43A8EF",
+        "connectNulls" : false,
+        "count" : 48,
+        "first" : 799,
+        "name" : "家庭负载",
+        "nulls" : 0,
+        "samples" : [
+          {
+            "index" : 0,
+            "percentage" : null,
+            "raw" : 799,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 12,
+            "percentage" : null,
+            "raw" : 2187,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 24,
+            "percentage" : null,
+            "raw" : 2736,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 25,
+            "percentage" : null,
+            "raw" : 2708,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 36,
+            "percentage" : null,
+            "raw" : 2259,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 47,
+            "percentage" : null,
+            "raw" : 799,
+            "stackY" : null,
+            "total" : null
+          }
+        ],
+        "stack" : null,
+        "stackKey" : null,
+        "type" : "areaspline",
+        "visible" : true,
+        "zoneAxis" : null,
+        "zones" : [
+
+        ]
+      },
+      {
+        "color" : "#53BC82",
+        "connectNulls" : false,
+        "count" : 48,
+        "first" : 996,
+        "name" : "电网功率",
+        "nulls" : 0,
+        "samples" : [
+          {
+            "index" : 0,
+            "percentage" : null,
+            "raw" : 996,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 12,
+            "percentage" : null,
+            "raw" : 2616,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 24,
+            "percentage" : null,
+            "raw" : 2949,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 25,
+            "percentage" : null,
+            "raw" : 3014,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 36,
+            "percentage" : null,
+            "raw" : 2196,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 47,
+            "percentage" : null,
+            "raw" : 996,
+            "stackY" : null,
+            "total" : null
+          }
+        ],
+        "stack" : null,
+        "stackKey" : null,
+        "type" : "areaspline",
+        "visible" : true,
+        "zoneAxis" : null,
+        "zones" : [
+
+        ]
+      }
+    ],
+    "stacking" : null,
+    "tooltipText" : null,
+    "tooltipVisible" : false,
+    "version" : "11.4.3"
+  }
+]

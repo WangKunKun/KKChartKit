@@ -1,0 +1,149 @@
+[
+  {
+    "axes" : [
+      {
+        "max" : 3212.0000000000005,
+        "min" : -3212.0000000000005,
+        "opposite" : false
+      }
+    ],
+    "categories" : 48,
+    "max" : 47,
+    "min" : 0,
+    "modelShowLegend" : true,
+    "modelShowNoData" : false,
+    "nativeTooltips" : [
+
+    ],
+    "plotHeight" : 234,
+    "plotLeft" : 39,
+    "plotTop" : 10,
+    "plotWidth" : 320,
+    "series" : [
+      {
+        "color" : "#F2A93B",
+        "connectNulls" : false,
+        "count" : 48,
+        "first" : 0,
+        "name" : "电池充放电",
+        "nulls" : 0,
+        "samples" : [
+          {
+            "index" : 0,
+            "percentage" : null,
+            "raw" : 0,
+            "stackY" : 0,
+            "total" : 0
+          },
+          {
+            "index" : 12,
+            "percentage" : 100,
+            "raw" : 1800,
+            "stackY" : 1800,
+            "total" : 1800
+          },
+          {
+            "index" : 24,
+            "percentage" : null,
+            "raw" : 0,
+            "stackY" : 0,
+            "total" : 0
+          },
+          {
+            "index" : 25,
+            "percentage" : 100,
+            "raw" : -235,
+            "stackY" : -235,
+            "total" : -235
+          },
+          {
+            "index" : 36,
+            "percentage" : 100,
+            "raw" : -1800,
+            "stackY" : -1800,
+            "total" : -1800
+          },
+          {
+            "index" : 47,
+            "percentage" : 100,
+            "raw" : -235,
+            "stackY" : -235,
+            "total" : -235
+          }
+        ],
+        "stack" : "battery",
+        "stackKey" : "spline,battery,,",
+        "type" : "spline",
+        "visible" : true,
+        "zoneAxis" : null,
+        "zones" : [
+
+        ]
+      },
+      {
+        "color" : "#43A8EF",
+        "connectNulls" : false,
+        "count" : 48,
+        "first" : 220,
+        "name" : "辅助功率",
+        "nulls" : 0,
+        "samples" : [
+          {
+            "index" : 0,
+            "percentage" : 100,
+            "raw" : 220,
+            "stackY" : 220,
+            "total" : 220
+          },
+          {
+            "index" : 12,
+            "percentage" : 100,
+            "raw" : 1120,
+            "stackY" : 1120,
+            "total" : 1120
+          },
+          {
+            "index" : 24,
+            "percentage" : 100,
+            "raw" : 220,
+            "stackY" : 220,
+            "total" : 220
+          },
+          {
+            "index" : 25,
+            "percentage" : 100,
+            "raw" : 103,
+            "stackY" : 103,
+            "total" : 103
+          },
+          {
+            "index" : 36,
+            "percentage" : 100,
+            "raw" : -680,
+            "stackY" : -680,
+            "total" : -680
+          },
+          {
+            "index" : 47,
+            "percentage" : 100,
+            "raw" : 103,
+            "stackY" : 103,
+            "total" : 103
+          }
+        ],
+        "stack" : "battery",
+        "stackKey" : "area,battery,,",
+        "type" : "area",
+        "visible" : true,
+        "zoneAxis" : null,
+        "zones" : [
+
+        ]
+      }
+    ],
+    "stacking" : "normal",
+    "tooltipText" : null,
+    "tooltipVisible" : false,
+    "version" : "11.4.3"
+  }
+]

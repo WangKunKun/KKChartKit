@@ -1,0 +1,32 @@
+[
+  {
+    "file": "crossing-area-independent-混合图.png",
+    "test": "ChartDemoUITests/testCrossingStackedAreaBoundaryComparisonInBothDemos()",
+    "sha256": "465bebb36373072de5d84b09f466cae19302707aa3b0a82bac12bad7e76f595b"
+  },
+  {
+    "file": "crossing-area-no-markers-混合图.png",
+    "test": "ChartDemoUITests/testCrossingStackedAreaBoundaryComparisonInBothDemos()",
+    "sha256": "88498e6d3a05d173183246b2ea364c9f8c0d824242cb95790290a522945d0b52"
+  },
+  {
+    "file": "crossing-area-follow-baseline-混合图.png",
+    "test": "ChartDemoUITests/testCrossingStackedAreaBoundaryComparisonInBothDemos()",
+    "sha256": "c5c857b7bb8817ae05569b789761b89080dc7e7ba0e6d722f0f7ed6016e6a57c"
+  },
+  {
+    "file": "crossing-area-independent-折线图.png",
+    "test": "ChartDemoUITests/testCrossingStackedAreaBoundaryComparisonInBothDemos()",
+    "sha256": "bcb97af3585d752ef933dfa98ba5bb332f1ebd72b6bb0b29d72506a6ade98bfc"
+  },
+  {
+    "file": "crossing-area-no-markers-折线图.png",
+    "test": "ChartDemoUITests/testCrossingStackedAreaBoundaryComparisonInBothDemos()",
+    "sha256": "9435066023b191db6ba083d4b202f7e634059aeb3c177639ce53d3b17abcc90f"
+  },
+  {
+    "file": "crossing-area-follow-baseline-折线图.png",
+    "test": "ChartDemoUITests/testCrossingStackedAreaBoundaryComparisonInBothDemos()",
+    "sha256": "41108dda70b1aca14b14900d4df55b8e2a10d19110a026e82a2d775dcf2e416d"
+  }
+]

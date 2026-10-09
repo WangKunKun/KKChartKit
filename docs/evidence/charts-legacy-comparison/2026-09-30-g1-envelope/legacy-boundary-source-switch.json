@@ -1,0 +1,302 @@
+[
+  {
+    "axes" : [
+      {
+        "max" : 60.500000000000007,
+        "min" : -60.500000000000007,
+        "opposite" : false
+      }
+    ],
+    "categories" : 3,
+    "max" : 2,
+    "min" : 0,
+    "modelShowLegend" : true,
+    "modelShowNoData" : false,
+    "nativeTooltips" : [
+
+    ],
+    "plotHeight" : 234,
+    "plotLeft" : 39,
+    "plotTop" : 10,
+    "plotWidth" : 320,
+    "series" : [
+      {
+        "color" : "#0000FF",
+        "connectNulls" : false,
+        "count" : 3,
+        "first" : 20,
+        "name" : "固定基底",
+        "nulls" : 0,
+        "samples" : [
+          {
+            "index" : 0,
+            "percentage" : 36.363636363636367,
+            "raw" : 20,
+            "stackY" : 55,
+            "total" : 55
+          },
+          {
+            "index" : 1,
+            "percentage" : -400,
+            "raw" : 20,
+            "stackY" : -5,
+            "total" : -5
+          },
+          {
+            "index" : 2,
+            "percentage" : 36.363636363636367,
+            "raw" : 20,
+            "stackY" : 55,
+            "total" : 55
+          }
+        ],
+        "stack" : "boundary",
+        "stackKey" : "areaspline,boundary,,",
+        "type" : "areaspline",
+        "visible" : true,
+        "zoneAxis" : null,
+        "zones" : [
+
+        ]
+      },
+      {
+        "color" : "#FF8000",
+        "connectNulls" : false,
+        "count" : 3,
+        "first" : 30,
+        "name" : "跨零前层",
+        "nulls" : 0,
+        "samples" : [
+          {
+            "index" : 0,
+            "percentage" : 54.54545454545454,
+            "raw" : 30,
+            "stackY" : 35,
+            "total" : 55
+          },
+          {
+            "index" : 1,
+            "percentage" : 0,
+            "raw" : 0,
+            "stackY" : -25,
+            "total" : -5
+          },
+          {
+            "index" : 2,
+            "percentage" : 54.54545454545454,
+            "raw" : 30,
+            "stackY" : 35,
+            "total" : 55
+          }
+        ],
+        "stack" : "boundary",
+        "stackKey" : "areaspline,boundary,,",
+        "type" : "areaspline",
+        "visible" : true,
+        "zoneAxis" : null,
+        "zones" : [
+
+        ]
+      },
+      {
+        "color" : "#00D000",
+        "connectNulls" : false,
+        "count" : 3,
+        "first" : 5,
+        "name" : "同符号上层",
+        "nulls" : 0,
+        "samples" : [
+          {
+            "index" : 0,
+            "percentage" : 9.0909090909090917,
+            "raw" : 5,
+            "stackY" : 5,
+            "total" : 55
+          },
+          {
+            "index" : 1,
+            "percentage" : -100,
+            "raw" : 5,
+            "stackY" : -25,
+            "total" : -5
+          },
+          {
+            "index" : 2,
+            "percentage" : 9.0909090909090917,
+            "raw" : 5,
+            "stackY" : 5,
+            "total" : 55
+          }
+        ],
+        "stack" : "boundary",
+        "stackKey" : "areaspline,boundary,,",
+        "type" : "areaspline",
+        "visible" : true,
+        "zoneAxis" : null,
+        "zones" : [
+
+        ]
+      },
+      {
+        "color" : "#FFFFFF00",
+        "connectNulls" : false,
+        "count" : 3,
+        "first" : 0,
+        "name" : "",
+        "nulls" : 0,
+        "samples" : [
+          {
+            "index" : 0,
+            "percentage" : null,
+            "raw" : 0,
+            "stackY" : 0,
+            "total" : 0
+          },
+          {
+            "index" : 1,
+            "percentage" : 100,
+            "raw" : 30,
+            "stackY" : 30,
+            "total" : 30
+          },
+          {
+            "index" : 2,
+            "percentage" : null,
+            "raw" : 0,
+            "stackY" : 0,
+            "total" : 0
+          }
+        ],
+        "stack" : null,
+        "stackKey" : "areaspline,,,",
+        "type" : "areaspline",
+        "visible" : true,
+        "zoneAxis" : null,
+        "zones" : [
+
+        ]
+      },
+      {
+        "color" : "#0000FF",
+        "connectNulls" : false,
+        "count" : 3,
+        "first" : 0,
+        "name" : "固定基底",
+        "nulls" : 0,
+        "samples" : [
+          {
+            "index" : 0,
+            "percentage" : 0,
+            "raw" : 0,
+            "stackY" : 0,
+            "total" : 55
+          },
+          {
+            "index" : 1,
+            "percentage" : 0,
+            "raw" : 0,
+            "stackY" : -30,
+            "total" : -5
+          },
+          {
+            "index" : 2,
+            "percentage" : 0,
+            "raw" : 0,
+            "stackY" : 0,
+            "total" : 55
+          }
+        ],
+        "stack" : "boundary",
+        "stackKey" : "areaspline,boundary,,",
+        "type" : "areaspline",
+        "visible" : true,
+        "zoneAxis" : null,
+        "zones" : [
+
+        ]
+      },
+      {
+        "color" : "#FF8000",
+        "connectNulls" : false,
+        "count" : 3,
+        "first" : 0,
+        "name" : "跨零前层",
+        "nulls" : 0,
+        "samples" : [
+          {
+            "index" : 0,
+            "percentage" : 0,
+            "raw" : 0,
+            "stackY" : 0,
+            "total" : 55
+          },
+          {
+            "index" : 1,
+            "percentage" : 600,
+            "raw" : -30,
+            "stackY" : -30,
+            "total" : -5
+          },
+          {
+            "index" : 2,
+            "percentage" : 0,
+            "raw" : 0,
+            "stackY" : 0,
+            "total" : 55
+          }
+        ],
+        "stack" : "boundary",
+        "stackKey" : "areaspline,boundary,,",
+        "type" : "areaspline",
+        "visible" : true,
+        "zoneAxis" : null,
+        "zones" : [
+
+        ]
+      },
+      {
+        "color" : "#00D000",
+        "connectNulls" : false,
+        "count" : 3,
+        "first" : 0,
+        "name" : "同符号上层",
+        "nulls" : 0,
+        "samples" : [
+          {
+            "index" : 0,
+            "percentage" : 0,
+            "raw" : 0,
+            "stackY" : 0,
+            "total" : 55
+          },
+          {
+            "index" : 1,
+            "percentage" : 0,
+            "raw" : 0,
+            "stackY" : 0,
+            "total" : -5
+          },
+          {
+            "index" : 2,
+            "percentage" : 0,
+            "raw" : 0,
+            "stackY" : 0,
+            "total" : 55
+          }
+        ],
+        "stack" : "boundary",
+        "stackKey" : "areaspline,boundary,,",
+        "type" : "areaspline",
+        "visible" : true,
+        "zoneAxis" : null,
+        "zones" : [
+
+        ]
+      }
+    ],
+    "stacking" : "normal",
+    "tooltipText" : null,
+    "tooltipVisible" : false,
+    "version" : "11.4.3"
+  }
+]

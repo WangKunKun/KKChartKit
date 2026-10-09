@@ -1,0 +1,46 @@
+{
+  "xcode": "26.3 (17C529)",
+  "simulator": {
+    "name": "iPhone 15 Pro",
+    "os": "17.2",
+    "id": "23C39E52-9B21-4992-9121-5730E201718C",
+    "arch": "arm64",
+    "localeReadback": "zh_CN",
+    "languagesReadback": [
+      "zh-Hans-CN",
+      "en-CN"
+    ],
+    "localeWasForced": false,
+    "timeZoneReadback": null
+  },
+  "hostTimezone": "Asia/Shanghai",
+  "fixtureTimeLabels": "Fixed strings for 2026-09-30, not derived from device timezone",
+  "testConfiguration": "Debug",
+  "builds": [
+    {
+      "target": "native",
+      "configuration": "Release",
+      "destination": "generic/platform=iOS Simulator",
+      "result": "succeeded",
+      "log": "/tmp/ChartsAudit-native-release-20260930.log",
+      "logSHA256": "5660ac0178be0784b86d009e2e8d9e0dcee06a97c291ce5fc2e0e2695113229b"
+    },
+    {
+      "target": "legacy",
+      "configuration": "Release",
+      "destination": "generic/platform=iOS Simulator",
+      "result": "succeeded",
+      "log": "/tmp/ChartsAudit-legacy-release-20260930.log",
+      "logSHA256": "366699cec46ea4de4547076cfc9d04d13cb8f500fb736d583fd6d00d08cc8c36"
+    }
+  ],
+  "nativeReleaseContainsAAJS": false,
+  "nativeReleaseContainsAuditFixture": false,
+  "notes": [
+    "Initial name-based destination was ambiguous due to two same-name devices; no tests ran in that attempt. Retried using the recorded UUID.",
+    "Build success validates the App targets, not a standalone SDK product.",
+    "No device performance or pixel-equivalence claim."
+  ],
+  "legacyReleaseContainsAAJS": true,
+  "legacyReleaseContainsAuditFixture": true
+}

@@ -1,0 +1,251 @@
+[
+  {
+    "axes" : [
+      {
+        "max" : 1358024.6625000001,
+        "min" : 0,
+        "opposite" : false
+      }
+    ],
+    "categories" : 48,
+    "max" : 47,
+    "min" : 0,
+    "plotHeight" : 244,
+    "series" : [
+      {
+        "connectNulls" : false,
+        "count" : 48,
+        "first" : 1234.567,
+        "name" : "屋顶光伏",
+        "nulls" : 0,
+        "samples" : [
+          {
+            "index" : 0,
+            "percentage" : null,
+            "raw" : 1234.567,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 12,
+            "percentage" : null,
+            "raw" : 1234.567,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 24,
+            "percentage" : null,
+            "raw" : 1234.567,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 25,
+            "percentage" : null,
+            "raw" : 1234567.8899999999,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 36,
+            "percentage" : null,
+            "raw" : 1234.567,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 47,
+            "percentage" : null,
+            "raw" : 1234567.8899999999,
+            "stackY" : null,
+            "total" : null
+          }
+        ],
+        "type" : "areaspline",
+        "visible" : true,
+        "zoneAxis" : null,
+        "zones" : [
+
+        ]
+      },
+      {
+        "connectNulls" : false,
+        "count" : 48,
+        "first" : 400,
+        "name" : "设备正常",
+        "nulls" : 0,
+        "samples" : [
+          {
+            "index" : 0,
+            "percentage" : null,
+            "raw" : 400,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 12,
+            "percentage" : null,
+            "raw" : 1866,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 24,
+            "percentage" : null,
+            "raw" : 2747,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 25,
+            "percentage" : null,
+            "raw" : 2641,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 36,
+            "percentage" : null,
+            "raw" : 2258,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 47,
+            "percentage" : null,
+            "raw" : 400,
+            "stackY" : null,
+            "total" : null
+          }
+        ],
+        "type" : "areaspline",
+        "visible" : true,
+        "zoneAxis" : null,
+        "zones" : [
+
+        ]
+      },
+      {
+        "connectNulls" : false,
+        "count" : 48,
+        "first" : 799,
+        "name" : "收益",
+        "nulls" : 0,
+        "samples" : [
+          {
+            "index" : 0,
+            "percentage" : null,
+            "raw" : 799,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 12,
+            "percentage" : null,
+            "raw" : 2187,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 24,
+            "percentage" : null,
+            "raw" : 2736,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 25,
+            "percentage" : null,
+            "raw" : 2708,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 36,
+            "percentage" : null,
+            "raw" : 2259,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 47,
+            "percentage" : null,
+            "raw" : 799,
+            "stackY" : null,
+            "total" : null
+          }
+        ],
+        "type" : "areaspline",
+        "visible" : true,
+        "zoneAxis" : null,
+        "zones" : [
+
+        ]
+      },
+      {
+        "connectNulls" : false,
+        "count" : 48,
+        "first" : {
+          "y" : 996
+        },
+        "name" : "电网功率",
+        "nulls" : 0,
+        "samples" : [
+          {
+            "index" : 0,
+            "percentage" : null,
+            "raw" : 996,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 12,
+            "percentage" : null,
+            "raw" : 2616,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 24,
+            "percentage" : null,
+            "raw" : 2949,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 25,
+            "percentage" : null,
+            "raw" : 3014,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 36,
+            "percentage" : null,
+            "raw" : 2196,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 47,
+            "percentage" : null,
+            "raw" : 996,
+            "stackY" : null,
+            "total" : null
+          }
+        ],
+        "type" : "areaspline",
+        "visible" : true,
+        "zoneAxis" : null,
+        "zones" : [
+
+        ]
+      }
+    ],
+    "stacking" : null,
+    "tooltipText" : "<b>2026-09-30 06:00<\/b><br\/>发电分组 1: 3.1 kW<br\/><span style=\"color:#F2A93B; font-size:13px\">●<\/span> 逆变器 1: 1.23 kW<br\/><span style=\"color:#9769E8; font-size:13px\">●<\/span> 设备正常: 1.87 kW<br\/><hr>用电<br\/><span style=\"color:#43A8EF; font-size:13px\">●<\/span> 收益<br\/><hr>电网: 2.62 kW<br\/><span style=\"color:#53BC82; font-size:13px\">●<\/span> 电网功率: 2.4 kW<br\/>",
+    "tooltipVisible" : true,
+    "version" : "11.4.3"
+  }
+]

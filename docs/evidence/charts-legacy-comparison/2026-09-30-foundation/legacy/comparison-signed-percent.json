@@ -1,0 +1,149 @@
+[
+  {
+    "axes" : [
+      {
+        "max" : 1,
+        "min" : 0,
+        "opposite" : false
+      }
+    ],
+    "categories" : 48,
+    "max" : 47,
+    "min" : 0,
+    "modelShowLegend" : true,
+    "modelShowNoData" : false,
+    "nativeTooltips" : [
+
+    ],
+    "plotHeight" : 234,
+    "plotLeft" : 44,
+    "plotTop" : 10,
+    "plotWidth" : 315,
+    "series" : [
+      {
+        "color" : "#F2A93B",
+        "connectNulls" : false,
+        "count" : 48,
+        "first" : 0,
+        "name" : "电池充放电",
+        "nulls" : 0,
+        "samples" : [
+          {
+            "index" : 0,
+            "percentage" : 0,
+            "raw" : 0,
+            "stackY" : 100,
+            "total" : 220
+          },
+          {
+            "index" : 12,
+            "percentage" : 61.643835616438359,
+            "raw" : 1800,
+            "stackY" : 100,
+            "total" : 2920
+          },
+          {
+            "index" : 24,
+            "percentage" : 0,
+            "raw" : 0,
+            "stackY" : 100,
+            "total" : 220
+          },
+          {
+            "index" : 25,
+            "percentage" : -69.526627218934905,
+            "raw" : -235,
+            "stackY" : -69.526627218935005,
+            "total" : 338
+          },
+          {
+            "index" : 36,
+            "percentage" : -72.58064516129032,
+            "raw" : -1800,
+            "stackY" : -100,
+            "total" : 2480
+          },
+          {
+            "index" : 47,
+            "percentage" : -69.526627218934905,
+            "raw" : -235,
+            "stackY" : -69.526627218935005,
+            "total" : 338
+          }
+        ],
+        "stack" : "battery",
+        "stackKey" : "column,battery,,",
+        "type" : "column",
+        "visible" : true,
+        "zoneAxis" : null,
+        "zones" : [
+
+        ]
+      },
+      {
+        "color" : "#43A8EF",
+        "connectNulls" : false,
+        "count" : 48,
+        "first" : 220,
+        "name" : "辅助功率",
+        "nulls" : 0,
+        "samples" : [
+          {
+            "index" : 0,
+            "percentage" : 100,
+            "raw" : 220,
+            "stackY" : 100,
+            "total" : 220
+          },
+          {
+            "index" : 12,
+            "percentage" : 38.356164383561641,
+            "raw" : 1120,
+            "stackY" : 38.356164383562003,
+            "total" : 2920
+          },
+          {
+            "index" : 24,
+            "percentage" : 100,
+            "raw" : 220,
+            "stackY" : 100,
+            "total" : 220
+          },
+          {
+            "index" : 25,
+            "percentage" : 30.473372781065088,
+            "raw" : 103,
+            "stackY" : 30.473372781064999,
+            "total" : 338
+          },
+          {
+            "index" : 36,
+            "percentage" : -27.419354838709676,
+            "raw" : -680,
+            "stackY" : -27.419354838709999,
+            "total" : 2480
+          },
+          {
+            "index" : 47,
+            "percentage" : 30.473372781065088,
+            "raw" : 103,
+            "stackY" : 30.473372781064999,
+            "total" : 338
+          }
+        ],
+        "stack" : "battery",
+        "stackKey" : "column,battery,,",
+        "type" : "column",
+        "visible" : true,
+        "zoneAxis" : null,
+        "zones" : [
+
+        ]
+      }
+    ],
+    "stacking" : "percent",
+    "tooltipText" : null,
+    "tooltipVisible" : false,
+    "version" : "11.4.3"
+  }
+]

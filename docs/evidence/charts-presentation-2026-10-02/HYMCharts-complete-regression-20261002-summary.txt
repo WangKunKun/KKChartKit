@@ -1,0 +1,850 @@
+Test Suite 'Selected tests' started at 2026-10-02 20:11:56.424.
+Test Suite 'SwiftFunctionProjectUITests.xctest' started at 2026-10-02 20:11:56.424.
+Test Suite 'ChartDemoUITests' started at 2026-10-02 20:11:56.424.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testAnnotationPresetBoundsAndLabelAvoidanceOnFourPages]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testAnnotationPresetBoundsAndLabelAvoidanceOnFourPages]' passed (66.083 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testAutoGapPresetAndPolicyPickerOnLineAndCombined]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testAutoGapPresetAndPolicyPickerOnLineAndCombined]' passed (24.767 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testBodySelectionPresetSharedHitAndDisableOnFourPages]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testBodySelectionPresetSharedHitAndDisableOnFourPages]' passed (49.762 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testCartesianReuseToggleIsLiveOnEachPage]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testCartesianReuseToggleIsLiveOnEachPage]' passed (21.400 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testColorZonesAndSmoothNegativePresetsOnLineAndCombined]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testColorZonesAndSmoothNegativePresetsOnLineAndCombined]' passed (46.445 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testColumnColorZonesPresetValueSourceAndDisableOnThreePages]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testColumnColorZonesPresetValueSourceAndDisableOnThreePages]' passed (61.939 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testColumnDensityPresetAndReset]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testColumnDensityPresetAndReset]' passed (9.678 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testCombinedGroupsPresetAndIndependentStylePanel]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testCombinedGroupsPresetAndIndependentStylePanel]' passed (11.486 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testCrossingStackedAreaBoundaryComparisonInBothDemos]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testCrossingStackedAreaBoundaryComparisonInBothDemos]' passed (60.260 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testFixedDimensionsPresetScrollsAndAllowsManualRange]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testFixedDimensionsPresetScrollsAndAllowsManualRange]' passed (22.347 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testGapBoundaryStackedAreaComparisonInBothDemos]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testGapBoundaryStackedAreaComparisonInBothDemos]' passed (46.166 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testGroupedTooltipAndImageLegendPresetOnAllCartesianPages]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testGroupedTooltipAndImageLegendPresetOnAllCartesianPages]' passed (57.257 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testIndependentAxesPresetVisibilityAndRotationOnFourPages]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testIndependentAxesPresetVisibilityAndRotationOnFourPages]' passed (76.764 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testLineAuditAxisPriorityAndDisabledReasons]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testLineAuditAxisPriorityAndDisabledReasons]' passed (22.181 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testLineAuditGapAndZoneDependenciesRecover]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testLineAuditGapAndZoneDependenciesRecover]' passed (21.744 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testLineAuditSceneSwitchClearsOldDataAndStyle]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testLineAuditSceneSwitchClearsOldDataAndStyle]' passed (12.986 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testLineAuditSystemFontAndPopupControls]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testLineAuditSystemFontAndPopupControls]' passed (27.245 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testLineMinMaxPresetToggleAndDetail]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testLineMinMaxPresetToggleAndDetail]' passed (14.466 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testLineTargetPointCountInputLiveCountsAndModePriority]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testLineTargetPointCountInputLiveCountsAndModePriority]' passed (39.653 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testObjectiveCCartesianCallbackForAllKinds]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testObjectiveCCartesianCallbackForAllKinds]' passed (10.391 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testPercentStackedAreaComparisonInBothDemos]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testPercentStackedAreaComparisonInBothDemos]' passed (46.278 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testPreviousValuesAndPinnedTooltipOnAllCartesianPages]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testPreviousValuesAndPinnedTooltipOnAllCartesianPages]' passed (54.565 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testRichTooltipRulesAndScrollingOnAllCartesianPages]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testRichTooltipRulesAndScrollingOnAllCartesianPages]' passed (87.988 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testSemanticPresetAndFormatPanelAreLive]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testSemanticPresetAndFormatPanelAreLive]' passed (9.732 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testSingleEntryPagesAndLiveThemeControls]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testSingleEntryPagesAndLiveThemeControls]' passed (42.408 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testSourceSwitchStackedAreaBoundaryComparisonInBothDemos]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testSourceSwitchStackedAreaBoundaryComparisonInBothDemos]' passed (46.246 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testStackedAreaSeamPresetInLineAndCombinedDemos]' started.
+/Users/hoymiles/Desktop/AI编程项目/Swift/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests.swift:433: error: -[SwiftFunctionProjectUITests.ChartDemoUITests testStackedAreaSeamPresetInLineAndCombinedDemos] : XCTAssertTrue failed
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testStackedAreaSeamPresetInLineAndCombinedDemos]' failed (8.626 seconds).
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testThinStackedAreaBoundaryComparisonInBothDemos]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testThinStackedAreaBoundaryComparisonInBothDemos]' passed (39.240 seconds).
+Test Suite 'ChartDemoUITests' failed at 2026-10-02 20:29:14.549.
+	 Executed 28 tests, with 1 failure (0 unexpected) in 1038.102 (1038.125) seconds
+Test Suite 'SwiftFunctionProjectUITests.xctest' failed at 2026-10-02 20:29:14.550.
+	 Executed 28 tests, with 1 failure (0 unexpected) in 1038.102 (1038.126) seconds
+Test Suite 'Selected tests' failed at 2026-10-02 20:29:14.550.
+	 Executed 28 tests, with 1 failure (0 unexpected) in 1038.102 (1038.126) seconds
+Test Suite 'All tests' started at 2026-10-02 20:29:15.875.
+Test Suite 'SwiftFunctionProjectTests.xctest' started at 2026-10-02 20:29:15.875.
+Test Suite 'AnnotationStyleTests' started at 2026-10-02 20:29:15.875.
+Test Case '-[SwiftFunctionProjectTests.AnnotationStyleTests testAxisBindingClippedBandAndUpdatesNeverChangeDataOrHits]' started.
+Test Case '-[SwiftFunctionProjectTests.AnnotationStyleTests testAxisBindingClippedBandAndUpdatesNeverChangeDataOrHits]' passed (0.003 seconds).
+Test Case '-[SwiftFunctionProjectTests.AnnotationStyleTests testCombinedResolvesCrossFamilyCollisionsAndReuseMatchesFreshAtAllScales]' started.
+Test Case '-[SwiftFunctionProjectTests.AnnotationStyleTests testCombinedResolvesCrossFamilyCollisionsAndReuseMatchesFreshAtAllScales]' passed (0.090 seconds).
+Test Case '-[SwiftFunctionProjectTests.AnnotationStyleTests testDataLabelAvoidanceKeepsTotalsFirstAndDoesNotTouchGeometry]' started.
+Test Case '-[SwiftFunctionProjectTests.AnnotationStyleTests testDataLabelAvoidanceKeepsTotalsFirstAndDoesNotTouchGeometry]' passed (0.003 seconds).
+Test Case '-[SwiftFunctionProjectTests.AnnotationStyleTests testDataLabelsAvoidPlacedAnnotationsWithoutMovingAnnotationsOrHitGeometry]' started.
+Test Case '-[SwiftFunctionProjectTests.AnnotationStyleTests testDataLabelsAvoidPlacedAnnotationsWithoutMovingAnnotationsOrHitGeometry]' passed (0.006 seconds).
+Test Case '-[SwiftFunctionProjectTests.AnnotationStyleTests testGeometryAlignmentOffsetsClampingAndNonFiniteInputs]' started.
+Test Case '-[SwiftFunctionProjectTests.AnnotationStyleTests testGeometryAlignmentOffsetsClampingAndNonFiniteInputs]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.AnnotationStyleTests testIndependentStylesAndBoundedLabelsAcrossFourRenderers]' started.
+Test Case '-[SwiftFunctionProjectTests.AnnotationStyleTests testIndependentStylesAndBoundedLabelsAcrossFourRenderers]' passed (0.003 seconds).
+Test Case '-[SwiftFunctionProjectTests.AnnotationStyleTests testLongLabelsTruncateHideAndReflowAfterResizeAndPan]' started.
+Test Case '-[SwiftFunctionProjectTests.AnnotationStyleTests testLongLabelsTruncateHideAndReflowAfterResizeAndPan]' passed (0.003 seconds).
+Test Case '-[SwiftFunctionProjectTests.AnnotationStyleTests testObjectiveCSnapshotAndDemoBindingsUseSameAnnotationSettings]' started.
+Test Case '-[SwiftFunctionProjectTests.AnnotationStyleTests testObjectiveCSnapshotAndDemoBindingsUseSameAnnotationSettings]' passed (0.016 seconds).
+Test Suite 'AnnotationStyleTests' passed at 2026-10-02 20:29:16.001.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.124 (0.126) seconds
+Test Suite 'AxisStyleTests' started at 2026-10-02 20:29:16.001.
+Test Case '-[SwiftFunctionProjectTests.AxisStyleTests testDemoAllAxisStyleBindingsAndResetOnExistingPages]' started.
+Test Case '-[SwiftFunctionProjectTests.AxisStyleTests testDemoAllAxisStyleBindingsAndResetOnExistingPages]' passed (0.035 seconds).
+Test Case '-[SwiftFunctionProjectTests.AxisStyleTests testExplicitCategoryCadenceIsAbsoluteAndDensityUsesMultiples]' started.
+Test Case '-[SwiftFunctionProjectTests.AxisStyleTests testExplicitCategoryCadenceIsAbsoluteAndDensityUsesMultiples]' passed (0.005 seconds).
+Test Case '-[SwiftFunctionProjectTests.AxisStyleTests testHiddenLabelsReleaseLayoutWithoutChangingDomainsDataOrGridSettings]' started.
+Test Case '-[SwiftFunctionProjectTests.AxisStyleTests testHiddenLabelsReleaseLayoutWithoutChangingDomainsDataOrGridSettings]' passed (0.008 seconds).
+Test Case '-[SwiftFunctionProjectTests.AxisStyleTests testIndependentAxisColorsFontsAndLinesAcrossFourRenderers]' started.
+Test Case '-[SwiftFunctionProjectTests.AxisStyleTests testIndependentAxisColorsFontsAndLinesAcrossFourRenderers]' passed (0.004 seconds).
+Test Case '-[SwiftFunctionProjectTests.AxisStyleTests testLargeFontsRotationNarrowBoundsAndLegendDoNotOverflow]' started.
+Test Case '-[SwiftFunctionProjectTests.AxisStyleTests testLargeFontsRotationNarrowBoundsAndLegendDoNotOverflow]' passed (0.024 seconds).
+Test Case '-[SwiftFunctionProjectTests.AxisStyleTests testOCSnapshotAndThreeViewKindsRestore]' started.
+Test Case '-[SwiftFunctionProjectTests.AxisStyleTests testOCSnapshotAndThreeViewKindsRestore]' passed (0.004 seconds).
+Test Case '-[SwiftFunctionProjectTests.AxisStyleTests testReuseAndThemeInheritanceRestoreAtThreeRasterScales]' started.
+Test Case '-[SwiftFunctionProjectTests.AxisStyleTests testReuseAndThemeInheritanceRestoreAtThreeRasterScales]' passed (0.250 seconds).
+Test Suite 'AxisStyleTests' passed at 2026-10-02 20:29:16.330.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.328 (0.329) seconds
+Test Suite 'CartesianColorZoneTests' started at 2026-10-02 20:29:16.330.
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testAllNegativeAreaIsNotLostAndLegacyGradientIsNotRecolored]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testAllNegativeAreaIsNotLostAndLegacyGradientIsNotRecolored]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testAreaRegionsShareMaskAndGlobalGradientCoordinatesWithOpacity]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testAreaRegionsShareMaskAndGlobalGradientCoordinatesWithOpacity]' passed (0.004 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testCombinedSecondaryAxisUsesItsDomainAndColumnsApplyZones]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testCombinedSecondaryAxisUsesItsDomainAndColumnsApplyZones]' passed (0.008 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testDemoBindingsCoverThresholdColorsFillAndOff]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testDemoBindingsCoverThresholdColorsFillAndOff]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testEveryConnectionKeepsExactOriginalPathAndDashWithZones]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testEveryConnectionKeepsExactOriginalPathAndDashWithZones]' passed (0.008 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testFractionalXAndYCrossingsHaveCorrectVisibleColors]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testFractionalXAndYCrossingsHaveCorrectVisibleColors]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testHalfOpenBoundariesTailInheritanceAndExplicitPrecedence]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testHalfOpenBoundariesTailInheritanceAndExplicitPrecedence]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testInvalidConfigurationFallsBackToNegativeColorWithoutChangingData]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testInvalidConfigurationFallsBackToNegativeColorWithoutChangingData]' passed (0.005 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testMarkersUseBoundaryZoneUnlessPointColorIsExplicit]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testMarkersUseBoundaryZoneUnlessPointColorIsExplicit]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testObjectiveCZonesAreValueSnapshotsAndResetToLegacy]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testObjectiveCZonesAreValueSnapshotsAndResetToLegacy]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testRepeatedZonesReuseContainersWithoutGrowth]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testRepeatedZonesReuseContainersWithoutGrowth]' passed (0.008 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testReuseMatchesFreshAfterAxisFillCountVisibilityAndEmptyTransitions]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testReuseMatchesFreshAfterAxisFillCountVisibilityAndEmptyTransitions]' passed (0.050 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testSamplingAndViewportKeepOriginalXThresholdAndOriginalHits]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testSamplingAndViewportKeepOriginalXThresholdAndOriginalHits]' passed (0.057 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testSmoothNegativeColorUsesUnmodifiedCubicAndActuallyPaintsRed]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testSmoothNegativeColorUsesUnmodifiedCubicAndActuallyPaintsRed]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testStackAndPercentUseDrawValueButKeepRawDatum]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testStackAndPercentUseDrawValueButKeepRawDatum]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testValidationRejectsNonFiniteDuplicateReversedAndOpenMiddleBounds]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testValidationRejectsNonFiniteDuplicateReversedAndOpenMiddleBounds]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testXClipsUseOriginalFractionalIndicesAndVisibleIntersection]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testXClipsUseOriginalFractionalIndicesAndVisibleIntersection]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testYClipsUseSecondaryAxisAndDoNotChangeAtXPan]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testYClipsUseSecondaryAxisAndDoNotChangeAtXPan]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testZoneFillNilInheritsAndEmptyRestoresZoneDefaultGradient]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testZoneFillNilInheritsAndEmptyRestoresZoneDefaultGradient]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testZonesDoNotFillMissingDataOrChangeHitDomainAndGapPolicy]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianColorZoneTests testZonesDoNotFillMissingDataOrChangeHitDomainAndGapPolicy]' passed (0.001 seconds).
+Test Suite 'CartesianColorZoneTests' passed at 2026-10-02 20:29:16.490.
+	 Executed 20 tests, with 0 failures (0 unexpected) in 0.156 (0.160) seconds
+Test Suite 'CartesianDataSemanticsTests' started at 2026-10-02 20:29:16.490.
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testAggregationHasNoSingleRawSampleAndPreservesSourceRange]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testAggregationHasNoSingleRawSampleAndPreservesSourceRange]' passed (0.013 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testBarBodySnapAndSharedUseSameValues]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testBarBodySnapAndSharedUseSameValues]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testColumnBodySnapAndSharedUseSameValues]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testColumnBodySnapAndSharedUseSameValues]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testFormatsAreIndependentAndDoNotOverrideExplicitSeriesRules]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testFormatsAreIndependentAndDoNotOverrideExplicitSeriesRules]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testFormattingLocaleCurrencyRoundingAndInvalidValues]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testFormattingLocaleCurrencyRoundingAndInvalidValues]' passed (0.003 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testLegacyManuallyConstructedTargetDoesNotInventRawValue]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testLegacyManuallyConstructedTargetDoesNotInventRawValue]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testLineBodySnapAndSharedUseSameValues]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testLineBodySnapAndSharedUseSameValues]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testNegativeStackAndMissingVersusZero]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testNegativeStackAndMissingVersusZero]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testNonStackedAndMetadataUpdateDoNotChangeMath]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testNonStackedAndMetadataUpdateDoNotChangeMath]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testOCBridgeSnapshotsFormatVisibilityRangeAndLifetime]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testOCBridgeSnapshotsFormatVisibilityRangeAndLifetime]' passed (0.006 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testOCParsingRetainsMissingSlotsAndRejectsInvalidConfiguration]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testOCParsingRetainsMissingSlotsAndRejectsInvalidConfiguration]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testSampledLineReadsOriginalValue]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testSampledLineReadsOriginalValue]' passed (0.045 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testSignedPercentageUsesVisibleSeriesAndIndependentAxis]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianDataSemanticsTests testSignedPercentageUsesVisibleSeriesAndIndependentAxis]' passed (0.002 seconds).
+Test Suite 'CartesianDataSemanticsTests' passed at 2026-10-02 20:29:16.571.
+	 Executed 13 tests, with 0 failures (0 unexpected) in 0.079 (0.081) seconds
+Test Suite 'CartesianGapPolicyTests' started at 2026-10-02 20:29:16.571.
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testAllConnectionStylesAndAreaMasksUseSameSegments]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testAllConnectionStylesAndAreaMasksUseSameSegments]' passed (0.012 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testCombinedIndependentSeriesAndVisibilityRestorePolicy]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testCombinedIndependentSeriesAndVisibilityRestorePolicy]' passed (0.004 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testDemoControlsWriteActualPolicyAndLegacyReset]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testDemoControlsWriteActualPolicyAndLegacyReset]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testDurationCountsOnlyMissingSlotsAndIncludesEquality]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testDurationCountsOnlyMissingSlotsAndIncludesEquality]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testDurationRendererUsesValidTimeAxisAndUpdatesOnIntervalChange]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testDurationRendererUsesValidTimeAxisAndUpdatesOnIntervalChange]' passed (0.004 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testElevenTwelveThirteenMissingPointsHaveInclusiveBoundary]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testElevenTwelveThirteenMissingPointsHaveInclusiveBoundary]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testEmptyLeadingTrailingNonFiniteAndZeroSamples]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testEmptyLeadingTrailingNonFiniteAndZeroSamples]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testInvalidDurationOrTimeAxisBreaksOnlyAtMissingSlots]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testInvalidDurationOrTimeAxisBreaksOnlyAtMissingSlots]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testLegacyConnectNullsAndExplicitPolicyPrecedence]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testLegacyConnectNullsAndExplicitPolicyPrecedence]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testObjectiveCPolicyAndTimeAxisAreSnapshotsAndKeepNSNullSlots]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testObjectiveCPolicyAndTimeAxisAreSnapshotsAndKeepNSNullSlots]' passed (0.004 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testPolicyUpdateAndResetRemoveOldSegmentsWithAndWithoutReuse]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testPolicyUpdateAndResetRemoveOldSegmentsWithAndWithoutReuse]' passed (0.009 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testRendererDoesNotInventHitsOrChangeValuesAndDomains]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testRendererDoesNotInventHitsOrChangeValuesAndDomains]' passed (0.003 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testSamplingKeepsLongGapsAndRealBoundaryNeighbors]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testSamplingKeepsLongGapsAndRealBoundaryNeighbors]' passed (0.003 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testSegmentationNeverCreatesRemovesOrReordersFiniteSamples]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testSegmentationNeverCreatesRemovesOrReordersFiniteSamples]' passed (0.005 seconds).
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testStackedAndPercentAreasKeepGapsAndMathematicalValues]' started.
+Test Case '-[SwiftFunctionProjectTests.CartesianGapPolicyTests testStackedAndPercentAreasKeepGapsAndMathematicalValues]' passed (0.005 seconds).
+Test Suite 'CartesianGapPolicyTests' passed at 2026-10-02 20:29:16.625.
+	 Executed 15 tests, with 0 failures (0 unexpected) in 0.051 (0.054) seconds
+Test Suite 'ChartDemoTests' started at 2026-10-02 20:29:16.625.
+Test Case '-[SwiftFunctionProjectTests.ChartDemoTests testHeatmapSwiftUIHonorsSuppliedTheme]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartDemoTests testHeatmapSwiftUIHonorsSuppliedTheme]' passed (0.106 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartDemoTests testPanelChangesRealThemeAndRestoresOptionalDefaults]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartDemoTests testPanelChangesRealThemeAndRestoresOptionalDefaults]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartDemoTests testSeriesPanelUsesIndependentReducerAndLegendOverride]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartDemoTests testSeriesPanelUsesIndependentReducerAndLegendOverride]' passed (0.001 seconds).
+Test Suite 'ChartDemoTests' passed at 2026-10-02 20:29:16.733.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.108 (0.109) seconds
+Test Suite 'ChartLegendTests' started at 2026-10-02 20:29:16.734.
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testClickPreservesLegendAndClearsSelectionWithoutPlotHit]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testClickPreservesLegendAndClearsSelectionWithoutPlotHit]' passed (0.004 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testColumnAndBarStackSegmentsHitAfterVisibilityChange]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testColumnAndBarStackSegmentsHitAfterVisibilityChange]' passed (0.013 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testDefaultOffAndEmptyLegendDoNotReserveSpace]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testDefaultOffAndEmptyLegendDoNotReserveSpace]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testDefaultSymbolAndPerIDOverrides]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testDefaultSymbolAndPerIDOverrides]' passed (0.003 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testExpandStillProtectsPlotWhenCallerDoesNotProvideEnoughHeight]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testExpandStillProtectsPlotWhenCallerDoesNotProvideEnoughHeight]' passed (0.005 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testFourPositionsReserveSpaceOutsidePlotAndTitle]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testFourPositionsReserveSpaceOutsidePlotAndTitle]' passed (0.004 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testGroupedMarksRecenterAndRetainOriginalSeriesIndex]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testGroupedMarksRecenterAndRetainOriginalSeriesIndex]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testHiddenRightAxisSeriesAndMissingValues]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testHiddenRightAxisSeriesAndMissingValues]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testHiddenSeriesAreExcludedFromBoundsStacksAndPercentDenominator]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testHiddenSeriesAreExcludedFromBoundsStacksAndPercentDenominator]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testHideAllKeepsLegendAndCategoriesButRemovesAllHits]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testHideAllKeepsLegendAndCategoriesButRemovesAllHits]' passed (0.004 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testMeasurementEmptyDisabledAndInvalidWidthHaveNoSpacing]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testMeasurementEmptyDisabledAndInvalidWidthHaveNoSpacing]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testMeasurementReportsFullContentSeparatelyFromScrollViewport]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testMeasurementReportsFullContentSeparatelyFromScrollViewport]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testMeasurementUsesTitleOverridesFontAndLegendMembership]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testMeasurementUsesTitleOverridesFontAndLegendMembership]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testPublicMeasurementMatchesRenderedLegendAndPreservesBasePlotHeight]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testPublicMeasurementMatchesRenderedLegendAndPreservesBasePlotHeight]' passed (0.005 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testRemovedIDDoesNotRetainOldVisibility]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testRemovedIDDoesNotRetainOldVisibility]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testRenderSnapshots]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testRenderSnapshots]' passed (0.036 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testSideMeasurementReservesWidthInsteadOfAddingHeights]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testSideMeasurementReservesWidthInsteadOfAddingHeights]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testSmallContainerAndLongLabelsCannotConsumeMinimumPlot]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testSmallContainerAndLongLabelsCannotConsumeMinimumPlot]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testSwiftUIVisibilityCallbackRefreshAndLocalStatePreservation]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testSwiftUIVisibilityCallbackRefreshAndLocalStatePreservation]' passed (0.321 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testTogglePreservesCategoryViewport]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testTogglePreservesCategoryViewport]' passed (0.006 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testVisibilitySurvivesReorderingAndCanBeResetOrDrivenByModel]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testVisibilitySurvivesReorderingAndCanBeResetOrDrivenByModel]' passed (0.006 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testWrapScrollLimitAndAlignment]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartLegendTests testWrapScrollLimitAndAlignment]' passed (0.003 seconds).
+Test Suite 'ChartLegendTests' passed at 2026-10-02 20:29:17.161.
+	 Executed 22 tests, with 0 failures (0 unexpected) in 0.423 (0.427) seconds
+Test Suite 'ChartUpdateTests' started at 2026-10-02 20:29:17.161.
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testBarPreservesValueXAndCategoryYWindows]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testBarPreservesValueXAndCategoryYWindows]' passed (0.012 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testBarSwiftUIUsesLatestCallback]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testBarSwiftUIUsesLatestCallback]' passed (0.329 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testColumnSwiftUIUsesLatestCallback]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testColumnSwiftUIUsesLatestCallback]' passed (0.341 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testDataAndThemeUpdatesPreserveBothWindows]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testDataAndThemeUpdatesPreserveBothWindows]' passed (0.019 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testDataUpdateClearsStaleTooltipAndHitsNewDataImmediately]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testDataUpdateClearsStaleTooltipAndHitsNewDataImmediately]' passed (0.008 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testDualAxisWindowsPreserveClampAndClearWhenRemoved]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testDualAxisWindowsPreserveClampAndClearWhenRemoved]' passed (0.019 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testEmptyDataClearsOldWindowBeforeRepopulation]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testEmptyDataClearsOldWindowBeforeRepopulation]' passed (0.007 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testExplicitResetAndLegacyConfigureStillShowFullData]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testExplicitResetAndLegacyConfigureStillShowFullData]' passed (0.012 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testExternalLocatedPopupReceivesOneInvalidation]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testExternalLocatedPopupReceivesOneInvalidation]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testFullViewContinuesToFollowAllData]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testFullViewContinuesToFollowAllData]' passed (0.006 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testLineSwiftUIUsesLatestCallback]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testLineSwiftUIUsesLatestCallback]' passed (0.322 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testShrinkingDataClampsWindowAndGrowingDoesNotRestoreStaleRange]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testShrinkingDataClampsWindowAndGrowingDoesNotRestoreStaleRange]' passed (0.008 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testSwiftUIExplicitResetPolicyRestoresFullViewport]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testSwiftUIExplicitResetPolicyRestoresFullViewport]' passed (0.229 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testUpdateStopsEntranceAnimationAtCompleteState]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testUpdateStopsEntranceAnimationAtCompleteState]' passed (0.013 seconds).
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testUpdateStopsReboundFromWritingOldWindow]' started.
+Test Case '-[SwiftFunctionProjectTests.ChartUpdateTests testUpdateStopsReboundFromWritingOldWindow]' passed (0.414 seconds).
+Test Suite 'ChartUpdateTests' passed at 2026-10-02 20:29:18.907.
+	 Executed 15 tests, with 0 failures (0 unexpected) in 1.740 (1.746) seconds
+Test Suite 'ColumnColorZoneTests' started at 2026-10-02 20:29:18.907.
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testAnimationUsesFinalColorAndAreaGradientsDoNotChangeColumns]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testAnimationUsesFinalColorAndAreaGradientsDoNotChangeColumns]' passed (0.014 seconds).
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testCombinedColumnZoneControlsAreEnabledRatherThanMarkedLineOnly]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testCombinedColumnZoneControlsAreEnabledRatherThanMarkedLineOnly]' passed (0.005 seconds).
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testDemoPresetAndBindingsAreIsolatedLiveAndRestorable]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testDemoPresetAndBindingsAreIsolatedLiveAndRestorable]' passed (0.021 seconds).
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testInvalidAndAbsentZonesPreserveNegativePaletteAndThemePrecedence]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testInvalidAndAbsentZonesPreserveNegativePaletteAndThemePrecedence]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testObjectiveCValueSourceIsCopiedAndAllColumnKindsConsumeZones]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testObjectiveCValueSourceIsCopiedAndAllColumnKindsConsumeZones]' passed (0.005 seconds).
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testRawAndDrawValueForNormalGroupedPercentAndFixedStacks]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testRawAndDrawValueForNormalGroupedPercentAndFixedStacks]' passed (0.013 seconds).
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testRawColorStaysStableWhileDrawColorFollowsVisibilityAndStackMembership]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testRawColorStaysStableWhileDrawColorFollowsVisibilityAndStackMembership]' passed (0.004 seconds).
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testResolverHalfOpenThresholdsZeroAndTailInheritance]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testResolverHalfOpenThresholdsZeroAndTailInheritance]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testReuseMatchesFreshAfterZoneSourcePaletteEmptyAndVisibilityChanges]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testReuseMatchesFreshAfterZoneSourcePaletteEmptyAndVisibilityChanges]' passed (0.860 seconds).
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testSecondaryAxisUsesValuesNotScreenCoordinatesAndDoesNotAffectLineZones]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testSecondaryAxisUsesValuesNotScreenCoordinatesAndDoesNotAffectLineZones]' passed (0.006 seconds).
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testTimeAggregationColorsByBucketValueAndOriginalBucketStartIndex]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testTimeAggregationColorsByBucketValueAndOriginalBucketStartIndex]' passed (0.003 seconds).
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testWholeSegmentsThresholdsMissingAndHitDataAcrossThreeRenderers]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testWholeSegmentsThresholdsMissingAndHitDataAcrossThreeRenderers]' passed (0.003 seconds).
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testXZonesKeepOriginalIndicesWhenPanningAndIgnoreYSource]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnColorZoneTests testXZonesKeepOriginalIndicesWhenPanningAndIgnoreYSource]' passed (0.007 seconds).
+Test Suite 'ColumnColorZoneTests' passed at 2026-10-02 20:29:19.852.
+	 Executed 13 tests, with 0 failures (0 unexpected) in 0.942 (0.945) seconds
+Test Suite 'ColumnFixedLayoutTests' started at 2026-10-02 20:29:19.852.
+Test Case '-[SwiftFunctionProjectTests.ColumnFixedLayoutTests testAggregationBudgetsFixedWidthAndSpacingAndPadsOnlyGeometry]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnFixedLayoutTests testAggregationBudgetsFixedWidthAndSpacingAndPadsOnlyGeometry]' passed (0.047 seconds).
+Test Case '-[SwiftFunctionProjectTests.ColumnFixedLayoutTests testBarCategoryLabelsAndGridStayInsidePlotWhenScrolled]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnFixedLayoutTests testBarCategoryLabelsAndGridStayInsidePlotWhenScrolled]' passed (0.012 seconds).
+Test Case '-[SwiftFunctionProjectTests.ColumnFixedLayoutTests testBarUsesVerticalScrollingAndFixedThickness]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnFixedLayoutTests testBarUsesVerticalScrollingAndFixedThickness]' passed (0.004 seconds).
+Test Case '-[SwiftFunctionProjectTests.ColumnFixedLayoutTests testDemoBindsFixedDimensionsAndHidesInactiveRatios]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnFixedLayoutTests testDemoBindsFixedDimensionsAndHidesInactiveRatios]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.ColumnFixedLayoutTests testFixedWidthStartsAtEarliestAndPansWithoutEnablingZoom]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnFixedLayoutTests testFixedWidthStartsAtEarliestAndPansWithoutEnablingZoom]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.ColumnFixedLayoutTests testGapDoesNotHitAnyColumnAndBodyStillHitsOriginalValue]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnFixedLayoutTests testGapDoesNotHitAnyColumnAndBodyStillHitsOriginalValue]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.ColumnFixedLayoutTests testInvalidAndImpossibleSpacingIsSafeAndCanRecover]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnFixedLayoutTests testInvalidAndImpossibleSpacingIsSafeAndCanRecover]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.ColumnFixedLayoutTests testManualRangeUpdateResizeAndResetPreserveDimensions]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnFixedLayoutTests testManualRangeUpdateResizeAndResetPreserveDimensions]' passed (0.003 seconds).
+Test Case '-[SwiftFunctionProjectTests.ColumnFixedLayoutTests testShortLastTimeBucketKeepsFixedWidthAndOriginalHitMetadata]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnFixedLayoutTests testShortLastTimeBucketKeepsFixedWidthAndOriginalHitMetadata]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.ColumnFixedLayoutTests testSmallDatasetAndHiddenSeriesDoNotStretchFixedWidths]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnFixedLayoutTests testSmallDatasetAndHiddenSeriesDoNotStretchFixedWidths]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.ColumnFixedLayoutTests testSpacingOnlyKeepsExactPointsWhenZooming]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnFixedLayoutTests testSpacingOnlyKeepsExactPointsWhenZooming]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.ColumnFixedLayoutTests testTurningOffFixedModeRestoresLegacyLayoutAndGesturePolicy]' started.
+Test Case '-[SwiftFunctionProjectTests.ColumnFixedLayoutTests testTurningOffFixedModeRestoresLegacyLayoutAndGesturePolicy]' passed (0.003 seconds).
+Test Suite 'ColumnFixedLayoutTests' passed at 2026-10-02 20:29:19.934.
+	 Executed 12 tests, with 0 failures (0 unexpected) in 0.080 (0.082) seconds
+Test Suite 'CombinedChartTests' started at 2026-10-02 20:29:19.935.
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testAxesAndFamiliesNeverMixStacksWithSameID]' started.
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testAxesAndFamiliesNeverMixStacksWithSameID]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testFixedMixedScrollUsesColumnGroupsAndPreservesOrigin]' started.
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testFixedMixedScrollUsesColumnGroupsAndPreservesOrigin]' passed (0.076 seconds).
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testGroupedAggregationBudgetsGroupsAndPreservesKeys]' started.
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testGroupedAggregationBudgetsGroupsAndPreservesKeys]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testGroupedCompatibilityKeepsOriginalPartitionsWhenHidden]' started.
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testGroupedCompatibilityKeepsOriginalPartitionsWhenHidden]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testGroupedFixedGeometryAndBodyHitsInAllColumnRenderers]' started.
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testGroupedFixedGeometryAndBodyHitsInAllColumnRenderers]' passed (0.010 seconds).
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testGroupSeparatorsStayOnTheirOwnSegmentBoundary]' started.
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testGroupSeparatorsStayOnTheirOwnSegmentBoundary]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testIndependentGroupsSignsMissingAndRaggedData]' started.
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testIndependentGroupsSignsMissingAndRaggedData]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testMixedRenderingLegendHitsAndAxesUseOneContext]' started.
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testMixedRenderingLegendHitsAndAxesUseOneContext]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testOCCombinedCopiesTypesStylesAndStackIDs]' started.
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testOCCombinedCopiesTypesStylesAndStackIDs]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testPercentDenominatorsAndUnstackedSeries]' started.
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testPercentDenominatorsAndUnstackedSeries]' passed (0.003 seconds).
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testPlainRendererNormalizesMixedKindsToItsOwnFamily]' started.
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testPlainRendererNormalizesMixedKindsToItsOwnFamily]' passed (0.003 seconds).
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testSeriesStylePanelWritesAndRestoresActualModelFields]' started.
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testSeriesStylePanelWritesAndRestoresActualModelFields]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testSmoothStackedAreaConnectsToLastBaselineBeforeReversing]' started.
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testSmoothStackedAreaConnectsToLastBaselineBeforeReversing]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testStackedAreaUsesLowerSeriesConnectionAndIndependentGroups]' started.
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testStackedAreaUsesLowerSeriesConnectionAndIndependentGroups]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testStyleOverridesGradientMarkersAndResetAreIndependent]' started.
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testStyleOverridesGradientMarkersAndResetAreIndependent]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testSwitchingKindsVisibilityAndEmptyRemovesStalePasses]' started.
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testSwitchingKindsVisibilityAndEmptyRemovesStalePasses]' passed (0.004 seconds).
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testTotalsArePerGroupAndAnimationDoesNotDuplicate]' started.
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testTotalsArePerGroupAndAnimationDoesNotDuplicate]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testTwoPointSmoothReverseEndsAtFirstBaselinePoint]' started.
+Test Case '-[SwiftFunctionProjectTests.CombinedChartTests testTwoPointSmoothReverseEndsAtFirstBaselinePoint]' passed (0.000 seconds).
+Test Suite 'CombinedChartTests' passed at 2026-10-02 20:29:20.046.
+	 Executed 18 tests, with 0 failures (0 unexpected) in 0.108 (0.111) seconds
+Test Suite 'GroupedPresentationTests' started at 2026-10-02 20:29:20.046.
+Test Case '-[SwiftFunctionProjectTests.GroupedPresentationTests testDefaultFlatTextAndUnknownGroupFallback]' started.
+Test Case '-[SwiftFunctionProjectTests.GroupedPresentationTests testDefaultFlatTextAndUnknownGroupFallback]' passed (0.004 seconds).
+Test Case '-[SwiftFunctionProjectTests.GroupedPresentationTests testDemoDependenciesKeepValuesAndRestoreDefaults]' started.
+Test Case '-[SwiftFunctionProjectTests.GroupedPresentationTests testDemoDependenciesKeepValuesAndRestoreDefaults]' passed (0.013 seconds).
+Test Case '-[SwiftFunctionProjectTests.GroupedPresentationTests testFiltersAffectOnlyTextAndEmptyContentHasNoHeader]' started.
+Test Case '-[SwiftFunctionProjectTests.GroupedPresentationTests testFiltersAffectOnlyTextAndEmptyContentHasNoHeader]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.GroupedPresentationTests testGroupedLegendMeasurementMatchesRendererAtAllPositions]' started.
+Test Case '-[SwiftFunctionProjectTests.GroupedPresentationTests testGroupedLegendMeasurementMatchesRendererAtAllPositions]' passed (0.006 seconds).
+Test Case '-[SwiftFunctionProjectTests.GroupedPresentationTests testGroupedTextKeepsStableOrderAndSumsRawSignedValues]' started.
+Test Case '-[SwiftFunctionProjectTests.GroupedPresentationTests testGroupedTextKeepsStableOrderAndSumsRawSignedValues]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.GroupedPresentationTests testImageVisibilityCustomSymbolReuseAndFallbackCleanUp]' started.
+Test Case '-[SwiftFunctionProjectTests.GroupedPresentationTests testImageVisibilityCustomSymbolReuseAndFallbackCleanUp]' passed (0.005 seconds).
+Test Case '-[SwiftFunctionProjectTests.GroupedPresentationTests testOCBridgeConfiguresGroupingAndLegendOverrides]' started.
+Test Case '-[SwiftFunctionProjectTests.GroupedPresentationTests testOCBridgeConfiguresGroupingAndLegendOverrides]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.GroupedPresentationTests testSharedTapUsesGroupingAcrossAllCartesianRenderersAndPreservesCallbacks]' started.
+Test Case '-[SwiftFunctionProjectTests.GroupedPresentationTests testSharedTapUsesGroupingAcrossAllCartesianRenderersAndPreservesCallbacks]' passed (0.015 seconds).
+Test Case '-[SwiftFunctionProjectTests.GroupedPresentationTests testSubtotalRejectsDifferentUnitsAxesFormatsAndAggregates]' started.
+Test Case '-[SwiftFunctionProjectTests.GroupedPresentationTests testSubtotalRejectsDifferentUnitsAxesFormatsAndAggregates]' passed (0.006 seconds).
+Test Case '-[SwiftFunctionProjectTests.GroupedPresentationTests testSubtotalUsesSignedSumBeforeAbsoluteFormattingAndRejectsOverflow]' started.
+Test Case '-[SwiftFunctionProjectTests.GroupedPresentationTests testSubtotalUsesSignedSumBeforeAbsoluteFormattingAndRejectsOverflow]' passed (0.003 seconds).
+Test Suite 'GroupedPresentationTests' passed at 2026-10-02 20:29:20.104.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.057 (0.059) seconds
+Test Suite 'LegacyReferenceComparisonTests' started at 2026-10-02 20:29:20.104.
+Test Case '-[SwiftFunctionProjectTests.LegacyReferenceComparisonTests testCapturedSignedSamplesMatchWhenLegacyStackOrderIsMapped]' started.
+Test Case '-[SwiftFunctionProjectTests.LegacyReferenceComparisonTests testCapturedSignedSamplesMatchWhenLegacyStackOrderIsMapped]' passed (0.022 seconds).
+Test Case '-[SwiftFunctionProjectTests.LegacyReferenceComparisonTests testLegacyGapInputKeepsColorZonesAndMissingSamplesIndependent]' started.
+Test Case '-[SwiftFunctionProjectTests.LegacyReferenceComparisonTests testLegacyGapInputKeepsColorZonesAndMissingSamplesIndependent]' passed (0.016 seconds).
+Test Case '-[SwiftFunctionProjectTests.LegacyReferenceComparisonTests testMixedConcreteTypesNeedCompatibilityStackPartitions]' started.
+Test Case '-[SwiftFunctionProjectTests.LegacyReferenceComparisonTests testMixedConcreteTypesNeedCompatibilityStackPartitions]' passed (0.023 seconds).
+Test Case '-[SwiftFunctionProjectTests.LegacyReferenceComparisonTests testSharedAreaPercentMissingAndVisibilityRecomputeEveryCategory]' started.
+Test Case '-[SwiftFunctionProjectTests.LegacyReferenceComparisonTests testSharedAreaPercentMissingAndVisibilityRecomputeEveryCategory]' passed (0.058 seconds).
+Test Case '-[SwiftFunctionProjectTests.LegacyReferenceComparisonTests testSharedAreaSamplesKeepBusinessValuesWithoutAuxiliarySeries]' started.
+Test Case '-[SwiftFunctionProjectTests.LegacyReferenceComparisonTests testSharedAreaSamplesKeepBusinessValuesWithoutAuxiliarySeries]' passed (0.030 seconds).
+Test Case '-[SwiftFunctionProjectTests.LegacyReferenceComparisonTests testSharedTooltipRulesPreserveHitIdentityAndPreviousValueSource]' started.
+Test Case '-[SwiftFunctionProjectTests.LegacyReferenceComparisonTests testSharedTooltipRulesPreserveHitIdentityAndPreviousValueSource]' passed (0.003 seconds).
+Test Suite 'LegacyReferenceComparisonTests' passed at 2026-10-02 20:29:20.258.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.152 (0.153) seconds
+Test Suite 'LineDemoAuditTests' started at 2026-10-02 20:29:20.258.
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testAllRegisteredControlsBindAndNumericRangesContainInitialValues]' started.
+LINE_DEMO_AUDIT editable controls=326, binding mutations=3367
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testAllRegisteredControlsBindAndNumericRangesContainInitialValues]' passed (9.958 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testAllSceneButtonsWorkAfterEveryOtherSceneAndDirtyConfiguration]' started.
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testAllSceneButtonsWorkAfterEveryOtherSceneAndDirtyConfiguration]' passed (3.552 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testAxisDependenciesNormalizeInputAndRestoreLowerPrioritySettings]' started.
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testAxisDependenciesNormalizeInputAndRestoreLowerPrioritySettings]' passed (0.008 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testDataOverridesAndDayIntervalUseActualLongestSeries]' started.
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testDataOverridesAndDayIntervalUseActualLongestSeries]' passed (0.007 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testGapZonesAndAreaPrecedenceCanBeRestoredWithoutLosingValues]' started.
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testGapZonesAndAreaPrecedenceCanBeRestoredWithoutLosingValues]' passed (0.016 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testLineTooltipHeaderWorksForDirectSnapAndSampledHits]' started.
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testLineTooltipHeaderWorksForDirectSnapAndSampledHits]' passed (0.033 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testNonPresetActionsOnlyChangeTheirOwnConfiguration]' started.
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testNonPresetActionsOnlyChangeTheirOwnConfiguration]' passed (0.008 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testReferenceAxesFallBackAndRestoreWithSecondaryAxis]' started.
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testReferenceAxesFallBackAndRestoreWithSecondaryAxis]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testRenderingMatrixForConnectionStackGapZonesAndDualAxes]' started.
+LINE_DEMO_AUDIT rendered configuration matrix=750
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testRenderingMatrixForConnectionStackGapZonesAndDualAxes]' passed (0.867 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testSamplingStatusMatchesActualSeriesOverridesAndVisibility]' started.
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testSamplingStatusMatchesActualSeriesOverridesAndVisibility]' passed (0.680 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testSeriesOverridesVisibilityAndGlobalDependencies]' started.
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testSeriesOverridesVisibilityAndGlobalDependencies]' passed (0.021 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testSharedTooltipRespectsBothSwitchesAndDoesNotSwallowExternalCallbacks]' started.
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testSharedTooltipRespectsBothSwitchesAndDoesNotSwallowExternalCallbacks]' passed (0.006 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testSinglePopupSwitchAndCustomContentModesInActualHost]' started.
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testSinglePopupSwitchAndCustomContentModesInActualHost]' passed (0.891 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testStackedAreaBoundaryAvailabilityAndDefaultRestoration]' started.
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testStackedAreaBoundaryAvailabilityAndDefaultRestoration]' passed (0.018 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testStackedAreaKnownLimitationIsDisclosedOnlyWhenRelevant]' started.
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testStackedAreaKnownLimitationIsDisclosedOnlyWhenRelevant]' passed (0.011 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testTargetSamplingControlsOverrideWidthAndThresholdWithoutClearingThem]' started.
+Test Case '-[SwiftFunctionProjectTests.LineDemoAuditTests testTargetSamplingControlsOverrideWidthAndThresholdWithoutClearingThem]' passed (0.103 seconds).
+Test Suite 'LineDemoAuditTests' passed at 2026-10-02 20:29:36.441.
+	 Executed 16 tests, with 0 failures (0 unexpected) in 16.179 (16.183) seconds
+Test Suite 'LineSamplingTests' started at 2026-10-02 20:29:36.441.
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testClippingPreservesNeighboursWithoutBridgingMissingGaps]' started.
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testClippingPreservesNeighboursWithoutBridgingMissingGaps]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testDemoSamplingFieldsBindAndCanDisable]' started.
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testDemoSamplingFieldsBindAndCanDisable]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testDenseIsolatedSamplesKeepTheirOnlyVisibleMarks]' started.
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testDenseIsolatedSamplesKeepTheirOnlyVisibleMarks]' passed (0.011 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testDenseMarkerAndLabelPoliciesRestoreWhenZoomed]' started.
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testDenseMarkerAndLabelPoliciesRestoreWhenZoomed]' passed (0.025 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testDualAxesHiddenSeriesAndRaggedDataKeepOriginalIdentities]' started.
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testDualAxesHiddenSeriesAndRaggedDataKeepOriginalIdentities]' passed (0.028 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testEveryBucketPreservesItsActualExtremaInTimeOrder]' started.
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testEveryBucketPreservesItsActualExtremaInTimeOrder]' passed (0.009 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testMissingRunsAndSinglePointsDoNotBecomeConnected]' started.
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testMissingRunsAndSinglePointsDoNotBecomeConnected]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testOmittedOriginalPointStillSupportsDirectSnapSharedAndTooltipHits]' started.
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testOmittedOriginalPointStillSupportsDirectSnapSharedAndTooltipHits]' passed (0.021 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testPanKeepsInteriorBucketAnchorsStable]' started.
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testPanKeepsInteriorBucketAnchorsStable]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testPreservesPeaksTroughsEndpointsOrderAndOriginalValues]' started.
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testPreservesPeaksTroughsEndpointsOrderAndOriginalValues]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testRendererKeepsModelAndDomainsWhileReducingLayers]' started.
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testRendererKeepsModelAndDomainsWhileReducingLayers]' passed (0.048 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testSamplingWorkloadAndSnapshots]' started.
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testSamplingWorkloadAndSnapshots]' passed (0.133 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testThresholdZoomAndInvalidOptionsAreSafe]' started.
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testThresholdZoomAndInvalidOptionsAreSafe]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testUnsupportedConnectionsAndStackingPreserveFullRendering]' started.
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testUnsupportedConnectionsAndStackingPreserveFullRendering]' passed (0.015 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testUpdateRebuildsSelectionAndRespectsDisconnectedAreaSegments]' started.
+Test Case '-[SwiftFunctionProjectTests.LineSamplingTests testUpdateRebuildsSelectionAndRespectsDisconnectedAreaSegments]' passed (0.014 seconds).
+Test Suite 'LineSamplingTests' passed at 2026-10-02 20:29:36.755.
+	 Executed 15 tests, with 0 failures (0 unexpected) in 0.312 (0.314) seconds
+Test Suite 'LineTargetPointSamplingTests' started at 2026-10-02 20:29:36.755.
+Test Case '-[SwiftFunctionProjectTests.LineTargetPointSamplingTests testBudgetIsPerSeriesAndIndependentOfWidthAndActivationThreshold]' started.
+Test Case '-[SwiftFunctionProjectTests.LineTargetPointSamplingTests testBudgetIsPerSeriesAndIndependentOfWidthAndActivationThreshold]' passed (0.003 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineTargetPointSamplingTests testClippingCountsNeighboursInBudgetAndDoesNotInventValues]' started.
+Test Case '-[SwiftFunctionProjectTests.LineTargetPointSamplingTests testClippingCountsNeighboursInBudgetAndDoesNotInventValues]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineTargetPointSamplingTests testDiagnosticsTrackDirectPanHideAndEmptySeries]' started.
+Test Case '-[SwiftFunctionProjectTests.LineTargetPointSamplingTests testDiagnosticsTrackDirectPanHideAndEmptySeries]' passed (0.020 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineTargetPointSamplingTests testExactBudgetsForFlatMonotoneOscillatingAndExtremeValues]' started.
+Test Case '-[SwiftFunctionProjectTests.LineTargetPointSamplingTests testExactBudgetsForFlatMonotoneOscillatingAndExtremeValues]' passed (0.153 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineTargetPointSamplingTests testExactIntegerInputValidationAndTargetPreset]' started.
+Test Case '-[SwiftFunctionProjectTests.LineTargetPointSamplingTests testExactIntegerInputValidationAndTargetPreset]' passed (0.004 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineTargetPointSamplingTests testFragmentedBudgetAllocationIsExactAndPreservesEverySegmentExtremum]' started.
+Test Case '-[SwiftFunctionProjectTests.LineTargetPointSamplingTests testFragmentedBudgetAllocationIsExactAndPreservesEverySegmentExtremum]' passed (0.627 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineTargetPointSamplingTests testLiveTargetUpdatesPreserveViewportAndZoomRestoresSparseMarkers]' started.
+Test Case '-[SwiftFunctionProjectTests.LineTargetPointSamplingTests testLiveTargetUpdatesPreserveViewportAndZoomRestoresSparseMarkers]' passed (0.116 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineTargetPointSamplingTests testMultiSeriesRaggedSecondaryAxisVisibilityAndUnsupportedModes]' started.
+Test Case '-[SwiftFunctionProjectTests.LineTargetPointSamplingTests testMultiSeriesRaggedSecondaryAxisVisibilityAndUnsupportedModes]' passed (0.064 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineTargetPointSamplingTests testOmittedPointsStillHitOriginalValuesAndDomains]' started.
+Test Case '-[SwiftFunctionProjectTests.LineTargetPointSamplingTests testOmittedPointsStillHitOriginalValuesAndDomains]' passed (0.044 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineTargetPointSamplingTests testProtectedEndpointsAndExtremaMayExceedTinyTargetWithoutJoiningGaps]' started.
+Test Case '-[SwiftFunctionProjectTests.LineTargetPointSamplingTests testProtectedEndpointsAndExtremaMayExceedTinyTargetWithoutJoiningGaps]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineTargetPointSamplingTests testReadoutShowsActualCountsOverflowAndSparseRecovery]' started.
+Test Case '-[SwiftFunctionProjectTests.LineTargetPointSamplingTests testReadoutShowsActualCountsOverflowAndSparseRecovery]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.LineTargetPointSamplingTests testReportCoalescesLayoutUpdatesAndCanReleaseWithoutRetainCycle]' started.
+Test Case '-[SwiftFunctionProjectTests.LineTargetPointSamplingTests testReportCoalescesLayoutUpdatesAndCanReleaseWithoutRetainCycle]' passed (0.010 seconds).
+Test Suite 'LineTargetPointSamplingTests' passed at 2026-10-02 20:29:37.800.
+	 Executed 12 tests, with 0 failures (0 unexpected) in 1.043 (1.045) seconds
+Test Suite 'PercentStackedAreaTests' started at 2026-10-02 20:29:37.801.
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testAbsoluteDenominatorAndAtomicFallbacksPreserveCurrentSemantics]' started.
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testAbsoluteDenominatorAndAtomicFallbacksPreserveCurrentSemantics]' passed (0.130 seconds).
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testAllMixedStylesAndSignsMatchRationalReferenceWithoutOverlapsOrEnvelopeOverflow]' started.
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testAllMixedStylesAndSignsMatchRationalReferenceWithoutOverlapsOrEnvelopeOverflow]' passed (0.515 seconds).
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testDemoLineCombinedAndOCUseTheSamePercentGeometryAndRawHits]' started.
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testDemoLineCombinedAndOCUseTheSamePercentGeometryAndRawHits]' passed (0.008 seconds).
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testMatchingGapRunsConnectAndBreakWithoutCreatingSamples]' started.
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testMatchingGapRunsConnectAndBreakWithoutCreatingSamples]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testMixedPercentThinLayerUsesSharedNormalizationAndKeepsHundredEnvelope]' started.
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testMixedPercentThinLayerUsesSharedNormalizationAndKeepsHundredEnvelope]' passed (0.044 seconds).
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testNormalizerRejectsSingularOrUnboundedWorkAndKeepsCertifiedAccuracy]' started.
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testNormalizerRejectsSingularOrUnboundedWorkAndKeepsCertifiedAccuracy]' passed (0.006 seconds).
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testPercentStrokeAtCurveStepAndSignJoinsStaysInsideAreaAtAllScales]' started.
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testPercentStrokeAtCurveStepAndSignJoinsStaysInsideAreaAtAllScales]' passed (11.507 seconds).
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testVisibilityStackAxisIsolationUpdatesAndViewportMatchFreshGeometry]' started.
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testVisibilityStackAxisIsolationUpdatesAndViewportMatchFreshGeometry]' passed (0.647 seconds).
+Test Suite 'PercentStackedAreaTests' passed at 2026-10-02 20:29:50.662.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 12.860 (12.861) seconds
+Test Suite 'RenderingReuseTests' started at 2026-10-02 20:29:50.662.
+Test Case '-[SwiftFunctionProjectTests.RenderingReuseTests testBarAndColumnAnimationReuseLabelsAndShadowsWithoutAccumulation]' started.
+Test Case '-[SwiftFunctionProjectTests.RenderingReuseTests testBarAndColumnAnimationReuseLabelsAndShadowsWithoutAccumulation]' passed (0.080 seconds).
+Test Case '-[SwiftFunctionProjectTests.RenderingReuseTests testDemoReuseToggleBindsToActualConfiguration]' started.
+Test Case '-[SwiftFunctionProjectTests.RenderingReuseTests testDemoReuseToggleBindsToActualConfiguration]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.RenderingReuseTests testDenseToSparseAndUnmountReleaseUnusedObjects]' started.
+Test Case '-[SwiftFunctionProjectTests.RenderingReuseTests testDenseToSparseAndUnmountReleaseUnusedObjects]' passed (0.023 seconds).
+Test Case '-[SwiftFunctionProjectTests.RenderingReuseTests testEmptyDataClearsSeriesAndHitCachesAndCanRestore]' started.
+Test Case '-[SwiftFunctionProjectTests.RenderingReuseTests testEmptyDataClearsSeriesAndHitCachesAndCanRestore]' passed (0.006 seconds).
+Test Case '-[SwiftFunctionProjectTests.RenderingReuseTests testLineColumnAndBarReuseActualObjectsAndCanDisable]' started.
+Test Case '-[SwiftFunctionProjectTests.RenderingReuseTests testLineColumnAndBarReuseActualObjectsAndCanDisable]' passed (0.005 seconds).
+Test Case '-[SwiftFunctionProjectTests.RenderingReuseTests testRepeatedLayoutAllocationBenchmark]' started.
+Test Case '-[SwiftFunctionProjectTests.RenderingReuseTests testRepeatedLayoutAllocationBenchmark]' passed (1.578 seconds).
+Test Case '-[SwiftFunctionProjectTests.RenderingReuseTests testReuseMatchesFreshRenderingAcrossStyleAndVisibilityTransitions]' started.
+Test Case '-[SwiftFunctionProjectTests.RenderingReuseTests testReuseMatchesFreshRenderingAcrossStyleAndVisibilityTransitions]' passed (0.259 seconds).
+Test Case '-[SwiftFunctionProjectTests.RenderingReuseTests testRotatedAxisLabelsResetWhenRotationAndTitleChange]' started.
+Test Case '-[SwiftFunctionProjectTests.RenderingReuseTests testRotatedAxisLabelsResetWhenRotationAndTitleChange]' passed (0.002 seconds).
+Test Suite 'RenderingReuseTests' passed at 2026-10-02 20:29:52.617.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 1.953 (1.955) seconds
+Test Suite 'RichTooltipTests' started at 2026-10-02 20:29:52.617.
+Test Case '-[SwiftFunctionProjectTests.RichTooltipTests testAggregationRulesKeepIntervalAndOriginalRangeWithoutInventingPointName]' started.
+Test Case '-[SwiftFunctionProjectTests.RichTooltipTests testAggregationRulesKeepIntervalAndOriginalRangeWithoutInventingPointName]' passed (0.004 seconds).
+Test Case '-[SwiftFunctionProjectTests.RichTooltipTests testDemoRulesDisableIrrelevantControlsAndResetRestoresDefaults]' started.
+Test Case '-[SwiftFunctionProjectTests.RichTooltipTests testDemoRulesDisableIrrelevantControlsAndResetRestoresDefaults]' passed (0.010 seconds).
+Test Case '-[SwiftFunctionProjectTests.RichTooltipTests testHideAnimationCannotHideNewContentAndInteractionResets]' started.
+Test Case '-[SwiftFunctionProjectTests.RichTooltipTests testHideAnimationCannotHideNewContentAndInteractionResets]' passed (0.254 seconds).
+Test Case '-[SwiftFunctionProjectTests.RichTooltipTests testLongMultilingualRowsManyGroupsConstrainAndScrollWithoutClipping]' started.
+Test Case '-[SwiftFunctionProjectTests.RichTooltipTests testLongMultilingualRowsManyGroupsConstrainAndScrollWithoutClipping]' passed (0.037 seconds).
+Test Case '-[SwiftFunctionProjectTests.RichTooltipTests testOCPresentationCopiesSettingsAndRemovesProviderOnUpdate]' started.
+Test Case '-[SwiftFunctionProjectTests.RichTooltipTests testOCPresentationCopiesSettingsAndRemovesProviderOnUpdate]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.RichTooltipTests testProviderRunsAfterGlobalFilterAndOnlyOncePerIncludedDatum]' started.
+Test Case '-[SwiftFunctionProjectTests.RichTooltipTests testProviderRunsAfterGlobalFilterAndOnlyOncePerIncludedDatum]' passed (0.003 seconds).
+Test Case '-[SwiftFunctionProjectTests.RichTooltipTests testSingleAndSharedPathsUseSameRulesAcrossFourRenderersAndCanClearThem]' started.
+Test Case '-[SwiftFunctionProjectTests.RichTooltipTests testSingleAndSharedPathsUseSameRulesAcrossFourRenderersAndCanClearThem]' passed (0.028 seconds).
+Test Case '-[SwiftFunctionProjectTests.RichTooltipTests testStructuredContentKeepsGroupsMetadataImagesAndSignedSubtotal]' started.
+Test Case '-[SwiftFunctionProjectTests.RichTooltipTests testStructuredContentKeepsGroupsMetadataImagesAndSignedSubtotal]' passed (0.005 seconds).
+Test Case '-[SwiftFunctionProjectTests.RichTooltipTests testSwiftUIUpdatesPresentationWithoutRecreatingAnyCartesianChart]' started.
+Test Case '-[SwiftFunctionProjectTests.RichTooltipTests testSwiftUIUpdatesPresentationWithoutRecreatingAnyCartesianChart]' passed (0.871 seconds).
+Test Suite 'RichTooltipTests' passed at 2026-10-02 20:29:53.833.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 1.213 (1.216) seconds
+Test Suite 'SelectionStyleTests' started at 2026-10-02 20:29:53.833.
+Test Case '-[SwiftFunctionProjectTests.SelectionStyleTests testActualTapIgnoresTooltipAndCrosshairSwitchesThenUpdateAndMissClear]' started.
+Test Case '-[SwiftFunctionProjectTests.SelectionStyleTests testActualTapIgnoresTooltipAndCrosshairSwitchesThenUpdateAndMissClear]' passed (0.003 seconds).
+Test Case '-[SwiftFunctionProjectTests.SelectionStyleTests testDisabledByDefaultAndSelectionNeverMutatesOriginalColorsOrData]' started.
+Test Case '-[SwiftFunctionProjectTests.SelectionStyleTests testDisabledByDefaultAndSelectionNeverMutatesOriginalColorsOrData]' passed (0.011 seconds).
+Test Case '-[SwiftFunctionProjectTests.SelectionStyleTests testLayoutAnimationAndViewportKeepSelectionAlignedOrClear]' started.
+Test Case '-[SwiftFunctionProjectTests.SelectionStyleTests testLayoutAnimationAndViewportKeepSelectionAlignedOrClear]' passed (0.004 seconds).
+Test Case '-[SwiftFunctionProjectTests.SelectionStyleTests testObjectiveCAndSamePageDemoExposeDefaultCompatibleSelection]' started.
+Test Case '-[SwiftFunctionProjectTests.SelectionStyleTests testObjectiveCAndSamePageDemoExposeDefaultCompatibleSelection]' passed (0.010 seconds).
+Test Case '-[SwiftFunctionProjectTests.SelectionStyleTests testRepeatedSelectionHasBoundedLayersAndRestoresIdenticalPixelsAtAllScales]' started.
+Test Case '-[SwiftFunctionProjectTests.SelectionStyleTests testRepeatedSelectionHasBoundedLayersAndRestoresIdenticalPixelsAtAllScales]' passed (0.034 seconds).
+Test Case '-[SwiftFunctionProjectTests.SelectionStyleTests testReplayClearsSelectionImmediatelyAcrossAllCartesianFamilies]' started.
+Test Case '-[SwiftFunctionProjectTests.SelectionStyleTests testReplayClearsSelectionImmediatelyAcrossAllCartesianFamilies]' passed (0.004 seconds).
+Test Case '-[SwiftFunctionProjectTests.SelectionStyleTests testSamplingAndSecondaryAxisUseOriginalPointAndMarkerRadius]' started.
+Test Case '-[SwiftFunctionProjectTests.SelectionStyleTests testSamplingAndSecondaryAxisUseOriginalPointAndMarkerRadius]' passed (0.003 seconds).
+Test Case '-[SwiftFunctionProjectTests.SelectionStyleTests testSharedHighlightsOnlyFiniteVisibleEntriesAndClearsMissingColumn]' started.
+Test Case '-[SwiftFunctionProjectTests.SelectionStyleTests testSharedHighlightsOnlyFiniteVisibleEntriesAndClearsMissingColumn]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.SelectionStyleTests testSingleLineColumnBarAndCombinedUseRealMarkFrames]' started.
+Test Case '-[SwiftFunctionProjectTests.SelectionStyleTests testSingleLineColumnBarAndCombinedUseRealMarkFrames]' passed (0.003 seconds).
+Test Case '-[SwiftFunctionProjectTests.SelectionStyleTests testStableIDAndFamilyValidationRejectsStaleOrForeignTargets]' started.
+Test Case '-[SwiftFunctionProjectTests.SelectionStyleTests testStableIDAndFamilyValidationRejectsStaleOrForeignTargets]' passed (0.002 seconds).
+Test Suite 'SelectionStyleTests' passed at 2026-10-02 20:29:53.912.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.076 (0.078) seconds
+Test Suite 'StackTotalLabelTests' started at 2026-10-02 20:29:53.912.
+Test Case '-[SwiftFunctionProjectTests.StackTotalLabelTests testAnimationReplacesLabelsInsteadOfAccumulatingThem]' started.
+Test Case '-[SwiftFunctionProjectTests.StackTotalLabelTests testAnimationReplacesLabelsInsteadOfAccumulatingThem]' passed (0.003 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackTotalLabelTests testClippedChainEndDoesNotProduceMisleadingEdgeLabel]' started.
+Test Case '-[SwiftFunctionProjectTests.StackTotalLabelTests testClippedChainEndDoesNotProduceMisleadingEdgeLabel]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackTotalLabelTests testDualAxesHaveIndependentTotalsAndShareLabelLimit]' started.
+Test Case '-[SwiftFunctionProjectTests.StackTotalLabelTests testDualAxesHaveIndependentTotalsAndShareLabelLimit]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackTotalLabelTests testLabelsRecoverWhenZoomingIntoLargeCategorySet]' started.
+Test Case '-[SwiftFunctionProjectTests.StackTotalLabelTests testLabelsRecoverWhenZoomingIntoLargeCategorySet]' passed (0.016 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackTotalLabelTests testLabelsRemainInsidePlotAndDoNotOverlapTitleOrAxisLabels]' started.
+Test Case '-[SwiftFunctionProjectTests.StackTotalLabelTests testLabelsRemainInsidePlotAndDoNotOverlapTitleOrAxisLabels]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackTotalLabelTests testMissingPercentageValueDoesNotResetDenominator]' started.
+Test Case '-[SwiftFunctionProjectTests.StackTotalLabelTests testMissingPercentageValueDoesNotResetDenominator]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackTotalLabelTests testMixedSignsAndPercentageModesUseRawTotals]' started.
+Test Case '-[SwiftFunctionProjectTests.StackTotalLabelTests testMixedSignsAndPercentageModesUseRawTotals]' passed (0.005 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackTotalLabelTests testNonStackedAndAllZeroDoNotShowTotals]' started.
+Test Case '-[SwiftFunctionProjectTests.StackTotalLabelTests testNonStackedAndAllZeroDoNotShowTotals]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackTotalLabelTests testRaggedAndMissingDataDoNotLoseValidContributions]' started.
+Test Case '-[SwiftFunctionProjectTests.StackTotalLabelTests testRaggedAndMissingDataDoNotLoseValidContributions]' passed (0.004 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackTotalLabelTests testSmallSegmentsStillContributeToTotals]' started.
+Test Case '-[SwiftFunctionProjectTests.StackTotalLabelTests testSmallSegmentsStillContributeToTotals]' passed (0.002 seconds).
+Test Suite 'StackTotalLabelTests' passed at 2026-10-02 20:29:53.950.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.037 (0.039) seconds
+Test Suite 'StackedAreaEnvelopeTests' started at 2026-10-02 20:29:53.951.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaEnvelopeTests testBothNativeFixturesActuallyReadTheSameLegacyInputFile]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaEnvelopeTests testBothNativeFixturesActuallyReadTheSameLegacyInputFile]' passed (0.089 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaEnvelopeTests testConnectedUpperGapReusesSourceCrossingsAndBridgesOnlyTheBrokenPart]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaEnvelopeTests testConnectedUpperGapReusesSourceCrossingsAndBridgesOnlyTheBrokenPart]' passed (0.003 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaEnvelopeTests testDemoAndOCSourceSwitchHaveMatchingBoundariesAndOriginalHitValues]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaEnvelopeTests testDemoAndOCSourceSwitchHaveMatchingBoundariesAndOriginalHitValues]' passed (0.005 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaEnvelopeTests testMixedStylesSignsAndStackModesFollowPiecewiseSignSums]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaEnvelopeTests testMixedStylesSignsAndStackModesFollowPiecewiseSignSums]' passed (0.165 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaEnvelopeTests testPositiveUpperAreaFollowsCrossingSourceInsteadOfBridgingItsEndpoints]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaEnvelopeTests testPositiveUpperAreaFollowsCrossingSourceInsteadOfBridgingItsEndpoints]' passed (0.044 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaEnvelopeTests testSourceSwitchStrokePixelsStayInsideItsAreaAtAllScales]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaEnvelopeTests testSourceSwitchStrokePixelsStayInsideItsAreaAtAllScales]' passed (11.770 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaEnvelopeTests testUpdatesIsolationAndCompatibilityDoNotKeepOldEnvelopes]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaEnvelopeTests testUpdatesIsolationAndCompatibilityDoNotKeepOldEnvelopes]' passed (0.564 seconds).
+Test Suite 'StackedAreaEnvelopeTests' passed at 2026-10-02 20:30:06.593.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 12.641 (12.642) seconds
+Test Suite 'StackedAreaGapBoundaryTests' started at 2026-10-02 20:30:06.593.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGapBoundaryTests testDemoLineCombinedAndOCBridgePreserveSamplesAndMatchingAreas]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGapBoundaryTests testDemoLineCombinedAndOCBridgePreserveSamplesAndMatchingAreas]' passed (0.005 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGapBoundaryTests testGapAndSegmentEndStrokesRemainInsideAreaAtAllScales]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGapBoundaryTests testGapAndSegmentEndStrokesRemainInsideAreaAtAllScales]' passed (7.781 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGapBoundaryTests testGapPiecesRetainExactCurvesAcrossStylesSignsModesAndHigherLayers]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGapBoundaryTests testGapPiecesRetainExactCurvesAcrossStylesSignsModesAndHigherLayers]' passed (0.144 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGapBoundaryTests testGapPolicyOverridesAndNonfiniteDataKeepTheirOriginalSemantics]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGapBoundaryTests testGapPolicyOverridesAndNonfiniteDataKeepTheirOriginalSemantics]' passed (0.011 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGapBoundaryTests testLongUpperConnectionRetainsBothContinuousLowerPieces]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGapBoundaryTests testLongUpperConnectionRetainsBothContinuousLowerPieces]' passed (0.037 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGapBoundaryTests testMissingEndpointsDoNotHideInteriorIslandsAndCrossingUsesBothSignBridges]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGapBoundaryTests testMissingEndpointsDoNotHideInteriorIslandsAndCrossingUsesBothSignBridges]' passed (0.003 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGapBoundaryTests testUnresolvedBridgeKeepsSmoothOwnThicknessInsteadOfInvertingIt]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGapBoundaryTests testUnresolvedBridgeKeepsSmoothOwnThicknessInsteadOfInvertingIt]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGapBoundaryTests testUpdatesRebuildGapGeometryAndCompatibilityModesStayUnchanged]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGapBoundaryTests testUpdatesRebuildGapGeometryAndCompatibilityModesStayUnchanged]' passed (0.495 seconds).
+Test Suite 'StackedAreaGapBoundaryTests' passed at 2026-10-02 20:30:15.072.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 8.478 (8.479) seconds
+Test Suite 'StackedAreaGeometryTests' started at 2026-10-02 20:30:15.072.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testAllConnectionStylesAndStackModesShareExactNegativeAndPositiveEdges]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testAllConnectionStylesAndStackModesShareExactNegativeAndPositiveEdges]' passed (0.048 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testBrokenSourceUsesStraightTransitionInsteadOfInventingSmoothBridge]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testBrokenSourceUsesStraightTransitionInsteadOfInventingSmoothBridge]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testConnectedUpperGapFollowsAllIntermediateLowerVertices]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testConnectedUpperGapFollowsAllIntermediateLowerVertices]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testContourMatchesOriginalStrokeGeometryForEveryConnectionStyle]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testContourMatchesOriginalStrokeGeometryForEveryConnectionStyle]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testCrossingAreaClosesOnItsOwnSignBaseline]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testCrossingAreaClosesOnItsOwnSignBaseline]' passed (0.037 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testFollowingBaselineCombinedAndOCBridgeDrawSameBoundaries]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testFollowingBaselineCombinedAndOCBridgeDrawSameBoundaries]' passed (0.005 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testFollowingBaselineConnectedGapUsesIntermediateSourceKnots]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testFollowingBaselineConnectedGapUsesIntermediateSourceKnots]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testFollowingBaselineCoversAllStylePairsBothSignsAndThreeStackModes]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testFollowingBaselineCoversAllStylePairsBothSignsAndThreeStackModes]' passed (0.247 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testFollowingBaselineLiveUpdatesAndPercentEnvelopeStayCompatible]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testFollowingBaselineLiveUpdatesAndPercentEnvelopeStayCompatible]' passed (0.004 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testFollowingBaselineRefinesSourceGapsAndResolvedCrossings]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testFollowingBaselineRefinesSourceGapsAndResolvedCrossings]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testLiveStyleAndVisibilityUpdatesRebuildContoursAndPreserveViewport]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testLiveStyleAndVisibilityUpdatesRebuildContoursAndPreserveViewport]' passed (0.004 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testRaggedHiddenIndependentAndSecondaryAxisSeriesRemainFinite]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testRaggedHiddenIndependentAndSecondaryAxisSeriesRemainFinite]' passed (0.006 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testSeamPresetIsAvailableInBothDemosAndKeepsOriginalHitData]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testSeamPresetIsAvailableInBothDemosAndKeepsOriginalHitData]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testSharedCurveFillHasNeitherGapNorOverlapAndSavesImageEvidence]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testSharedCurveFillHasNeitherGapNorOverlapAndSavesImageEvidence]' passed (0.031 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testSourceCrossingOppositeSignInsideConnectedUpperGapIsNotBorrowed]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testSourceCrossingOppositeSignInsideConnectedUpperGapIsNotBorrowed]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testSourceGapMustNotChangeNeighboringSharedCurves]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testSourceGapMustNotChangeNeighboringSharedCurves]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testSourceSignChangeOnlyAffectsTheTransitionInterval]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testSourceSignChangeOnlyAffectsTheTransitionInterval]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testThinMixedStyleAreaDoesNotFoldInsideLowerArea]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testThinMixedStyleAreaDoesNotFoldInsideLowerArea]' passed (0.032 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testUpperGapMustNotRecomputeLowerSmoothTangents]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaGeometryTests testUpperGapMustNotRecomputeLowerSmoothTangents]' passed (0.001 seconds).
+Test Suite 'StackedAreaGeometryTests' passed at 2026-10-02 20:30:15.501.
+	 Executed 19 tests, with 0 failures (0 unexpected) in 0.425 (0.429) seconds
+Test Suite 'StackedAreaStrokeTests' started at 2026-10-02 20:30:15.501.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaStrokeTests testActualPixelsHaveNoGreenTipsInsideBasesOrColoredCapsOutsideEndpoints]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaStrokeTests testActualPixelsHaveNoGreenTipsInsideBasesOrColoredCapsOutsideEndpoints]' passed (1.888 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaStrokeTests testClippingKeepsConfiguredInsideWidthAndZeroAreaHasNoStroke]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaStrokeTests testClippingKeepsConfiguredInsideWidthAndZeroAreaHasNoStroke]' passed (0.069 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaStrokeTests testLineCombinedAndOCUseSameStrokeContainment]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaStrokeTests testLineCombinedAndOCUseSameStrokeContainment]' passed (0.070 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaStrokeTests testReuseModeChangesZonesAndAnimationMatchFreshRendering]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaStrokeTests testReuseModeChangesZonesAndAnimationMatchFreshRendering]' passed (0.807 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaStrokeTests testStrokePixelsStayWithinFillForEveryConnectionWidthAndScale]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaStrokeTests testStrokePixelsStayWithinFillForEveryConnectionWidthAndScale]' passed (3.255 seconds).
+Test Suite 'StackedAreaStrokeTests' passed at 2026-10-02 20:30:21.592.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 6.090 (6.091) seconds
+Test Suite 'StackedAreaTransitionTests' started at 2026-10-02 20:30:21.592.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaTransitionTests testCrossingStyleAndSignMatrixHasNoFillInsideEitherBaseline]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaTransitionTests testCrossingStyleAndSignMatrixHasNoFillInsideEitherBaseline]' passed (0.209 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaTransitionTests testDemoCombinedAndOCUseTheSameSplitGeometry]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaTransitionTests testDemoCombinedAndOCUseTheSameSplitGeometry]' passed (0.005 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaTransitionTests testDynamicVisibilityAxesAndModeUpdatesRebuildSplitContours]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaTransitionTests testDynamicVisibilityAxesAndModeUpdatesRebuildSplitContours]' passed (0.007 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaTransitionTests testGapPolicyPreservesSourceBreakWhileUpperBridgesAndSplits]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaTransitionTests testGapPolicyPreservesSourceBreakWhileUpperBridgesAndSplits]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaTransitionTests testSmoothCrossingUsesContributionRootInsteadOfCumulativeOrLinearRoot]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaTransitionTests testSmoothCrossingUsesContributionRootInsteadOfCumulativeOrLinearRoot]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.StackedAreaTransitionTests testZeroSamplesRetainPositiveChainAnchorsForEveryConnectionStyle]' started.
+Test Case '-[SwiftFunctionProjectTests.StackedAreaTransitionTests testZeroSamplesRetainPositiveChainAnchorsForEveryConnectionStyle]' passed (0.015 seconds).
+Test Suite 'StackedAreaTransitionTests' passed at 2026-10-02 20:30:21.833.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.239 (0.240) seconds
+Test Suite 'SwiftFunctionProjectTests' started at 2026-10-02 20:30:21.833.
+Test Case '-[SwiftFunctionProjectTests.SwiftFunctionProjectTests testBarHorizontalAxis]' started.
+Test Case '-[SwiftFunctionProjectTests.SwiftFunctionProjectTests testBarHorizontalAxis]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.SwiftFunctionProjectTests testChartSelfTest]' started.
+Test Case '-[SwiftFunctionProjectTests.SwiftFunctionProjectTests testChartSelfTest]' passed (0.053 seconds).
+Test Case '-[SwiftFunctionProjectTests.SwiftFunctionProjectTests testCrosshairVisibleAfterTap]' started.
+Test Case '-[SwiftFunctionProjectTests.SwiftFunctionProjectTests testCrosshairVisibleAfterTap]' passed (2.509 seconds).
+Test Case '-[SwiftFunctionProjectTests.SwiftFunctionProjectTests testExample]' started.
+Test Case '-[SwiftFunctionProjectTests.SwiftFunctionProjectTests testExample]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.SwiftFunctionProjectTests testPerformanceExample]' started.
+/Users/hoymiles/Desktop/AI编程项目/Swift/SwiftFunctionProject/SwiftFunctionProjectTests/SwiftFunctionProjectTests.swift:122: Test Case '-[SwiftFunctionProjectTests.SwiftFunctionProjectTests testPerformanceExample]' measured [Time, seconds] average: 0.000, relative standard deviation: 112.590%, values: [0.000071, 0.000018, 0.000010, 0.000010, 0.000010, 0.000009, 0.000009, 0.000009, 0.000009, 0.000009], performanceMetricID:com.apple.XCTPerformanceMetric_WallClockTime, baselineName: "", baselineAverage: , polarity: prefers smaller, maxPercentRegression: 10.000%, maxPercentRelativeStandardDeviation: 10.000%, maxRegression: 0.100, maxStandardDeviation: 0.100
+Test Case '-[SwiftFunctionProjectTests.SwiftFunctionProjectTests testPerformanceExample]' passed (0.278 seconds).
+Test Case '-[SwiftFunctionProjectTests.SwiftFunctionProjectTests testRubberBandRebound]' started.
+Test Case '-[SwiftFunctionProjectTests.SwiftFunctionProjectTests testRubberBandRebound]' passed (0.829 seconds).
+Test Suite 'SwiftFunctionProjectTests' passed at 2026-10-02 20:30:25.506.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 3.671 (3.674) seconds
+Test Suite 'TimeGroupingCacheTests' started at 2026-10-02 20:30:25.507.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingCacheTests testCachedAndUncachedPanningHaveIdenticalValuesAndHitMetadata]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingCacheTests testCachedAndUncachedPanningHaveIdenticalValuesAndHitMetadata]' passed (0.072 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingCacheTests testCacheIsBoundedAndThemeUpdateInvalidatesWidthPlan]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingCacheTests testCacheIsBoundedAndThemeUpdateInvalidatesWidthPlan]' passed (0.038 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingCacheTests testDisablingCacheRecalculatesOnEachGesture]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingCacheTests testDisablingCacheRecalculatesOnEachGesture]' passed (0.013 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingCacheTests testExternalRenderInvalidatesCapturedReducerState]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingCacheTests testExternalRenderInvalidatesCapturedReducerState]' passed (0.018 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingCacheTests testGestureTimingComparison]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingCacheTests testGestureTimingComparison]' passed (0.916 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingCacheTests testHysteresisDelaysRefinementButCoarsensImmediately]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingCacheTests testHysteresisDelaysRefinementButCoarsensImmediately]' passed (0.022 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingCacheTests testPanningReusesReducerLabelsAndStackedValues]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingCacheTests testPanningReusesReducerLabelsAndStackedValues]' passed (0.030 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingCacheTests testUpdateInvalidatesDataReducerUnitTimeAndVisibility]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingCacheTests testUpdateInvalidatesDataReducerUnitTimeAndVisibility]' passed (0.019 seconds).
+Test Suite 'TimeGroupingCacheTests' passed at 2026-10-02 20:30:26.636.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 1.128 (1.130) seconds
+Test Suite 'TimeGroupingTests' started at 2026-10-02 20:30:26.637.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testBucketSumsConserveTotalsAndTailHasTrueDuration]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testBucketSumsConserveTotalsAndTailHasTrueDuration]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testColumnGeometryDirectSharedAndSnapHitsAgreeOnSourceInterval]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testColumnGeometryDirectSharedAndSnapHitsAgreeOnSourceInterval]' passed (0.018 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testCustomInvalidResultAndSumOverflowBecomeMissing]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testCustomInvalidResultAndSumOverflowBecomeMissing]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testCustomReceivesOriginalIndicesAndOnlyFiniteValues]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testCustomReceivesOriginalIndicesAndOnlyFiniteValues]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testDenseTimeLabelsKeepGapWhenZoomedToFractionalCategoryWindow]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testDenseTimeLabelsKeepGapWhenZoomedToFractionalCategoryWindow]' passed (0.032 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testDrillDownAndResetRestoreRawCoordinateDomainAndValues]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testDrillDownAndResetRestoreRawCoordinateDomainAndValues]' passed (0.045 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testDrillInsideHitCallbackDoesNotRestoreStaleInteraction]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testDrillInsideHitCallbackDoesNotRestoreStaleInteraction]' passed (0.080 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testGroupedOverviewAndDetailSnapshots]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testGroupedOverviewAndDetailSnapshots]' passed (0.118 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testHiddenUnconfiguredSeriesDoesNotBlockGrouping]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testHiddenUnconfiguredSeriesDoesNotBlockGrouping]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testIndependentReducersShareExactIntervalsAndSourceRanges]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testIndependentReducersShareExactIntervalsAndSourceRanges]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testInvalidAndMissingConfigurationFallsBackToOriginalData]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testInvalidAndMissingConfigurationFallsBackToOriginalData]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testMissingAndRaggedDataRetainCoverageWithoutInventingZero]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testMissingAndRaggedDataRetainCoverageWithoutInventingZero]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testNewDataAndLegendVisibilityInvalidateDerivedValues]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testNewDataAndLegendVisibilityInvalidateDerivedValues]' passed (0.052 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testPartialBucketRemainsVisibleWhenAnchorIsOutsideWindow]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testPartialBucketRemainsVisibleWhenAnchorIsOutsideWindow]' passed (0.032 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testPercentageIsComputedAfterAggregationAndVisibility]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testPercentageIsComputedAfterAggregationAndVisibility]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testRawResolutionDoesNotInvokeCustomReducer]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testRawResolutionDoesNotInvokeCustomReducer]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testSwiftUIRangeCommandsDoNotOverwriteLaterGestureWindow]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testSwiftUIRangeCommandsDoNotOverwriteLaterGestureWindow]' passed (0.570 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testTimeAxisUsesDatesForMultiDayDataAndHonorsFormatter]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testTimeAxisUsesDatesForMultiDayDataAndHonorsFormatter]' passed (0.052 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testWidthSeriesCountAndZoomChooseDensityWithoutMovingBucketAnchor]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testWidthSeriesCountAndZoomChooseDensityWithoutMovingBucketAnchor]' passed (0.013 seconds).
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testWorkloadMatrixAndSnapshot]' started.
+Test Case '-[SwiftFunctionProjectTests.TimeGroupingTests testWorkloadMatrixAndSnapshot]' passed (0.859 seconds).
+Test Suite 'TimeGroupingTests' passed at 2026-10-02 20:30:28.516.
+	 Executed 20 tests, with 0 failures (0 unexpected) in 1.875 (1.879) seconds
+Test Suite 'TooltipSelectionTests' started at 2026-10-02 20:30:28.516.
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testActualTimeAggregationIncludingSinglePointTailKeepsBucketStatistics]' started.
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testActualTimeAggregationIncludingSinglePointTailKeepsBucketStatistics]' passed (0.003 seconds).
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testAutomaticOffsetRetainsArrowAtRealAnchorAndDefaultGeometry]' started.
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testAutomaticOffsetRetainsArrowAtRealAnchorAndDefaultGeometry]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testBoundaryPoliciesAndExtremeOffsetsDoNotOverflow]' started.
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testBoundaryPoliciesAndExtremeOffsetsDoNotOverflow]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testDemoConditionsParserAndResetAreConsistent]' started.
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testDemoConditionsParserAndResetAreConsistent]' passed (0.011 seconds).
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testExactMissingSourceIsOmittedWithoutSearchingEarlierSample]' started.
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testExactMissingSourceIsOmittedWithoutSearchingEarlierSample]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testOCUpdatesAndResetsSampleAndPlacementSettings]' started.
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testOCUpdatesAndResetsSampleAndPlacementSettings]' passed (0.001 seconds).
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testPinnedControllerFitsLongTextAndRemeasuresScrollableContentAfterResize]' started.
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testPinnedControllerFitsLongTextAndRemeasuresScrollableContentAfterResize]' passed (0.016 seconds).
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testPinnedGeometryIgnoresAnchorClampsOffsetsAndRejectsInvalidContainers]' started.
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testPinnedGeometryIgnoresAnchorClampsOffsetsAndRejectsInvalidContainers]' passed (0.000 seconds).
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testPreviousValuesKeepCurrentHeaderHitProviderAndAlignedSubtotal]' started.
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testPreviousValuesKeepCurrentHeaderHitProviderAndAlignedSubtotal]' passed (0.002 seconds).
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testSingleSharedAndClearSelectionAcrossAllFourRenderers]' started.
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testSingleSharedAndClearSelectionAcrossAllFourRenderers]' passed (0.029 seconds).
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testSourceOutsideVisibleWindowRemainsAvailableAndHiddenSeriesStayExcluded]' started.
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testSourceOutsideVisibleWindowRemainsAvailableAndHiddenSeriesStayExcluded]' passed (0.004 seconds).
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testSwiftUIUpdatesSampleAndPositionWithoutReplacingCharts]' started.
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testSwiftUIUpdatesSampleAndPositionWithoutReplacingCharts]' passed (0.868 seconds).
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testZeroFilterUsesDisplayedValueAndSourceLabelsCanBeLocalizedOrHidden]' started.
+Test Case '-[SwiftFunctionProjectTests.TooltipSelectionTests testZeroFilterUsesDisplayedValueAndSourceLabelsCanBeLocalizedOrHidden]' passed (0.008 seconds).
+Test Suite 'TooltipSelectionTests' passed at 2026-10-02 20:30:29.464.
+	 Executed 13 tests, with 0 failures (0 unexpected) in 0.945 (0.948) seconds
+Test Suite 'SwiftFunctionProjectTests.xctest' passed at 2026-10-02 20:30:29.464.
+	 Executed 342 tests, with 0 failures (0 unexpected) in 73.513 (73.589) seconds
+Test Suite 'All tests' passed at 2026-10-02 20:30:29.465.
+	 Executed 342 tests, with 0 failures (0 unexpected) in 73.513 (73.590) seconds
+** TEST FAILED **

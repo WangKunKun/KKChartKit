@@ -1,0 +1,14 @@
+Test Suite 'All tests' started at 2026-10-02 19:43:00.867.
+Test Suite 'IntegrationUITests.xctest' started at 2026-10-02 19:43:00.868.
+Test Suite 'IntegrationUITests' started at 2026-10-02 19:43:00.868.
+Test Case '-[IntegrationUITests.IntegrationUITests testObjectiveCPublicImport]' started.
+Test Case '-[IntegrationUITests.IntegrationUITests testObjectiveCPublicImport]' passed (7.643 seconds).
+Test Case '-[IntegrationUITests.IntegrationUITests testSwiftPublicImport]' started.
+Test Case '-[IntegrationUITests.IntegrationUITests testSwiftPublicImport]' passed (7.360 seconds).
+Test Suite 'IntegrationUITests' passed at 2026-10-02 19:43:15.873.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 15.003 (15.005) seconds
+Test Suite 'IntegrationUITests.xctest' passed at 2026-10-02 19:43:15.873.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 15.003 (15.005) seconds
+Test Suite 'All tests' passed at 2026-10-02 19:43:15.874.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 15.003 (15.006) seconds
+** TEST SUCCEEDED **

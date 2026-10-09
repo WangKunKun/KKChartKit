@@ -1,0 +1,387 @@
+{
+  "devices" : [
+    {
+      "architecture" : "arm64",
+      "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+      "deviceName" : "iPhone 16 Pro",
+      "modelName" : "iPhone 16 Pro",
+      "osBuildNumber" : "22G86",
+      "osVersion" : "18.6",
+      "platform" : "iOS Simulator"
+    }
+  ],
+  "testNodes" : [
+    {
+      "children" : [
+        {
+          "children" : [
+            {
+              "children" : [
+                {
+                  "duration" : "1分钟9秒",
+                  "durationInSeconds" : 69.1513180732727,
+                  "name" : "testAnnotationPresetBoundsAndLabelAvoidanceOnFourPages()",
+                  "nodeIdentifier" : "ChartDemoUITests/testAnnotationPresetBoundsAndLabelAvoidanceOnFourPages()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testAnnotationPresetBoundsAndLabelAvoidanceOnFourPages",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "26秒",
+                  "durationInSeconds" : 26.560662031173706,
+                  "name" : "testAutoGapPresetAndPolicyPickerOnLineAndCombined()",
+                  "nodeIdentifier" : "ChartDemoUITests/testAutoGapPresetAndPolicyPickerOnLineAndCombined()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testAutoGapPresetAndPolicyPickerOnLineAndCombined",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "53秒",
+                  "durationInSeconds" : 53.585363030433655,
+                  "name" : "testBodySelectionPresetSharedHitAndDisableOnFourPages()",
+                  "nodeIdentifier" : "ChartDemoUITests/testBodySelectionPresetSharedHitAndDisableOnFourPages()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testBodySelectionPresetSharedHitAndDisableOnFourPages",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "22秒",
+                  "durationInSeconds" : 22.450703978538513,
+                  "name" : "testCartesianReuseToggleIsLiveOnEachPage()",
+                  "nodeIdentifier" : "ChartDemoUITests/testCartesianReuseToggleIsLiveOnEachPage()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testCartesianReuseToggleIsLiveOnEachPage",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "49秒",
+                  "durationInSeconds" : 49.57572400569916,
+                  "name" : "testColorZonesAndSmoothNegativePresetsOnLineAndCombined()",
+                  "nodeIdentifier" : "ChartDemoUITests/testColorZonesAndSmoothNegativePresetsOnLineAndCombined()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testColorZonesAndSmoothNegativePresetsOnLineAndCombined",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1分钟5秒",
+                  "durationInSeconds" : 65.39907991886139,
+                  "name" : "testColumnColorZonesPresetValueSourceAndDisableOnThreePages()",
+                  "nodeIdentifier" : "ChartDemoUITests/testColumnColorZonesPresetValueSourceAndDisableOnThreePages()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testColumnColorZonesPresetValueSourceAndDisableOnThreePages",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "10秒",
+                  "durationInSeconds" : 10.715978026390076,
+                  "name" : "testColumnDensityPresetAndReset()",
+                  "nodeIdentifier" : "ChartDemoUITests/testColumnDensityPresetAndReset()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testColumnDensityPresetAndReset",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "12秒",
+                  "durationInSeconds" : 12.374703049659729,
+                  "name" : "testCombinedGroupsPresetAndIndependentStylePanel()",
+                  "nodeIdentifier" : "ChartDemoUITests/testCombinedGroupsPresetAndIndependentStylePanel()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testCombinedGroupsPresetAndIndependentStylePanel",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1分钟3秒",
+                  "durationInSeconds" : 63.281205892562866,
+                  "name" : "testCrossingStackedAreaBoundaryComparisonInBothDemos()",
+                  "nodeIdentifier" : "ChartDemoUITests/testCrossingStackedAreaBoundaryComparisonInBothDemos()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testCrossingStackedAreaBoundaryComparisonInBothDemos",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "13秒",
+                  "durationInSeconds" : 13.775837063789368,
+                  "name" : "testDivergingStackObjectiveCModeAndRawCallback()",
+                  "nodeIdentifier" : "ChartDemoUITests/testDivergingStackObjectiveCModeAndRawCallback()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testDivergingStackObjectiveCModeAndRawCallback",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "39秒",
+                  "durationInSeconds" : 39.94010102748871,
+                  "name" : "testDivergingStackPresetDiagnosticsAndGapControlsRecover()",
+                  "nodeIdentifier" : "ChartDemoUITests/testDivergingStackPresetDiagnosticsAndGapControlsRecover()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testDivergingStackPresetDiagnosticsAndGapControlsRecover",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "23秒",
+                  "durationInSeconds" : 23.381500005722046,
+                  "name" : "testFixedDimensionsPresetScrollsAndAllowsManualRange()",
+                  "nodeIdentifier" : "ChartDemoUITests/testFixedDimensionsPresetScrollsAndAllowsManualRange()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testFixedDimensionsPresetScrollsAndAllowsManualRange",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "49秒",
+                  "durationInSeconds" : 49.19397294521332,
+                  "name" : "testGapBoundaryStackedAreaComparisonInBothDemos()",
+                  "nodeIdentifier" : "ChartDemoUITests/testGapBoundaryStackedAreaComparisonInBothDemos()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testGapBoundaryStackedAreaComparisonInBothDemos",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1分钟1秒",
+                  "durationInSeconds" : 61.49662792682648,
+                  "name" : "testGroupedTooltipAndImageLegendPresetOnAllCartesianPages()",
+                  "nodeIdentifier" : "ChartDemoUITests/testGroupedTooltipAndImageLegendPresetOnAllCartesianPages()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testGroupedTooltipAndImageLegendPresetOnAllCartesianPages",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1分钟21秒",
+                  "durationInSeconds" : 81.14142107963562,
+                  "name" : "testIndependentAxesPresetVisibilityAndRotationOnFourPages()",
+                  "nodeIdentifier" : "ChartDemoUITests/testIndependentAxesPresetVisibilityAndRotationOnFourPages()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testIndependentAxesPresetVisibilityAndRotationOnFourPages",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "23秒",
+                  "durationInSeconds" : 23.29890203475952,
+                  "name" : "testLineAuditAxisPriorityAndDisabledReasons()",
+                  "nodeIdentifier" : "ChartDemoUITests/testLineAuditAxisPriorityAndDisabledReasons()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testLineAuditAxisPriorityAndDisabledReasons",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "23秒",
+                  "durationInSeconds" : 23.165413975715637,
+                  "name" : "testLineAuditGapAndZoneDependenciesRecover()",
+                  "nodeIdentifier" : "ChartDemoUITests/testLineAuditGapAndZoneDependenciesRecover()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testLineAuditGapAndZoneDependenciesRecover",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "14秒",
+                  "durationInSeconds" : 14.177088975906372,
+                  "name" : "testLineAuditSceneSwitchClearsOldDataAndStyle()",
+                  "nodeIdentifier" : "ChartDemoUITests/testLineAuditSceneSwitchClearsOldDataAndStyle()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testLineAuditSceneSwitchClearsOldDataAndStyle",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "28秒",
+                  "durationInSeconds" : 28.536934971809387,
+                  "name" : "testLineAuditSystemFontAndPopupControls()",
+                  "nodeIdentifier" : "ChartDemoUITests/testLineAuditSystemFontAndPopupControls()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testLineAuditSystemFontAndPopupControls",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "15秒",
+                  "durationInSeconds" : 15.727771043777466,
+                  "name" : "testLineMinMaxPresetToggleAndDetail()",
+                  "nodeIdentifier" : "ChartDemoUITests/testLineMinMaxPresetToggleAndDetail()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testLineMinMaxPresetToggleAndDetail",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "41秒",
+                  "durationInSeconds" : 41.76849400997162,
+                  "name" : "testLineTargetPointCountInputLiveCountsAndModePriority()",
+                  "nodeIdentifier" : "ChartDemoUITests/testLineTargetPointCountInputLiveCountsAndModePriority()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testLineTargetPointCountInputLiveCountsAndModePriority",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "10秒",
+                  "durationInSeconds" : 10.927535057067871,
+                  "name" : "testObjectiveCCartesianCallbackForAllKinds()",
+                  "nodeIdentifier" : "ChartDemoUITests/testObjectiveCCartesianCallbackForAllKinds()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testObjectiveCCartesianCallbackForAllKinds",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "49秒",
+                  "durationInSeconds" : 49.34117293357849,
+                  "name" : "testPercentStackedAreaComparisonInBothDemos()",
+                  "nodeIdentifier" : "ChartDemoUITests/testPercentStackedAreaComparisonInBothDemos()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testPercentStackedAreaComparisonInBothDemos",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "58秒",
+                  "durationInSeconds" : 58.553404092788696,
+                  "name" : "testPreviousValuesAndPinnedTooltipOnAllCartesianPages()",
+                  "nodeIdentifier" : "ChartDemoUITests/testPreviousValuesAndPinnedTooltipOnAllCartesianPages()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testPreviousValuesAndPinnedTooltipOnAllCartesianPages",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1分钟33秒",
+                  "durationInSeconds" : 93.32615900039673,
+                  "name" : "testRichTooltipRulesAndScrollingOnAllCartesianPages()",
+                  "nodeIdentifier" : "ChartDemoUITests/testRichTooltipRulesAndScrollingOnAllCartesianPages()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testRichTooltipRulesAndScrollingOnAllCartesianPages",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "10秒",
+                  "durationInSeconds" : 10.648336052894592,
+                  "name" : "testSemanticPresetAndFormatPanelAreLive()",
+                  "nodeIdentifier" : "ChartDemoUITests/testSemanticPresetAndFormatPanelAreLive()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testSemanticPresetAndFormatPanelAreLive",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "44秒",
+                  "durationInSeconds" : 44.28148007392883,
+                  "name" : "testSingleEntryPagesAndLiveThemeControls()",
+                  "nodeIdentifier" : "ChartDemoUITests/testSingleEntryPagesAndLiveThemeControls()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testSingleEntryPagesAndLiveThemeControls",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "49秒",
+                  "durationInSeconds" : 49.192667961120605,
+                  "name" : "testSourceSwitchStackedAreaBoundaryComparisonInBothDemos()",
+                  "nodeIdentifier" : "ChartDemoUITests/testSourceSwitchStackedAreaBoundaryComparisonInBothDemos()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testSourceSwitchStackedAreaBoundaryComparisonInBothDemos",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "35秒",
+                  "durationInSeconds" : 35.7783739566803,
+                  "name" : "testStackedAreaSeamPresetInLineAndCombinedDemos()",
+                  "nodeIdentifier" : "ChartDemoUITests/testStackedAreaSeamPresetInLineAndCombinedDemos()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testStackedAreaSeamPresetInLineAndCombinedDemos",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "41秒",
+                  "durationInSeconds" : 41.31542491912842,
+                  "name" : "testThinStackedAreaBoundaryComparisonInBothDemos()",
+                  "nodeIdentifier" : "ChartDemoUITests/testThinStackedAreaBoundaryComparisonInBothDemos()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testThinStackedAreaBoundaryComparisonInBothDemos",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "ChartDemoUITests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "duration" : "2秒",
+                  "durationInSeconds" : 2.1301790475845337,
+                  "name" : "testExample()",
+                  "nodeIdentifier" : "SwiftFunctionProjectUITests/testExample()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/SwiftFunctionProjectUITests/testExample",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "21秒",
+                  "durationInSeconds" : 21.24374496936798,
+                  "name" : "testLaunchPerformance()",
+                  "nodeIdentifier" : "SwiftFunctionProjectUITests/testLaunchPerformance()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/SwiftFunctionProjectUITests/testLaunchPerformance",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "SwiftFunctionProjectUITests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/SwiftFunctionProjectUITests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "children" : [
+                    {
+                      "duration" : "3秒",
+                      "durationInSeconds" : 3.6702280044555664,
+                      "name" : "Light Appearance, Landscape Right",
+                      "nodeType" : "Arguments",
+                      "result" : "Passed"
+                    },
+                    {
+                      "duration" : "3秒",
+                      "durationInSeconds" : 3.9057799577713013,
+                      "name" : "Light Appearance, Portrait",
+                      "nodeType" : "Arguments",
+                      "result" : "Passed"
+                    },
+                    {
+                      "duration" : "3秒",
+                      "durationInSeconds" : 3.719267964363098,
+                      "name" : "Light Appearance, Portrait Upside Down",
+                      "nodeType" : "Arguments",
+                      "result" : "Passed"
+                    },
+                    {
+                      "duration" : "3秒",
+                      "durationInSeconds" : 3.7159420251846313,
+                      "name" : "Unspecified, Portrait Upside Down",
+                      "nodeType" : "Arguments",
+                      "result" : "Passed"
+                    }
+                  ],
+                  "duration" : "3秒",
+                  "durationInSeconds" : 3.7528044879436493,
+                  "name" : "testLaunch()",
+                  "nodeIdentifier" : "SwiftFunctionProjectUITestsLaunchTests/testLaunch",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/SwiftFunctionProjectUITestsLaunchTests/testLaunch",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "SwiftFunctionProjectUITestsLaunchTests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/SwiftFunctionProjectUITestsLaunchTests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            }
+          ],
+          "name" : "SwiftFunctionProjectUITests",
+          "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests",
+          "nodeType" : "UI test bundle",
+          "result" : "Passed"
+        }
+      ],
+      "name" : "SwiftFunctionProject",
+      "nodeType" : "Test Plan",
+      "result" : "Passed"
+    }
+  ],
+  "testPlanConfigurations" : [
+    {
+      "configurationId" : "1",
+      "configurationName" : "Test Scheme Action"
+    }
+  ]
+}

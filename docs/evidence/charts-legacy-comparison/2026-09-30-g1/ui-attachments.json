@@ -1,0 +1,50 @@
+[
+  {
+    "configurationName": "Test Scheme Action",
+    "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+    "deviceName": "iPhone 15 Pro",
+    "exportedFileName": "BE5C79A0-5F21-4A8C-BBCF-FD49E60B72E2.png",
+    "isAssociatedWithFailure": false,
+    "suggestedHumanReadableName": "thin-area-independent-混合图_0_84FCB9E8-0198-4446-BDA5-2BB23509557C.png",
+    "timestamp": 1790749735.637,
+    "testIdentifier": "ChartDemoUITests/testThinStackedAreaBoundaryComparisonInBothDemos()",
+    "file": "thin-area-independent-混合图.png",
+    "sha256": "78288793d372a66bc0ff1ba95c63dbeb0d8fe538b814e2d0c6c5eacf25a752f1"
+  },
+  {
+    "configurationName": "Test Scheme Action",
+    "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+    "deviceName": "iPhone 15 Pro",
+    "exportedFileName": "AB57C5D9-C177-4D79-BC68-25F62E436CB2.png",
+    "isAssociatedWithFailure": false,
+    "suggestedHumanReadableName": "thin-area-follow-baseline-混合图_0_431426F6-4C8E-490F-8ADE-C8C0FD34F8D2.png",
+    "timestamp": 1790749729.799,
+    "testIdentifier": "ChartDemoUITests/testThinStackedAreaBoundaryComparisonInBothDemos()",
+    "file": "thin-area-follow-baseline-混合图.png",
+    "sha256": "d4c21c9cc513161c55d21baa20407541eec16d90a856e13629de1b17a36d46de"
+  },
+  {
+    "configurationName": "Test Scheme Action",
+    "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+    "deviceName": "iPhone 15 Pro",
+    "exportedFileName": "2CC57F3C-1C8C-44C4-90D6-D8CD6F811CEA.png",
+    "isAssociatedWithFailure": false,
+    "suggestedHumanReadableName": "thin-area-independent-折线图_0_623F5118-3103-4665-AFD7-A29328783AC8.png",
+    "timestamp": 1790749717.402,
+    "testIdentifier": "ChartDemoUITests/testThinStackedAreaBoundaryComparisonInBothDemos()",
+    "file": "thin-area-independent-折线图.png",
+    "sha256": "a3206e396fa596de91832775ec0870975a850d41cd42b83643434806526219b0"
+  },
+  {
+    "configurationName": "Test Scheme Action",
+    "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+    "deviceName": "iPhone 15 Pro",
+    "exportedFileName": "C91087A6-5C1E-4861-BAFE-44D54D89D24F.png",
+    "isAssociatedWithFailure": false,
+    "suggestedHumanReadableName": "thin-area-follow-baseline-折线图_0_D3FEBCD9-3D90-4424-8405-DB3726B33BCC.png",
+    "timestamp": 1790749711.551,
+    "testIdentifier": "ChartDemoUITests/testThinStackedAreaBoundaryComparisonInBothDemos()",
+    "file": "thin-area-follow-baseline-折线图.png",
+    "sha256": "c9806c8e00e8e78fc54a76819bf6350da51e172b3ae057393622d1e2a1454502"
+  }
+]

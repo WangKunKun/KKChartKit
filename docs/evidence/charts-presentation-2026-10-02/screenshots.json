@@ -1,0 +1,572 @@
+[
+  {
+    "file": "g2-draw-条形图.png",
+    "sha256": "0b6de636519f3ad1f9b4aaaf441f841128c66637341f1bd0e74d782ca99f7b60",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "3E869640-4763-49E0-B07A-E83CE011F236.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g2-draw-条形图_0_97073FB5-D2D8-41B4-A68D-264F3F594375.png",
+      "timestamp": 1790941659.913
+    },
+    "test": "ChartDemoUITests/testColumnColorZonesPresetValueSourceAndDisableOnThreePages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g2-draw-柱状图.png",
+    "sha256": "16d0a25443eb2d64aa5089cdfaa53eb8e38387b9b10d2314528bd8d5c2eef185",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "634C4CF4-53B5-463A-B4E6-C982A55C6F07.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g2-draw-柱状图_0_AEC530BC-1CA0-459A-8A2D-0C186D830E47.png",
+      "timestamp": 1790941639.379
+    },
+    "test": "ChartDemoUITests/testColumnColorZonesPresetValueSourceAndDisableOnThreePages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g2-draw-混合图.png",
+    "sha256": "a8e444d21bb0a85cd3cc18060772d62a31ddab2a7b0557d3f6bcc6c976ff5550",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "FB02DB16-EBA6-4799-9BBF-5F9E53A620E9.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g2-draw-混合图_0_1421241A-CDB3-47DE-96EA-16BB31FE5231.png",
+      "timestamp": 1790941680.373
+    },
+    "test": "ChartDemoUITests/testColumnColorZonesPresetValueSourceAndDisableOnThreePages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g2-raw-条形图.png",
+    "sha256": "a3d950ef161d2fe6509c49ef8b993b8410534313032774dc047f932690647f67",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "EF9F718A-BB48-4EA6-91BC-5ED751173E52.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g2-raw-条形图_0_F845963F-1999-42E5-9C73-E351B30FF045.png",
+      "timestamp": 1790941655.529
+    },
+    "test": "ChartDemoUITests/testColumnColorZonesPresetValueSourceAndDisableOnThreePages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g2-raw-柱状图.png",
+    "sha256": "0385e7a6fc5f70521024b8ee88d8c5e37d00dd4b74f72f09b107a145217d7c13",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "E5710B3E-C659-46D9-953A-A03EF0246794.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g2-raw-柱状图_0_6D6AFABF-9E55-4D32-96BC-4BE13F230AE8.png",
+      "timestamp": 1790941635.025
+    },
+    "test": "ChartDemoUITests/testColumnColorZonesPresetValueSourceAndDisableOnThreePages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g2-raw-混合图.png",
+    "sha256": "f193c367bb9a6f523627e6c8bc3d5e81bf30fdc25b98c6c2e0d0606c314a1e64",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "30990E09-7EAC-4507-9C7F-B5ADEC5DEE8C.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g2-raw-混合图_0_68F75FC4-1B2A-49C6-99BC-060B6341E224.png",
+      "timestamp": 1790941676.046
+    },
+    "test": "ChartDemoUITests/testColumnColorZonesPresetValueSourceAndDisableOnThreePages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g2-restored-条形图.png",
+    "sha256": "06ce0ba9f84cfd7ef6e6b2d9e260bc88a17a50134a2eb0603f3173cd84550e10",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "D4F9DDF1-71CD-45B9-9FA3-6E4497053AB1.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g2-restored-条形图_0_B925D2CD-3020-4D13-8645-E11CAC030CDA.png",
+      "timestamp": 1790941668.868
+    },
+    "test": "ChartDemoUITests/testColumnColorZonesPresetValueSourceAndDisableOnThreePages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g2-restored-柱状图.png",
+    "sha256": "94d492259a737235b925b9b7a59e7f44a1e5728d72b26330b17e3a4e5f0f37b5",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "CC42B145-BEA1-454F-91A1-2F4D9EDD0DAA.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g2-restored-柱状图_0_D3849A2A-BC0E-4A2C-970A-75226E9CF889.png",
+      "timestamp": 1790941648.338
+    },
+    "test": "ChartDemoUITests/testColumnColorZonesPresetValueSourceAndDisableOnThreePages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g2-restored-混合图.png",
+    "sha256": "dd8af7c96f5c01c501b8b39715486f292db1525e979fb88cc0af439c190f3750",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "4602AF92-FB4A-403A-8025-4A78FD499AB9.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g2-restored-混合图_0_4AAC468D-4397-468E-825B-4B4BD622AA31.png",
+      "timestamp": 1790941689.349
+    },
+    "test": "ChartDemoUITests/testColumnColorZonesPresetValueSourceAndDisableOnThreePages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g3-axis-inheritance.png",
+    "sha256": "606618b37b51e68808b0e6f9aa8054ef0d778c5494587265d1bd4ea0e2c8d97f",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "33301F5D-4221-4698-8AD1-317012BD600C.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g3-axis-inheritance_0_16F48068-91C2-4A92-A148-FE6185AF906E.png",
+      "timestamp": 1790941743.986
+    },
+    "test": "AxisStyleTests/testReuseAndThemeInheritanceRestoreAtThreeRasterScales()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g3-hidden-category-折线图.png",
+    "sha256": "e5f81732c9a788c5d033ac19f3035725ccc581d93cffcf5657e2db0e20ed7034",
+    "test": "ChartDemoUITests/testIndependentAxesPresetVisibilityAndRotationOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G3-orientation-v2-20261002.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "DF6D89E9-8AD6-4A70-B8C5-7FB9B67FF5AD.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g3-hidden-category-折线图_0_6F839154-79EB-4964-9B5A-2FE5A848D26F.png",
+      "timestamp": 1790942819.17
+    }
+  },
+  {
+    "file": "g3-hidden-category-条形图.png",
+    "sha256": "a5a0583111df617dbb917d9159fc6d578852499b70d682f2d5650c6d62b8eae0",
+    "test": "ChartDemoUITests/testIndependentAxesPresetVisibilityAndRotationOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G3-orientation-v2-20261002.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "FBAE6D71-79B4-4F51-BF45-7F77F03EF612.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g3-hidden-category-条形图_0_F5AFDB38-19AE-4A96-98D4-3DFCE5ACAFF1.png",
+      "timestamp": 1790942857.466
+    }
+  },
+  {
+    "file": "g3-hidden-category-柱状图.png",
+    "sha256": "f3673185c6cea03a7798cb7a448b667b3f21dddf869a4c33a8481eb85814c7b0",
+    "test": "ChartDemoUITests/testIndependentAxesPresetVisibilityAndRotationOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G3-orientation-v2-20261002.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "6A05BD10-B50B-4F4F-BDFD-B57E1FC82BD1.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g3-hidden-category-柱状图_0_89E8F2E8-8C02-4CED-9B62-3D8C49CDEDCB.png",
+      "timestamp": 1790942838.368
+    }
+  },
+  {
+    "file": "g3-hidden-category-混合图.png",
+    "sha256": "131f95a2ff38b5a63ab7bcdd588443e76b2a119fc9537742eb06813a0315c32c",
+    "test": "ChartDemoUITests/testIndependentAxesPresetVisibilityAndRotationOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G3-orientation-v2-20261002.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "62385E14-5B8F-44A8-89CD-C1A0C6A6F3C2.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g3-hidden-category-混合图_0_F981768B-EC65-4FE9-A2BB-1FA243C35EC2.png",
+      "timestamp": 1790942876.648
+    }
+  },
+  {
+    "file": "g3-landscape-折线图.png",
+    "sha256": "361dca96ab3044399c023b6d55342da130000e7f9f8c9b05ef1e6edf9829856d",
+    "test": "ChartDemoUITests/testIndependentAxesPresetVisibilityAndRotationOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G3-orientation-v2-20261002.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "7465F9F6-2E57-4559-963B-79EB21843452.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g3-landscape-折线图_0_9051A937-E2DF-44F6-8034-6C6B6F7807BC.png",
+      "timestamp": 1790942823.938
+    }
+  },
+  {
+    "file": "g3-landscape-条形图.png",
+    "sha256": "15a8eff00a5976bae42e589ec94d95bf7d163af7f349f554c83b26a2f5b41d25",
+    "test": "ChartDemoUITests/testIndependentAxesPresetVisibilityAndRotationOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G3-orientation-v2-20261002.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "A2B278DD-695E-4AEF-A56D-0214A2820562.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g3-landscape-条形图_0_EB1723B1-B604-4644-A21A-85E3B23CE90B.png",
+      "timestamp": 1790942862.216
+    }
+  },
+  {
+    "file": "g3-landscape-柱状图.png",
+    "sha256": "015cfe7f0aa33c6dd9adfa1117779569e19867e30335fb8c4467a1c93eb8646b",
+    "test": "ChartDemoUITests/testIndependentAxesPresetVisibilityAndRotationOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G3-orientation-v2-20261002.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "C5843633-DD67-44F5-A592-EB9EF3AEA637.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g3-landscape-柱状图_0_293B190A-FEB2-4AA9-ADC2-533BCBC09FE9.png",
+      "timestamp": 1790942843.067
+    }
+  },
+  {
+    "file": "g3-landscape-混合图.png",
+    "sha256": "e8d3dab7e3e200633180e303561a7960fb0a1858bdc7af6d4b84bde56d131a44",
+    "test": "ChartDemoUITests/testIndependentAxesPresetVisibilityAndRotationOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G3-orientation-v2-20261002.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "9486DC0C-CA4D-45A6-B342-E5CC70D90F5A.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g3-landscape-混合图_0_824E9D9D-9345-46BF-92D6-514899B8D584.png",
+      "timestamp": 1790942881.355
+    }
+  },
+  {
+    "file": "g3-styled-折线图.png",
+    "sha256": "ea6ec5bbeaf7ca3c9ae26f329165d5268515511dc4c6d896b4498c5ac60a3afb",
+    "test": "ChartDemoUITests/testIndependentAxesPresetVisibilityAndRotationOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G3-orientation-v2-20261002.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "D83A266F-DA64-4BE8-ADEE-5773E05FE3D2.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g3-styled-折线图_0_F2C50FB8-DF2D-4D00-A692-8CD88A13E1AC.png",
+      "timestamp": 1790942815.061
+    }
+  },
+  {
+    "file": "g3-styled-条形图.png",
+    "sha256": "36bb3b5550f73d2d296f7b3782e3bef3f25dc89999ac79d0b08cd48588e25394",
+    "test": "ChartDemoUITests/testIndependentAxesPresetVisibilityAndRotationOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G3-orientation-v2-20261002.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "FA870990-646F-49CB-B90D-10E40CB5A3A9.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g3-styled-条形图_0_EB8F1361-2CD2-401F-9EFE-994F534B8C28.png",
+      "timestamp": 1790942853.401
+    }
+  },
+  {
+    "file": "g3-styled-柱状图.png",
+    "sha256": "e62c5c7ca03976dcc969f358bb03f8293cc619b29000c2039df252635361125d",
+    "test": "ChartDemoUITests/testIndependentAxesPresetVisibilityAndRotationOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G3-orientation-v2-20261002.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "7A7805DE-EAB5-42BE-B916-C624299B8A45.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g3-styled-柱状图_0_16D4CD29-B3F4-4D38-B45E-C1DEB5B42B15.png",
+      "timestamp": 1790942834.247
+    }
+  },
+  {
+    "file": "g3-styled-混合图.png",
+    "sha256": "9c6ab072ce2038a5e4e324e9702cf96dd3809e28602e1029dbd5907be1679e5e",
+    "test": "ChartDemoUITests/testIndependentAxesPresetVisibilityAndRotationOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G3-orientation-v2-20261002.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "508B7173-55B5-49E3-8F6A-6CC87F8C50C7.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g3-styled-混合图_0_75A92509-D636-4165-858B-AA23666D3056.png",
+      "timestamp": 1790942872.576
+    }
+  },
+  {
+    "file": "g4-annotations-折线图.png",
+    "sha256": "c38728d5d89f4ec1ce9eaaf222947e2aa068a3145b825936382945d6a7200e05",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "87109259-F876-415E-89EF-C704C5F46159.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g4-annotations-折线图_0_76A98BEF-664D-4E2B-A90F-B5B2F65AB1AF.png",
+      "timestamp": 1790941521.073
+    },
+    "test": "ChartDemoUITests/testAnnotationPresetBoundsAndLabelAvoidanceOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g4-annotations-条形图.png",
+    "sha256": "d486c346d1db6074664f3a57a6e8a562fe940ebad87d5288dbe866e52dcd4443",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "AA587F5F-7916-431D-BF04-FB330B03A9E4.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g4-annotations-条形图_0_27B20000-F82D-4B5E-843A-05802F5CFC2A.png",
+      "timestamp": 1790941552.868
+    },
+    "test": "ChartDemoUITests/testAnnotationPresetBoundsAndLabelAvoidanceOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g4-annotations-柱状图.png",
+    "sha256": "cb920aff144d56275a5a55d355b1b4111e66937a43c95537e70bb106e871b494",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "0411D77C-6230-49BE-9DAB-C31E9E26A8EE.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g4-annotations-柱状图_0_44075C38-71C9-491C-8B3D-8342A40BB1A7.png",
+      "timestamp": 1790941537.108
+    },
+    "test": "ChartDemoUITests/testAnnotationPresetBoundsAndLabelAvoidanceOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g4-annotations-混合图.png",
+    "sha256": "2150a9f20ce8ddf575346f175ed83d4247fa6384146ad6e6554feb370864ceaa",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "04BA49C8-F112-492F-B16E-A3D10F27A2A0.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g4-annotations-混合图_0_65BB55A6-3C2E-489E-A48C-1C55B29B9546.png",
+      "timestamp": 1790941568.642
+    },
+    "test": "ChartDemoUITests/testAnnotationPresetBoundsAndLabelAvoidanceOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g4-without-avoidance-折线图.png",
+    "sha256": "cfed1c6dad413bd50d7d12461f477c01476c3bdfb537f8842e5be224f978eba3",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "27E4D83B-E1A0-4948-B9E0-35E22F877374.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g4-without-avoidance-折线图_0_72E80205-76BE-4F15-9215-7FFDEC201F5D.png",
+      "timestamp": 1790941529.896
+    },
+    "test": "ChartDemoUITests/testAnnotationPresetBoundsAndLabelAvoidanceOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g4-without-avoidance-条形图.png",
+    "sha256": "acda670ab05bf9f78a757ac0c2219147e201b73d18b5bc3920e8a5c8f0bf4e42",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "911A6381-2092-4697-98A8-1C34B26E800B.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g4-without-avoidance-条形图_0_CFBBC65B-B9B1-4C7F-AE06-F87377D874F6.png",
+      "timestamp": 1790941561.577
+    },
+    "test": "ChartDemoUITests/testAnnotationPresetBoundsAndLabelAvoidanceOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g4-without-avoidance-柱状图.png",
+    "sha256": "e23085ad624d047b60c2237c2c71e3571a855f05ce6fe8dc2bc63dfedbb4069a",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "46FF2596-E258-458B-B128-72FE70A35FB8.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g4-without-avoidance-柱状图_0_FD6B807E-D301-478C-91AD-F5EAFE1B39FC.png",
+      "timestamp": 1790941545.88
+    },
+    "test": "ChartDemoUITests/testAnnotationPresetBoundsAndLabelAvoidanceOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g4-without-avoidance-混合图.png",
+    "sha256": "37c354542fe619a5e13e96aed6cdb40a07d54bb14ff51d44ffdfa9b9d82265ca",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "DEC9CB2E-13F6-4BAF-8E03-BB4C258425AA.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g4-without-avoidance-混合图_0_932A8B95-C554-4550-B55A-6668AF4FABE2.png",
+      "timestamp": 1790941577.484
+    },
+    "test": "ChartDemoUITests/testAnnotationPresetBoundsAndLabelAvoidanceOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g5-disabled-折线图.png",
+    "sha256": "02a490c89e21828e2e8dfe56ecd14e87ed9ade0483f880141d4eb06432b0f33b",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "148994AC-8823-4A79-835D-C4A663898DA0.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g5-disabled-折线图_0_99D82187-D002-4D87-9E7D-B068F42306C2.png",
+      "timestamp": 1790941590.215
+    },
+    "test": "ChartDemoUITests/testBodySelectionPresetSharedHitAndDisableOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g5-disabled-条形图.png",
+    "sha256": "af734b25f99b786480d7a341c17f66fe5090b2ec813fd421595a143d33f9c3c5",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "1F7C87A8-297C-4E75-9CA4-A0EADB3BE658.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g5-disabled-条形图_0_C21F1066-741B-4FFC-ADE8-2E3CA7E99E88.png",
+      "timestamp": 1790941615.049
+    },
+    "test": "ChartDemoUITests/testBodySelectionPresetSharedHitAndDisableOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g5-disabled-柱状图.png",
+    "sha256": "571f1d1dd1204f97dd48152f73ac622283cfa8bd37e913942e5a13d18d0602b2",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "61FD00B9-9FC4-4843-8B8B-EBFEE6EB6E8A.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g5-disabled-柱状图_0_47BE64EC-8806-4C10-8527-BE7EDBB23529.png",
+      "timestamp": 1790941602.68
+    },
+    "test": "ChartDemoUITests/testBodySelectionPresetSharedHitAndDisableOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g5-disabled-混合图.png",
+    "sha256": "32ea8dae50cc7bf621ad9fbee9bc0c1480d268789fe71250c281b954d93b3208",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "D809FCA4-1015-40FB-8893-96D087F7E3D4.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g5-disabled-混合图_0_FF996A23-5A9A-4068-A227-9D4F138A0F9A.png",
+      "timestamp": 1790941627.528
+    },
+    "test": "ChartDemoUITests/testBodySelectionPresetSharedHitAndDisableOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g5-selected-折线图.png",
+    "sha256": "61582fc55233564c7bd9048c895d9677ee3100d9470d96e47af40d391ca211ff",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "B47B2FE8-3FCA-44C1-BB2E-85EE1764E10A.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g5-selected-折线图_0_2B4B6FAE-3BB7-4B0A-B5CB-DF1AE63C794D.png",
+      "timestamp": 1790941585.479
+    },
+    "test": "ChartDemoUITests/testBodySelectionPresetSharedHitAndDisableOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g5-selected-条形图.png",
+    "sha256": "e7dde1bb122ca780eda2d1c9d6c06a631b836f0b54f53c23c49b44b2ba6ec666",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "4AB50239-E2D4-4B9A-A0A6-7EBA9B0F8CEB.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g5-selected-条形图_0_40895669-CFB6-4CAA-8944-0068B5253F81.png",
+      "timestamp": 1790941610.337
+    },
+    "test": "ChartDemoUITests/testBodySelectionPresetSharedHitAndDisableOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g5-selected-柱状图.png",
+    "sha256": "7cb7a2021b8358bad333868183073eebb406c2fc1330d0211ca471e6d74b5cf7",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "6C42AA27-672A-42D8-A4C2-EC9C6EB0575A.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g5-selected-柱状图_0_9673163C-D5F8-4688-9B26-C07C75CF35EE.png",
+      "timestamp": 1790941597.855
+    },
+    "test": "ChartDemoUITests/testBodySelectionPresetSharedHitAndDisableOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  },
+  {
+    "file": "g5-selected-混合图.png",
+    "sha256": "a867dd3fc136443364bedbd2d47df106c90fe1d450902b850fffad2b2c69473a",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "7D3BB96E-D0DD-4A82-A234-659D22D87D92.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "g5-selected-混合图_0_23F02B35-472D-4DA2-AF72-4236B482A93C.png",
+      "timestamp": 1790941622.865
+    },
+    "test": "ChartDemoUITests/testBodySelectionPresetSharedHitAndDisableOnFourPages()",
+    "resultBundle": "/tmp/HYMCharts-G2-G5-acceptance-20261002.xcresult"
+  }
+]

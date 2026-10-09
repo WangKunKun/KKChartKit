@@ -1,0 +1,17 @@
+{
+  "negative" : {
+    "exception" : "NSInvalidArgumentException",
+    "reason" : "-[NSNull doubleValue]: unrecognized selector sent to instance 0x1e9a4ecd8"
+  },
+  "positiveCopy" : {
+    "hideNameInTooltip" : false,
+    "showPrev" : false,
+    "markerHidden" : false,
+    "negativeColor" : null,
+    "hideInTooltip" : false
+  },
+  "positive" : {
+    "exception" : "NSInvalidArgumentException",
+    "reason" : "-[NSNull doubleValue]: unrecognized selector sent to instance 0x1e9a4ecd8"
+  }
+}

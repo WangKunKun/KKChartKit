@@ -1,0 +1,50 @@
+{
+  "comparisons": [
+    {
+      "mode": "normal",
+      "samplePairs": 12,
+      "comparedFields": [
+        "raw",
+        "stackY"
+      ],
+      "maximumAbsoluteError": 0,
+      "legacyAxes": [
+        {
+          "max": 3212.0000000000005,
+          "min": -3212.0000000000005,
+          "opposite": false
+        }
+      ],
+      "hymAxes": [
+        {
+          "max": 3000,
+          "min": -3000
+        }
+      ]
+    },
+    {
+      "mode": "percent",
+      "samplePairs": 12,
+      "comparedFields": [
+        "raw",
+        "stackY",
+        "percentage"
+      ],
+      "maximumAbsoluteError": 3.623767952376511e-13,
+      "legacyAxes": [
+        {
+          "max": 1,
+          "min": 0,
+          "opposite": false
+        }
+      ],
+      "hymAxes": [
+        {
+          "max": 100,
+          "min": -100
+        }
+      ]
+    }
+  ],
+  "scope": "48-point signed fixture; 6 selected indices; explicit legacy stack order mapping; not a full page adapter"
+}

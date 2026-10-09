@@ -1,0 +1,42 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64",
+        "deviceId" : "23C39E52-9B21-4992-9121-5730E201718C",
+        "deviceName" : "iPhone 15 Pro",
+        "modelName" : "iPhone 15 Pro",
+        "osBuildNumber" : "21C62",
+        "osVersion" : "17.2",
+        "platform" : "iOS Simulator"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 0,
+      "passedTests" : 2,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "ChartsIntegration · Built with macOS 26.4",
+  "expectedFailures" : 0,
+  "failedTests" : 0,
+  "finishTime" : 1790747799.085,
+  "passedTests" : 2,
+  "result" : "Passed",
+  "skippedTests" : 0,
+  "startTime" : 1790747780.79,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+
+  ],
+  "title" : "Test - ChartsIntegration",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 2
+}

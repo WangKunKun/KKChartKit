@@ -1,0 +1,36 @@
+[
+  {
+    "attachments": [
+      {
+        "configurationName": "Test Scheme Action",
+        "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+        "deviceName": "iPhone 15 Pro",
+        "exportedFileName": "A2D51120-1000-4AA8-8D41-314F9A816092.png",
+        "isAssociatedWithFailure": false,
+        "suggestedHumanReadableName": "OC-public-import_0_E6B11DED-77FD-4A90-A04E-44D936E4A402.png",
+        "timestamp": 1790747790.363,
+        "savedPath": "debug/OC-public-import.png",
+        "sha256": "e779afd8a57facabee9d18f2b12ee46d3c72e7093df3ccf3398e189e1b97fb75"
+      }
+    ],
+    "testIdentifier": "IntegrationUITests/testObjectiveCPublicImport()",
+    "testIdentifierURL": "test://com.apple.xcode/ChartsIntegration/IntegrationUITests/IntegrationUITests/testObjectiveCPublicImport"
+  },
+  {
+    "attachments": [
+      {
+        "configurationName": "Test Scheme Action",
+        "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+        "deviceName": "iPhone 15 Pro",
+        "exportedFileName": "D53A7345-8DDB-4C3E-8B90-59C05A47B14B.png",
+        "isAssociatedWithFailure": false,
+        "suggestedHumanReadableName": "Swift-public-import_0_53BEAAE9-F45C-4616-A6E4-C1E320159B8A.png",
+        "timestamp": 1790747797.721,
+        "savedPath": "debug/Swift-public-import.png",
+        "sha256": "5d4e9b3b0c05000189cd1e1e53ac7f896199083a9f0a986861c28cd764e39c6c"
+      }
+    ],
+    "testIdentifier": "IntegrationUITests/testSwiftPublicImport()",
+    "testIdentifierURL": "test://com.apple.xcode/ChartsIntegration/IntegrationUITests/IntegrationUITests/testSwiftPublicImport"
+  }
+]

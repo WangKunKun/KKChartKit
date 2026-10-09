@@ -1,0 +1,77 @@
+[
+  {
+    "file": "native-percent-boundary.png",
+    "sha256": "4aa8b8bdff02f2b9eb693ed0912b1bce83f1f3b1f34ba0257577a66f73142095",
+    "test": "PercentStackedAreaTests/testMixedPercentThinLayerUsesSharedNormalizationAndKeepsHundredEnvelope()",
+    "resultBundle": "/tmp/HYMCharts-G1-percent-evidence-20261002.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "A6D4EEBB-3761-4C59-B3D9-66298117491E.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "native-percent-boundary_0_F4D2363B-58A3-4ABC-B4BD-E1E967420EA9.png",
+      "timestamp": 1790942007.58
+    }
+  },
+  {
+    "file": "percent-area-follow-baseline-折线图.png",
+    "sha256": "f675743551e333fd7595ba3f16d0ae9fd50c84f805048acd4e776ef13ff44a17",
+    "test": "ChartDemoUITests/testPercentStackedAreaComparisonInBothDemos()",
+    "resultBundle": "/tmp/HYMCharts-G1-percent-evidence-20261002.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "E63868D4-C03F-4DC8-8647-E01AB6A351AD.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "percent-area-follow-baseline-折线图_0_FBE7074D-5A0A-424B-9938-AF77B1FF1DAB.png",
+      "timestamp": 1790942031.572
+    }
+  },
+  {
+    "file": "percent-area-follow-baseline-混合图.png",
+    "sha256": "2f4dc2294dc69f34af57c4ee10544158160c7cd51598063b3be6993901cd795e",
+    "test": "ChartDemoUITests/testPercentStackedAreaComparisonInBothDemos()",
+    "resultBundle": "/tmp/HYMCharts-G1-percent-evidence-20261002.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "669187A0-EAD8-47FE-AA72-58CB87FA3669.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "percent-area-follow-baseline-混合图_0_6B197AD8-3048-4C03-B3D6-EC5CD605D689.png",
+      "timestamp": 1790942054.628
+    }
+  },
+  {
+    "file": "percent-area-independent-折线图.png",
+    "sha256": "0a014e9f983cff522a3d30b1258ec462dd7ef8319457147eab527043facbabc7",
+    "test": "ChartDemoUITests/testPercentStackedAreaComparisonInBothDemos()",
+    "resultBundle": "/tmp/HYMCharts-G1-percent-evidence-20261002.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "CAB057F6-A2FA-4B42-9D2B-D3CBEF4881A1.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "percent-area-independent-折线图_0_CEF48E99-2212-40B6-BEB0-210654CF7556.png",
+      "timestamp": 1790942037.515
+    }
+  },
+  {
+    "file": "percent-area-independent-混合图.png",
+    "sha256": "106047c54ccc4c729ee784e91fc12148fdf0635297b4bd851784d889871d0ce7",
+    "test": "ChartDemoUITests/testPercentStackedAreaComparisonInBothDemos()",
+    "resultBundle": "/tmp/HYMCharts-G1-percent-evidence-20261002.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+      "deviceName": "iPhone 15 Pro",
+      "exportedFileName": "669572CE-8B67-421B-9F84-D4B9C0298447.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "percent-area-independent-混合图_0_41A382BA-F4F6-425B-B4E3-A7FBDA02BFD0.png",
+      "timestamp": 1790942060.584
+    }
+  }
+]

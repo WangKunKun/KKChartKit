@@ -1,0 +1,12 @@
+Test Suite 'Selected tests' started at 2026-10-02 20:36:10.362.
+Test Suite 'SwiftFunctionProjectUITests.xctest' started at 2026-10-02 20:36:10.362.
+Test Suite 'ChartDemoUITests' started at 2026-10-02 20:36:10.362.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testStackedAreaSeamPresetInLineAndCombinedDemos]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testStackedAreaSeamPresetInLineAndCombinedDemos]' passed (33.777 seconds).
+Test Suite 'ChartDemoUITests' passed at 2026-10-02 20:36:44.140.
+	 Executed 1 test, with 0 failures (0 unexpected) in 33.777 (33.777) seconds
+Test Suite 'SwiftFunctionProjectUITests.xctest' passed at 2026-10-02 20:36:44.140.
+	 Executed 1 test, with 0 failures (0 unexpected) in 33.777 (33.778) seconds
+Test Suite 'Selected tests' passed at 2026-10-02 20:36:44.140.
+	 Executed 1 test, with 0 failures (0 unexpected) in 33.777 (33.778) seconds
+** TEST SUCCEEDED **

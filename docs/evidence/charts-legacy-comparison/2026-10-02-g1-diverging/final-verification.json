@@ -1,0 +1,17 @@
+{
+  "verifiedAt": "2026-10-02T23:37:54.138514+08:00",
+  "result": "Passed",
+  "checkedLocalLinks": 144,
+  "documentCount": 9,
+  "unchangedSourceInputs": 154,
+  "verifiedScreenshotHashes": 11,
+  "verifiedFrameworkBinaryHashes": 2,
+  "gitDiffCheck": "Passed",
+  "testCounts": {
+    "mainUnit": 364,
+    "allUniqueMainUI": 33,
+    "mainUniqueTotal": 397,
+    "independentPublicImport": 2
+  },
+  "note": "Main tests executed in batches; the two G1 UI tests were repeated. Shutdown is a subsequent user-requested action; this record does not certify power-off."
+}

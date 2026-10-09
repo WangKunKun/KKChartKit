@@ -1,0 +1,91 @@
+{
+  "axes" : [
+    {
+      "max" : 3000,
+      "min" : -2000
+    }
+  ],
+  "series" : [
+    {
+      "groupID" : null,
+      "id" : "solar",
+      "name" : "屋顶光伏",
+      "samples" : [
+        {
+          "index" : 0,
+          "percentage" : null,
+          "raw" : 400,
+          "stackBase" : 0,
+          "stackY" : 400
+        },
+        {
+          "index" : 24,
+          "percentage" : null,
+          "raw" : 2747,
+          "stackBase" : 0,
+          "stackY" : 2747
+        },
+        {
+          "index" : 47,
+          "percentage" : null,
+          "raw" : 400,
+          "stackBase" : 0,
+          "stackY" : 400
+        }
+      ],
+      "stack" : null,
+      "type" : "areaspline"
+    },
+    {
+      "groupID" : null,
+      "id" : "load",
+      "name" : "家庭负载",
+      "samples" : [
+        {
+          "index" : 0,
+          "percentage" : null,
+          "raw" : 0,
+          "stackBase" : 0,
+          "stackY" : 0
+        },
+        {
+          "index" : 12,
+          "percentage" : null,
+          "raw" : 1800,
+          "stackBase" : 0,
+          "stackY" : 1800
+        },
+        {
+          "index" : 24,
+          "percentage" : null,
+          "raw" : 2.2043642384652357e-13,
+          "stackBase" : 0,
+          "stackY" : 2.2043642384652357e-13
+        },
+        {
+          "index" : 25,
+          "percentage" : null,
+          "raw" : -234.94714599609318,
+          "stackBase" : 0,
+          "stackY" : -234.94714599609318
+        },
+        {
+          "index" : 36,
+          "percentage" : null,
+          "raw" : -1800,
+          "stackBase" : 0,
+          "stackY" : -1800
+        },
+        {
+          "index" : 47,
+          "percentage" : null,
+          "raw" : -234.94714599609304,
+          "stackBase" : 0,
+          "stackY" : -234.94714599609304
+        }
+      ],
+      "stack" : null,
+      "type" : "areaspline"
+    }
+  ]
+}

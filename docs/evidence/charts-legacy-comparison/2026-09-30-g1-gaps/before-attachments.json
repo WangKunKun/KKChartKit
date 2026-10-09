@@ -1,0 +1,7 @@
+[
+  {
+    "file": "before.png",
+    "test": "StackedAreaGapBoundaryTests/testLongUpperConnectionRetainsBothContinuousLowerPieces()",
+    "sha256": "7de135342bd8e711f1b103a37485085f54589c3024426a7357fef5bc3c863ad6"
+  }
+]

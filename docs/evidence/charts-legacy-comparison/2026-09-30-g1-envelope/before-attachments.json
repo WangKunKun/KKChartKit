@@ -1,0 +1,7 @@
+[
+  {
+    "file": "before.png",
+    "test": "StackedAreaEnvelopeTests/testPositiveUpperAreaFollowsCrossingSourceInsteadOfBridgingItsEndpoints()",
+    "sha256": "566e656527eaef579bc58f0d88da8b4f1ac735b25503965e2ffc8d7bcd8e86ce"
+  }
+]

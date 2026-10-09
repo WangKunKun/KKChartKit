@@ -1,0 +1,252 @@
+[
+  {
+    "attachments": [
+      {
+        "configurationName": "Test Scheme Action",
+        "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+        "deviceName": "iPhone 15 Pro",
+        "exportedFileName": "C14C8992-6FBC-4E24-A194-1B856BFA5BF5.json",
+        "isAssociatedWithFailure": false,
+        "suggestedHumanReadableName": "hym-signed-percent-mapped_0_97310023-9D01-47D6-B44D-96966D4EC71C.json",
+        "timestamp": 1790747595.348,
+        "savedPath": "native/hym-signed-percent-mapped.json",
+        "sha256": "8d662a9d65becc48c381e8acab75704c4f4241307f5455a9f77ab9fff539d033"
+      },
+      {
+        "configurationName": "Test Scheme Action",
+        "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+        "deviceName": "iPhone 15 Pro",
+        "exportedFileName": "5A328DD5-CD5F-4675-8FB5-E97E0A145457.png",
+        "isAssociatedWithFailure": false,
+        "suggestedHumanReadableName": "hym-signed-percent-mapped_0_62759DCC-EA18-402E-A3C8-620B146E4B70.png",
+        "timestamp": 1790747595.348,
+        "savedPath": "native/hym-signed-percent-mapped.png",
+        "sha256": "e2b0614917625bac57a03066646f5bd1de40db5032897858c9143b902e25444f"
+      },
+      {
+        "configurationName": "Test Scheme Action",
+        "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+        "deviceName": "iPhone 15 Pro",
+        "exportedFileName": "F99B7880-000F-43F6-85E9-7176A6AC6706.json",
+        "isAssociatedWithFailure": false,
+        "suggestedHumanReadableName": "hym-signed-normal-mapped_0_7143544C-9904-4A02-9A4F-86047BF541D5.json",
+        "timestamp": 1790747595.341,
+        "savedPath": "native/hym-signed-normal-mapped.json",
+        "sha256": "59a9ee7b3077472e2fa93c8f7b494524ada159299a10b72349b376d99d88135f"
+      },
+      {
+        "configurationName": "Test Scheme Action",
+        "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+        "deviceName": "iPhone 15 Pro",
+        "exportedFileName": "14E9D462-AD03-4E50-8B27-AA83532EFA8D.png",
+        "isAssociatedWithFailure": false,
+        "suggestedHumanReadableName": "hym-signed-normal-mapped_0_E38D0BB8-B372-4819-A86F-30C7EFAA185C.png",
+        "timestamp": 1790747595.34,
+        "savedPath": "native/hym-signed-normal-mapped.png",
+        "sha256": "241da791b97a4e0d4d2c9ce2261eb2c2c91132a7cdf9f66fd5a11aeba5326db5"
+      },
+      {
+        "configurationName": "Test Scheme Action",
+        "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+        "deviceName": "iPhone 15 Pro",
+        "exportedFileName": "66E4939C-94B0-4764-A59E-3EEE8E68F19C.json",
+        "isAssociatedWithFailure": false,
+        "suggestedHumanReadableName": "hym-signed-default-order_0_F2F10CC9-C1BB-488F-BC6B-BE044BA62919.json",
+        "timestamp": 1790747595.333,
+        "savedPath": "native/hym-signed-default-order.json",
+        "sha256": "c63d104e39fb09c31f87afb0b1097176069a810d64f53bcb00bcaa0af178cb2c"
+      },
+      {
+        "configurationName": "Test Scheme Action",
+        "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+        "deviceName": "iPhone 15 Pro",
+        "exportedFileName": "962328A7-7115-4D1B-8D98-EEA9919C588E.png",
+        "isAssociatedWithFailure": false,
+        "suggestedHumanReadableName": "hym-signed-default-order_0_18BA11AF-170D-4EBC-A2D4-761CF3D36E3B.png",
+        "timestamp": 1790747595.333,
+        "savedPath": "native/hym-signed-default-order.png",
+        "sha256": "311899626067d077981ebba54641e871938f566fde9bf920305f5957710b6d13"
+      }
+    ],
+    "testIdentifier": "LegacyReferenceComparisonTests/testCapturedSignedSamplesMatchWhenLegacyStackOrderIsMapped()",
+    "testIdentifierURL": "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/LegacyReferenceComparisonTests/testCapturedSignedSamplesMatchWhenLegacyStackOrderIsMapped"
+  },
+  {
+    "attachments": [
+      {
+        "configurationName": "Test Scheme Action",
+        "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+        "deviceName": "iPhone 15 Pro",
+        "exportedFileName": "EBBADCDD-3A16-4BAE-823A-85C459B7C5A3.json",
+        "isAssociatedWithFailure": false,
+        "suggestedHumanReadableName": "hym-gaps-independent-zones_0_B0594532-F1CF-47E2-B2B1-86445735BC92.json",
+        "timestamp": 1790747595.367,
+        "savedPath": "native/hym-gaps-independent-zones.json",
+        "sha256": "1221316dcfede08ac1009c4a8640e193916cd8cdd0d02f1ace3a6d8c7f8fa3ec"
+      },
+      {
+        "configurationName": "Test Scheme Action",
+        "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+        "deviceName": "iPhone 15 Pro",
+        "exportedFileName": "756172D9-2902-4788-A284-5DAC3B5472B8.png",
+        "isAssociatedWithFailure": false,
+        "suggestedHumanReadableName": "hym-gaps-independent-zones_0_EAA1BAD6-1690-415D-BF84-B57032A0BD1D.png",
+        "timestamp": 1790747595.366,
+        "savedPath": "native/hym-gaps-independent-zones.png",
+        "sha256": "29786e7aef4b38320d1d0f4bbe6336b684bb724f20c622e4197e24d91148101e"
+      }
+    ],
+    "testIdentifier": "LegacyReferenceComparisonTests/testLegacyGapInputKeepsColorZonesAndMissingSamplesIndependent()",
+    "testIdentifierURL": "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/LegacyReferenceComparisonTests/testLegacyGapInputKeepsColorZonesAndMissingSamplesIndependent"
+  },
+  {
+    "attachments": [
+      {
+        "configurationName": "Test Scheme Action",
+        "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+        "deviceName": "iPhone 15 Pro",
+        "exportedFileName": "B24F6510-C971-4FFA-93C9-85143A2853A1.json",
+        "isAssociatedWithFailure": false,
+        "suggestedHumanReadableName": "hym-mixed-types-partitioned_0_862D7115-DEF3-4BCF-8831-513A88340CBC.json",
+        "timestamp": 1790747595.392,
+        "savedPath": "native/hym-mixed-types-partitioned.json",
+        "sha256": "d7b193a618bd84d78f8fefc64842c4bf25acb254fa981a383b1641744aa75de8"
+      },
+      {
+        "configurationName": "Test Scheme Action",
+        "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+        "deviceName": "iPhone 15 Pro",
+        "exportedFileName": "D9ABF1D0-2F56-4DB4-A185-719FD5FC6E13.png",
+        "isAssociatedWithFailure": false,
+        "suggestedHumanReadableName": "hym-mixed-types-partitioned_0_D94D1F6A-4A69-4EBF-BCEA-17185CBCD9DD.png",
+        "timestamp": 1790747595.392,
+        "savedPath": "native/hym-mixed-types-partitioned.png",
+        "sha256": "2dbb50290ead2a4dc2d22875393770481d18aade2c6db5f49402d22d9e0a46a2"
+      },
+      {
+        "configurationName": "Test Scheme Action",
+        "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+        "deviceName": "iPhone 15 Pro",
+        "exportedFileName": "6694A01D-63C2-4252-A99C-B4AF984CCF54.json",
+        "isAssociatedWithFailure": false,
+        "suggestedHumanReadableName": "hym-mixed-types-unmapped_0_ECA76A55-AF11-49B8-A6D6-CC7E461AD9A9.json",
+        "timestamp": 1790747595.38,
+        "savedPath": "native/hym-mixed-types-unmapped.json",
+        "sha256": "2cfeb3190b0bff8c2571cbd3bb92b113715be65c46b8f7fe7034903628426d37"
+      },
+      {
+        "configurationName": "Test Scheme Action",
+        "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+        "deviceName": "iPhone 15 Pro",
+        "exportedFileName": "F25AEA9B-84E7-4AE0-AC54-37BF1E02E640.png",
+        "isAssociatedWithFailure": false,
+        "suggestedHumanReadableName": "hym-mixed-types-unmapped_0_63281F3C-3B0B-491A-9982-CC4EFEF96BE4.png",
+        "timestamp": 1790747595.38,
+        "savedPath": "native/hym-mixed-types-unmapped.png",
+        "sha256": "22bb7ac374ea693d6d8a22e425ed5b6c97b3ab9e412a48e0daa95396acd1233d"
+      }
+    ],
+    "testIdentifier": "LegacyReferenceComparisonTests/testMixedConcreteTypesNeedCompatibilityStackPartitions()",
+    "testIdentifierURL": "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/LegacyReferenceComparisonTests/testMixedConcreteTypesNeedCompatibilityStackPartitions"
+  },
+  {
+    "attachments": [
+      {
+        "configurationName": "Test Scheme Action",
+        "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+        "deviceName": "iPhone 15 Pro",
+        "exportedFileName": "98427164-7410-432A-BADE-0DDA1B3BFDC2.json",
+        "isAssociatedWithFailure": false,
+        "suggestedHumanReadableName": "hym-area-missing-percent_0_0FC3E74D-7256-4E6D-92FB-9A0AEBC358F3.json",
+        "timestamp": 1790747595.453,
+        "savedPath": "native/hym-area-missing-percent.json",
+        "sha256": "6067cda827332e51baef6f3ffc1a64c9526ce6b66bcae1e54956c8bee8e34e46"
+      },
+      {
+        "configurationName": "Test Scheme Action",
+        "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+        "deviceName": "iPhone 15 Pro",
+        "exportedFileName": "3A5BAE6B-46C7-4B1A-AF06-3EF83A4870FF.png",
+        "isAssociatedWithFailure": false,
+        "suggestedHumanReadableName": "hym-area-missing-percent_0_5DA71124-D746-471A-AFE4-288DD3A113B3.png",
+        "timestamp": 1790747595.453,
+        "savedPath": "native/hym-area-missing-percent.png",
+        "sha256": "c24a95fc8a595061d81893a4928f670b14bc629d77e0d27bb8e40cbd189fed64"
+      },
+      {
+        "configurationName": "Test Scheme Action",
+        "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+        "deviceName": "iPhone 15 Pro",
+        "exportedFileName": "DBA651A8-8A1E-4FED-A626-77A5A0868C00.json",
+        "isAssociatedWithFailure": false,
+        "suggestedHumanReadableName": "hym-area-missing-normal_0_6121395D-8002-4C54-BE4C-F8EBED3206B7.json",
+        "timestamp": 1790747595.434,
+        "savedPath": "native/hym-area-missing-normal.json",
+        "sha256": "dc38223ee92caca398661ddb4c262a97de068c4d8ed6d118dd8adfd7d7336ac7"
+      },
+      {
+        "configurationName": "Test Scheme Action",
+        "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+        "deviceName": "iPhone 15 Pro",
+        "exportedFileName": "1E71D080-63A1-4699-8A53-D0E406782BD8.png",
+        "isAssociatedWithFailure": false,
+        "suggestedHumanReadableName": "hym-area-missing-normal_0_EB7D2A7C-E5A7-4DF7-BE8A-607B4AA149B8.png",
+        "timestamp": 1790747595.433,
+        "savedPath": "native/hym-area-missing-normal.png",
+        "sha256": "88dc934cb3abe01a8444391e7546e5f3e8862ed36e2528ec4a41bd54a87864b8"
+      }
+    ],
+    "testIdentifier": "LegacyReferenceComparisonTests/testSharedAreaPercentMissingAndVisibilityRecomputeEveryCategory()",
+    "testIdentifierURL": "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/LegacyReferenceComparisonTests/testSharedAreaPercentMissingAndVisibilityRecomputeEveryCategory"
+  },
+  {
+    "attachments": [
+      {
+        "configurationName": "Test Scheme Action",
+        "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+        "deviceName": "iPhone 15 Pro",
+        "exportedFileName": "F1DC2226-B0DD-43DE-BEC7-2D6D8B12925A.json",
+        "isAssociatedWithFailure": false,
+        "suggestedHumanReadableName": "hym-area-multi-business-series_0_0A17D837-BDA5-499B-80FA-9DF30EBFBA51.json",
+        "timestamp": 1790747595.486,
+        "savedPath": "native/hym-area-multi-business-series.json",
+        "sha256": "56fa352077431dd9d41204a961a9859cdc7dd2abe32c9af43f41bf3643ba1050"
+      },
+      {
+        "configurationName": "Test Scheme Action",
+        "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+        "deviceName": "iPhone 15 Pro",
+        "exportedFileName": "1044891E-CB2B-4783-904A-D6F6679CEFB7.png",
+        "isAssociatedWithFailure": false,
+        "suggestedHumanReadableName": "hym-area-multi-business-series_0_5B2A99DF-23D0-4712-A903-F7813C21A3D9.png",
+        "timestamp": 1790747595.486,
+        "savedPath": "native/hym-area-multi-business-series.png",
+        "sha256": "d73577299aef4c5a45017f9b5fcd2a9ad104b0cb1fab50410958a1452f831af9"
+      },
+      {
+        "configurationName": "Test Scheme Action",
+        "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+        "deviceName": "iPhone 15 Pro",
+        "exportedFileName": "08185021-4AB1-4331-84E8-E800D419136E.json",
+        "isAssociatedWithFailure": false,
+        "suggestedHumanReadableName": "hym-area-single-business-series_0_FA5C5669-0CCF-4DC6-BFC3-6BFCA21F469A.json",
+        "timestamp": 1790747595.47,
+        "savedPath": "native/hym-area-single-business-series.json",
+        "sha256": "614c108a9cfd41cb9fe766c568f96f7fbe1aacffcc3a0d8fb8706f9324dddcdf"
+      },
+      {
+        "configurationName": "Test Scheme Action",
+        "deviceId": "23C39E52-9B21-4992-9121-5730E201718C",
+        "deviceName": "iPhone 15 Pro",
+        "exportedFileName": "9F5FE580-ECCA-43B6-A05B-A1372CD96C93.png",
+        "isAssociatedWithFailure": false,
+        "suggestedHumanReadableName": "hym-area-single-business-series_0_62590A42-5AD9-4421-9AAE-5A03C76BC03E.png",
+        "timestamp": 1790747595.47,
+        "savedPath": "native/hym-area-single-business-series.png",
+        "sha256": "d73577299aef4c5a45017f9b5fcd2a9ad104b0cb1fab50410958a1452f831af9"
+      }
+    ],
+    "testIdentifier": "LegacyReferenceComparisonTests/testSharedAreaSamplesKeepBusinessValuesWithoutAuxiliarySeries()",
+    "testIdentifierURL": "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/LegacyReferenceComparisonTests/testSharedAreaSamplesKeepBusinessValuesWithoutAuxiliarySeries"
+  }
+]

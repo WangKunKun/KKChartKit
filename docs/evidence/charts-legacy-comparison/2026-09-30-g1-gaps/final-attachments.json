@@ -1,0 +1,77 @@
+[
+  {
+    "file": "after.png",
+    "test": "StackedAreaGapBoundaryTests/testLongUpperConnectionRetainsBothContinuousLowerPieces()",
+    "sha256": "52d6d1048f6a1269e423dbe08376f4fa2d187b6c362e78adf9453d2531c77c2a"
+  },
+  {
+    "file": "crossing-area-independent-混合图.png",
+    "test": "ChartDemoUITests/testCrossingStackedAreaBoundaryComparisonInBothDemos()",
+    "sha256": "255835553ad58b43ca1f3c609718c006f0bad8bfd966dc3700202f121e0c7c70"
+  },
+  {
+    "file": "crossing-area-no-markers-混合图.png",
+    "test": "ChartDemoUITests/testCrossingStackedAreaBoundaryComparisonInBothDemos()",
+    "sha256": "601a91aaff3a1695ab4a77d6c9b25b711c697c9e266425e7fd41883c0b88e438"
+  },
+  {
+    "file": "crossing-area-follow-baseline-混合图.png",
+    "test": "ChartDemoUITests/testCrossingStackedAreaBoundaryComparisonInBothDemos()",
+    "sha256": "06338c6c582df1f301c59893b7c595a758b6f636e358fc1902ef64618bf65ef5"
+  },
+  {
+    "file": "crossing-area-independent-折线图.png",
+    "test": "ChartDemoUITests/testCrossingStackedAreaBoundaryComparisonInBothDemos()",
+    "sha256": "01b677cdc9189f256bcefda9784ec99a668b239d668e649a8bd6081a49165966"
+  },
+  {
+    "file": "crossing-area-no-markers-折线图.png",
+    "test": "ChartDemoUITests/testCrossingStackedAreaBoundaryComparisonInBothDemos()",
+    "sha256": "9d5fc15b0ac9811f96fd2392bc847dc374c400c69b60dd10103762b678e49669"
+  },
+  {
+    "file": "crossing-area-follow-baseline-折线图.png",
+    "test": "ChartDemoUITests/testCrossingStackedAreaBoundaryComparisonInBothDemos()",
+    "sha256": "f92e5ba278cbdd4ca43dce1eded263dd866f54aaf3ce80ca184436bf46c65b33"
+  },
+  {
+    "file": "gap-boundary-area-independent-混合图.png",
+    "test": "ChartDemoUITests/testGapBoundaryStackedAreaComparisonInBothDemos()",
+    "sha256": "964c33ba1f0719d89c41b11dad8c8ae7df5c099058260588b37d617723c25ec6"
+  },
+  {
+    "file": "gap-boundary-area-follow-baseline-混合图.png",
+    "test": "ChartDemoUITests/testGapBoundaryStackedAreaComparisonInBothDemos()",
+    "sha256": "fbb0bbd704b5ea641f602b058272017dd2a016861494384e94e22047ad2b67db"
+  },
+  {
+    "file": "gap-boundary-area-independent-折线图.png",
+    "test": "ChartDemoUITests/testGapBoundaryStackedAreaComparisonInBothDemos()",
+    "sha256": "8adb21348fe636436515dfb99e734885428d64e854f7172bc2a2b04270228315"
+  },
+  {
+    "file": "gap-boundary-area-follow-baseline-折线图.png",
+    "test": "ChartDemoUITests/testGapBoundaryStackedAreaComparisonInBothDemos()",
+    "sha256": "3c10b695a0efcafa70828ba2998c93da808d4471a983dedc62f8fc4bfdd3c681"
+  },
+  {
+    "file": "source-switch-area-independent-混合图.png",
+    "test": "ChartDemoUITests/testSourceSwitchStackedAreaBoundaryComparisonInBothDemos()",
+    "sha256": "583726e965b061a44aa9d29cd1919c634aee7250594135305622bca9fe26538a"
+  },
+  {
+    "file": "source-switch-area-follow-baseline-混合图.png",
+    "test": "ChartDemoUITests/testSourceSwitchStackedAreaBoundaryComparisonInBothDemos()",
+    "sha256": "3a7f9f569938c40348152de05a6bac75df4a273990646e023cc780ab956b2a37"
+  },
+  {
+    "file": "source-switch-area-independent-折线图.png",
+    "test": "ChartDemoUITests/testSourceSwitchStackedAreaBoundaryComparisonInBothDemos()",
+    "sha256": "2c2af3cb9db740dd9597a89fb575c7b3c6d53f7cd2e31197f4c35f329f85578c"
+  },
+  {
+    "file": "source-switch-area-follow-baseline-折线图.png",
+    "test": "ChartDemoUITests/testSourceSwitchStackedAreaBoundaryComparisonInBothDemos()",
+    "sha256": "63dab19d696eaa9597b5c1cf0ef339657da8f5dfb9f2a939788d697487f166ae"
+  }
+]

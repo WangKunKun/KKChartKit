@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "tolerance": 1e-08,
+  "scope": "Six representative indices per series; no pixel or complete-page parity claim.",
+  "comparisons": [
+    {
+      "old": "comparison-signed-normal",
+      "new": "hym-signed-normal-mapped",
+      "comparedPoints": 12,
+      "maxRawError": 0,
+      "maxDrawDifference": 0,
+      "drawDifferences": []
+    },
+    {
+      "old": "comparison-signed-percent",
+      "new": "hym-signed-percent-mapped",
+      "comparedPoints": 12,
+      "maxRawError": 0,
+      "maxDrawDifference": 3.623767952376511e-13,
+      "drawDifferences": []
+    },
+    {
+      "old": "audit-mixed-types",
+      "new": "hym-mixed-types-unmapped",
+      "comparedPoints": 12,
+      "maxRawError": 0,
+      "maxDrawDifference": 1800,
+      "drawDifferences": [
+        {
+          "seriesID": "aux",
+          "index": 12,
+          "legacyDraw": 1120,
+          "nativeDraw": 2920
+        },
+        {
+          "seriesID": "aux",
+          "index": 36,
+          "legacyDraw": -680,
+          "nativeDraw": -2480
+        }
+      ]
+    },
+    {
+      "old": "audit-mixed-types",
+      "new": "hym-mixed-types-partitioned",
+      "comparedPoints": 12,
+      "maxRawError": 0,
+      "maxDrawDifference": 0,
+      "drawDifferences": []
+    }
+  ],
+  "areas": [
+    {
+      "case": "area-single",
+      "businessPointsCompared": 12,
+      "rawMatches": true,
+      "legacySeriesCount": 5,
+      "nativeSeriesCount": 2,
+      "drawDifferences": [
+        {
+          "seriesID": "aux",
+          "index": 25,
+          "raw": 103,
+          "legacyDraw": -132,
+          "nativeDraw": 103
+        },
+        {
+          "seriesID": "aux",
+          "index": 47,
+          "raw": 103,
+          "legacyDraw": -132,
+          "nativeDraw": 103
+        }
+      ],
+      "legacyAxis": {
+        "max": 3212.0000000000005,
+        "min": -3212.0000000000005,
+        "opposite": false
+      },
+      "legacyClippedSamples": []
+    },
+    {
+      "case": "area-multi",
+      "businessPointsCompared": 12,
+      "rawMatches": true,
+      "legacySeriesCount": 3,
+      "nativeSeriesCount": 2,
+      "drawDifferences": [
+        {
+          "seriesID": "battery",
+          "index": 25,
+          "raw": -235,
+          "legacyDraw": -132,
+          "nativeDraw": -235
+        },
+        {
+          "seriesID": "battery",
+          "index": 47,
+          "raw": -235,
+          "legacyDraw": -132,
+          "nativeDraw": -235
+        }
+      ],
+      "legacyAxis": {
+        "max": 1980.0000000000002,
+        "min": -1980.0000000000002,
+        "opposite": false
+      },
+      "legacyClippedSamples": [
+        {
+          "seriesID": "battery",
+          "index": 12,
+          "draw": 2920
+        },
+        {
+          "seriesID": "battery",
+          "index": 36,
+          "draw": -2480
+        }
+      ]
+    }
+  ],
+  "sourcesSHA256": {
+    "comparison-signed-normal.json": "e7c2848e28edcacb5024d19b6cf7d239194ed0cd2cf74e2cd5380e521b20ede5",
+    "hym-signed-normal-mapped.json": "59a9ee7b3077472e2fa93c8f7b494524ada159299a10b72349b376d99d88135f",
+    "comparison-signed-percent.json": "c1f9d7e7805fbe23e177be1ce14f16feed63136c1592c9fda5c084e574fa72c0",
+    "hym-signed-percent-mapped.json": "8d662a9d65becc48c381e8acab75704c4f4241307f5455a9f77ab9fff539d033",
+    "audit-mixed-types.json": "777f5373081daea7bfbf87b29c29246e207e0dfb63b025d4b805b1982330749f",
+    "hym-mixed-types-unmapped.json": "2cfeb3190b0bff8c2571cbd3bb92b113715be65c46b8f7fe7034903628426d37",
+    "hym-mixed-types-partitioned.json": "d7b193a618bd84d78f8fefc64842c4bf25acb254fa981a383b1641744aa75de8",
+    "audit-area-single.json": "d0468c40340c34e15b2bc6a3da99d4eb6dc2ca81565f64aea43989f122b75ca8",
+    "hym-area-single-business-series.json": "614c108a9cfd41cb9fe766c568f96f7fbe1aacffcc3a0d8fb8706f9324dddcdf",
+    "audit-area-multi.json": "496c598d030dbbd87d7ddffe399bf751b1f7445d5746be03f456220fb7dc7fe0",
+    "hym-area-multi-business-series.json": "56fa352077431dd9d41204a961a9859cdc7dd2abe32c9af43f41bf3643ba1050"
+  }
+}

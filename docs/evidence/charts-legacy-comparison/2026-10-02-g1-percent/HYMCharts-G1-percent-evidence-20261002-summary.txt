@@ -1,0 +1,37 @@
+Test Suite 'Selected tests' started at 2026-10-02 19:53:26.789.
+Test Suite 'SwiftFunctionProjectTests.xctest' started at 2026-10-02 19:53:26.790.
+Test Suite 'PercentStackedAreaTests' started at 2026-10-02 19:53:26.790.
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testAbsoluteDenominatorAndAtomicFallbacksPreserveCurrentSemantics]' started.
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testAbsoluteDenominatorAndAtomicFallbacksPreserveCurrentSemantics]' passed (0.155 seconds).
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testAllMixedStylesAndSignsMatchRationalReferenceWithoutOverlapsOrEnvelopeOverflow]' started.
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testAllMixedStylesAndSignsMatchRationalReferenceWithoutOverlapsOrEnvelopeOverflow]' passed (0.567 seconds).
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testDemoLineCombinedAndOCUseTheSamePercentGeometryAndRawHits]' started.
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testDemoLineCombinedAndOCUseTheSamePercentGeometryAndRawHits]' passed (0.012 seconds).
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testMatchingGapRunsConnectAndBreakWithoutCreatingSamples]' started.
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testMatchingGapRunsConnectAndBreakWithoutCreatingSamples]' passed (0.003 seconds).
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testMixedPercentThinLayerUsesSharedNormalizationAndKeepsHundredEnvelope]' started.
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testMixedPercentThinLayerUsesSharedNormalizationAndKeepsHundredEnvelope]' passed (0.052 seconds).
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testNormalizerRejectsSingularOrUnboundedWorkAndKeepsCertifiedAccuracy]' started.
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testNormalizerRejectsSingularOrUnboundedWorkAndKeepsCertifiedAccuracy]' passed (0.007 seconds).
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testPercentStrokeAtCurveStepAndSignJoinsStaysInsideAreaAtAllScales]' started.
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testPercentStrokeAtCurveStepAndSignJoinsStaysInsideAreaAtAllScales]' passed (11.674 seconds).
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testVisibilityStackAxisIsolationUpdatesAndViewportMatchFreshGeometry]' started.
+Test Case '-[SwiftFunctionProjectTests.PercentStackedAreaTests testVisibilityStackAxisIsolationUpdatesAndViewportMatchFreshGeometry]' passed (0.662 seconds).
+Test Suite 'PercentStackedAreaTests' passed at 2026-10-02 19:53:39.925.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 13.133 (13.135) seconds
+Test Suite 'SwiftFunctionProjectTests.xctest' passed at 2026-10-02 19:53:39.925.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 13.133 (13.135) seconds
+Test Suite 'Selected tests' passed at 2026-10-02 19:53:39.925.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 13.133 (13.136) seconds
+Test Suite 'Selected tests' started at 2026-10-02 19:53:42.143.
+Test Suite 'SwiftFunctionProjectUITests.xctest' started at 2026-10-02 19:53:42.144.
+Test Suite 'ChartDemoUITests' started at 2026-10-02 19:53:42.144.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testPercentStackedAreaComparisonInBothDemos]' started.
+Test Case '-[SwiftFunctionProjectUITests.ChartDemoUITests testPercentStackedAreaComparisonInBothDemos]' passed (46.716 seconds).
+Test Suite 'ChartDemoUITests' passed at 2026-10-02 19:54:28.860.
+	 Executed 1 test, with 0 failures (0 unexpected) in 46.716 (46.717) seconds
+Test Suite 'SwiftFunctionProjectUITests.xctest' passed at 2026-10-02 19:54:28.861.
+	 Executed 1 test, with 0 failures (0 unexpected) in 46.716 (46.717) seconds
+Test Suite 'Selected tests' passed at 2026-10-02 19:54:28.862.
+	 Executed 1 test, with 0 failures (0 unexpected) in 46.716 (46.718) seconds
+** TEST SUCCEEDED **

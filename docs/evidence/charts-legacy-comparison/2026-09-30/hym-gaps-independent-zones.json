@@ -1,0 +1,76 @@
+{
+  "axes" : [
+    {
+      "max" : 3000,
+      "min" : -2000
+    }
+  ],
+  "series" : [
+    {
+      "id" : "solar",
+      "name" : "屋顶光伏",
+      "samples" : [
+        {
+          "index" : 0,
+          "percentage" : null,
+          "raw" : 400,
+          "stackY" : 400
+        },
+        {
+          "index" : 24,
+          "percentage" : null,
+          "raw" : 2747,
+          "stackY" : 2747
+        },
+        {
+          "index" : 47,
+          "percentage" : null,
+          "raw" : 400,
+          "stackY" : 400
+        }
+      ]
+    },
+    {
+      "id" : "load",
+      "name" : "家庭负载",
+      "samples" : [
+        {
+          "index" : 0,
+          "percentage" : null,
+          "raw" : 0,
+          "stackY" : 0
+        },
+        {
+          "index" : 12,
+          "percentage" : null,
+          "raw" : 1800,
+          "stackY" : 1800
+        },
+        {
+          "index" : 24,
+          "percentage" : null,
+          "raw" : 2.2043642384652357e-13,
+          "stackY" : 2.2043642384652357e-13
+        },
+        {
+          "index" : 25,
+          "percentage" : null,
+          "raw" : -234.94714599609318,
+          "stackY" : -234.94714599609318
+        },
+        {
+          "index" : 36,
+          "percentage" : null,
+          "raw" : -1800,
+          "stackY" : -1800
+        },
+        {
+          "index" : 47,
+          "percentage" : null,
+          "raw" : -234.94714599609304,
+          "stackY" : -234.94714599609304
+        }
+      ]
+    }
+  ]
+}

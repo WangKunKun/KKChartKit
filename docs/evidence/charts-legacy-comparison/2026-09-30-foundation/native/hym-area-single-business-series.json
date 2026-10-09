@@ -1,0 +1,112 @@
+{
+  "axes" : [
+    {
+      "max" : 3000,
+      "min" : -3000
+    }
+  ],
+  "series" : [
+    {
+      "groupID" : "g0",
+      "id" : "aux",
+      "name" : "辅助功率",
+      "samples" : [
+        {
+          "index" : 0,
+          "percentage" : null,
+          "raw" : 220,
+          "stackBase" : 0,
+          "stackY" : 220
+        },
+        {
+          "index" : 12,
+          "percentage" : null,
+          "raw" : 1120,
+          "stackBase" : 0,
+          "stackY" : 1120
+        },
+        {
+          "index" : 24,
+          "percentage" : null,
+          "raw" : 220,
+          "stackBase" : 0,
+          "stackY" : 220
+        },
+        {
+          "index" : 25,
+          "percentage" : null,
+          "raw" : 103,
+          "stackBase" : 0,
+          "stackY" : 103
+        },
+        {
+          "index" : 36,
+          "percentage" : null,
+          "raw" : -680,
+          "stackBase" : 0,
+          "stackY" : -680
+        },
+        {
+          "index" : 47,
+          "percentage" : null,
+          "raw" : 103,
+          "stackBase" : 0,
+          "stackY" : 103
+        }
+      ],
+      "stack" : "battery",
+      "type" : "areaspline"
+    },
+    {
+      "groupID" : "g0",
+      "id" : "battery",
+      "name" : "电池充放电",
+      "samples" : [
+        {
+          "index" : 0,
+          "percentage" : null,
+          "raw" : 0,
+          "stackBase" : 220,
+          "stackY" : 220
+        },
+        {
+          "index" : 12,
+          "percentage" : null,
+          "raw" : 1800,
+          "stackBase" : 1120,
+          "stackY" : 2920
+        },
+        {
+          "index" : 24,
+          "percentage" : null,
+          "raw" : 0,
+          "stackBase" : 220,
+          "stackY" : 220
+        },
+        {
+          "index" : 25,
+          "percentage" : null,
+          "raw" : -235,
+          "stackBase" : 0,
+          "stackY" : -235
+        },
+        {
+          "index" : 36,
+          "percentage" : null,
+          "raw" : -1800,
+          "stackBase" : -680,
+          "stackY" : -2480
+        },
+        {
+          "index" : 47,
+          "percentage" : null,
+          "raw" : -235,
+          "stackBase" : 0,
+          "stackY" : -235
+        }
+      ],
+      "stack" : "battery",
+      "type" : "areaspline"
+    }
+  ]
+}

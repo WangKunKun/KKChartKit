@@ -1,0 +1,22 @@
+[
+  {
+    "file": "legacy-boundary-source-switch.png",
+    "test": "LegacyChartDemoUITests/testBoundaryCrossingAndSourceSwitchSharedInputs()",
+    "sha256": "4aa6550d638b66dd92ec32f2b06e0a9808116cae9c15c2a75147de966512f91f"
+  },
+  {
+    "file": "legacy-boundary-source-switch.json",
+    "test": "LegacyChartDemoUITests/testBoundaryCrossingAndSourceSwitchSharedInputs()",
+    "sha256": "10a1bc95ce5043f888bb86f31fcd7e23e90ab9551dcacecb5841efcbe4043481"
+  },
+  {
+    "file": "legacy-boundary-crossing.png",
+    "test": "LegacyChartDemoUITests/testBoundaryCrossingAndSourceSwitchSharedInputs()",
+    "sha256": "05c39086885f196e4f6b550edc58f03999ceda7509686ecbe834315f2a691e28"
+  },
+  {
+    "file": "legacy-boundary-crossing.json",
+    "test": "LegacyChartDemoUITests/testBoundaryCrossingAndSourceSwitchSharedInputs()",
+    "sha256": "3a136232c76c1336c52248dc844c2de57b5cdab11c49a1c6a81a9376e6eaf862"
+  }
+]

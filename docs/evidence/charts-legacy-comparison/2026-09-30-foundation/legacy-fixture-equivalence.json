@@ -1,0 +1,22 @@
+[
+  {
+    "file": "comparison-format-programmatic-js.json",
+    "previous": "2026-09-30-rerun/comparison-format-programmatic-js.json",
+    "exactJSONObjectEquality": true
+  },
+  {
+    "file": "comparison-signed-normal.json",
+    "previous": "2026-09-30-rerun/comparison-signed-normal.json",
+    "exactJSONObjectEquality": true
+  },
+  {
+    "file": "comparison-signed-percent.json",
+    "previous": "2026-09-30-rerun/comparison-signed-percent.json",
+    "exactJSONObjectEquality": true
+  },
+  {
+    "file": "comparison-gaps-options.json",
+    "previous": "2026-09-30-rerun/comparison-gaps-options.json",
+    "exactJSONObjectEquality": true
+  }
+]

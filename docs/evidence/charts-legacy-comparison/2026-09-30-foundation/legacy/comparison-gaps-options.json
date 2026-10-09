@@ -1,0 +1,156 @@
+[
+  {
+    "axes" : [
+      {
+        "max" : 3290.1000000000004,
+        "min" : -3290.1000000000004,
+        "opposite" : false
+      }
+    ],
+    "categories" : 48,
+    "max" : 47,
+    "min" : 0,
+    "modelShowLegend" : true,
+    "modelShowNoData" : false,
+    "nativeTooltips" : [
+
+    ],
+    "plotHeight" : 234,
+    "plotLeft" : 39,
+    "plotTop" : 10,
+    "plotWidth" : 320,
+    "series" : [
+      {
+        "color" : "#F2A93B",
+        "connectNulls" : true,
+        "count" : 48,
+        "first" : 400,
+        "name" : "屋顶光伏",
+        "nulls" : 17,
+        "samples" : [
+          {
+            "index" : 0,
+            "percentage" : null,
+            "raw" : 400,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 12,
+            "percentage" : null,
+            "raw" : null,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 24,
+            "percentage" : null,
+            "raw" : 2747,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 25,
+            "percentage" : null,
+            "raw" : null,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 36,
+            "percentage" : null,
+            "raw" : null,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 47,
+            "percentage" : null,
+            "raw" : 400,
+            "stackY" : null,
+            "total" : null
+          }
+        ],
+        "stack" : null,
+        "stackKey" : null,
+        "type" : "areaspline",
+        "visible" : true,
+        "zoneAxis" : "x",
+        "zones" : [
+          {
+            "color" : null,
+            "value" : 24
+          },
+          {
+            "color" : "transparent",
+            "value" : 37
+          }
+        ]
+      },
+      {
+        "color" : "#43A8EF",
+        "connectNulls" : false,
+        "count" : 48,
+        "first" : 0,
+        "name" : "家庭负载",
+        "nulls" : 0,
+        "samples" : [
+          {
+            "index" : 0,
+            "percentage" : null,
+            "raw" : 0,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 12,
+            "percentage" : null,
+            "raw" : 1800,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 24,
+            "percentage" : null,
+            "raw" : 2.2043642384652357e-13,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 25,
+            "percentage" : null,
+            "raw" : -234.94714599609318,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 36,
+            "percentage" : null,
+            "raw" : -1800,
+            "stackY" : null,
+            "total" : null
+          },
+          {
+            "index" : 47,
+            "percentage" : null,
+            "raw" : -234.94714599609304,
+            "stackY" : null,
+            "total" : null
+          }
+        ],
+        "stack" : null,
+        "stackKey" : null,
+        "type" : "areaspline",
+        "visible" : true,
+        "zoneAxis" : null,
+        "zones" : [
+
+        ]
+      }
+    ],
+    "stacking" : null,
+    "tooltipText" : null,
+    "tooltipVisible" : false,
+    "version" : "11.4.3"
+  }
+]

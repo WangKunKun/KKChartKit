@@ -1,0 +1,163 @@
+[
+  {
+    "name": "baseline-multi-lower-charts",
+    "file": "baseline-multi-lower-charts.png",
+    "test": "LegacyChartDemoUITests/testAllReferenceScenariosRenderRealHighcharts()",
+    "device": "iPhone 15 Pro",
+    "associatedWithFailure": false
+  },
+  {
+    "name": "baseline-multi",
+    "file": "baseline-multi.png",
+    "test": "LegacyChartDemoUITests/testAllReferenceScenariosRenderRealHighcharts()",
+    "device": "iPhone 15 Pro",
+    "associatedWithFailure": false
+  },
+  {
+    "name": "baseline-empty",
+    "file": "baseline-empty.png",
+    "test": "LegacyChartDemoUITests/testAllReferenceScenariosRenderRealHighcharts()",
+    "device": "iPhone 15 Pro",
+    "associatedWithFailure": false
+  },
+  {
+    "name": "baseline-dense",
+    "file": "baseline-dense.png",
+    "test": "LegacyChartDemoUITests/testAllReferenceScenariosRenderRealHighcharts()",
+    "device": "iPhone 15 Pro",
+    "associatedWithFailure": false
+  },
+  {
+    "name": "baseline-format",
+    "file": "baseline-format.png",
+    "test": "LegacyChartDemoUITests/testAllReferenceScenariosRenderRealHighcharts()",
+    "device": "iPhone 15 Pro",
+    "associatedWithFailure": false
+  },
+  {
+    "name": "baseline-gaps",
+    "file": "baseline-gaps.png",
+    "test": "LegacyChartDemoUITests/testAllReferenceScenariosRenderRealHighcharts()",
+    "device": "iPhone 15 Pro",
+    "associatedWithFailure": false
+  },
+  {
+    "name": "baseline-mixed",
+    "file": "baseline-mixed.png",
+    "test": "LegacyChartDemoUITests/testAllReferenceScenariosRenderRealHighcharts()",
+    "device": "iPhone 15 Pro",
+    "associatedWithFailure": false
+  },
+  {
+    "name": "baseline-legendGroups",
+    "file": "baseline-legendGroups.png",
+    "test": "LegacyChartDemoUITests/testAllReferenceScenariosRenderRealHighcharts()",
+    "device": "iPhone 15 Pro",
+    "associatedWithFailure": false
+  },
+  {
+    "name": "baseline-signed",
+    "file": "baseline-signed.png",
+    "test": "LegacyChartDemoUITests/testAllReferenceScenariosRenderRealHighcharts()",
+    "device": "iPhone 15 Pro",
+    "associatedWithFailure": false
+  },
+  {
+    "name": "baseline-column",
+    "file": "baseline-column.png",
+    "test": "LegacyChartDemoUITests/testAllReferenceScenariosRenderRealHighcharts()",
+    "device": "iPhone 15 Pro",
+    "associatedWithFailure": false
+  },
+  {
+    "name": "baseline-line",
+    "file": "baseline-line.png",
+    "test": "LegacyChartDemoUITests/testAllReferenceScenariosRenderRealHighcharts()",
+    "device": "iPhone 15 Pro",
+    "associatedWithFailure": false
+  },
+  {
+    "name": "baseline-power",
+    "file": "baseline-power.png",
+    "test": "LegacyChartDemoUITests/testAllReferenceScenariosRenderRealHighcharts()",
+    "device": "iPhone 15 Pro",
+    "associatedWithFailure": false
+  },
+  {
+    "name": "legacy-fullscreen",
+    "file": "legacy-fullscreen.png",
+    "test": "LegacyChartDemoUITests/testDensityControlsAndOriginalFullscreen()",
+    "device": "iPhone 15 Pro",
+    "associatedWithFailure": false
+  },
+  {
+    "name": "forced-empty-state",
+    "file": "forced-empty-state.png",
+    "test": "LegacyChartDemoUITests/testEmptyStateRestoresAndZeroValuesRemainData()",
+    "device": "iPhone 15 Pro",
+    "associatedWithFailure": false
+  },
+  {
+    "name": "all-zero-data",
+    "file": "all-zero-data.png",
+    "test": "LegacyChartDemoUITests/testEmptyStateRestoresAndZeroValuesRemainData()",
+    "device": "iPhone 15 Pro",
+    "associatedWithFailure": false
+  },
+  {
+    "name": "legacy-data-only-retains-packed-data",
+    "file": "legacy-data-only-retains-packed-data.png",
+    "test": "LegacyChartDemoUITests/testFullReloadAndDataOnlyRefreshUseDifferentLegacyPaths()",
+    "device": "iPhone 15 Pro",
+    "associatedWithFailure": false
+  },
+  {
+    "name": "signed-normal",
+    "file": "signed-normal.png",
+    "test": "LegacyChartDemoUITests/testStackingAndThemeControlsUseTheOriginalComponent()",
+    "device": "iPhone 15 Pro",
+    "associatedWithFailure": false
+  },
+  {
+    "name": "signed-percent-theme-change",
+    "file": "signed-percent-theme-change.png",
+    "test": "LegacyChartDemoUITests/testStackingAndThemeControlsUseTheOriginalComponent()",
+    "device": "iPhone 15 Pro",
+    "associatedWithFailure": false
+  },
+  {
+    "name": "legend-hidden",
+    "file": "legend-hidden.png",
+    "test": "LegacyChartDemoUITests/testTooltipVersionsAndLegacyLegendInteraction()",
+    "device": "iPhone 15 Pro",
+    "associatedWithFailure": false
+  },
+  {
+    "name": "tooltip-v2 原生",
+    "file": "tooltip-v2-native.png",
+    "test": "LegacyChartDemoUITests/testTooltipVersionsAndLegacyLegendInteraction()",
+    "device": "iPhone 15 Pro",
+    "associatedWithFailure": false
+  },
+  {
+    "name": "tooltip-v2 JS",
+    "file": "tooltip-v2-js.png",
+    "test": "LegacyChartDemoUITests/testTooltipVersionsAndLegacyLegendInteraction()",
+    "device": "iPhone 15 Pro",
+    "associatedWithFailure": false
+  },
+  {
+    "name": "tooltip-v1 原生",
+    "file": "tooltip-v1-native.png",
+    "test": "LegacyChartDemoUITests/testTooltipVersionsAndLegacyLegendInteraction()",
+    "device": "iPhone 15 Pro",
+    "associatedWithFailure": false
+  },
+  {
+    "name": "tooltip-v1 JS",
+    "file": "tooltip-v1-js.png",
+    "test": "LegacyChartDemoUITests/testTooltipVersionsAndLegacyLegendInteraction()",
+    "device": "iPhone 15 Pro",
+    "associatedWithFailure": false
+  }
+]
