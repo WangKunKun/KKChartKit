@@ -1,0 +1,94 @@
+{
+  "recordedAt": "2026-10-09T05:17:49.179317+00:00",
+  "scope": "All static files in this directory except this self-referential manifest; paths relative to this directory. Development records are not added to final acceptance counts.",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "2c1231259b6b9f76138fa664fb934f55c934f95366a6a56b6025f49603f634d2"
+    },
+    {
+      "path": "core-validation.json",
+      "sha256": "78edbdf74eb4527a04c61f04ca7c65ca6eae6d9532f270779b6399afb83d8318"
+    },
+    {
+      "path": "coverage-check.json",
+      "sha256": "ddb3af2afd40ca014b7fafa31f03ed30473eb7ed3d9e7b0a916554f82d50176c"
+    },
+    {
+      "path": "development-focused-summary.json",
+      "sha256": "16a206e607490d828be3bf23b73f0c1e3bd2dfdf8603bbaa6965b5dc8bef6cb6"
+    },
+    {
+      "path": "development-focused.log.gz",
+      "sha256": "4cd8f72b88df4a742578f84331940131b596a53304f34c4227ae5ed79ffd62ee"
+    },
+    {
+      "path": "framework-product-audit.json",
+      "sha256": "4c443784fb99491d7849e026df87213d9812d48af93c3578fa2bce2057a46ed4"
+    },
+    {
+      "path": "inventory-check.json",
+      "sha256": "173ef5f191f92ec0e266b351080855c15b8767f57f5e87862f39444a8ea83aaa"
+    },
+    {
+      "path": "main-summary.json",
+      "sha256": "1db628c42b9075b98d69728c1be365e92c3dc3e095b7bd9a04a89b5289e0b4da"
+    },
+    {
+      "path": "main-test.log.gz",
+      "sha256": "a7d90f48965189f89b4e89cd546f0c1a78be37b866c1605c0bcf68ef6a986872"
+    },
+    {
+      "path": "offline-evidence-check.json",
+      "sha256": "e010eeab8aec3d21d40cd1df73d24f4b0602d91b5c0de7ee5c634d2c49dde8e9"
+    },
+    {
+      "path": "public-build.log.gz",
+      "sha256": "8f756ec5f2ee7422c084c598900a0f92bf0a72a6e1c57bbc8e509c32521aa089"
+    },
+    {
+      "path": "public-import-summary.json",
+      "sha256": "dbb9f0dcb923e002ce17838764ae44cb9901902505b7ba2faf72d08ced1d9e44"
+    },
+    {
+      "path": "public-test.log.gz",
+      "sha256": "0ae7c691fb21732b6bc3f6a24726102e03bde45a7202ed64edae687c3e3fef11"
+    },
+    {
+      "path": "python-tests.log",
+      "sha256": "cd028a7967f2017681b454888f1b614da0b03fcafb26e80c774fab6f3a9bad5f"
+    },
+    {
+      "path": "screenshots/71F247F8-CDA2-45D9-8D5C-2E2CFFC635B9.png",
+      "sha256": "81a98f99d4e8952f5d650e4189f09690f02032d7a91acd6ed9293922936a9d8f"
+    },
+    {
+      "path": "screenshots/88269F1E-AAF2-4A72-8DE4-DD01FC064994.png",
+      "sha256": "83eadb93e6c786b7be3bec2c44e0aa76b5c09b45e22f96e7879281aa0c570074"
+    },
+    {
+      "path": "screenshots/963510B1-0B16-453E-B64F-E12CEC1760C9.png",
+      "sha256": "e3e12ed4f8fe97c2aca8ce230b3aaa0fe166902c8e6533823c864c3c1f92edde"
+    },
+    {
+      "path": "screenshots/FD3FA66A-4E94-4A5E-BABF-6FD6820CA8E2.png",
+      "sha256": "a795b07b5b4ac933adedb7c0f54e70638f7ff22fa80ddd09b19b743763729018"
+    },
+    {
+      "path": "screenshots/manifest.json",
+      "sha256": "40e8e8775b5dcdd1335a2430e24367fc7dc027ff7bf7019d1d1dd9b428832100"
+    },
+    {
+      "path": "screenshots/screenshots.json",
+      "sha256": "a078e26c2ba3efc0855462928eea9da794b91868fd666178b373698c8f111d91"
+    },
+    {
+      "path": "source-delta-from-n3.json",
+      "sha256": "603f0df5283b52c2a07b9c0b4cfe863a17baaefaeb095bfdf5948f1202148a11"
+    },
+    {
+      "path": "source-inputs.json",
+      "sha256": "a7f6d10ec97fb76a5b1cd17be4ef32b5a9f803a29afb641a29a1dc0c5aea47ab"
+    }
+  ]
+}

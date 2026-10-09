@@ -1,0 +1,44 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+        "deviceName" : "iPhone 16 Pro",
+        "exportedFileName" : "C97230E4-C382-43B2-A2AE-3595F14A87E6.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "neutral-v5-annotations-混合图_0_015DA8A7-241E-4464-882F-5BB13421446C.png",
+        "timestamp" : 1791520122.906
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+        "deviceName" : "iPhone 16 Pro",
+        "exportedFileName" : "9EB7130D-D016-425A-9DE7-BECDFA7D8938.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "neutral-v5-annotations-条形图_0_3A00BF3E-2DB1-480D-B80E-6F42E6C64DD7.png",
+        "timestamp" : 1791520108.32
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+        "deviceName" : "iPhone 16 Pro",
+        "exportedFileName" : "336C2509-D158-44B6-B9E7-84F653CB8229.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "neutral-v5-annotations-柱状图_0_084167D7-6ED2-433A-A371-B0437E6D4911.png",
+        "timestamp" : 1791520094.143
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+        "deviceName" : "iPhone 16 Pro",
+        "exportedFileName" : "FCC2833E-C5A2-412C-8828-FF9ACC9990F0.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "neutral-v5-annotations-折线图_0_3C070086-4AF1-45EB-896D-01C35D9FAFC1.png",
+        "timestamp" : 1791520032.445
+      }
+    ],
+    "testIdentifier" : "ChartDemoUITests/testNeutralAnnotationsOnFourPagesAndReset()",
+    "testIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testNeutralAnnotationsOnFourPagesAndReset"
+  }
+]

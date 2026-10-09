@@ -1,0 +1,113 @@
+{
+  "scope": "All static files in this directory except this self-referential manifest; paths relative to this directory. Development records are not added to final acceptance counts.",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "d6fb617d45d4e3f6b03134f64bafc04625c3bc117a0af28e8a6ea93d187e2e11"
+    },
+    {
+      "path": "core-validation.json",
+      "sha256": "eb0b807535b7b77e71dc1ce94b83b9406e06a1a5cd65fb6f3c21491420f0783b"
+    },
+    {
+      "path": "coverage-check.json",
+      "sha256": "0e8f567a8c48bda623da84763b5e639507c0408af1bc1fe41fb5d907a5d74cc7"
+    },
+    {
+      "path": "development-adapter-summary.json",
+      "sha256": "73d4e63e5503dd600ee5da09e69c41cd48b825fbcaa56d0f9f7cad6e176b1b7d"
+    },
+    {
+      "path": "development-adapter.log.gz",
+      "sha256": "37f5b02225a352bb3548ed8985a0c4a09f2dfdf6bf67cc9ddfd651f015803beb"
+    },
+    {
+      "path": "development-core-summary.json",
+      "sha256": "405d7fb65cb507e7165061a9cb4d9a3a060c09df8e05e3df3bd3145f4dd2aab0"
+    },
+    {
+      "path": "development-core.log.gz",
+      "sha256": "c294313757dae972d7c2b8059b37565cda983135555c10d187dc36f858f64997"
+    },
+    {
+      "path": "development-main-summary.json",
+      "sha256": "15de344682b9926da6bfb7a24fd5e4864c1ef01d651122b07d1a87622af530cd"
+    },
+    {
+      "path": "development-main.log.gz",
+      "sha256": "dc7bf96b6d6d9d5391c79675759fea985a753d83e25591b44b016a7959a35753"
+    },
+    {
+      "path": "development-sandbox.log.gz",
+      "sha256": "38023ad62f03fb581df482275cb31680348d43bdc7fb0be04b755c082157fabb"
+    },
+    {
+      "path": "framework-product-audit.json",
+      "sha256": "918d04a0ff407690283881446236c301f7a4af580aa8c2cc72d88b7fcbe6a18b"
+    },
+    {
+      "path": "inventory-check.json",
+      "sha256": "e4794e8b50a1dd4ce98c02dc7e1f23013a879de9ac07b5d71c5d8a30bc2e6387"
+    },
+    {
+      "path": "main-summary.json",
+      "sha256": "16cd7cf446004c8687432e0c285c8e1200cb5df07fb815650a628c3640e5ed66"
+    },
+    {
+      "path": "main-test.log.gz",
+      "sha256": "532be8998edc2ee1218e5f71d2c8fc474e4ecdfd8b36a3d7820b3d0bc1a62ef7"
+    },
+    {
+      "path": "offline-evidence-check.json",
+      "sha256": "849f101f8fd26e20d87a35e3bc6b6662bd506f0d06cb6e9f1813d54909d91729"
+    },
+    {
+      "path": "public-build.log.gz",
+      "sha256": "e35f5c4ae19a272d4bc015a63941b5b147a67e9352a6a83eb9a6ee379988e543"
+    },
+    {
+      "path": "public-import-summary.json",
+      "sha256": "2edaf27f26dc6f2f247027de0e62d9f87ec3a693094916cfcab518441ea5ab4e"
+    },
+    {
+      "path": "public-test.log.gz",
+      "sha256": "5f510cb66e10c27c07e89ae1637d2a2927d84e90cdf07fe8fb9ae6d4daee43d0"
+    },
+    {
+      "path": "python-tests.log",
+      "sha256": "7c79b2405cbba9f39f10c4d5274bd1bf13d71cfbd20269dd98c4ef865069e20e"
+    },
+    {
+      "path": "screenshots/336C2509-D158-44B6-B9E7-84F653CB8229.png",
+      "sha256": "3c8d4fc8a1d1836425a067a2b034c362092214829dbeaa060181e57fc5b0f1e8"
+    },
+    {
+      "path": "screenshots/9EB7130D-D016-425A-9DE7-BECDFA7D8938.png",
+      "sha256": "b49282dffdc165432a8a10b59094f9f8cd9e0ad15a5263a0b7c38d9fb4e3de0d"
+    },
+    {
+      "path": "screenshots/C97230E4-C382-43B2-A2AE-3595F14A87E6.png",
+      "sha256": "511c23bc621f7316ec12cd035a1913cf85d3bac6d3f6a5dffaf6e34427bf9a27"
+    },
+    {
+      "path": "screenshots/FCC2833E-C5A2-412C-8828-FF9ACC9990F0.png",
+      "sha256": "83b0a6c247b67dbfd30002ea7342db1cbca4f1a91e7a263a3a981d183d9a5849"
+    },
+    {
+      "path": "screenshots/manifest.json",
+      "sha256": "9224f936479fd0177e9a3e9eadbcf293b567a2e1d6aea115e4c142e1c70c2863"
+    },
+    {
+      "path": "screenshots/screenshots.json",
+      "sha256": "7ff58b2972ec89b76fad580728fe973e6abb2b9f4bf92a0f4760f1cd83edba01"
+    },
+    {
+      "path": "source-delta-from-n2.json",
+      "sha256": "7c1b9d84926a13e5c4f01b0ce02d9cdb1c91b35699d1ad5027d1f2b4baf23ec7"
+    },
+    {
+      "path": "source-inputs.json",
+      "sha256": "13090a18b53dd6d5f776a49653f24c60d25bd87075ead7e804007edac512dc95"
+    }
+  ]
+}

@@ -1,0 +1,167 @@
+{
+  "recordedAt": "2026-10-09T05:17:49.179317+00:00",
+  "baseline": "docs/evidence/charts-neutral-annotations-2026-10-09/source-inputs.json",
+  "baselineManifestSHA256": "13090a18b53dd6d5f776a49653f24c60d25bd87075ead7e804007edac512dc95",
+  "baselineCount": 200,
+  "currentCount": 207,
+  "unchangedCount": 175,
+  "changedBaselineFiles": [
+    {
+      "path": "Examples/ChartSpecifications/GenerateExample.swift",
+      "baselineSHA256": "70ce9c1da027d9771592548b6de3b4d6d27bbe30004725468cd0bbcdc9d2402c",
+      "sha256": "4a72f3fdeaa296276c70500e67b5688d9c1ef76a115416a33ab9a5e589125312"
+    },
+    {
+      "path": "Examples/ChartsIntegration/ChartsIntegration.xcodeproj/project.pbxproj",
+      "baselineSHA256": "ebbfda0a90ca7e2393aef0984e1eaebbc89752b20e1cfedd0d93269c161bbc0d",
+      "sha256": "b41fb7dd52434916121c1278053b58f4ae8856aabcae76b034a6c0f6907974f6"
+    },
+    {
+      "path": "Examples/ChartsIntegration/OCHost/main.m",
+      "baselineSHA256": "ed27502b7ed8829a8f8ae9031251c8e4e8884d6306c46362b83324e5039f9a39",
+      "sha256": "c2a5b58e3eb7fd99a83cd26672700da61ef8c1d1b19d441840f3e603442ff210"
+    },
+    {
+      "path": "Examples/ChartsIntegration/README.md",
+      "baselineSHA256": "a69b86c0dc2bad42f55c003abb522236d8817d4deb651786f3a04143311adaa1",
+      "sha256": "433e5ea9bd797fa73896010948a69265750e5fbdfe63216f8246ca4deb7bc38d"
+    },
+    {
+      "path": "Examples/ChartsIntegration/SwiftHost/AppDelegate.swift",
+      "baselineSHA256": "66738eecfd32fc6272557989a6b08a90e07b91b855deb54d4183f5af78443a7e",
+      "sha256": "f6e6affe689859ad91bbbbab8fafc1cf988754186b8f87437231fdbd5d10a3c4"
+    },
+    {
+      "path": "Examples/ChartsIntegration/check_product.py",
+      "baselineSHA256": "7d31caa7461fdeaf6d3e45fa2658b2a600e781af09f77290c136c32deb007dc0",
+      "sha256": "23835b71cee2568deb1fa79227c1dba5789f4af9cb260914239ccd002e3a291e"
+    },
+    {
+      "path": "Examples/ChartsIntegration/generate_project.py",
+      "baselineSHA256": "5c0bddbd7117ccc5056d42eeb5c05f9f39aa4d7740d121f5ebd14aed4f77dabe",
+      "sha256": "c642c21888c04405decb5221892a6bbfe0feee7f60f069049b9d0c8faa67bdf5"
+    },
+    {
+      "path": "README.en.md",
+      "baselineSHA256": "ccd4209416b70af5402f3e10ffb2869c93917a45a4354a655473034a54cc57af",
+      "sha256": "0f24fdcad637ff5d823cb858376a69bb033e5bed799714074a4c2f7235902e79"
+    },
+    {
+      "path": "README.md",
+      "baselineSHA256": "e8496f455837ad1f7a14964b54721eeb6282c4a185dadce9e26c2efbeabe79c7",
+      "sha256": "75c74ff39f195488c382ce79f759893e48d9eaa06e01679230a5a7ee1ca163af"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Adapters/HYMChartsSpecificationAdapter.swift",
+      "baselineSHA256": "8e4f65dbcdfe7434bcd0b260fd067443274b4b990ba8ff5215729f396daddf09",
+      "sha256": "856b398fc3eb6798fc61bf429f06ef0507d8589ece1e2f9e74a24e1acea28b89"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/OCBridge/HYMCartesianChartViewBridge.swift",
+      "baselineSHA256": "98637d8f034a81355d5d6bbab554dba63ab7e2e73ee238e7c599c7304bb9e70e",
+      "sha256": "b51f243d73cb130adc0c856d2d48f4f6ed6f5458b7ff13942d47801ff3e2e18e"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Specification/ChartSpecification.swift",
+      "baselineSHA256": "a832664794167c2b0e6082efffc5ef1cc0dc51dba4ff5591eb072cf4ad0810ac",
+      "sha256": "4894e824faa1463e2fd83429188654a950de95ca958e0bea8fc1864dcb9db256"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Specification/ChartSpecificationValidation.swift",
+      "baselineSHA256": "3abc14497a68e38b4d01be38ce20a074908901f5a769ee895e10f3732d9b4e1b",
+      "sha256": "d476cb855951e2ae8dcc706dd71127b29ea5866ff25291dbb6dc77906a0de49d"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Specification/ChartSpecificationVersionCoding.swift",
+      "baselineSHA256": "47834a3ec0f78559deb0be9b60ee74c93ab1e6579daf803632597ed310a4d6e5",
+      "sha256": "43efa1e1188e4508fe174eea008b1f2a9c9506f3fd59908c98bda8722cdd263c"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/SwiftUI/ChartSpecificationDemo.swift",
+      "baselineSHA256": "650dac080de7de2c9cec0060545b2e48aff442c2a0e5e6a217cb62afc0839920",
+      "sha256": "674ad6eaefff4ff19aba2691affe7551ba8bb3abec217b6d1614550f0a6bdb6b"
+    },
+    {
+      "path": "SwiftFunctionProjectTests/ChartSpecificationAnnotationTests.swift",
+      "baselineSHA256": "fc8ddf10003845e4fc5b7d4238002c60b1ef7dcf4c669c462d23f448b3651871",
+      "sha256": "6ca1cec9de85c74d63f336945b0f5320971676ebe3a4422514232058074028ae"
+    },
+    {
+      "path": "SwiftFunctionProjectUITests/ChartDemoUITests.swift",
+      "baselineSHA256": "1cfed4287175880e0c9b5971db74d08f105631c695cf6108785756414568aa63",
+      "sha256": "9d4a7f0042d27e144cbc32fce832c16a80958f5a98d3b0a3b403e20bcda1973e"
+    },
+    {
+      "path": "docs/charts-capability-status.md",
+      "baselineSHA256": "43566f8ec06f000d20fafb0e12844d26768f156810e0ccf94a317442ecc91196",
+      "sha256": "8a5a6c444779e83e80b629c485954268914295122e609a0b3e7bad3932cbc060"
+    },
+    {
+      "path": "docs/charts-neutral-model-coverage.json",
+      "baselineSHA256": "bbe5f3ca05ced6825d2f232b70a1bde4170f0df6b71822c79bc9c63506858648",
+      "sha256": "27871ba7468fbc859e97fe936c921475e557ee2cdce4a3e4612b242aab604c01"
+    },
+    {
+      "path": "docs/charts-neutral-model-coverage.md",
+      "baselineSHA256": "3018d41607a62b77567756806ca39cbcc7fc1f1e758e45d74546a55b48a19293",
+      "sha256": "94e02689418de3b8f5c20db73a4d6d504870f5e347ab54913df6d1523a7c2317"
+    },
+    {
+      "path": "docs/charts-neutral-model-guide.md",
+      "baselineSHA256": "0ab2cf4dc92f4dff10212828a430600b16118d7e44cb3a957482588acea114c9",
+      "sha256": "28584892ce874a0ba2987f6dabf63df0a864139567d74cb8dff0283b776948d7"
+    },
+    {
+      "path": "docs/charts-neutral-model-task-progress-2026-10-03.md",
+      "baselineSHA256": "02216120c0f263f517f9249ac5bdfa3d7ecc15a4ce3444bcaee96e94a48d7fc8",
+      "sha256": "d8f6ee1fe465c0b4dbd98b4cf443621a9dac81c2af60b18ac7be927ba2c0184c"
+    },
+    {
+      "path": "docs/charts-next-task-plan-2026-10-09.md",
+      "baselineSHA256": "977ed7a7df5dcb3c7cb486327582d9712506efbaaf3295aac1ef38fcbc4732be",
+      "sha256": "eebeb37fd63272c444f29ac3bed0412a7661f28278157292e34c59affd1eb8f4"
+    },
+    {
+      "path": "scripts/check_chart_evidence.py",
+      "baselineSHA256": "b351b49f1201f6a0f6b9c2e240ab69dc1ec08c9728dac87292c82bb6b435fa5c",
+      "sha256": "0daa845cc7d69ad765782d273d85ec41aa74ab598063cc13a7975a51ebbc9b37"
+    },
+    {
+      "path": "scripts/test_check_chart_neutral_coverage.py",
+      "baselineSHA256": "c6f036d6816f8583badd586dca9b209efe25fac4d4dcc5c12d3996794d1a7d98",
+      "sha256": "7e5601b91348139a2e82ec94646280b6a4e5a2d160a6be0b4cf8b835ec831a8b"
+    }
+  ],
+  "addedFiles": [
+    {
+      "path": "Examples/ChartSpecifications/energy-interaction-v6.json",
+      "sha256": "9dcb33fcfd52f4bb0d3ed6e0879bf48ac6d087cd134833623ecb942dd7ba9ff3"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Adapters/HYMChartsSpecificationInteraction.swift",
+      "sha256": "843fb6f56a6743441b95229dbf69a058f306d052dddac0c7631513e2381ff7ce"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Specification/ChartInteractionSpecification.swift",
+      "sha256": "264730107cc0b7acce895e7b66ce8cfdfa6dc6c3e6554a0f05d45f29715245ff"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/SwiftUI/ChartSpecificationInteractionControls.swift",
+      "sha256": "460f71580eab719ffc444c917df87042ddaab342bcfaa370bb0dcbcf3a9d5c12"
+    },
+    {
+      "path": "SwiftFunctionProjectTests/ChartSpecificationInteractionTests.swift",
+      "sha256": "485bec12b99f18f8fe56b3230e5889a199f3b4edebb36d126f3cc9d0f27a7e4d"
+    },
+    {
+      "path": "SwiftFunctionProjectTests/HYMChartsSpecificationInteractionTests.swift",
+      "sha256": "992bf743292e6df867746b7659c34c6f49bbf67155b51ee3745297273985fb0c"
+    },
+    {
+      "path": "docs/charts-neutral-interaction-task-progress-2026-10-09.md",
+      "sha256": "7ce8e128d967e0c4be03851985a24c120420b3703e9e00d28f943e79579ae02e"
+    }
+  ],
+  "removedFiles": [],
+  "scope": "N4 delta against the recorded, still-uncommitted N3 state rather than Git HEAD; no native renderer, coordinate, stack or sample-selection algorithm files changed."
+}

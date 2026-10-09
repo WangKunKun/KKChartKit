@@ -1,0 +1,44 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+        "deviceName" : "iPhone 16 Pro",
+        "exportedFileName" : "71F247F8-CDA2-45D9-8D5C-2E2CFFC635B9.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "neutral-v6-interaction-混合图_0_6DD13E95-AE32-4F68-839C-3A220BB1316F.png",
+        "timestamp" : 1791522540.342
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+        "deviceName" : "iPhone 16 Pro",
+        "exportedFileName" : "88269F1E-AAF2-4A72-8DE4-DD01FC064994.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "neutral-v6-interaction-条形图_0_9F215A6B-F817-4580-8AB0-287DDB299F2C.png",
+        "timestamp" : 1791522520.544
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+        "deviceName" : "iPhone 16 Pro",
+        "exportedFileName" : "963510B1-0B16-453E-B64F-E12CEC1760C9.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "neutral-v6-interaction-柱状图_0_5E133D70-3C4E-4F9E-AA59-EFCF7F966D53.png",
+        "timestamp" : 1791522502.395
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+        "deviceName" : "iPhone 16 Pro",
+        "exportedFileName" : "FD3FA66A-4E94-4A5E-BABF-6FD6820CA8E2.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "neutral-v6-interaction-折线图_0_F27210D7-B8B5-44F6-9E88-D9678064FC3B.png",
+        "timestamp" : 1791522474.98
+      }
+    ],
+    "testIdentifier" : "ChartDemoUITests/testNeutralTooltipLegendOnFourPagesAndReset()",
+    "testIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testNeutralTooltipLegendOnFourPagesAndReset"
+  }
+]

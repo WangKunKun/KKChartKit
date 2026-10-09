@@ -1,0 +1,134 @@
+{
+  "recordedAt": "2026-10-09T12:39:39.174889+08:00",
+  "scope": "Compare only preserved N2 scoped inputs plus explicit new scope entries; additions mean added to this manifest, not necessarily newly created files.",
+  "baseline": "docs/evidence/charts-neutral-axes-2026-10-09/source-inputs.json",
+  "baselineManifestSHA256": "2bf892b1463529f9f590f53a9a340d88d1390277373354d264768953c63394b7",
+  "baselineFileCount": 191,
+  "currentScopedFileCount": 200,
+  "unchangedBaselineFileCount": 170,
+  "changedBaselineFiles": [
+    {
+      "path": "Examples/ChartSpecifications/GenerateExample.swift",
+      "sha256": "70ce9c1da027d9771592548b6de3b4d6d27bbe30004725468cd0bbcdc9d2402c"
+    },
+    {
+      "path": "Examples/ChartsIntegration/ChartsIntegration.xcodeproj/project.pbxproj",
+      "sha256": "ebbfda0a90ca7e2393aef0984e1eaebbc89752b20e1cfedd0d93269c161bbc0d"
+    },
+    {
+      "path": "Examples/ChartsIntegration/OCHost/main.m",
+      "sha256": "ed27502b7ed8829a8f8ae9031251c8e4e8884d6306c46362b83324e5039f9a39"
+    },
+    {
+      "path": "Examples/ChartsIntegration/README.md",
+      "sha256": "a69b86c0dc2bad42f55c003abb522236d8817d4deb651786f3a04143311adaa1"
+    },
+    {
+      "path": "Examples/ChartsIntegration/SwiftHost/AppDelegate.swift",
+      "sha256": "66738eecfd32fc6272557989a6b08a90e07b91b855deb54d4183f5af78443a7e"
+    },
+    {
+      "path": "Examples/ChartsIntegration/check_product.py",
+      "sha256": "7d31caa7461fdeaf6d3e45fa2658b2a600e781af09f77290c136c32deb007dc0"
+    },
+    {
+      "path": "Examples/ChartsIntegration/generate_project.py",
+      "sha256": "5c0bddbd7117ccc5056d42eeb5c05f9f39aa4d7740d121f5ebd14aed4f77dabe"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Adapters/HYMChartsSpecificationAdapter.swift",
+      "sha256": "8e4f65dbcdfe7434bcd0b260fd067443274b4b990ba8ff5215729f396daddf09"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Specification/ChartSpecification.swift",
+      "sha256": "a832664794167c2b0e6082efffc5ef1cc0dc51dba4ff5591eb072cf4ad0810ac"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Specification/ChartSpecificationValidation.swift",
+      "sha256": "3abc14497a68e38b4d01be38ce20a074908901f5a769ee895e10f3732d9b4e1b"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Specification/ChartSpecificationVersionCoding.swift",
+      "sha256": "47834a3ec0f78559deb0be9b60ee74c93ab1e6579daf803632597ed310a4d6e5"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/SwiftUI/ChartSpecificationDemo.swift",
+      "sha256": "650dac080de7de2c9cec0060545b2e48aff442c2a0e5e6a217cb62afc0839920"
+    },
+    {
+      "path": "SwiftFunctionProjectTests/ChartSpecificationAxisPresentationTests.swift",
+      "sha256": "4bc3b9dc460fcc58aca5621d5368c3e701b6c35dadbd3862716a09042d607afe"
+    },
+    {
+      "path": "SwiftFunctionProjectUITests/ChartDemoUITests.swift",
+      "sha256": "1cfed4287175880e0c9b5971db74d08f105631c695cf6108785756414568aa63"
+    },
+    {
+      "path": "docs/charts-neutral-model-coverage.json",
+      "sha256": "bbe5f3ca05ced6825d2f232b70a1bde4170f0df6b71822c79bc9c63506858648"
+    },
+    {
+      "path": "docs/charts-neutral-model-coverage.md",
+      "sha256": "3018d41607a62b77567756806ca39cbcc7fc1f1e758e45d74546a55b48a19293"
+    },
+    {
+      "path": "docs/charts-neutral-model-guide.md",
+      "sha256": "0ab2cf4dc92f4dff10212828a430600b16118d7e44cb3a957482588acea114c9"
+    },
+    {
+      "path": "docs/charts-neutral-model-task-progress-2026-10-03.md",
+      "sha256": "02216120c0f263f517f9249ac5bdfa3d7ecc15a4ce3444bcaee96e94a48d7fc8"
+    },
+    {
+      "path": "docs/charts-next-task-plan-2026-10-09.md",
+      "sha256": "977ed7a7df5dcb3c7cb486327582d9712506efbaaf3295aac1ef38fcbc4732be"
+    },
+    {
+      "path": "scripts/check_chart_evidence.py",
+      "sha256": "b351b49f1201f6a0f6b9c2e240ab69dc1ec08c9728dac87292c82bb6b435fa5c"
+    },
+    {
+      "path": "scripts/test_check_chart_neutral_coverage.py",
+      "sha256": "c6f036d6816f8583badd586dca9b209efe25fac4d4dcc5c12d3996794d1a7d98"
+    }
+  ],
+  "addedScopeFiles": [
+    {
+      "path": "Examples/ChartSpecifications/energy-annotations-v5.json",
+      "sha256": "55bbfd4d868292ad89d69b06fa6f111780dbc2429d9ae67f9a7e5e64b131fe55"
+    },
+    {
+      "path": "README.en.md",
+      "sha256": "ccd4209416b70af5402f3e10ffb2869c93917a45a4354a655473034a54cc57af"
+    },
+    {
+      "path": "README.md",
+      "sha256": "e8496f455837ad1f7a14964b54721eeb6282c4a185dadce9e26c2efbeabe79c7"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Specification/ChartAnnotationSpecification.swift",
+      "sha256": "08e2e390355e8d7a8a4ca0cc2c2d0934c0f8995328016ec60839415c2af9d587"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/SwiftUI/ChartSpecificationAnnotationControls.swift",
+      "sha256": "4b2c467f76bc5ff726a68955ec2c67641da8baac4b472fbab8dbf81243887161"
+    },
+    {
+      "path": "SwiftFunctionProjectTests/ChartSpecificationAnnotationTests.swift",
+      "sha256": "fc8ddf10003845e4fc5b7d4238002c60b1ef7dcf4c669c462d23f448b3651871"
+    },
+    {
+      "path": "SwiftFunctionProjectTests/HYMChartsSpecificationAnnotationTests.swift",
+      "sha256": "f5a0c90f430d67270f498dd56cfbd7c3c64949f64c5289b01d90338e684f7ade"
+    },
+    {
+      "path": "docs/charts-capability-status.md",
+      "sha256": "43566f8ec06f000d20fafb0e12844d26768f156810e0ccf94a317442ecc91196"
+    },
+    {
+      "path": "docs/charts-neutral-annotations-task-progress-2026-10-09.md",
+      "sha256": "87b2514398f5debc83ac3d21d12c6cc0c5b602aa727002efc4c88e73ba0c7eb8"
+    }
+  ],
+  "removedBaselineFiles": []
+}

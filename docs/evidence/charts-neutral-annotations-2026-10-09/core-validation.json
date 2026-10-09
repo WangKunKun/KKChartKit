@@ -1,0 +1,84 @@
+{
+  "status": "PASS",
+  "scope": "Foundation-only Swift 6 strict concurrency; five JSON samples regenerated, v1-v4 unchanged",
+  "commands": [
+    {
+      "command": [
+        "xcrun",
+        "swiftc",
+        "-swift-version",
+        "6",
+        "-strict-concurrency=complete",
+        "-parse-as-library",
+        "-module-cache-path",
+        "/tmp/hym-n3-module-cache",
+        "SwiftFunctionProject/Charts/Specification/ChartAdapter.swift",
+        "SwiftFunctionProject/Charts/Specification/ChartAnnotationSpecification.swift",
+        "SwiftFunctionProject/Charts/Specification/ChartAppearanceSpecification.swift",
+        "SwiftFunctionProject/Charts/Specification/ChartAxisPresentation.swift",
+        "SwiftFunctionProject/Charts/Specification/ChartDataSpecification.swift",
+        "SwiftFunctionProject/Charts/Specification/ChartSpecification.swift",
+        "SwiftFunctionProject/Charts/Specification/ChartSpecificationCoding.swift",
+        "SwiftFunctionProject/Charts/Specification/ChartSpecificationValidation.swift",
+        "SwiftFunctionProject/Charts/Specification/ChartSpecificationVersionCoding.swift",
+        "SwiftFunctionProject/Charts/Specification/ChartValueColorZones.swift",
+        "Examples/ChartSpecifications/GenerateExample.swift",
+        "-o",
+        "/tmp/hym-n3-generate-example"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/tmp/hym-n3-generate-example",
+        "/tmp/hym-n3-final-v1.json",
+        "/tmp/hym-n3-final-v2.json",
+        "/tmp/hym-n3-final-v3.json",
+        "/tmp/hym-n3-final-v4.json",
+        "/tmp/hym-n3-final-v5.json"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "samples": [
+    {
+      "version": 1,
+      "path": "Examples/ChartSpecifications/energy.json",
+      "sha256": "6d174ae3d0008f9da05a48ed7d7fcbcb67ecde658d38351daceb68c8cf2e44b6",
+      "generated": "/tmp/hym-n3-final-v1.json",
+      "byteIdentical": true
+    },
+    {
+      "version": 2,
+      "path": "Examples/ChartSpecifications/energy-g1-v2.json",
+      "sha256": "5f1b0fe5699e99e547cbbf091d82215dadc900a06a2447c831ef34843e9e1509",
+      "generated": "/tmp/hym-n3-final-v2.json",
+      "byteIdentical": true
+    },
+    {
+      "version": 3,
+      "path": "Examples/ChartSpecifications/energy-zones-v3.json",
+      "sha256": "d541b6cf4f828ecda988a6f77e59a7bca0ce75c242d203ec8fea00beea2a1800",
+      "generated": "/tmp/hym-n3-final-v3.json",
+      "byteIdentical": true
+    },
+    {
+      "version": 4,
+      "path": "Examples/ChartSpecifications/energy-axes-v4.json",
+      "sha256": "470077ea09418ceb5c3960e83abd384715a7874ca4fc7db1e4fb4d5a5d41f1b9",
+      "generated": "/tmp/hym-n3-final-v4.json",
+      "byteIdentical": true
+    },
+    {
+      "version": 5,
+      "path": "Examples/ChartSpecifications/energy-annotations-v5.json",
+      "sha256": "55bbfd4d868292ad89d69b06fa6f111780dbc2429d9ae67f9a7e5e64b131fe55",
+      "generated": "/tmp/hym-n3-final-v5.json",
+      "byteIdentical": true
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+{"status": "PASS", "legacyDeclarations": 197, "capabilities": 59, "nativeReview": 15, "counts": {"external": 104, "unsupported": 7, "expressed": 55, "schema_gap": 31}, "scope": "offline audit consistency; not renderer execution"}
