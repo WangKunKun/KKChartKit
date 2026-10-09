@@ -1,0 +1,9 @@
+{
+  "command": [
+    "python3",
+    "scripts/check_chart_migration_inventory.py"
+  ],
+  "exitCode": 0,
+  "stdout": "PASS: 197 declarations in 9 headers; every member has an explicit status\n",
+  "stderr": ""
+}

@@ -1,0 +1,62 @@
+[
+  {
+    "file": "7051BD72-DE9C-4E24-8E67-E05CD03F43B3.png",
+    "sha256": "0a747feaefb2ce4e264a35fc7c951abf06018e0a89b06feb6c5b24a9ff658774",
+    "test": "ChartDemoUITests/testNeutralTooltipLegendOnFourPagesAndReset()",
+    "resultBundle": "/tmp/hym-neutral-layout-accepted-20261009.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "781C9872-DAE0-4996-A623-36115772B60F",
+      "deviceName": "iPhone 16 Pro",
+      "exportedFileName": "7051BD72-DE9C-4E24-8E67-E05CD03F43B3.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "neutral-v6-layout-混合图_0_D2260C4B-108D-4540-BF7B-59A9D21BB697.png",
+      "timestamp": 1791528965.939
+    }
+  },
+  {
+    "file": "5EC569E6-1AEA-437B-949F-6D2EAF07FD81.png",
+    "sha256": "c375e361dcc6f59ba2fcdcea1fe46106e69427553b438bacbd2c32d852f3ec1c",
+    "test": "ChartDemoUITests/testNeutralTooltipLegendOnFourPagesAndReset()",
+    "resultBundle": "/tmp/hym-neutral-layout-accepted-20261009.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "781C9872-DAE0-4996-A623-36115772B60F",
+      "deviceName": "iPhone 16 Pro",
+      "exportedFileName": "5EC569E6-1AEA-437B-949F-6D2EAF07FD81.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "neutral-v6-layout-条形图_0_3B3DF0F3-D128-45C1-9576-097A23CC4E08.png",
+      "timestamp": 1791528946.686
+    }
+  },
+  {
+    "file": "2CB45D95-754A-44FB-9E5B-3C1493E41FA1.png",
+    "sha256": "4cc4220b138e8abb925d6435a81fe255225a7e09ff867264566eacad435a63dc",
+    "test": "ChartDemoUITests/testNeutralTooltipLegendOnFourPagesAndReset()",
+    "resultBundle": "/tmp/hym-neutral-layout-accepted-20261009.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "781C9872-DAE0-4996-A623-36115772B60F",
+      "deviceName": "iPhone 16 Pro",
+      "exportedFileName": "2CB45D95-754A-44FB-9E5B-3C1493E41FA1.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "neutral-v6-layout-柱状图_0_84B4BB0F-5D61-49B0-920C-5C7A6E1EAFEF.png",
+      "timestamp": 1791528927.643
+    }
+  },
+  {
+    "file": "88FCD21B-56A2-4200-8CC7-001B13599FEC.png",
+    "sha256": "fc8507a66cc3f30d32f669b637b5dc8cbe99224e63b1458923d193998ae230ea",
+    "test": "ChartDemoUITests/testNeutralTooltipLegendOnFourPagesAndReset()",
+    "resultBundle": "/tmp/hym-neutral-layout-accepted-20261009.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "781C9872-DAE0-4996-A623-36115772B60F",
+      "deviceName": "iPhone 16 Pro",
+      "exportedFileName": "88FCD21B-56A2-4200-8CC7-001B13599FEC.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "neutral-v6-layout-折线图_0_0B95E16A-8CF7-462F-9152-8BDD5B05C938.png",
+      "timestamp": 1791528907.639
+    }
+  }
+]

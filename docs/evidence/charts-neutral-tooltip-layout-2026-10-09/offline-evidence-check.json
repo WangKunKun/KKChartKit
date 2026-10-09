@@ -1,0 +1,9 @@
+{
+  "command": [
+    "python3",
+    "scripts/check_chart_evidence.py"
+  ],
+  "exitCode": 0,
+  "stdout": "PASS: 69 chart documents, 1448 local links, 68 original screenshots across 8 current batches\nIntegrity only; XCTest execution and visual review are separate checks.\n",
+  "stderr": ""
+}

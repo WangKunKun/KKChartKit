@@ -1,0 +1,130 @@
+{
+  "recordedAt": "2026-10-09T07:02:27.355048+00:00",
+  "scope": "All static files in this directory except this self-referential manifest; paths relative to this directory. Development runs are not added to final acceptance counts.",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "99f32cad729d2c8dc0344df440e4d3342059da3a46c764d1a7ca8699c5aee9f4"
+    },
+    {
+      "path": "commands.json",
+      "sha256": "35ebb08c3af43f7ce11ae8475a78638541d2dd93787be5fd150e518ee67926d0"
+    },
+    {
+      "path": "core-validation.json",
+      "sha256": "e7a371965f2d14638548721cbb5cfa7d61fbb822e7a51f8766a28d2241651e4e"
+    },
+    {
+      "path": "coverage-check.json",
+      "sha256": "ddb3af2afd40ca014b7fafa31f03ed30473eb7ed3d9e7b0a916554f82d50176c"
+    },
+    {
+      "path": "demo-audit-summary.json",
+      "sha256": "48aa474922ea1933a62ffbc1546412dad4fa5c9bb5a9bff258ac1a6e75a26eab"
+    },
+    {
+      "path": "demo-control-inventory.json",
+      "sha256": "1c43cd84b9e781ab5700bf6e04832b0200c60c671b7f76775b8f5947b2fbafa2"
+    },
+    {
+      "path": "development-compile-failure.log.gz",
+      "sha256": "8e020025097f84d5e45ae50bd0ed4b2ea7f0fe8e6ac6842e6ab2c0ead9562a39"
+    },
+    {
+      "path": "development-focused-summary.json",
+      "sha256": "f01d83143c30f8e9ddb79361a28e16b6a9f144fee4107d16f5b9def09c878d1e"
+    },
+    {
+      "path": "development-focused.log.gz",
+      "sha256": "e97d3d0c6e90d0bf82bca480b667a7bad20e59f44b137dc3f0df67005020792e"
+    },
+    {
+      "path": "development-inventory-failure.log.gz",
+      "sha256": "3375684d7ad570cd667bbc6d71696ff31d008df0ebc0853855bb67858e21a0ba"
+    },
+    {
+      "path": "development-inventory-summary.json",
+      "sha256": "77779b1488942299ae0320228aee41f1fb84ee86386c5107c471b38f55cfe944"
+    },
+    {
+      "path": "development-sandbox-failure.log.gz",
+      "sha256": "645c68b7af9273851c784ffc68b5c9c5e1dbe2c1eaf28110e0cc96b6228cca05"
+    },
+    {
+      "path": "framework-product-audit.json",
+      "sha256": "8991fa7dfdd09b18af0b0cc1c88a8b9b81ba8b6f9dcd89fc30048700cb78744a"
+    },
+    {
+      "path": "historical-evidence-check.json",
+      "sha256": "ba46b2072dc5fbdb22b38f61e1c30c4586668dc9419c3847165ff0102c844b83"
+    },
+    {
+      "path": "inventory-check.json",
+      "sha256": "173ef5f191f92ec0e266b351080855c15b8767f57f5e87862f39444a8ea83aaa"
+    },
+    {
+      "path": "main-summary.json",
+      "sha256": "2f1706b030421def45ea6801618eebecc387f13188522f7bdd012893a08dfcfe"
+    },
+    {
+      "path": "main-test.log.gz",
+      "sha256": "a19becc6ca07c783f7913dd744c074171dfa0300abebae90b4086455c7a9857f"
+    },
+    {
+      "path": "offline-evidence-check.json",
+      "sha256": "99c30b55bffbcaebe2acfbf8e31ac5a70860abfdb90b543a641e3343378df2ba"
+    },
+    {
+      "path": "public-build.log.gz",
+      "sha256": "48301f42fe8cfa3fd605074bb798af7ad017e392bd9d927cdf3aebc761d91202"
+    },
+    {
+      "path": "public-import-summary.json",
+      "sha256": "807b41c2ff99ff070b0fb8329d06d0eedd4ec79b84047301f004d585fe70e4c2"
+    },
+    {
+      "path": "public-import-tests.json",
+      "sha256": "a7d52e02a2096498bde18cf9815d6fd48063e446f2e6328422c550b9e4109d4d"
+    },
+    {
+      "path": "public-test.log.gz",
+      "sha256": "0b2089e78074d0f6910a796cac61b1b41d1c1e8e95f49432353796a4da8e17e6"
+    },
+    {
+      "path": "python-tests.log",
+      "sha256": "c14e7dc16af861423ff2103ab6ace4c64606d93c6724b14a21b261cbbbd353d4"
+    },
+    {
+      "path": "screenshots/2CB45D95-754A-44FB-9E5B-3C1493E41FA1.png",
+      "sha256": "4cc4220b138e8abb925d6435a81fe255225a7e09ff867264566eacad435a63dc"
+    },
+    {
+      "path": "screenshots/5EC569E6-1AEA-437B-949F-6D2EAF07FD81.png",
+      "sha256": "c375e361dcc6f59ba2fcdcea1fe46106e69427553b438bacbd2c32d852f3ec1c"
+    },
+    {
+      "path": "screenshots/7051BD72-DE9C-4E24-8E67-E05CD03F43B3.png",
+      "sha256": "0a747feaefb2ce4e264a35fc7c951abf06018e0a89b06feb6c5b24a9ff658774"
+    },
+    {
+      "path": "screenshots/88FCD21B-56A2-4200-8CC7-001B13599FEC.png",
+      "sha256": "fc8507a66cc3f30d32f669b637b5dc8cbe99224e63b1458923d193998ae230ea"
+    },
+    {
+      "path": "screenshots/manifest.json",
+      "sha256": "cfd370f966dd7c616b57ceaac1fa6ff6cbb344f46b489a7a6ed88ab596c582c5"
+    },
+    {
+      "path": "screenshots/screenshots.json",
+      "sha256": "4795e55373a6be38477781de1acec5a2bd63dacf44b1b1bf4c5f6b1e44e0253a"
+    },
+    {
+      "path": "source-delta-from-n4.json",
+      "sha256": "ed24773691c3a606482be9184730e7c4a2f639e525fa934914dd77b6dc7ab134"
+    },
+    {
+      "path": "source-inputs.json",
+      "sha256": "93411c9adef3925ed52bcb6e2f1fdb8edf02a0af6895cba5fc92286af33d1f3c"
+    }
+  ]
+}

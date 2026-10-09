@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "editableControls": 327,
+  "bindingMutations": 3379,
+  "renderedConfigurationMatrix": 750,
+  "resultBundle": "/tmp/hym-neutral-layout-accepted-20261009.xcresult",
+  "test": "LineDemoAuditTests/testAllRegisteredControlsBindAndNumericRangesContainInitialValues()",
+  "source": "Final test log and successful suite; inventory lists include actions/notes in addition to editable controls."
+}

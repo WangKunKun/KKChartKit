@@ -1,0 +1,174 @@
+{
+  "recordedAt": "2026-10-09T07:02:27.355048+00:00",
+  "baseline": "docs/evidence/charts-neutral-interaction-2026-10-09/source-inputs.json",
+  "baselineManifestSHA256": "a7f6d10ec97fb76a5b1cd17be4ef32b5a9f803a29afb641a29a1dc0c5aea47ab",
+  "baselineCount": 207,
+  "currentCount": 211,
+  "unchangedCount": 178,
+  "changedBaselineFiles": [
+    {
+      "path": "Examples/ChartsIntegration/OCHost/main.m",
+      "baselineSHA256": "c2a5b58e3eb7fd99a83cd26672700da61ef8c1d1b19d441840f3e603442ff210",
+      "sha256": "c6616a7c4b04a4e85ab479c1447c1e8e86884c4042839560b74ee3dbbc5ae86e"
+    },
+    {
+      "path": "Examples/ChartsIntegration/README.md",
+      "baselineSHA256": "433e5ea9bd797fa73896010948a69265750e5fbdfe63216f8246ca4deb7bc38d",
+      "sha256": "a3e63438928df9b950d25658891a7b7ce2fda86640e0d097d5104ebf89b4277d"
+    },
+    {
+      "path": "Examples/ChartsIntegration/SwiftHost/AppDelegate.swift",
+      "baselineSHA256": "f6e6affe689859ad91bbbbab8fafc1cf988754186b8f87437231fdbd5d10a3c4",
+      "sha256": "adc3ee1b406b6493a1cfd7547ae90b91aa0b90d181ee6c3dd2104677480fb0f4"
+    },
+    {
+      "path": "Examples/ChartsIntegration/check_product.py",
+      "baselineSHA256": "23835b71cee2568deb1fa79227c1dba5789f4af9cb260914239ccd002e3a291e",
+      "sha256": "d834e56bb839db0b1f8c46cbea5164309142d867b88e1c5de8559e94a0e41e72"
+    },
+    {
+      "path": "README.en.md",
+      "baselineSHA256": "0f24fdcad637ff5d823cb858376a69bb033e5bed799714074a4c2f7235902e79",
+      "sha256": "c619a17d6c8a718ae610b7f5c607224e8c494131a9adc19cc1e7ec926bc27990"
+    },
+    {
+      "path": "README.md",
+      "baselineSHA256": "75c74ff39f195488c382ce79f759893e48d9eaa06e01679230a5a7ee1ca163af",
+      "sha256": "457814ebe7e72b83a9f867e12866d1ab104ad368f9bef32937cf5d75957c6f75"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Adapters/HYMChartsSpecificationInteraction.swift",
+      "baselineSHA256": "843fb6f56a6743441b95229dbf69a058f306d052dddac0c7631513e2381ff7ce",
+      "sha256": "8a5c6e52114c2e09c3c19e805c1f161cda820cedf7bfe866b878a22f51527ea2"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Cartesian/CartesianRendererBase.swift",
+      "baselineSHA256": "4d07db6a83018a397d23fd2f868a3fa134a136c3eb6896da88b19488ba5addae",
+      "sha256": "e08e7b056777ad4c88cd80d7471725f309955c75901655412a9e536a4757d645"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Cartesian/ChartLegend.swift",
+      "baselineSHA256": "fcadebbec906cbef2eb1952f696bc7a3e213dbe56f53d1b3ca60caf0b9037207",
+      "sha256": "5c69cb0a873a722fa463a4f9d9f7620781c066d36c7e886d95dcdda8c825d169"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Core/HYMChartRenderer.swift",
+      "baselineSHA256": "4eaa607b7b039d6bb0ee5f0807e283972223d09592ffa403298a7a49c148fba9",
+      "sha256": "963a6ef1b834b32357df2b5a3f32a212e02ecf3813cb2a1d1d90f4364502e7b6"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Core/HYMChartTooltipController.swift",
+      "baselineSHA256": "7d722cb4c2a9b31d0e5df346f8c59dd8ce04ed0d9e9d9d9fdddcad39af8a2eb6",
+      "sha256": "e231c9d5f59f17257134049de3fdac48a356b9f0f31ee8aa728de0fc4b542f50"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Core/HYMChartTooltipTheme.swift",
+      "baselineSHA256": "48e46114c1c17cf5d336d7325e08239cf2431001b5606f27f8bb6666de066909",
+      "sha256": "c2abdbd46cd8c63140305e5f394a04991838cab4670fb289bdbef724236ec519"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Core/HYMChartView.swift",
+      "baselineSHA256": "632aa5b62e1a556f0689b19b014df4ddb11690edf418bed4a48f9a163c42ddaa",
+      "sha256": "a6dfeafa54c9c5f1b21aa5987ee2ecbff749722bbbcaaf86ea308f634261cb2b"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/OCBridge/HYMCartesianPresentation.swift",
+      "baselineSHA256": "327a08f4c4cf465a20fe8326699e59cbe668810ba560c264c7ef69a9aecb5b9f",
+      "sha256": "8f4bf79ec1daee8d851f5b6e797f910a102d8f947551efc36a9f08c1254371e0"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/SwiftUI/CartesianDemoRules.swift",
+      "baselineSHA256": "650b6c6990b9aab9144ad39ee8a470e35add48bd4f8dc1c7783955d580d86111",
+      "sha256": "20a4958ed24786424c67f20947fa12c00934fc7403729d6ef7bfaee69650ec3b"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/SwiftUI/ChartSpecificationInteractionControls.swift",
+      "baselineSHA256": "460f71580eab719ffc444c917df87042ddaab342bcfaa370bb0dcbcf3a9d5c12",
+      "sha256": "f71f47174761f60754ec717b2c713cc6cddea3034ff9ab6b663076bad566c567"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/SwiftUI/DemoThemeFields.swift",
+      "baselineSHA256": "b767e213b5133e559c2ae644559603969b1f46f0b7ad107f0329016ac9087d1d",
+      "sha256": "6a2462931f961ac1dcad8e67e42fd42ece981f290daa5be9a95b5ef8ca0fda1a"
+    },
+    {
+      "path": "SwiftFunctionProjectTests/HYMChartsSpecificationInteractionTests.swift",
+      "baselineSHA256": "992bf743292e6df867746b7659c34c6f49bbf67155b51ee3745297273985fb0c",
+      "sha256": "127fef8e7f953c501c77e9c5418153186cdbc8272a63272f257156d3c1b10688"
+    },
+    {
+      "path": "SwiftFunctionProjectTests/LineDemoAuditTests.swift",
+      "baselineSHA256": "bed4e9e2254d0bd6de1a6ab3e8036c85fb72be11319fd25be5b4d75e53b61885",
+      "sha256": "34d96697a79173dc35334b6c2abc644860a0be9f0e264b778df03e92ed1345e8"
+    },
+    {
+      "path": "SwiftFunctionProjectTests/TooltipSelectionTests.swift",
+      "baselineSHA256": "c6bee764cc4ce18b3ca96f39b7a5c9d722862003b5f73bf495aa68a6f00dbf48",
+      "sha256": "892185b699888ed714f5915dd5b980470d4cf41e74902edd4a2206c25ca298f3"
+    },
+    {
+      "path": "SwiftFunctionProjectUITests/ChartDemoUITests.swift",
+      "baselineSHA256": "9d4a7f0042d27e144cbc32fce832c16a80958f5a98d3b0a3b403e20bcda1973e",
+      "sha256": "883ae4ad2df499913a0f335db10ded186d8f62fe447a5cb7659e8e1209541c41"
+    },
+    {
+      "path": "docs/charts-capability-status.md",
+      "baselineSHA256": "8a5a6c444779e83e80b629c485954268914295122e609a0b3e7bad3932cbc060",
+      "sha256": "08af7d10c2b7a9a0f84c2af8c34d2ef70614743198378c689531658b6d0a61ba"
+    },
+    {
+      "path": "docs/charts-neutral-interaction-task-progress-2026-10-09.md",
+      "baselineSHA256": "7ce8e128d967e0c4be03851985a24c120420b3703e9e00d28f943e79579ae02e",
+      "sha256": "5dc65c3f88a571e9b86d78c5aa01e170bbac64903c71a2ea374cd05e7ba432e7"
+    },
+    {
+      "path": "docs/charts-neutral-model-coverage.json",
+      "baselineSHA256": "27871ba7468fbc859e97fe936c921475e557ee2cdce4a3e4612b242aab604c01",
+      "sha256": "700dc460de89af15a7a0146748c27b53b5d34c97aa1b4529245163672f4f8a79"
+    },
+    {
+      "path": "docs/charts-neutral-model-coverage.md",
+      "baselineSHA256": "94e02689418de3b8f5c20db73a4d6d504870f5e347ab54913df6d1523a7c2317",
+      "sha256": "dc7a348ffa5c9b8a9fd4216d9d1ab599a8de0db169c294f1fb32a378f67ea638"
+    },
+    {
+      "path": "docs/charts-neutral-model-guide.md",
+      "baselineSHA256": "28584892ce874a0ba2987f6dabf63df0a864139567d74cb8dff0283b776948d7",
+      "sha256": "b199c835c6ddf6fbccf4c64da04722ed779f4ff67c27a23cfc6b4a7252be9156"
+    },
+    {
+      "path": "docs/charts-neutral-model-task-progress-2026-10-03.md",
+      "baselineSHA256": "d8f6ee1fe465c0b4dbd98b4cf443621a9dac81c2af60b18ac7be927ba2c0184c",
+      "sha256": "771a0b4dbef3b688983e22dcb0f9601112069aefd94474140d59a31486872c2c"
+    },
+    {
+      "path": "docs/charts-next-task-plan-2026-10-09.md",
+      "baselineSHA256": "eebeb37fd63272c444f29ac3bed0412a7661f28278157292e34c59affd1eb8f4",
+      "sha256": "c547079ebb8738332c5923b9bc62ccddf586e89985ec971fcddf8db87b99f8d5"
+    },
+    {
+      "path": "scripts/check_chart_evidence.py",
+      "baselineSHA256": "0daa845cc7d69ad765782d273d85ec41aa74ab598063cc13a7975a51ebbc9b37",
+      "sha256": "6d31a228ac7458a0a7c7854537167aa8656ea65f36f45f2e0f1292d1e45f9493"
+    }
+  ],
+  "addedFiles": [
+    {
+      "path": "SwiftFunctionProjectTests/FixedTooltipLayoutTests.swift",
+      "sha256": "6f2bddf67c66aa1ee3a23e441ea747269b1e2abf1072e86efc76844c08994bc5"
+    },
+    {
+      "path": "docs/charts-demo-guide.md",
+      "sha256": "05f40f3e68a179858857144685a138eca1d62cc517a7143a6130e8dda2f33f6e"
+    },
+    {
+      "path": "docs/charts-neutral-tooltip-layout-task-progress-2026-10-09.md",
+      "sha256": "db245517a9341437d7d72f4c47f736c5204c73a753c76463e2e0f086a2dcc06c"
+    },
+    {
+      "path": "docs/charts-tooltip-selection-guide.md",
+      "sha256": "7b9f9d748bb3de46954ceb3346df45c2790da5cc09fa484489ced5b486a495ca"
+    }
+  ],
+  "scope": "Runtime layout/API, demo, test and documentation delta only; Foundation specification and six JSON fixtures are unchanged. CartesianRendererBase only exposes existing final plotFrame through an internal optional capability; coordinate and stack calculation algorithms unchanged."
+}

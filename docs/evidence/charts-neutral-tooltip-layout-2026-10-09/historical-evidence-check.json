@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "scope": "Historical artifact integrity only; historical source hashes are not expected to match this updated workspace.",
+  "checks": [
+    {
+      "manifest": "docs/evidence/charts-neutral-annotations-2026-10-09/artifact-hashes.json",
+      "manifestSHA256": "2dff86d67c3019b793e48100068b995b7e51234a73d467c483ba21f30f4b46a8",
+      "fileCount": 27,
+      "mismatches": []
+    },
+    {
+      "manifest": "docs/evidence/charts-neutral-interaction-2026-10-09/artifact-hashes.json",
+      "manifestSHA256": "27e7715d8de0f2eb94661ed1bda74bb5aa7891486613d18f89299d66c9f68659",
+      "fileCount": 22,
+      "mismatches": []
+    }
+  ]
+}

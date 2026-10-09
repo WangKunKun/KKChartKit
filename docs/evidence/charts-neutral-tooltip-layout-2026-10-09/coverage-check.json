@@ -1,0 +1,9 @@
+{
+  "command": [
+    "python3",
+    "scripts/check_chart_neutral_coverage.py"
+  ],
+  "exitCode": 0,
+  "stdout": "{\"status\": \"PASS\", \"legacyDeclarations\": 197, \"capabilities\": 61, \"nativeReview\": 18, \"counts\": {\"external\": 104, \"unsupported\": 7, \"expressed\": 60, \"schema_gap\": 26}, \"scope\": \"offline audit consistency; not renderer execution\"}\n",
+  "stderr": ""
+}
