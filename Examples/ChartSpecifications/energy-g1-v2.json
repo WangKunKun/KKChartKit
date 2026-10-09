@@ -1,0 +1,183 @@
+{
+  "domain" : {
+    "categories" : [
+      {
+        "id" : "08",
+        "label" : "08:00"
+      },
+      {
+        "id" : "09",
+        "label" : "09:00"
+      },
+      {
+        "id" : "10",
+        "label" : "10:00"
+      }
+    ],
+    "kind" : "category"
+  },
+  "domainAppearance" : {
+    "showsGridlines" : false,
+    "showsLabels" : true,
+    "showsLine" : true
+  },
+  "groups" : [
+    {
+      "id" : "energy",
+      "name" : "能源"
+    }
+  ],
+  "id" : "power-trend",
+  "orientation" : "vertical",
+  "schemaVersion" : 2,
+  "series" : [
+    {
+      "appearance" : {
+        "color" : {
+          "alpha" : 1,
+          "blue" : 0.88,
+          "green" : 0.42,
+          "red" : 0.12
+        },
+        "marker" : "circle",
+        "showsValueLabels" : false,
+        "strokePattern" : "solid"
+      },
+      "groupID" : "energy",
+      "id" : "solar",
+      "interpolation" : "monotone",
+      "isVisible" : true,
+      "mark" : "area",
+      "missingValues" : {
+        "mode" : "breakPath"
+      },
+      "name" : "光伏",
+      "samples" : [
+        {
+          "coordinate" : {
+            "categoryID" : "08",
+            "kind" : "category"
+          },
+          "id" : "solar-08",
+          "metadata" : {
+            "meterID" : "M1"
+          },
+          "value" : 60
+        },
+        {
+          "coordinate" : {
+            "categoryID" : "09",
+            "kind" : "category"
+          },
+          "id" : "solar-09",
+          "metadata" : {
+
+          },
+          "value" : null
+        },
+        {
+          "coordinate" : {
+            "categoryID" : "10",
+            "kind" : "category"
+          },
+          "id" : "solar-10",
+          "metadata" : {
+
+          },
+          "value" : -20
+        }
+      ],
+      "showsInLegend" : true,
+      "stackID" : "supply",
+      "unit" : "W",
+      "valueAxisID" : "power",
+      "valuePresentation" : {
+        "currencySymbol" : "",
+        "maximumFractionDigits" : 2,
+        "rounding" : "nearest",
+        "scale" : "none",
+        "showsAbsoluteValue" : false,
+        "usesGroupingSeparator" : true
+      }
+    },
+    {
+      "appearance" : {
+        "showsValueLabels" : false,
+        "strokePattern" : "solid"
+      },
+      "groupID" : "energy",
+      "id" : "battery",
+      "interpolation" : "linear",
+      "isVisible" : true,
+      "mark" : "line",
+      "missingValues" : {
+        "mode" : "breakPath"
+      },
+      "name" : "电池",
+      "samples" : [
+        {
+          "coordinate" : {
+            "categoryID" : "08",
+            "kind" : "category"
+          },
+          "id" : "battery-08",
+          "metadata" : {
+
+          },
+          "value" : -40
+        },
+        {
+          "coordinate" : {
+            "categoryID" : "09",
+            "kind" : "category"
+          },
+          "id" : "battery-09",
+          "metadata" : {
+
+          },
+          "value" : 30
+        },
+        {
+          "coordinate" : {
+            "categoryID" : "10",
+            "kind" : "category"
+          },
+          "id" : "battery-10",
+          "metadata" : {
+
+          },
+          "value" : 0
+        }
+      ],
+      "showsInLegend" : true,
+      "stackID" : "supply",
+      "unit" : "W",
+      "valueAxisID" : "power",
+      "valuePresentation" : {
+        "currencySymbol" : "",
+        "maximumFractionDigits" : 2,
+        "rounding" : "nearest",
+        "scale" : "none",
+        "showsAbsoluteValue" : false,
+        "usesGroupingSeparator" : true
+      }
+    }
+  ],
+  "showsLegend" : true,
+  "stackedAreaBoundary" : "diverging",
+  "stacking" : {
+    "mode" : "percentOfAbsoluteTotal"
+  },
+  "title" : "功率趋势",
+  "valueAxes" : [
+    {
+      "appearance" : {
+        "showsGridlines" : false,
+        "showsLabels" : true,
+        "showsLine" : true
+      },
+      "id" : "power",
+      "isReversed" : false
+    }
+  ]
+}
