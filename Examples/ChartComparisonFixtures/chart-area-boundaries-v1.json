@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "categories": ["1", "2", "3"],
+  "cases": [
+    {
+      "id": "boundary-crossing", "topType": "areaspline",
+      "groups": [["positive", "negative", "crossing"]],
+      "series": [
+        {"id":"positive","name":"正值基线","kind":"areaspline","stackID":"boundary","color":"#0000FF","values":[40,40,40]},
+        {"id":"negative","name":"负值基线","kind":"areaspline","stackID":"boundary","color":"#FF8000","values":[-30,-30,-30]},
+        {"id":"crossing","name":"跨零面积","kind":"areaspline","stackID":"boundary","color":"#00D000","values":[10,-10,10]}
+      ]
+    },
+    {
+      "id": "boundary-source-switch", "topType": "areaspline",
+      "groups": [["floor", "switch", "upper"]],
+      "series": [
+        {"id":"floor","name":"固定基底","kind":"areaspline","stackID":"boundary","color":"#0000FF","values":[20,20,20]},
+        {"id":"switch","name":"跨零前层","kind":"areaspline","stackID":"boundary","color":"#FF8000","values":[30,-30,30]},
+        {"id":"upper","name":"同符号上层","kind":"areaspline","stackID":"boundary","color":"#00D000","values":[5,5,5]}
+      ]
+    }
+  ]
+}
