@@ -131,7 +131,47 @@
         && [[axesDocument sampleIdentifierForSeriesID:@"solar" categoryIndex:0] isEqual:@"solar-08"]
         && [g1Bridge updateWithSpecification:axesDocument preserveViewport:YES error:&error];
     [g1Bridge.chartView layoutIfNeeded];
-    neutralPassed &= g1Passed && zonesPassed && axesPassed;
+    NSURL *annotationsURL = [NSBundle.mainBundle URLForResource:@"energy-annotations-v5" withExtension:@"json"];
+    NSData *annotationsData = annotationsURL ? [NSData dataWithContentsOfURL:annotationsURL] : nil;
+    HYMChartSpecificationDocument *annotationsDocument = annotationsData ? [[HYMChartSpecificationDocument alloc] initWithJSONData:annotationsData error:&error] : nil;
+    NSData *annotationsRoundTrip = [annotationsDocument JSONDataWithError:&error];
+    NSDictionary *annotationsObject = annotationsRoundTrip ? [NSJSONSerialization JSONObjectWithData:annotationsRoundTrip options:0 error:&error] : nil;
+    NSArray *lines = annotationsObject[@"plotLines"], *bands = annotationsObject[@"plotBands"];
+    BOOL annotationsPassed = annotationsDocument != nil && [annotationsObject[@"schemaVersion"] integerValue] == 5
+        && lines.count == 3 && bands.count == 1
+        && [lines[1][@"valueAxisID"] isEqual:@"temperature"] && ![lines[2][@"isVisible"] boolValue]
+        && [lines[0][@"labelStyle"][@"fontWeight"] isEqual:@"semibold"]
+        && [bands[0][@"from"] doubleValue] == -20 && [bands[0][@"to"] doubleValue] == 20
+        && [[annotationsDocument sampleIdentifierForSeriesID:@"solar" categoryIndex:0] isEqual:@"solar-08"]
+        && [g1Bridge updateWithSpecification:annotationsDocument preserveViewport:YES error:&error];
+    [g1Bridge.chartView layoutIfNeeded];
+    NSURL *interactionURL = [NSBundle.mainBundle URLForResource:@"energy-interaction-v6" withExtension:@"json"];
+    NSData *interactionData = interactionURL ? [NSData dataWithContentsOfURL:interactionURL] : nil;
+    HYMChartSpecificationDocument *interactionDocument = interactionData ? [[HYMChartSpecificationDocument alloc] initWithJSONData:interactionData error:&error] : nil;
+    NSData *interactionRoundTrip = [interactionDocument JSONDataWithError:&error];
+    NSDictionary *interactionObject = interactionRoundTrip ? [NSJSONSerialization JSONObjectWithData:interactionRoundTrip options:0 error:&error] : nil;
+    NSDictionary *tooltip = interactionObject[@"tooltip"], *legend = interactionObject[@"legend"];
+    HYMCartesianChartViewBridge *interactionBridge = [interactionDocument makeNativeBridgeWithFrame:self.view.bounds error:&error];
+    BOOL interactionPassed = interactionDocument != nil && interactionBridge != nil
+        && [interactionObject[@"schemaVersion"] integerValue] == 6
+        && [tooltip[@"layout"] isEqual:@"columns"] && [tooltip[@"position"] isEqual:@"fixedTop"]
+        && [tooltip[@"sampleSelection"][@"offset"] integerValue] == -1
+        && [tooltip[@"sampleSelection"][@"offsetsBySeriesID"][@"solar"] integerValue] == 0
+        && [legend[@"titlesBySeriesID"][@"solar"] isEqual:@"光伏发电"]
+        && [[interactionDocument sampleIdentifierForSeriesID:@"solar" categoryIndex:0] isEqual:@"solar-08"]
+        && [g1Bridge updateWithSpecification:interactionDocument preserveViewport:YES error:&error];
+    [g1Bridge.chartView layoutIfNeeded]; [interactionBridge.chartView layoutIfNeeded];
+    // Native opt-in remains a public OC property; a document without Tooltip restores this baseline.
+    interactionBridge.tooltipOptions.position = HYMCartesianTooltipPositionFixedTop;
+    interactionBridge.tooltipOptions.fixedTopUsesPlotArea = YES;
+    interactionPassed &= interactionBridge.tooltipOptions.fixedTopUsesPlotArea
+        && [interactionBridge updateWithSpecification:annotationsDocument preserveViewport:YES error:&error];
+    [interactionBridge.chartView layoutIfNeeded];
+    interactionBridge.tooltipOptions.fixedTopUsesPlotArea = NO;
+    interactionPassed &= [interactionBridge updateWithSpecification:annotationsDocument preserveViewport:YES error:&error];
+    // A document without N4 configuration restores bridge runtime defaults, not stale v6 rules.
+    interactionPassed &= [g1Bridge updateWithSpecification:annotationsDocument preserveViewport:YES error:&error];
+    neutralPassed &= g1Passed && zonesPassed && axesPassed && annotationsPassed && interactionPassed;
     passed &= neutralPassed;
     status.text = [NSString stringWithFormat:@"%@ OC | update=500 | visibility=%lu | released=%ld/30 | invalid=rejected | neutral=%@", passed ? @"PASS" : @"FAIL", (unsigned long)events.count, (long)released, neutralPassed ? @"true" : @"false"];
 }

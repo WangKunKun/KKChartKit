@@ -1,0 +1,312 @@
+{
+  "domain" : {
+    "categories" : [
+      {
+        "id" : "08",
+        "label" : "08:00"
+      },
+      {
+        "id" : "09",
+        "label" : "09:00"
+      },
+      {
+        "id" : "10",
+        "label" : "10:00"
+      }
+    ],
+    "kind" : "category"
+  },
+  "domainAppearance" : {
+    "showsGridlines" : false,
+    "showsLabels" : true,
+    "showsLine" : true
+  },
+  "groups" : [
+    {
+      "id" : "energy",
+      "name" : "能源"
+    }
+  ],
+  "id" : "power-trend",
+  "orientation" : "vertical",
+  "plotBands" : [
+    {
+      "color" : {
+        "alpha" : 0.18,
+        "blue" : 0.3,
+        "green" : 0.6,
+        "red" : 0
+      },
+      "from" : -20,
+      "id" : "range",
+      "isVisible" : true,
+      "label" : "±20%",
+      "labelStyle" : {
+        "alignment" : "leading",
+        "backgroundColor" : {
+          "alpha" : 0.95,
+          "blue" : 1,
+          "green" : 1,
+          "red" : 1
+        },
+        "bounds" : "clamp",
+        "color" : {
+          "alpha" : 1,
+          "blue" : 0,
+          "green" : 0,
+          "red" : 0
+        },
+        "fontSize" : 13,
+        "fontWeight" : "semibold",
+        "offsetX" : 0,
+        "offsetY" : 0,
+        "verticalAlignment" : "automatic"
+      },
+      "to" : 20,
+      "valueAxisID" : "power"
+    }
+  ],
+  "plotLines" : [
+    {
+      "color" : {
+        "alpha" : 1,
+        "blue" : 0.2,
+        "green" : 0.1,
+        "red" : 0.8
+      },
+      "id" : "limit",
+      "isVisible" : true,
+      "label" : "主轴 40%",
+      "labelStyle" : {
+        "alignment" : "leading",
+        "backgroundColor" : {
+          "alpha" : 0.95,
+          "blue" : 1,
+          "green" : 1,
+          "red" : 1
+        },
+        "bounds" : "clamp",
+        "color" : {
+          "alpha" : 1,
+          "blue" : 0,
+          "green" : 0,
+          "red" : 0
+        },
+        "fontSize" : 13,
+        "fontWeight" : "semibold",
+        "offsetX" : 0,
+        "offsetY" : 0,
+        "verticalAlignment" : "automatic"
+      },
+      "lineWidth" : 2,
+      "strokePattern" : "dashed",
+      "value" : 40,
+      "valueAxisID" : "power"
+    },
+    {
+      "id" : "secondary-limit",
+      "isVisible" : true,
+      "label" : "次轴 10%",
+      "labelStyle" : {
+        "alignment" : "leading",
+        "backgroundColor" : {
+          "alpha" : 0.95,
+          "blue" : 1,
+          "green" : 1,
+          "red" : 1
+        },
+        "bounds" : "clamp",
+        "color" : {
+          "alpha" : 1,
+          "blue" : 0,
+          "green" : 0,
+          "red" : 0
+        },
+        "fontSize" : 13,
+        "fontWeight" : "semibold",
+        "offsetX" : 0,
+        "offsetY" : 0,
+        "verticalAlignment" : "automatic"
+      },
+      "strokePattern" : "solid",
+      "value" : 10,
+      "valueAxisID" : "temperature"
+    },
+    {
+      "id" : "hidden-limit",
+      "isVisible" : false,
+      "labelStyle" : {
+        "alignment" : "automatic",
+        "bounds" : "clamp",
+        "offsetX" : 0,
+        "offsetY" : 0,
+        "verticalAlignment" : "automatic"
+      },
+      "strokePattern" : "solid",
+      "value" : 80,
+      "valueAxisID" : "power"
+    }
+  ],
+  "schemaVersion" : 5,
+  "series" : [
+    {
+      "appearance" : {
+        "color" : {
+          "alpha" : 1,
+          "blue" : 0.88,
+          "green" : 0.42,
+          "red" : 0.12
+        },
+        "marker" : "circle",
+        "showsValueLabels" : false,
+        "strokePattern" : "solid"
+      },
+      "groupID" : "energy",
+      "id" : "solar",
+      "interpolation" : "monotone",
+      "isVisible" : true,
+      "mark" : "area",
+      "missingValues" : {
+        "mode" : "breakPath"
+      },
+      "name" : "光伏",
+      "samples" : [
+        {
+          "coordinate" : {
+            "categoryID" : "08",
+            "kind" : "category"
+          },
+          "id" : "solar-08",
+          "metadata" : {
+            "meterID" : "M1"
+          },
+          "value" : 60
+        },
+        {
+          "coordinate" : {
+            "categoryID" : "09",
+            "kind" : "category"
+          },
+          "id" : "solar-09",
+          "metadata" : {
+
+          },
+          "value" : null
+        },
+        {
+          "coordinate" : {
+            "categoryID" : "10",
+            "kind" : "category"
+          },
+          "id" : "solar-10",
+          "metadata" : {
+
+          },
+          "value" : -20
+        }
+      ],
+      "showsInLegend" : true,
+      "stackID" : "supply",
+      "unit" : "W",
+      "valueAxisID" : "power",
+      "valuePresentation" : {
+        "currencySymbol" : "",
+        "maximumFractionDigits" : 2,
+        "rounding" : "nearest",
+        "scale" : "none",
+        "showsAbsoluteValue" : false,
+        "usesGroupingSeparator" : true
+      }
+    },
+    {
+      "appearance" : {
+        "showsValueLabels" : false,
+        "strokePattern" : "solid"
+      },
+      "groupID" : "energy",
+      "id" : "battery",
+      "interpolation" : "linear",
+      "isVisible" : true,
+      "mark" : "line",
+      "missingValues" : {
+        "mode" : "breakPath"
+      },
+      "name" : "电池",
+      "samples" : [
+        {
+          "coordinate" : {
+            "categoryID" : "08",
+            "kind" : "category"
+          },
+          "id" : "battery-08",
+          "metadata" : {
+
+          },
+          "value" : -40
+        },
+        {
+          "coordinate" : {
+            "categoryID" : "09",
+            "kind" : "category"
+          },
+          "id" : "battery-09",
+          "metadata" : {
+
+          },
+          "value" : 30
+        },
+        {
+          "coordinate" : {
+            "categoryID" : "10",
+            "kind" : "category"
+          },
+          "id" : "battery-10",
+          "metadata" : {
+
+          },
+          "value" : 0
+        }
+      ],
+      "showsInLegend" : true,
+      "stackID" : "supply",
+      "unit" : "W",
+      "valueAxisID" : "power",
+      "valuePresentation" : {
+        "currencySymbol" : "",
+        "maximumFractionDigits" : 2,
+        "rounding" : "nearest",
+        "scale" : "none",
+        "showsAbsoluteValue" : false,
+        "usesGroupingSeparator" : true
+      }
+    }
+  ],
+  "showsLegend" : true,
+  "stackedAreaBoundary" : "diverging",
+  "stacking" : {
+    "mode" : "percentOfAbsoluteTotal"
+  },
+  "title" : "功率趋势",
+  "valueAxes" : [
+    {
+      "appearance" : {
+        "showsGridlines" : false,
+        "showsLabels" : true,
+        "showsLine" : true
+      },
+      "id" : "power",
+      "isReversed" : false
+    },
+    {
+      "appearance" : {
+        "showsGridlines" : false,
+        "showsLabels" : true,
+        "showsLine" : true
+      },
+      "id" : "temperature",
+      "isReversed" : false,
+      "maximum" : 40,
+      "minimum" : -20
+    }
+  ]
+}

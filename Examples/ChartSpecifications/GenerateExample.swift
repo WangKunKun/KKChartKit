@@ -54,5 +54,35 @@ import Foundation
             axes.valueAxes[0].labelFormat = .init(number: number, unit: "%")
             try axes.jsonData().write(to: URL(fileURLWithPath: CommandLine.arguments[4]))
         }
+        if CommandLine.arguments.count >= 6 {
+            var annotated = specification
+            annotated.schemaVersion = 5; annotated.stackedAreaBoundary = .diverging
+            annotated.valueAxes.append(.init(id: "temperature", minimum: -20, maximum: 40))
+            let style = ChartAnnotationLabelStyle(color: .init(red: 0, green: 0, blue: 0), fontSize: 13,
+                fontWeight: .semibold, backgroundColor: .init(red: 1, green: 1, blue: 1, alpha: 0.95), alignment: .leading)
+            annotated.plotLines = [
+                .init(id: "limit", valueAxisID: "power", value: 40, color: .init(red: 0.8, green: 0.1, blue: 0.2),
+                      lineWidth: 2, strokePattern: .dashed, label: "主轴 40%", labelStyle: style),
+                .init(id: "secondary-limit", valueAxisID: "temperature", value: 10, label: "次轴 10%", labelStyle: style),
+                .init(id: "hidden-limit", valueAxisID: "power", value: 80, isVisible: false)
+            ]
+            annotated.plotBands = [.init(id: "range", valueAxisID: "power", from: -20, to: 20,
+                color: .init(red: 0, green: 0.6, blue: 0.3, alpha: 0.18), label: "±20%", labelStyle: style)]
+            try annotated.jsonData().write(to: URL(fileURLWithPath: CommandLine.arguments[5]))
+        }
+        if CommandLine.arguments.count >= 7 {
+            var interaction = specification
+            interaction.schemaVersion = 6; interaction.stackedAreaBoundary = .diverging
+            var tooltip = ChartTooltipSpecification()
+            tooltip.layout = .columns; tooltip.position = .fixedTop; tooltip.headerTemplate = "当前 {key}"
+            tooltip.sampleSelection.offset = -1; tooltip.sampleSelection.boundaryPolicy = .clamp
+            tooltip.sampleSelection.offsetsBySeriesID = ["solar": 0]
+            tooltip.seriesRules = ["battery": .init(title: "电池（上一时点）")]
+            interaction.tooltip = tooltip
+            var legend = ChartLegendSpecification(); legend.position = .top; legend.alignment = .leading
+            legend.titlesBySeriesID = ["solar": "光伏发电", "battery": "储能"]
+            interaction.legend = legend
+            try interaction.jsonData().write(to: URL(fileURLWithPath: CommandLine.arguments[6]))
+        }
     }
 }

@@ -1,6 +1,6 @@
 # HYMCharts 独立接入验证
 
-2026-10-09 N2 v4：Swift 与纯 OC 宿主同时载入 `energy.json`（v1）、`energy-g1-v2.json`（显式正负分链）、`energy-zones-v3.json`（值轴阈值颜色）和 `energy-axes-v4.json`（轴展示）。`neutral=true` 必须四份文档的检查均通过；JSON 只进入宿主，不打入 SDK framework。版本及降级规则见[模型指南](../../docs/charts-neutral-model-guide.md)。
+2026-10-09 N4 v6：Swift 与纯 OC 宿主同时载入 v1–v6 六份 `energy*.json`；新增 `energy-interaction-v6.json` 表达 Tooltip 内容／取值及图例布局。`neutral=true` 必须六份文档的检查均通过；JSON 只进入宿主，不打入 SDK framework。版本及降级规则见[模型指南](../../docs/charts-neutral-model-guide.md)。
 
 同一个 `HYMCharts.framework` 由现有 Charts 源码构建，SwiftHost 仅 `import HYMCharts`，OCHost 仅 `#import <HYMCharts/HYMCharts-Swift.h>`。两个宿主不编译 SDK 源码，不使用 `@testable`、App bridging header 或测试专用 renderer。此工程验证独立导入，不承诺旧模型适配已完成。
 
@@ -10,7 +10,7 @@
 - `SwiftHost/`：公开 Swift 接口配置、更新、显隐、真实点击；另实例化公开 SwiftUI LineChart 包装。
 - `OCHost/`：全部业务源码为 Objective-C；通过生成头调用，验证错误保留有效数据与桥接对象释放。
 - `UITests/`：启动两个 App，读取其验证结果，再点击图表检查更新后的值 `500`。
-- `generate_project.py`：使用 Python 标准库重建工程，按确定顺序引用当前 98 份图表源码。保留 6 种 SwiftUI 包装；framework 排除 Demo/Debug/参考目录及资源。两个宿主额外携带共用的 `ChartSpecifications/energy*.json`，不把样本打进 framework。新增 SDK 文件后重新运行并审阅工程差异。
+- `generate_project.py`：使用 Python 标准库重建工程，按确定顺序引用当前 101 份图表源码。保留 6 种 SwiftUI 包装；framework 排除 Demo/Debug/参考目录及资源。两个宿主额外携带共用的 `ChartSpecifications/energy*.json`，不把样本打进 framework。新增 SDK 文件后重新运行并审阅工程差异。
 - `check_product.py`：检查生成 OC 头、SwiftUI 公开类型、`@rpath` 加载路径，以及无 AA/JS/WebKit/App 依赖或 Demo/fixture 资源。
 
 当前使用 iOS 15 deployment target、Swift 5 语言模式和 Xcode 26.3。真实业务工程的最低版本和交付方式待核对。这里只维护 Xcode framework 这一种产物；尚未打包发行版 XCFramework、SPM 或 CocoaPods。
@@ -70,4 +70,16 @@ G2–G5 批次的 framework 源列表为 85 个 Swift 文件。Swift 和纯 OC �
 
 ## 2026-10-09 N2 schema v4 验收
 
-Release framework 构建和公开产物审计通过，Swift / 纯 OC 宿主 **2/2 通过**。当前每个宿主的 `neutral=true` 都要求 v1–v4 四份共享 JSON 通过；v4 新增值轴显式刻度、标签数字格式与单位、域/值轴系统字重及类目标签候选间隔。Swift 宿主检查公开映射结果、字重与格式化输出；OC 宿主检查 document 往返、样本身份以及 bridge 创建/更新。普通公开导入不使用 `@testable`，不包含 App Demo；运行环境仍仅 arm64 模拟器，并非真机或正式分发验收。见 [N2 任务进度](../../docs/charts-neutral-axes-task-progress-2026-10-09.md)与[证据](../../docs/evidence/charts-neutral-axes-2026-10-09/README.md)。
+Release framework 构建和公开产物审计通过，Swift / 纯 OC 宿主 **2/2 通过**。N2 当时每个宿主的 `neutral=true` 都要求 v1–v4 四份共享 JSON 通过；v4 新增值轴显式刻度、标签数字格式与单位、域/值轴系统字重及类目标签候选间隔。Swift 宿主检查公开映射结果、字重与格式化输出；OC 宿主检查 document 往返、样本身份以及 bridge 创建/更新。普通公开导入不使用 `@testable`，不包含 App Demo；运行环境仍仅 arm64 模拟器，并非真机或正式分发验收。见 [N2 任务进度](../../docs/charts-neutral-axes-task-progress-2026-10-09.md)与[证据](../../docs/evidence/charts-neutral-axes-2026-10-09/README.md)。
+
+## 2026-10-09 N3 schema v5 验收
+
+Release framework 包含 99 份 Swift 源码。公开 Swift 与纯 OC 宿主 **2/2 通过**，该批 `neutral=true` 要求 v1–v5 五份文档通过。Swift 检查主次轴映射、隐藏源项、线型、文字字号/字重、色带范围及 JSON 往返；OC 检查 document 往返、隐藏标志、轴身份、样本身份和 bridge 创建／更新。新 JSON 仅进入宿主资源，SDK 无 Demo／fixture／JS／WebKit 依赖。见 [N3 进度](../../docs/charts-neutral-annotations-task-progress-2026-10-09.md)与[证据](../../docs/evidence/charts-neutral-annotations-2026-10-09/README.md)。仅 arm64 模拟器运行，不宣称真机或正式分发。
+
+## 2026-10-09 N4 schema v6 验收
+
+Release framework 包含 101 份 SDK Swift 源码。普通公开 Swift 与纯 OC 宿主 **2/2 通过**；`neutral=true` 要求 v1–v6 六份共享 JSON 全部通过。Swift 检查公开 Tooltip view 配置、布局／取值策略、图例映射、原值不变及 JSON 往返；纯 OC 通过字典／document 创建和更新 bridge，验证恢复旧 v5 时不残留 N4 提示覆盖。公开接口、依赖与资源审计通过，新增 JSON 仅进入宿主而非 SDK。见 [N4 进度](../../docs/charts-neutral-interaction-task-progress-2026-10-09.md)与[证据](../../docs/evidence/charts-neutral-interaction-2026-10-09/README.md)。仅 arm64 模拟器运行，不宣称真机／正式分发或全部视觉布局已完善。
+
+## 2026-10-09 N4 固定顶部布局公共接口补充
+
+框架仍包含 101 份 SDK Swift 源码。Swift 宿主验证 N4 转换后的 `fixedTopUsesPlotArea == true`；纯 OC 宿主通过生成头读写该选项并在旧版文档更新时恢复原生基线。产物检查器同时核对公开 Swift interface 和 OC 生成头。六版共享 JSON 不变，无 schema 升级；Release 构建／运行及范围见[布局质量证据](../../docs/evidence/charts-neutral-tooltip-layout-2026-10-09/README.md)。这不是图例／提示的所有组合像素金图、真机或正式分发验收。

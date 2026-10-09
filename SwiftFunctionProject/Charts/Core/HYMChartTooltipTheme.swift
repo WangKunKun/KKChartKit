@@ -32,6 +32,9 @@ public struct HYMChartTooltipTheme {
     /// 容器坐标偏移，正 x 向右、正 y 向下；最终位置仍受边界约束。
     public var offset: CGPoint
     public var fixedTopInset: CGFloat
+    /// fixedTop 时将提示限制在轴系绘图区，避开标题、图例与轴标签；仍是覆盖层，不预留空间。
+    /// 默认 false 保留整容器定位。非轴系 renderer 不提供绘图区时仍使用容器边界。
+    public var fixedTopUsesPlotArea: Bool
 
     public init(backgroundColor: UIColor = UIColor.black.withAlphaComponent(0.8),
                 textColor: UIColor = .white,
@@ -46,7 +49,8 @@ public struct HYMChartTooltipTheme {
                 gap: CGFloat = 6,
                 position: HYMChartTooltipPosition = .automatic,
                 offset: CGPoint = .zero,
-                fixedTopInset: CGFloat = 8) {
+                fixedTopInset: CGFloat = 8,
+                fixedTopUsesPlotArea: Bool = false) {
         self.backgroundColor = backgroundColor
         self.textColor = textColor
         self.font = font
@@ -59,6 +63,7 @@ public struct HYMChartTooltipTheme {
         self.showsAnimation = showsAnimation
         self.gap = gap
         self.position = position; self.offset = offset; self.fixedTopInset = fixedTopInset
+        self.fixedTopUsesPlotArea = fixedTopUsesPlotArea
     }
 
     /// 默认主题。

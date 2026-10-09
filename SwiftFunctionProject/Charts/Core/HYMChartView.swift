@@ -27,7 +27,10 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
 
     /// tooltip 外观主题（通用；默认 `.default`，可覆盖）。
     public var tooltipTheme: HYMChartTooltipTheme = .default {
-        didSet { tooltipController?.theme = tooltipTheme }
+        didSet {
+            tooltipController?.theme = tooltipTheme
+            setNeedsLayout()
+        }
     }
     /// 命中时是否显示默认 tooltip（通用默认 false，避免影响现有图表；
     /// 需要弹窗的图表在其封装层显式置 true）。
@@ -339,7 +342,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
                             bounds: bounds,
                             center: CGPoint(x: bounds.midX, y: bounds.midY)))
         panGesture.isEnabled = isZoomEnabled || automaticPanAxis != nil
-        tooltipController?.relayout(in: bounds)
+        tooltipController?.relayout(in: tooltipContainer)
         if pendingAnimation {
             pendingAnimation = false
             performEntranceAnimation()
@@ -744,6 +747,18 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
     }
 
     // MARK: - Tooltip
+    /// 只改变固定顶部提示可用边界，不移动锚点、准线或 renderer 绘图区。
+    private var tooltipContainer: CGRect {
+        guard tooltipTheme.position == .fixedTop, tooltipTheme.fixedTopUsesPlotArea,
+              let source = renderer as? HYMChartTooltipPlotAreaProviding else { return bounds }
+        let plot = source.tooltipPlotArea
+        guard plot.minX.isFinite, plot.minY.isFinite, plot.width.isFinite, plot.height.isFinite,
+              plot.width > 0, plot.height > 0 else { return .zero }
+        let available = bounds.intersection(plot)
+        // 无可用绘图区时隐藏，不能回退到标题/图例区域制造遮挡。
+        return available.isNull || available.isEmpty ? .zero : available
+    }
+
     private func ensureTooltipController() -> HYMChartTooltipController {
         if let c = tooltipController { return c }
         let c = HYMChartTooltipController(host: self, theme: tooltipTheme)
@@ -810,14 +825,14 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
             }
             if cartesianTooltipPresentation.layout == .columns {
                 let view = CartesianTooltipContentView(content: content, presentation: cartesianTooltipPresentation, theme: tooltipTheme)
-                ensureTooltipController().show(anchor: anchor.frame, contentView: view, in: bounds,
+                ensureTooltipController().show(anchor: anchor.frame, contentView: view, in: tooltipContainer,
                     preferred: anchor.preferredPlacements, animated: animated, allowsContentInteraction: true)
             } else {
-                ensureTooltipController().show(anchor: anchor.frame, text: content.text, in: bounds,
+                ensureTooltipController().show(anchor: anchor.frame, text: content.text, in: tooltipContainer,
                     preferred: anchor.preferredPlacements, animated: animated)
             }
         } else if let text = formattedTooltipText(for: target) {
-            ensureTooltipController().show(anchor: anchor.frame, text: text, in: bounds,
+            ensureTooltipController().show(anchor: anchor.frame, text: text, in: tooltipContainer,
                 preferred: anchor.preferredPlacements, animated: animated)
         } else { tooltipController?.hide() }
     }

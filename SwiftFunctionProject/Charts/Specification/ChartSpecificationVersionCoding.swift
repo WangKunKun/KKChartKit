@@ -1,10 +1,10 @@
 import Foundation
 
-// 顶层版本边界：v1/v2/v3 输出结构不变；新增保留键不能通过旧版本静默透传。
+// 顶层版本边界：v1–v5 输出结构不变；新增保留键不能通过旧版本静默透传。
 extension ChartSpecification {
     private enum Keys: String, CodingKey {
         case schemaVersion, id, title, orientation, domain, domainAppearance, valueAxes
-        case groups, series, stacking, showsLegend, stackedAreaBoundary, categoryLabelInterval
+        case groups, series, stacking, showsLegend, stackedAreaBoundary, categoryLabelInterval, plotLines, plotBands, tooltip, legend
     }
 
     private enum SeriesKeys: String, CodingKey { case appearance }
@@ -20,6 +20,27 @@ extension ChartSpecification {
         guard (1...Self.latestSchemaVersion).contains(schemaVersion) else {
             throw ChartSpecificationError(issues: [.init(code: .unsupportedVersion, path: "schemaVersion",
                 message: "只支持版本 1...\(Self.latestSchemaVersion)")])
+        }
+        if schemaVersion < 6 {
+            for key in [Keys.tooltip, .legend] where c.contains(key) {
+                throw ChartSpecificationError(issues: [.init(code: .invalidInput, path: key.rawValue,
+                    message: "提示/图例要求 schemaVersion 6；旧版本不允许此字段（包括 null）")])
+            }
+            tooltip = nil; legend = nil
+        } else {
+            // Required nullable keys distinguish explicit host ownership from incomplete v6 documents.
+            tooltip = try c.decode(ChartTooltipSpecification?.self, forKey: .tooltip)
+            legend = try c.decode(ChartLegendSpecification?.self, forKey: .legend)
+        }
+        if schemaVersion < 5 {
+            for key in [Keys.plotLines, .plotBands] where c.contains(key) {
+                throw ChartSpecificationError(issues: [.init(code: .invalidInput, path: key.rawValue,
+                    message: "值轴标注要求 schemaVersion 5；旧版本不允许此字段（包括 null/空数组）")])
+            }
+            plotLines = []; plotBands = []
+        } else {
+            plotLines = try c.decode([ChartPlotLine].self, forKey: .plotLines)
+            plotBands = try c.decode([ChartPlotBand].self, forKey: .plotBands)
         }
         if schemaVersion == 1 {
             guard !c.contains(.stackedAreaBoundary) else {
@@ -79,7 +100,7 @@ extension ChartSpecification {
         showsLegend = try c.decode(Bool.self, forKey: .showsLegend)
     }
 
-    /// 不允许静默降级丢失边界/分区/轴展示配置，即使直接使用 JSONEncoder 也必须校验。
+    /// 不允许静默降级丢失边界/分区/轴展示/标注配置，即使直接使用 JSONEncoder 也必须校验。
     public func encode(to encoder: Encoder) throws {
         try validate()
         var c = encoder.container(keyedBy: Keys.self)
@@ -95,6 +116,12 @@ extension ChartSpecification {
         try c.encode(series, forKey: .series)
         try c.encode(stacking, forKey: .stacking)
         try c.encode(showsLegend, forKey: .showsLegend)
+        if schemaVersion >= 6 {
+            try c.encode(tooltip, forKey: .tooltip); try c.encode(legend, forKey: .legend)
+        }
+        if schemaVersion >= 5 {
+            try c.encode(plotLines, forKey: .plotLines); try c.encode(plotBands, forKey: .plotBands)
+        }
         if schemaVersion >= 2 { try c.encode(stackedAreaBoundary, forKey: .stackedAreaBoundary) }
     }
 }

@@ -16,6 +16,7 @@ chart.isSharedTooltipOnTapEnabled = true
 
 var tooltipTheme = HYMChartTooltipTheme()
 tooltipTheme.position = .fixedTop
+tooltipTheme.fixedTopUsesPlotArea = true // 可选：避开轴系标题、图例和轴标签；原生默认 false
 tooltipTheme.offset = CGPoint(x: 12, y: 0)
 tooltipTheme.fixedTopInset = 8
 chart.tooltipTheme = tooltipTheme
@@ -64,15 +65,18 @@ chart.onHit = { [weak chart] target, _ in
 
 | `HYMChartTooltipTheme` 字段 | 默认 | 行为 |
 | --- | --- | --- |
-| `position` | `.automatic` | 沿锚点选择上/下；`.fixedTop` 使用图表 bounds 顶部 |
+| `position` | `.automatic` | 沿锚点选择上/下；`.fixedTop` 默认使用图表 bounds 顶部 |
+| `fixedTopUsesPlotArea` | false | fixedTop 时，轴系使用最终绘图区与 bounds 的交集；不预留空间，automatic 不使用 |
 | `offset` | `.zero` | 屏幕坐标 pt 偏移，正 x 向右、正 y 向下；两种策略均支持 |
 | `fixedTopInset` | 8 pt | 固定顶部距容器 minY 的间距；automatic 不使用 |
 
-`.fixedTop` 水平居中后叠加 offset，使用 minY + fixedTopInset + offset.y，最终约束于容器边界。它忽略锚点方向和 gap，并隐藏箭头；下一次命中仍更新内容，不锁定选择。图表 bounds 变化时重新测量已显示的置顶内容，不重复入场动画；配置变化在下一次显示生效，模型更新仍清理旧提示。
+`.fixedTop` 水平居中后叠加 offset，使用 minY + fixedTopInset + offset.y，最终约束于容器边界。它忽略锚点方向和 gap，并隐藏箭头；下一次命中仍更新内容，不锁定选择。容器边界或主题变化后，下一次 layout 重新测量已显示的置顶内容，不重复入场动画；模型更新仍清理旧提示。
 
 `.automatic` 在偏移后选择上/下并执行原有贴边规则，箭头仍指向真实锚点。非有限 offset 分量按 0，负/非有限顶部间距按 0；非法尺寸和容器不显示。
 
-固定顶部提示的宽高受 bounds 限制。columns 布局超高时内部滚动；普通 text 布局保持触摸透传，超高文本截断，因此多行/多组内容建议选择 columns。低层自定义内容须实现 `sizeThatFits`，交互仍由 `allowsContentInteraction` 决定。提示可能覆盖绘图区或图例，操作图表时需在提示外开始手势。此子项没有关闭按钮、拖动避让、抬手隐藏或超时消失配置。
+原生默认的固定顶部提示宽高受 bounds 限制；设置 `fixedTopUsesPlotArea = true` 后，四种轴系使用最终绘图区与 bounds 的交集，顶部间距与 offset 相对该容器并限制在其中。该开关不缩小绘图区、不修改坐标或命中，标题／图例及轴标签区不再被内置置顶提示覆盖。无绘图区能力的 renderer（如 Radar/Heatmap）回退到 bounds；绘图区无效或坍缩时隐藏，不回退到标题区，恢复布局后的下一次真实命中可重新显示。直接使用低层 `HYMChartTooltipController` 时仍尊重调用方传入的容器，不自行推断绘图区。
+
+固定顶部提示的宽高受所选容器限制。columns 布局超高时内部滚动；普通 text 布局保持触摸透传，超高文本截断，因此多行/多组内容建议选择 columns。低层自定义内容须实现 `sizeThatFits`，交互仍由 `allowsContentInteraction` 决定。原生默认仍可能覆盖标题／图例；选择绘图区边界后仍可能覆盖数据，操作图表时需在提示外开始手势。此子项没有关闭按钮、拖动避让、抬手隐藏或超时消失配置。
 
 ## Objective-C 与 Demo
 
@@ -83,6 +87,7 @@ bridge.tooltipOptions.sampleBoundaryPolicy = HYMCartesianTooltipSampleBoundaryPo
 bridge.tooltipOptions.showsSourceLabel = YES;
 bridge.tooltipOptions.sourceLabelTemplate = @"取值 {key}";
 bridge.tooltipOptions.position = HYMCartesianTooltipPositionFixedTop;
+bridge.tooltipOptions.fixedTopUsesPlotArea = YES;
 bridge.tooltipOptions.offset = CGPointMake(12, 0);
 bridge.tooltipOptions.fixedTopInset = 8;
 NSError *error = nil;
@@ -91,11 +96,15 @@ NSError *error = nil;
 
 修改后 configure/update 复制选项，换回默认 options 会移除偏移和固定位置。OC“轴系验证”页面已调用这些接口，回调仍展示当前 raw/draw/base/percentage。
 
-四个轴系页面搜索“前值与置顶”，加载“前值与置顶提示场景”：能源组取前值，温度/备用使用逐系列 0 覆盖，首项采用 clamp；图标分栏提示固定顶部。交互面板提供取值索引偏移、逐系列 ID:偏移（逗号分隔）、越界策略、显示来源和来源模板。弹窗外观面板提供 position、offset.x/y、fixedTopInset。
+四个轴系页面搜索“前值与置顶”，加载“前值与置顶提示场景”：能源组取前值，温度/备用使用逐系列 0 覆盖，首项采用 clamp；图标分栏提示固定顶部。交互面板提供取值索引偏移、逐系列 ID:偏移（逗号分隔）、越界策略、显示来源和来源模板。弹窗外观面板提供 position、offset.x/y、fixedTopInset 和`fixedTopUsesPlotArea`（置顶限制在绘图区）开关。
 
-外部接管或关闭提示时禁用内置取值控件；来源说明关闭时禁用模板；自动位置禁用 fixedTopInset，置顶禁用箭头和 gap。禁用保留原值，恢复默认清除配置。通用位置字段也适用于 Radar/Heatmap 提示。
+外部接管或关闭提示时禁用内置取值控件；来源说明关闭时禁用模板；自动位置禁用 fixedTopInset 和 fixedTopUsesPlotArea，置顶禁用箭头和 gap。禁用保留原值，恢复默认清除配置。通用位置字段也适用于 Radar/Heatmap 提示。
 
-## 2026-09-30 验证记录
+## 2026-10-09 N4 布局质量补充
+
+N4 通用适配的 `.fixedTop` 自动启用绘图区边界，JSON 不增加字段，仍为 schema v6；原生调用默认 false 保持旧行为。通用 tooltip 为 null／切回旧文档时，OC 桥恢复独立宿主选项基线。该补充不是专用提示预留区，也不承诺所有数据都不被遮挡；四 renderer、长内容、窄/宽尺寸、显隐与视口回归及公共宿主验证见[本轮进度](charts-neutral-tooltip-layout-task-progress-2026-10-09.md)。
+
+## 2026-09-30 验证记录（历史）
 
 环境为 Xcode 26.3（17C529）、iPhone 15 Pro / iOS 17.2 模拟器。最终完整 **256 项单元测试通过**，本轮新增 `TooltipSelectionTests` 13 项。最终新增 **1 项 UI 测试通过**，遍历 Line / Column / Bar / Combined，验证当前表头、回调 120、前值 100、组小计 60，以及顶部 8 pt 和调到约 20 pt 后的实际位置。
 

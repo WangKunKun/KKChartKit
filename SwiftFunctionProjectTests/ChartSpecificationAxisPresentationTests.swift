@@ -10,7 +10,7 @@ final class ChartSpecificationAxisPresentationTests: XCTestCase {
     }
 
     func testV4RoundTripAllWeightsExplicitEmptyTicksAndLegacyDefaults() throws {
-        XCTAssertEqual(ChartSpecification.latestSchemaVersion, 4)
+        XCTAssertGreaterThanOrEqual(ChartSpecification.latestSchemaVersion, 4)
         for weight in ChartFontWeight.allCases {
             var value = fixture(); value.categoryLabelInterval = 2
             value.domainAppearance.labelFontWeight = weight

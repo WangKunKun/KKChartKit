@@ -7,7 +7,9 @@ public final class HYMChartTooltipController {
     private weak var host: UIView?
     private let tooltip: HYMChartTooltip
     private var displayRevision = 0
-    public var theme: HYMChartTooltipTheme
+    public var theme: HYMChartTooltipTheme {
+        didSet { lastContainer = nil }
+    }
 
     public init(host: UIView, theme: HYMChartTooltipTheme = .default) {
         self.host = host
@@ -43,7 +45,7 @@ public final class HYMChartTooltipController {
              in: container, preferred: preferred, animated: animated)
     }
 
-    /// 容器尺寸变化时重新测量并定位已显示的固定顶部提示，不重播动画。
+    /// 容器边界或主题变化后重新测量并定位已显示的固定顶部提示，不重播动画。
     /// automatic 的锚点属于原绘图区，不在这里猜测新的点位置。
     public func relayout(in container: CGRect) {
         guard theme.position == .fixedTop, !tooltip.isHidden, lastContainer != container,

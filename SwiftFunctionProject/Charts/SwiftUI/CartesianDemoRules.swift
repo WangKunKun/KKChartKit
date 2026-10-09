@@ -212,6 +212,7 @@ enum CartesianDemoRules {
                 case "弹窗外观":
                     if !hasPopup { return annotate(item, "弹窗关闭或位置回调接管时，不绘制容器弹窗。", enabled: false) }
                     if label == "fixedTopInset" { return require(item, s.tooltipTheme.position == .fixedTop, "position 选择 fixedTop 时生效。") }
+                    if label == "fixedTopUsesPlotArea" { return require(item, s.tooltipTheme.position == .fixedTop, "仅 fixedTop 生效：限制在绘图区内，避开标题/图例/轴标签；不预留提示栏。") }
                     if label == "showsArrow" || label == "gap" || label.hasPrefix("arrowSize") {
                         guard s.tooltipTheme.position == .automatic else { return annotate(item, "固定顶部提示隐藏箭头，使用 fixedTopInset 定位。", enabled: false) }
                         if label.hasPrefix("arrowSize") { return require(item, s.tooltipTheme.showsArrow, "先启用 showsArrow。") }

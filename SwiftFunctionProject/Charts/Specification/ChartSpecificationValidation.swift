@@ -170,6 +170,8 @@ public extension ChartSpecification {
                 }
             }
         }
+        issues.append(contentsOf: annotationValidationIssues())
+        issues.append(contentsOf: interactionValidationIssues())
         return issues
     }
 

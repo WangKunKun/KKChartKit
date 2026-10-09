@@ -44,6 +44,8 @@ import UIKit
     public var position: HYMCartesianTooltipPosition = .automatic
     public var offset: CGPoint = .zero
     public var fixedTopInset: CGFloat = 8
+    /// 固定顶部提示限制在绘图区，避开标题/图例/轴标签；默认 false 保留原生定位。
+    public var fixedTopUsesPlotArea = false
 
     func buildSampleSelection() -> CartesianTooltipSampleSelection {
         var result = CartesianTooltipSampleSelection()
@@ -62,6 +64,7 @@ import UIKit
         var result = base
         result.position = position == .fixedTop ? .fixedTop : .automatic
         result.offset = offset; result.fixedTopInset = fixedTopInset
+        result.fixedTopUsesPlotArea = fixedTopUsesPlotArea
         return result
     }
 

@@ -29,7 +29,7 @@ final class ChartDemoUITests: XCTestCase {
             let before = XCTAttachment(screenshot: app.screenshot())
             before.name = "specification-\(name)"; before.lifetime = .keepAlways; add(before)
             let numeric = app.switches["specification.numeric"]
-            for _ in 0..<8 where !numeric.isHittable { app.swipeUp() }
+            revealSpecificationControl(numeric, in: app)
             XCTAssertTrue(numeric.isHittable)
             numeric.coordinate(withNormalizedOffset: .init(dx: 0.9, dy: 0.5)).tap()
             XCTAssertFalse(app.staticTexts["specification.success"].exists)
@@ -39,6 +39,94 @@ final class ChartDemoUITests: XCTestCase {
             entry.tap()
             XCTAssertTrue(app.textFields["demo.search"].waitForExistence(timeout: 5))
             app.navigationBars.buttons.element(boundBy: 0).tap()
+        }
+    }
+
+    @MainActor func testNeutralTooltipLegendOnFourPagesAndReset() {
+        let app = XCUIApplication()
+        for name in ["折线图", "柱状图", "条形图", "混合图"] {
+            app.launch(); app.buttons[name].tap(); app.buttons["demo.specification"].tap()
+            let schema = app.staticTexts["specification.boundaryStatus"]
+            XCTAssertTrue(schema.waitForExistence(timeout: 5)); XCTAssertTrue(schema.label.contains("v1"))
+            for id in ["specification.tooltipConfig", "specification.legendConfig"] {
+                let toggle = app.switches[id]; revealSpecificationControl(toggle, in: app)
+                toggle.coordinate(withNormalizedOffset: .init(dx: 0.9, dy: 0.5)).tap()
+                XCTAssertEqual(toggle.value as? String, "1"); XCTAssertTrue(schema.label.contains("v6"))
+                XCTAssertTrue(app.staticTexts["specification.success"].exists)
+            }
+            let status = app.staticTexts["specification.interactionStatus"]
+            revealSpecificationControl(status, in: app)
+            XCTAssertTrue(status.label.contains("columns")); XCTAssertTrue(status.label.contains("取值 -1"))
+            XCTAssertTrue(status.label.contains("图例 top"))
+            let chart = app.descendants(matching: .any)["specification.chart"].firstMatch
+            XCTAssertTrue(chart.waitForExistence(timeout: 5))
+            chart.coordinate(withNormalizedOffset: .init(dx: 0.6, dy: 0.65)).tap()
+            let popup = app.scrollViews["chart.tooltip.columns"].firstMatch
+            XCTAssertTrue(popup.waitForExistence(timeout: 5))
+            XCTAssertTrue(popup.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "当前 ")).firstMatch.exists)
+            XCTAssertTrue(popup.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "取值 ")).firstMatch.exists)
+            XCTAssertTrue(app.descendants(matching: .any)["chart.tooltip.fixedTop"].firstMatch.exists)
+            let tooltipFrame = app.descendants(matching: .any)["chart.tooltip.fixedTop"].firstMatch.frame
+            let legend = app.scrollViews["chart.legend"].firstMatch
+            let title = chart.staticTexts["通用模型预览"]
+            XCTAssertTrue(legend.exists); XCTAssertTrue(title.exists)
+            XCTAssertFalse(tooltipFrame.intersects(legend.frame), "固定顶部提示不能遮挡图例")
+            XCTAssertFalse(tooltipFrame.intersects(title.frame), "固定顶部提示不能遮挡标题")
+            XCTAssertTrue(chart.frame.contains(tooltipFrame))
+            auditEvidence("neutral-v6-layout-\(name)", in: app)
+            let toggle = app.switches["specification.tooltipConfig"]; revealSpecificationControl(toggle, in: app)
+            toggle.coordinate(withNormalizedOffset: .init(dx: 0.9, dy: 0.5)).tap()
+            XCTAssertTrue(schema.label.contains("v6"), "图例仍启用 v6")
+            toggle.coordinate(withNormalizedOffset: .init(dx: 0.9, dy: 0.5)).tap()
+            revealSpecificationControl(status, in: app); XCTAssertTrue(status.label.contains("columns"))
+            let reset = app.buttons["specification.reset"]; revealSpecificationControl(reset, in: app); reset.tap()
+            XCTAssertTrue(schema.label.contains("v1")); XCTAssertTrue(app.staticTexts["specification.success"].exists)
+            app.terminate()
+        }
+    }
+
+    @MainActor func testNeutralAnnotationsOnFourPagesAndReset() {
+        let app = XCUIApplication()
+        for name in ["折线图", "柱状图", "条形图", "混合图"] {
+            app.launch(); app.buttons[name].tap(); app.buttons["demo.specification"].tap()
+            let schema = app.staticTexts["specification.boundaryStatus"]
+            XCTAssertTrue(schema.waitForExistence(timeout: 5)); XCTAssertTrue(schema.label.contains("v1"))
+            for id in ["specification.plotLine", "specification.plotBand"] {
+                let toggle = app.switches[id]; revealSpecificationControl(toggle, in: app)
+                toggle.coordinate(withNormalizedOffset: .init(dx: 0.9, dy: 0.5)).tap()
+                XCTAssertEqual(toggle.value as? String, "1")
+                XCTAssertTrue(schema.label.contains("v5"), schema.label)
+                XCTAssertTrue(app.staticTexts["specification.success"].exists)
+            }
+            let status = app.staticTexts["specification.annotationStatus"]
+            revealSpecificationControl(status, in: app)
+            XCTAssertTrue(status.label.contains("power · line=on · band=on"), status.label)
+            auditEvidence("neutral-v5-annotations-\(name)", in: app)
+            if name == "折线图" {
+                func toggle(_ id: String) {
+                    let item = app.switches[id]; revealSpecificationControl(item, in: app)
+                    let previous = item.value as? String
+                    item.coordinate(withNormalizedOffset: .init(dx: 0.9, dy: 0.5)).tap()
+                    XCTAssertNotEqual(item.value as? String, previous)
+                }
+                toggle("specification.secondaryAxis")
+                let axis = app.buttons["specification.annotationAxis"]
+                revealSpecificationControl(axis, in: app); axis.tap(); app.buttons["temperature"].firstMatch.tap()
+                revealSpecificationControl(status, in: app)
+                XCTAssertTrue(status.label.contains("temperature · line=off · band=off"))
+                toggle("specification.plotLine")
+                toggle("specification.secondaryAxis")
+                revealSpecificationControl(status, in: app)
+                XCTAssertTrue(status.label.contains("power · line=on · band=on"))
+                toggle("specification.secondaryAxis")
+                revealSpecificationControl(status, in: app)
+                XCTAssertTrue(status.label.contains("temperature · line=on · band=off"))
+                XCTAssertTrue(app.staticTexts["specification.success"].exists)
+            }
+            let reset = app.buttons["specification.reset"]; revealSpecificationControl(reset, in: app); reset.tap()
+            XCTAssertTrue(schema.label.contains("v1 · independent"), schema.label)
+            XCTAssertTrue(app.staticTexts["specification.success"].exists)
+            app.terminate()
         }
     }
 
@@ -52,7 +140,7 @@ final class ChartDemoUITests: XCTestCase {
             XCTAssertTrue(status.waitForExistence(timeout: 5))
             XCTAssertTrue(status.label.contains("v1 · independent"))
             let picker = app.segmentedControls["specification.boundary"]
-            for _ in 0..<5 where !picker.isHittable { app.swipeUp() }
+            revealSpecificationControl(picker, in: app)
             XCTAssertTrue(picker.isHittable)
             for (label, mode) in [("正负分链", "diverging"), ("沿基线", "followBaseline"), ("独立插值", "independent")] {
                 picker.buttons[label].tap()
@@ -65,7 +153,7 @@ final class ChartDemoUITests: XCTestCase {
             }
             picker.buttons["正负分链"].tap()
             let reset = app.buttons["specification.reset"]
-            for _ in 0..<5 where !reset.isHittable { app.swipeUp() }
+            revealSpecificationControl(reset, in: app)
             XCTAssertTrue(reset.isHittable); reset.tap()
             XCTAssertTrue(status.label.contains("v1 · independent"), status.label)
             entry.tap(); app.navigationBars.buttons.element(boundBy: 0).tap()

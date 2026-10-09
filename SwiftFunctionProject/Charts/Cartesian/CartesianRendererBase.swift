@@ -1394,3 +1394,7 @@ extension CartesianRendererBase: HYMChartSnapHitProvider {
     }
 
 }
+
+extension CartesianRendererBase: HYMChartTooltipPlotAreaProviding {
+    var tooltipPlotArea: CGRect { currentPlotFrame }
+}

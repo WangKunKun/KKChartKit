@@ -31,9 +31,11 @@ flowchart LR
 | [ChartSpecification.swift](../SwiftFunctionProject/Charts/Specification/ChartSpecification.swift) | 根描述、方向、业务组、明确分母的数学堆叠 |
 | [ChartDataSpecification.swift](../SwiftFunctionProject/Charts/Specification/ChartDataSpecification.swift) | 类目/数值/时间坐标、采样、系列、图元和插值 |
 | [ChartAppearanceSpecification.swift](../SwiftFunctionProject/Charts/Specification/ChartAppearanceSpecification.swift) | 平台无关颜色、面积填充、轴外观、数字格式 |
+| [ChartInteractionSpecification.swift](../SwiftFunctionProject/Charts/Specification/ChartInteractionSpecification.swift) | v6 Tooltip 内容/取值、图例布局和校验 |
+| [ChartAnnotationSpecification.swift](../SwiftFunctionProject/Charts/Specification/ChartAnnotationSpecification.swift) | v5 值轴标线/色带、标签样式和校验 |
 | [ChartAxisPresentation.swift](../SwiftFunctionProject/Charts/Specification/ChartAxisPresentation.swift) | v4 系统字重与可序列化值轴标签格式 |
 | [ChartSpecificationCoding.swift](../SwiftFunctionProject/Charts/Specification/ChartSpecificationCoding.swift) | 显式 JSON 枚举格式，避免 Swift 合成 `_0` 键成为文件协议 |
-| [ChartSpecificationVersionCoding.swift](../SwiftFunctionProject/Charts/Specification/ChartSpecificationVersionCoding.swift) | v1/v2/v3/v4 兼容、边界、分区和轴展示保留键检查；禁止静默降级 |
+| [ChartSpecificationVersionCoding.swift](../SwiftFunctionProject/Charts/Specification/ChartSpecificationVersionCoding.swift) | v1–v6 兼容、边界、分区、轴展示、标注和交互保留键检查；禁止静默降级 |
 | [ChartSpecificationValidation.swift](../SwiftFunctionProject/Charts/Specification/ChartSpecificationValidation.swift) | 纯输入校验，不依赖绘图实现 |
 | [ChartAdapter.swift](../SwiftFunctionProject/Charts/Specification/ChartAdapter.swift) | 适配协议、结构化诊断、Swift Error / OC NSError |
 | [HYMChartsSpecificationAdapter.swift](../SwiftFunctionProject/Charts/Adapters/HYMChartsSpecificationAdapter.swift) | HYMCharts 能力检查、稀疏数据对齐、模型/主题转换、原始采样查回 |
@@ -110,7 +112,7 @@ NSString *sampleID = [document sampleIdentifierForSeriesID:@"solar" categoryInde
 
 首版 OC 通过版本化 JSON 读写模型，无需使用 Swift struct/关联值枚举。暂未为所有字段另做一套可变 NSObject builder。JSON 有明确的 `kind/mode` 判别字段，null 表示缺测；可从示例修改或由服务端/业务映射层生成，不接受 Highcharts options 作为通用模型。
 
-`ChartSpecification.decodeJSON` 和 OC document 会做模型校验；直接 `JSONDecoder().decode` 只是解码，后续仍须 validate 或交给适配器。当前可读取 v1/v2/v3/v4，默认构造仍为 v1；v2 及以后均必填 `stackedAreaBoundary`。v3 允许逐系列 `appearance.valueColorZones`；该键出现在 v1/v2（包括 null）会明确拒绝。v4 轴展示保留键出现在 v1–v3（包括 null/错误类型）同样拒绝，具体路径见下节。未知版本/枚举值拒绝；Codable 对其他额外对象键遵循 Swift 默认忽略行为，不能借未声明键传递引擎配置；已保留的 `stackedAreaBoundary` 若出现在 v1 中则明确报错。schema 变更应显式升级版本并提供迁移，不能依赖忽略未知键实现兼容。
+`ChartSpecification.decodeJSON` 和 OC document 会做模型校验；直接 `JSONDecoder().decode` 只是解码，后续仍须 validate 或交给适配器。当前可读取 v1–v6，默认构造仍为 v1；v2 及以后均必填 `stackedAreaBoundary`。v3 允许逐系列 `appearance.valueColorZones`；该键出现在 v1/v2（包括 null）会明确拒绝。v4 轴展示保留键出现在 v1–v3（包括 null/错误类型）同样拒绝，具体路径见下节。未知版本/枚举值拒绝；Codable 对其他额外对象键遵循 Swift 默认忽略行为，不能借未声明键传递引擎配置；已保留的 `stackedAreaBoundary` 若出现在 v1 中则明确报错。schema 变更应显式升级版本并提供迁移，不能依赖忽略未知键实现兼容。
 
 模型校验/能力错误的 `NSError.domain` 为 `HYMCharts.Specification`，`userInfo["issues"]` 含 code/path/message，后端能力错误附带 backendIdentifier。JSON 语法或字段类型错误保留 Codable 的解码错误。调用方应处理错误，不能捕获后改用默认图表掩盖问题。
 
@@ -130,9 +132,91 @@ NSString *sampleID = [document sampleIdentifierForSeriesID:@"solar" categoryInde
 | G1 堆叠边界模式 | v2 三种模式；v1 固定 independent | 显式映射原生 theme；不改业务数据 |
 | 轴刻度 / 类目候选间隔 / 系统字重 / 标签格式 | v4，轴配置按稳定 ID 独立 | 四种 renderer 已映射；不改变数据/坐标能力 |
 | 值轴颜色分区 | v3，逐系列半开阈值；柱 raw/draw，线/面积 draw | 按绑定值轴映射；线/面积 raw 明确报路径错误 |
-| X 分区、分区填充、标线/色带、完整 Tooltip/图例 | 尚未纳入通用 schema | 原生现有 API 保留，不宣称完整迁移 |
+| 值轴标线/色带及标签样式 | v5，稳定标注 ID / valueAxisID | 固定层次，隐藏源项保留，裁剪不扩域 |
+| Tooltip 内容／取值、图例布局 | v6，稳定系列 ID 规则、可选宿主接管 | 四类 renderer；OC bridge 自动应用，Swift 同步应用 view 配置 |
+| X 分区、分区填充、完整 Tooltip/图例 | 其余部分尚未纳入通用 schema | 原生现有 API 保留，不宣称完整迁移 |
 | 自适应深浅色、任意图片/字体/回调、动画与采样 | 后续资源/主题/运行时配置 | 不把 UIKit 对象和闭包塞进可序列化模型 |
 | 统计表头、日出日落、全屏容器、强制空态 | 业务 UI 层 | 不放入图表数学模型 |
+
+### N4 v6：Tooltip 内容／取值与图例布局（2026-10-09）
+
+共享示例 [energy-interaction-v6.json](../Examples/ChartSpecifications/energy-interaction-v6.json) 由同一个 Foundation-only 生成器输出，Swift 与纯 OC 宿主读取同一份 JSON；不修改 v1–v5 样例或默认构造版本。
+
+| 字段 | 契约 |
+| --- | --- |
+| `tooltip` | nil：使用宿主；非 nil：覆盖已建模内容。`isEnabled=false` 只关闭内置提示，不删除系列或关闭命中回调 |
+| `layout / position` | text/columns 与 automatic/fixedTop；固定顶部不锁定当前选择，不定义旧超时或抬手策略 |
+| `headerTemplate / hidesZeroValues` | nil 不加表头；仅替换 `{key}`，始终是当前命中标签；精确零值过滤使用偏移后的展示值 |
+| `seriesRules[seriesID]` | 稳定系列 ID 的 `isHidden / hidesValue / title`；nil 标题沿用宿主标题或系列名，空标题有效。过滤不改变绘制、堆叠、百分比分母和图例 |
+| `sampleSelection` | 全局 `offset`、逐系列 `offsetsBySeriesID`、omit/clamp/current、来源标签及模板。显式 0 覆盖全局偏移；负数表示前面的类目槽位，而非稀疏 samples 数组位置 |
+| `legend` | nil 沿用适配器原有默认图例；非 nil 指定屏幕四方向、行对齐、scroll/expand、最大行数/宽高、点击显隐、相邻组换行、逐系列标题；不改变系列顺序 |
+
+偏移越界时：omit 省略该行，clamp 钳到端点，current 使用当前命中；Int 极值安全处理。**缺测始终省略，不向前寻找有效值**。`row.datum` 仍为当前命中、`displayedDatum` 为取值点；来源标签仅位置变化时添加，header／准线／样本查回都不跟随偏移。实际聚合桶仍遵循原生“取当前桶”规则，不对桶应用单点偏移。非默认取值配置仅适用于类目域，不能当作连续时间或数值距离；G6 仍明确拒绝。
+
+**2026-10-09 布局质量补充**：N4 `.fixedTop` 适配时自动启用原生 `fixedTopUsesPlotArea`，将内置提示限制在最终绘图区与容器 bounds 的交集，避免覆盖标题、图例和轴标签区；顶部间距与 offset 相对该边界。它仍覆盖数据，不预留专用区域、不修改绘图区或坐标。原生默认 false 保持旧行为；automatic 不受此开关影响，null／旧文档恢复宿主的独立运行时基线。不新增 JSON 字段，不升级 schema；详见[布局质量进度](charts-neutral-tooltip-layout-task-progress-2026-10-09.md)与[原生位置指南](charts-tooltip-selection-guide.md)。
+
+图例 `maxRows > 0`，尺寸是有限的 0...1e9 point，0 可使图例没有可用空间；expand 仍保护原生最小绘图区，不撑大宿主 frame。左右为单列，上下按行对齐；所有位置均指屏幕方向，水平 Bar 不翻转这些名称。总开关继续是 `showsLegend`，成员资格是 `showsInLegend`，初始绘制显隐是 `isVisible`。Tooltip 标题和图例标题互不替换。
+
+**Swift 应同时应用 model、theme 和 Tooltip 配置**（后者属于 view，不会仅靠 model/theme 自动设置）：
+
+```swift
+var described = specification
+// 本例假定 specification 中有稳定 ID 为 solar 的系列。
+described.schemaVersion = 6
+var tooltip = ChartTooltipSpecification()
+tooltip.layout = .columns; tooltip.position = .fixedTop
+tooltip.headerTemplate = "当前 {key}"
+tooltip.sampleSelection.offset = -1; tooltip.sampleSelection.boundaryPolicy = .clamp
+tooltip.sampleSelection.offsetsBySeriesID = ["solar": 0]
+described.tooltip = tooltip
+var legend = ChartLegendSpecification(); legend.position = .top
+legend.titlesBySeriesID = ["solar": "光伏发电"]
+described.legend = legend
+let output = try HYMChartsSpecificationAdapter().makeConfiguration(from: described)
+
+// 宿主基线独立保存；不要把上一次适配结果再次当成 runtime 传入，避免旧规则串联。
+let runtimePresentation = CartesianTooltipPresentation()
+let runtimeTheme = HYMChartTooltipTheme.default
+chart.showsTooltipOnHit = output.tooltip?.isEnabled ?? true
+chart.tooltipTextOptions = output.tooltip?.textOptions ?? .init()
+chart.cartesianTooltipPresentation = output.tooltip?.presentation(preservingRuntime: runtimePresentation) ?? runtimePresentation
+chart.cartesianTooltipSampleSelection = output.tooltip?.sampleSelection ?? .init()
+chart.tooltipTheme = output.tooltip?.theme(preservingRuntime: runtimeTheme) ?? runtimeTheme
+chart.configure(model: output.model, theme: output.theme)
+```
+
+示例以默认宿主设置作为基线；实际宿主应保存自己的 textOptions、sampleSelection、开关和 theme。SwiftUI 包装器也接受这些 Tooltip 参数（见同页 Demo），轻点共享提示是否开启仍由宿主手势设置控制。N4 不序列化手势策略。
+
+**运行时优先级**：非 nil Tooltip 提供平铺内容，不自动启用业务分组／小计；数值格式与单位仍用系列配置。`presentation(preservingRuntime:)` 保留图片/provider 和间距，对命中的系列规则覆盖隐藏／隐藏数值，只有非 nil 标题覆盖宿主标题；未命中规则仍用宿主 provider。`theme(preservingRuntime:)` 覆盖位置，并在 fixedTop 时开启 `fixedTopUsesPlotArea`；automatic 保留宿主该开关值但不使用。颜色、字体、偏移、动画仍由宿主控制，不入 schema。不要通过 runtime provider 期待与某条中立规则矛盾的开关仍然优先。
+
+**Objective-C** 使用既有 `HYMChartSpecificationDocument` 与 `makeNativeBridge/updateWithSpecification` 即可；桥接自动应用 N4。每次更新先由 `tooltipOptions` 和桥接开关重建独立宿主基线；从 v6 对象切回 v1–v5 或 `tooltip:null` 时恢复该基线，不残留旧覆盖。非法文档、失配 renderer 或后端不支持组合在修改 view 前报错，保留有效图、提示配置和视口；成功更新按 `preserveViewport` 执行并清理旧提示。
+
+**版本**：v6 顶层 `tooltip` 与 `legend` 两键都必须存在，可以是 null；对象中的非可选字段必须完整，不能以 `{}` 代替默认对象。v1–v5 这两个保留键即使为 null、空对象、错误类型也拒绝。降级前必须将二者置 nil，包括关闭状态下的默认对象；普通 `JSONEncoder` 与辅助编码入口同样验证，不能静默丢配置。未知枚举、失效／空系列引用和非法尺寸拒绝，隐藏配置也不豁免校验。可选标题／表头的缺失或 null 视为 nil。
+
+**本轮未做**：逐 sample ID 表头／名称／隐藏点、动态组标题、组级 onlyName／业务小计、图片资源协议、Tooltip 字体／颜色、图例符号／背景／资源，以及旧输入 mapper、第二实际后端、G6。不要把 N4 有限切片当成完整 Tooltip/图例迁移。验证范围与后续入口见 [N4 进度](charts-neutral-interaction-task-progress-2026-10-09.md)。
+
+### N3 v5：值轴标线／色带（2026-10-09）
+
+复用原生 G4 的固定层次，不改变坐标／值域／命中。共享示例 [energy-annotations-v5.json](../Examples/ChartSpecifications/energy-annotations-v5.json) 包含主次轴标线、隐藏项和带透明度色带，Swift 与纯 OC 宿主载入同一份文档。
+
+```swift
+var annotated = specification
+annotated.schemaVersion = 5
+annotated.plotLines = [ChartPlotLine(id: "limit", valueAxisID: "power", value: 40,
+    lineWidth: 2, strokePattern: .dashed, label: "上限",
+    labelStyle: .init(fontSize: 13, fontWeight: .semibold, alignment: .leading))]
+annotated.plotBands = [ChartPlotBand(id: "range", valueAxisID: "power", from: 10, to: 30,
+    color: .init(red: 0, green: 0.6, blue: 0.3, alpha: 0.18), label: "区间")]
+let output = try HYMChartsSpecificationAdapter().makeConfiguration(from: annotated)
+```
+
+**版本／失败策略**：v5 必须保存两个数组（可空）；缺失、null、类型错误拒绝。v1–v4 遇到任一标注保留键即拒绝，即使空数组或 null。内存中非空数组不允许降级，包括隐藏项；清空数组后仍须遵守其他 v2–v4 字段降级规则。`decodeJSON` / document 做完整校验；直接 `JSONDecoder` 只做解码及版本检查，后续仍需 validate / adapter。
+
+**身份／坐标**：所有标线和色带 ID 统一非空唯一；`valueAxisID` 必须指向已声明轴，重排后重新解析原生索引。标线值有限，色带有限且严格 `from < to`（不交换端点）。坐标用逻辑值轴单位，百分比为百分数；部分越界带裁剪、完全越界线／带不画，绝不扩域。`isVisible=false` 仍校验并保留源项，不进入绘制数组，也不创建虚拟系列或影响原值、堆叠分母、图例、选择。
+
+**样式／边界**：可选 sRGB RGBA、非负有限线宽、solid/dashed/dotted；文字、颜色与底色独立（HYM nil 文字色跟随标注；色带文字取不透明 RGB），字号正有限、系统九字重。字号／字重同时 nil 时 HYM 继承主题刻度字号与 medium；只覆盖字号时默认 medium。水平 leading/center/trailing 和垂直 top/center/bottom 均为屏幕方向，automatic 保留原生位置。偏移先于边界处理，有限且绝对值 ≤ 1e9。clamp 限宽尾截再钳入绘图区，高度不足隐藏；hide 完整文字越界就隐藏。多个标签互相避让不在本切片内。
+
+**固定层次／非目标**：带体在系列后，标线和标签在系列前。支持 Line / Column / Combined 主次轴与 Bar 主值轴；不支持 X/类目标注、任意 zIndex、自定义字体资源、执行式 formatter，不解除 G6 拒绝。更多覆盖与限制见 [N3 进度](charts-neutral-annotations-task-progress-2026-10-09.md)。
 
 ### N2 v4：轴展示（2026-10-09）
 
@@ -205,7 +289,7 @@ let output = try HYMChartsSpecificationAdapter().makeConfiguration(from: shared)
 // output.source 保留 ID、原始正负值、缺测；output.theme 显式启用原生正负分链。
 ```
 
-也可在构造器末尾明确传入 `schemaVersion: 2, stackedAreaBoundary: .diverging`。`latestSchemaVersion == 4` 表示最新可读版本，**不改变默认构造器的 v1**。
+也可在构造器末尾明确传入 `schemaVersion: 2, stackedAreaBoundary: .diverging`。`latestSchemaVersion == 5` 表示最新可读版本，**不改变默认构造器的 v1**。
 
 | 输入 / 操作 | 行为 |
 | --- | --- |
@@ -245,7 +329,7 @@ OC 仍使用不可变 JSON 文档，无需第二套可变配置 API。将相同�
 
 ## Demo 与验证
 
-现有折线/柱状/条形/混合页右上角“通用模型”切换到同页预览；“原生属性”恢复原面板。通用预览提供缺测、百分比、图例、面积/插值和不支持能力的显式错误演示，全部经过真实适配器。折线/混合页增加 G1 三段选择器和实际模型版本状态；未开分区时独立模式恢复 v1，另两种模式明确选择 v2；任一系列开启分区则为 v3；当前有效轴启用任一 N2 字段则显式为 v4。混合页保留柱 + 两个线族系列，便于验证类型族隔离；只有线族基底缺测，另一层仍保留可命中原始点。恢复默认按钮回到 independent/v1。该预览不启用手势缩放；返回原面板保留其配置值，但因视图卸载会重新创建图表，不承诺保留手势窗口或选择。
+现有折线/柱状/条形/混合页右上角“通用模型”切换到同页预览；“原生属性”恢复原面板。通用预览提供缺测、百分比、图例、面积/插值和不支持能力的显式错误演示，全部经过真实适配器。折线/混合页增加 G1 三段选择器和实际模型版本状态；未开分区时独立模式恢复 v1，另两种模式明确选择 v2；任一系列开启分区则为 v3；当前有效轴启用任一 N2 字段则显式为 v4；启用任一 N3 标线/色带则为 v5。N3 详细配置可折叠，按稳定轴 ID 保存，开关次轴不串轴；无效区间显示诊断不自动修正。混合页保留柱 + 两个线族系列，便于验证类型族隔离；只有线族基底缺测，另一层仍保留可命中原始点。恢复默认按钮回到 independent/v1。该预览不启用手势缩放；返回原面板保留其配置值，但因视图卸载会重新创建图表，不承诺保留手势窗口或选择。
 
 核心模型可单独编译并生成跨语言示例：
 
@@ -254,14 +338,16 @@ xcrun swiftc -swift-version 6 -strict-concurrency=complete -parse-as-library \
   -module-cache-path /tmp/hym-spec-module-cache \
   SwiftFunctionProject/Charts/Specification/*.swift \
   Examples/ChartSpecifications/GenerateExample.swift -o /tmp/generate-neutral-chart
-/tmp/generate-neutral-chart /tmp/energy-v1.json /tmp/energy-g1-v2.json /tmp/energy-zones-v3.json /tmp/energy-axes-v4.json
+/tmp/generate-neutral-chart /tmp/energy-v1.json /tmp/energy-g1-v2.json /tmp/energy-zones-v3.json /tmp/energy-axes-v4.json /tmp/energy-annotations-v5.json /tmp/energy-interaction-v6.json
 cmp Examples/ChartSpecifications/energy.json /tmp/energy-v1.json
 cmp Examples/ChartSpecifications/energy-g1-v2.json /tmp/energy-g1-v2.json
 cmp Examples/ChartSpecifications/energy-zones-v3.json /tmp/energy-zones-v3.json
 cmp Examples/ChartSpecifications/energy-axes-v4.json /tmp/energy-axes-v4.json
+cmp Examples/ChartSpecifications/energy-annotations-v5.json /tmp/energy-annotations-v5.json
+cmp Examples/ChartSpecifications/energy-interaction-v6.json /tmp/energy-interaction-v6.json
 ```
 
-专项测试见 [ChartSpecificationTests.swift](../SwiftFunctionProjectTests/ChartSpecificationTests.swift) 和 [G1 边界契约测试](../SwiftFunctionProjectTests/ChartSpecificationBoundaryTests.swift)。专项分区测试见 [ChartSpecificationColorZoneTests.swift](../SwiftFunctionProjectTests/ChartSpecificationColorZoneTests.swift)。独立 Swift / 纯 OC 宿主共用 v1 energy.json、v2 energy-g1-v2.json 、v3 energy-zones-v3.json 与 v4 energy-axes-v4.json，分别通过普通公开导入创建/更新图表。
+专项测试见 [ChartSpecificationTests.swift](../SwiftFunctionProjectTests/ChartSpecificationTests.swift) 和 [G1 边界契约测试](../SwiftFunctionProjectTests/ChartSpecificationBoundaryTests.swift)。专项分区测试见 [ChartSpecificationColorZoneTests.swift](../SwiftFunctionProjectTests/ChartSpecificationColorZoneTests.swift)。独立 Swift / 纯 OC 宿主共用 v1 energy.json、v2 energy-g1-v2.json 、v3 energy-zones-v3.json 、v4 energy-axes-v4.json、v5 energy-annotations-v5.json 与 v6 energy-interaction-v6.json，分别通过普通公开导入创建/更新图表。
 
 2026-10-03 **首版历史验证（不是本次 v2 增量）**：**384 项单元（含新增 20 项）+ 2 项相关 UI 全部通过**；独立 Release Swift/纯 OC 宿主 **2/2 通过**。新核心通过 Swift 6 严格并发独立编译，Release framework 公开产物审计通过。两个同页 Demo 原始截图已目视复核；未做全量 UI、真机或其他第三方引擎验收。准确范围、早期失败与修复、日志及截图见 [首版证据](evidence/charts-neutral-model-2026-10-03/README.md)。
 
@@ -270,3 +356,7 @@ cmp Examples/ChartSpecifications/energy-axes-v4.json /tmp/energy-axes-v4.json
 2026-10-09 **N1 值轴阈值颜色 v3 最终验证**：**406 项单元 + 3 项相关 UI = 409/409**，独立 Release Swift/纯 OC 宿主 **2/2**，Python 审计回归 **25/25**。Foundation-only Swift 6 完整严格并发编译及三版 JSON 逐字节复现通过；四页 7 张原始截图已逐张复核。raw/draw 首层截图相同，跨阈值的取色差异另由专项测试验证；不是全量 UI、真机或完整旧 zones 兼容验收。见 [N1 任务进度](charts-neutral-zones-task-progress-2026-10-09.md)和[正式证据](evidence/charts-neutral-zones-2026-10-09/README.md)。
 
 2026-10-09 **N2 通用轴展示 v4 最终验证**：**419 项单元（含新增 13 项）+ 4 项相关 UI = 423/423**，独立 Release Swift/纯 OC 宿主 **2/2**，Python 审计回归 **26/26**。Foundation-only Swift 6 完整严格并发编译、四版 JSON 逐字节复现和 framework 产物审计通过；四页 4 张原始截图已逐张复核。保留 Bar 右端单位标签截断及深色文字低对比度限制，不宣称全主题/全量 UI/真机/第二后端验收。见 [N2 任务进度](charts-neutral-axes-task-progress-2026-10-09.md)与[正式证据](evidence/charts-neutral-axes-2026-10-09/README.md)。
+
+本轮 N3 最终验证（2026-10-09）：主工程全部单元 **431/431** + 五项相关 UI **5/5**，独立 Release Swift/OC 宿主 **2/2**，Python 审计回归 **27/27**；Foundation-only Swift 6 完整严格并发、v1–v5 五份 JSON 逐字节复现和公开产物审计通过。四页标线／色带原始截图已逐张复核；次轴关闭／恢复的配置隔离也已加入 UI 断言。此处不宣称全量 UI／真机／全主题或 G6 验收，既有低对比度与长单位标签问题仍保留。见 [N3 任务进度](charts-neutral-annotations-task-progress-2026-10-09.md)与[正式证据](evidence/charts-neutral-annotations-2026-10-09/README.md)。
+
+2026-10-09 **N4 Tooltip／图例 v6 最终验证**：**443 项单元 + 6 项相关 UI = 449/449**，独立 Release Swift／纯 OC 宿主 **2/2**，Python 审计回归 **28/28**。Foundation-only Swift 6 严格并发编译、六版 JSON 逐字节复现及 101 源文件 framework 审计通过；v1–v5 不变，四页原始截图已逐张复核。fixedTop 与顶部图例的遮挡仍为质量待办，不宣称所有布局组合或全量 UI／真机通过。见 [N4 任务进度](charts-neutral-interaction-task-progress-2026-10-09.md)与[正式证据](evidence/charts-neutral-interaction-2026-10-09/README.md)。

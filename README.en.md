@@ -4,7 +4,14 @@
 
 A native Swift chart module for iOS. Public types currently use the `HYM` and `Cartesian` prefixes. Rendering uses UIKit and Core Animation, with SwiftUI wrappers and Objective-C bridges.
 
-This repository contains source code and a runnable demo project. It does **not** currently publish a standalone Swift package, CocoaPod, or XCFramework. The project deployment target is iOS 15; the current validation environment is Xcode 26.3 with an iOS 17.2 simulator. This is not a claim of validation on every supported OS version.
+This repository contains source code and a runnable demo project. It does **not** currently publish a standalone Swift package, CocoaPod, or XCFramework. The project deployment target is iOS 15; historical checks used Xcode 26.3 with an iOS 17.2 simulator, while the 2026-10-09 layout follow-up uses iOS 18.6 (see its progress record below). This is not a claim of validation on every supported OS version.
+
+
+2026-10-09: [N4 fixed-top tooltip layout](docs/charts-neutral-tooltip-layout-task-progress-2026-10-09.md) adds opt-in native `fixedTopUsesPlotArea` (default `false`), enabled by N4 fixedTop adaptation. Tooltips stay inside the plot, avoiding title/legend/axis-label regions, but still overlay data. No new JSON field or reserved header area.
+
+2026-10-09: [N4 tooltip and legend (schema v6)](docs/charts-neutral-interaction-task-progress-2026-10-09.md) adds serializable content, stable-series rules, category-slot offsets and boundary policies, plus legend layout/titles. Default v1 construction and all v1–v5 fixtures remain unchanged. Images/callbacks remain runtime concerns; dynamic group names, business subtotals and G6 are not included.
+
+2026-10-09: [N3 value-axis annotations (schema v5)](docs/charts-neutral-annotations-task-progress-2026-10-09.md) adds stable axis bindings, visibility, line styles and label styling using the existing fixed native layering. Default v1 construction and v1–v4 JSON remain unchanged. See the [neutral model guide](docs/charts-neutral-model-guide.md) for versioning and limits; this does not enable G6 coordinates or a legacy-input mapper.
 
 ## Features
 

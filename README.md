@@ -4,7 +4,14 @@
 
 面向 iOS 的原生 Swift 图表模块。仓库中的公开类型目前使用 `HYM` / `Cartesian` 前缀，核心绘制采用 UIKit / Core Animation，提供 SwiftUI 封装和 Objective-C 桥接。
 
-当前仓库是源码与可运行 Demo 工程，尚未发布独立 Swift Package、CocoaPod 或 XCFramework。 已提供 [HYMCharts.framework 独立接入验证工程](Examples/ChartsIntegration/README.md)，Swift/纯 Objective-C 宿主通过 Debug/Release，正式旧输入适配仍待实现。项目最低部署版本为 iOS 15；本轮验证环境为 Xcode 26.3、iOS 17.2 模拟器。不要将验证环境理解为所有系统版本均已验收。
+当前仓库是源码与可运行 Demo 工程，尚未发布独立 Swift Package、CocoaPod 或 XCFramework。 已提供 [HYMCharts.framework 独立接入验证工程](Examples/ChartsIntegration/README.md)，Swift/纯 Objective-C 宿主通过 Debug/Release，正式旧输入适配仍待实现。项目最低部署版本为 iOS 15；历史验证包括 Xcode 26.3／iOS 17.2 模拟器，2026-10-09 的布局补充使用 iOS 18.6（详见下方进度）。不要将验证环境理解为所有系统版本均已验收。
+
+
+2026-10-09 补充 [N4 固定顶部提示布局质量](docs/charts-neutral-tooltip-layout-task-progress-2026-10-09.md)：原生新增默认关闭的 `fixedTopUsesPlotArea`，N4 fixedTop 自动启用，避开标题／图例／轴标签区；仍覆盖绘图区数据，不增加 JSON 字段或预留区域。
+
+2026-10-09 新增 [N4 Tooltip／图例（schema v6）](docs/charts-neutral-interaction-task-progress-2026-10-09.md)：提示内容、逐系列规则、类目槽位前值与边界政策、图例布局／标题；默认 v1 与 v1–v5 样例保持不变。图片／回调留宿主，不含动态组名、业务小计或 G6。
+
+2026-10-09 新增 [N3 值轴标线/色带（schema v5）](docs/charts-neutral-annotations-task-progress-2026-10-09.md)：稳定值轴 ID、显隐、线型及标签样式，复用原生固定层次；默认 v1 与 v1–v4 JSON 保持兼容。版本规则与边界见 [模型指南](docs/charts-neutral-model-guide.md)，不包含 G6 坐标扩展或旧输入 mapper。
 
 ## 已有功能
 

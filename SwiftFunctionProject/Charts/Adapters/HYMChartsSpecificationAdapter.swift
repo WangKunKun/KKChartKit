@@ -132,7 +132,7 @@ public struct HYMChartsSpecificationAdapter: ChartAdapter {
         if specification.orientation == .horizontal { kind = .bar }
         else if hasBars && rows.contains(where: { $0.kind != .column }) { kind = .combined }
         else { kind = hasBars ? .column : .line }
-        let model = CartesianChartModel(title: specification.title, series: rows,
+        var model = CartesianChartModel(title: specification.title, series: rows,
             xAxis: .init(kind: .category(labels: categories.map(\.label)),
                          showsGridlines: specification.domainAppearance.showsGridlines,
                          style: axisStyle(specification.domainAppearance),
@@ -140,6 +140,20 @@ public struct HYMChartsSpecificationAdapter: ChartAdapter {
             yAxis: axis(specification.valueAxes[0]),
             secondaryYAxis: specification.valueAxes.count == 2 ? axis(specification.valueAxes[1]) : nil,
             stacking: stacking, groups: specification.groups.map { .init(id: $0.id, name: $0.name) })
+        // Stable ID -> native slot only at this boundary. Invisible annotations remain in source.
+        model.plotLines = specification.plotLines.filter(\.isVisible).map { line in
+            var result = CartesianPlotLine(value: line.value, yAxisIndex: axes[line.valueAxisID]!,
+                dashStyle: dash(line.strokePattern), label: line.label, labelStyle: annotationStyle(line.labelStyle))
+            if let color = line.color { result.color = uiColor(color) }
+            if let width = line.lineWidth { result.lineWidth = CGFloat(width) }
+            return result
+        }
+        model.plotBands = specification.plotBands.filter(\.isVisible).map { band in
+            var result = CartesianPlotBand(from: band.from, to: band.to, yAxisIndex: axes[band.valueAxisID]!,
+                label: band.label, labelStyle: annotationStyle(band.labelStyle))
+            if let color = band.color { result.color = uiColor(color) }
+            return result
+        }
         var theme = CartesianChartTheme()
         switch specification.stackedAreaBoundary {
         case .independent: theme.stackedAreaBoundaryMode = .independent
@@ -147,6 +161,8 @@ public struct HYMChartsSpecificationAdapter: ChartAdapter {
         case .diverging: theme.stackedAreaBoundaryMode = .diverging
         }
         theme.legend.isEnabled = specification.showsLegend
+        if let legend = specification.legend { theme.legend = legend.nativeConfiguration(isEnabled: specification.showsLegend) }
+        if let tooltip = specification.tooltip { theme.showsTooltipOnHit = tooltip.isEnabled }
         // 主值轴/类目网格由屏幕方向主题控制；只设置 AxisModel.showsGridlines 不会生效。
         let valueGrid = specification.valueAxes[0].appearance.showsGridlines
         let domainGrid = specification.domainAppearance.showsGridlines
@@ -175,6 +191,32 @@ public struct HYMChartsSpecificationAdapter: ChartAdapter {
         let size = appearance.labelFontSize.map { CGFloat($0) } ?? CartesianChartTheme().tickLabelFont.pointSize
         return UIFont.systemFont(ofSize: size, weight: weight)
     }
+    private func annotationStyle(_ style: ChartAnnotationLabelStyle) -> CartesianAnnotationLabelStyle {
+        var font: UIFont?
+        if style.fontSize != nil || style.fontWeight != nil {
+            var appearance = ChartAxisAppearance()
+            appearance.labelFontSize = style.fontSize; appearance.labelFontWeight = style.fontWeight ?? .medium
+            font = axisFont(appearance)
+        }
+        let horizontal: CartesianAnnotationAlignment
+        switch style.alignment {
+        case .automatic: horizontal = .automatic
+        case .leading: horizontal = .leading
+        case .center: horizontal = .center
+        case .trailing: horizontal = .trailing
+        }
+        let vertical: CartesianAnnotationVerticalAlignment
+        switch style.verticalAlignment {
+        case .automatic: vertical = .automatic
+        case .top: vertical = .top
+        case .center: vertical = .center
+        case .bottom: vertical = .bottom
+        }
+        return .init(color: style.color.map(uiColor), font: font, backgroundColor: style.backgroundColor.map(uiColor),
+                     alignment: horizontal, verticalAlignment: vertical,
+                     offset: CGSize(width: style.offsetX, height: style.offsetY), bounds: style.bounds == .clamp ? .clamp : .hide)
+    }
+
     private func axisStyle(_ appearance: ChartAxisAppearance) -> CartesianAxisStyle {
         .init(labelColor: appearance.labelColor.map(uiColor),
               labelFont: axisFont(appearance),

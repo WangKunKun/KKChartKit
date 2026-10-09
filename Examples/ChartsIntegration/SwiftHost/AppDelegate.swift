@@ -114,7 +114,44 @@ private final class IntegrationController: UIViewController {
                 && axesOutput.model.yAxis.labelFormatter?(50) == "50 %"
                 && axesOutput.model.yAxis.style.labelFont?.fontDescriptor.symbolicTraits.contains(.traitBold) == true
                 && axes.series.map(\.samples) == source.series.map(\.samples) && axesRoundTrip
-            neutralPassed = g1Passed && zonesPassed && axesPassed && output.model.series[0].data[1].isNaN
+            guard let annotationsURL = Bundle.main.url(forResource: "energy-annotations-v5", withExtension: "json") else { throw CocoaError(.fileNoSuchFile) }
+            let annotations = try ChartSpecification.decodeJSON(Data(contentsOf: annotationsURL))
+            let annotationsOutput = try HYMChartsSpecificationAdapter().makeConfiguration(from: annotations)
+            temporary.configure(model: annotationsOutput.model, theme: annotationsOutput.theme); temporary.layoutIfNeeded()
+            let annotationsDocument = try HYMChartSpecificationDocument(specification: annotations)
+            let annotationsRoundTrip = try annotationsDocument.jsonData() == annotations.jsonData()
+            let annotationsPassed = annotations.schemaVersion == 5 && annotations.plotLines.count == 3
+                && annotationsOutput.model.plotLines.map(\.yAxisIndex) == [0, 1]
+                && annotationsOutput.model.plotLines.first?.dashStyle == .dash
+                && annotationsOutput.model.plotBands.first?.from == -20
+                && annotationsOutput.model.plotBands.first?.to == 20
+                && annotationsOutput.model.plotLines.first?.labelStyle.font == UIFont.systemFont(ofSize: 13, weight: .semibold)
+                && annotationsOutput.source.plotLines.last?.isVisible == false
+                && annotations.series.map(\.samples) == source.series.map(\.samples)
+                && annotationsRoundTrip
+            guard let interactionURL = Bundle.main.url(forResource: "energy-interaction-v6", withExtension: "json") else { throw CocoaError(.fileNoSuchFile) }
+            let interaction = try ChartSpecification.decodeJSON(Data(contentsOf: interactionURL))
+            let interactionOutput = try HYMChartsSpecificationAdapter().makeConfiguration(from: interaction)
+            guard let tooltip = interactionOutput.tooltip else { throw CocoaError(.coderValueNotFound) }
+            // Tooltip lives on the view, not in model/theme. Keep the host baseline independent.
+            let runtimePresentation = CartesianTooltipPresentation()
+            temporary.showsTooltipOnHit = tooltip.isEnabled
+            temporary.tooltipTextOptions = tooltip.textOptions
+            temporary.cartesianTooltipPresentation = tooltip.presentation(preservingRuntime: runtimePresentation)
+            temporary.cartesianTooltipSampleSelection = tooltip.sampleSelection
+            temporary.tooltipTheme = tooltip.theme()
+            temporary.update(model: interactionOutput.model, theme: interactionOutput.theme); temporary.layoutIfNeeded()
+            let interactionDocument = try HYMChartSpecificationDocument(specification: interaction)
+            let interactionRoundTrip = try interactionDocument.jsonData() == interaction.jsonData()
+            let interactionPassed = interaction.schemaVersion == 6 && tooltip.isEnabled
+                && temporary.cartesianTooltipPresentation.layout == .columns
+                && temporary.cartesianTooltipSampleSelection.offset == -1
+                && temporary.cartesianTooltipSampleSelection.offsetsBySeriesID["solar"] == 0
+                && temporary.tooltipTheme.position == .fixedTop && temporary.tooltipTheme.fixedTopUsesPlotArea
+                && interactionOutput.theme.legend.position == .top
+                && interactionOutput.theme.legend.itemOverrides["solar"]?.title == "光伏发电"
+                && interaction.series.map(\.samples) == source.series.map(\.samples) && interactionRoundTrip
+            neutralPassed = g1Passed && zonesPassed && axesPassed && annotationsPassed && interactionPassed && output.model.series[0].data[1].isNaN
                 && output.sourceSample(seriesID: "solar", categoryIndex: 0)?.id == "solar-08"
                 && output.model.stackedDrawValues[1][0] == -40
         } catch { neutralPassed = false }

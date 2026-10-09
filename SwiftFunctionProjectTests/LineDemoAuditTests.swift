@@ -126,7 +126,7 @@ import SwiftUI
                 }
             }
         }
-        XCTAssertEqual(identifiers.count, 326, "面板清单变化时同步更新审计文档及条件状态覆盖。")
+        XCTAssertEqual(identifiers.count, 327, "面板清单变化时同步更新审计文档及条件状态覆盖。")
         let json = try JSONSerialization.data(withJSONObject: inventoryRows.keys.sorted().compactMap { inventoryRows[$0] }, options: [.sortedKeys])
         let attachment = XCTAttachment(data: json, uniformTypeIdentifier: "public.json")
         attachment.name = "line-demo-control-inventory"; attachment.lifetime = .keepAlways; add(attachment)

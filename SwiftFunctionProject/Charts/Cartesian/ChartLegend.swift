@@ -256,6 +256,7 @@ final class ChartLegendView: UIScrollView {
         alwaysBounceVertical = false
         clipsToBounds = true
         layer.zPosition = 910
+        accessibilityIdentifier = "chart.legend"
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 

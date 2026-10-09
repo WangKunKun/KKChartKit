@@ -212,21 +212,23 @@ import SwiftUI
         let bridge = HYMCartesianChartViewBridge(kind: .line, frame: .init(x: 0, y: 0, width: 390, height: 300))
         bridge.tooltipOptions.sampleOffset = -1; bridge.tooltipOptions.sampleBoundaryPolicy = .clamp
         bridge.tooltipOptions.sampleOffsetsBySeriesID = ["other": 0]
+        bridge.tooltipOptions.fixedTopUsesPlotArea = true
         bridge.tooltipOptions.position = .fixedTop; bridge.tooltipOptions.offset = .init(x: 12, y: 3)
         try bridge.configure(model: model)
         let view = try XCTUnwrap(bridge.chartView as? HYMChartView<LineChartRenderer>); view.layoutIfNeeded()
         let content = try XCTUnwrap(view.cartesianTooltipContent(for: target([try XCTUnwrap(view.rendererForTesting.datum(series: 0, category: 1))])))
         XCTAssertTrue(content.text.contains("10")); XCTAssertEqual(view.tooltipTheme.position, .fixedTop)
+        XCTAssertTrue(view.tooltipTheme.fixedTopUsesPlotArea)
         XCTAssertEqual(view.tooltipTheme.offset, .init(x: 12, y: 3)); XCTAssertEqual(view.cartesianTooltipSampleSelection.boundaryPolicy, .clamp)
         view.tooltipTheme.font = .systemFont(ofSize: 20)
         bridge.tooltipOptions = .init(); try bridge.update(model: model, preserveViewport: true)
         XCTAssertEqual(view.cartesianTooltipSampleSelection, .init()); XCTAssertEqual(view.tooltipTheme.position, .automatic)
-        XCTAssertEqual(view.tooltipTheme.offset, .zero)
+        XCTAssertEqual(view.tooltipTheme.offset, .zero); XCTAssertFalse(view.tooltipTheme.fixedTopUsesPlotArea)
         XCTAssertEqual(view.tooltipTheme.font.pointSize, 20, "更新位置选项保留原有外观覆盖")
     }
 
     func testSwiftUIUpdatesSampleAndPositionWithoutReplacingCharts() throws {
-        let s = state()
+        var s = state(); s.tooltipTheme.fixedTopUsesPlotArea = true
         func verify<R: CartesianRendererBase<CartesianChartTheme>>(_ type: R.Type,
             build: (CartesianTooltipSampleSelection, HYMChartTooltipTheme) -> AnyView) throws {
             let host = UIHostingController(rootView: build(s.interaction.sampleSelection, s.tooltipTheme))
@@ -235,10 +237,12 @@ import SwiftUI
             host.view.layoutIfNeeded(); RunLoop.main.run(until: Date().addingTimeInterval(0.1))
             let chart = try XCTUnwrap(descendants(host.view).compactMap { $0 as? HYMChartView<R> }.first)
             XCTAssertEqual(chart.cartesianTooltipSampleSelection.offset, -1); XCTAssertEqual(chart.tooltipTheme.position, .fixedTop)
+            XCTAssertTrue(chart.tooltipTheme.fixedTopUsesPlotArea)
             host.rootView = build(.init(), .default); host.view.setNeedsLayout(); host.view.layoutIfNeeded()
             RunLoop.main.run(until: Date().addingTimeInterval(0.1))
             XCTAssertTrue(chart === descendants(host.view).compactMap { $0 as? HYMChartView<R> }.first)
             XCTAssertEqual(chart.cartesianTooltipSampleSelection, .init()); XCTAssertEqual(chart.tooltipTheme.position, .automatic)
+            XCTAssertFalse(chart.tooltipTheme.fixedTopUsesPlotArea)
         }
         try verify(LineChartRenderer.self) { AnyView(LineChart(model: s.model, playsAnimationOnAppear: false, cartesianTooltipSampleSelection: $0, tooltipTheme: $1).frame(height: 300)) }
         try verify(ColumnChartRenderer.self) { AnyView(ColumnChart(model: s.model, playsAnimationOnAppear: false, cartesianTooltipSampleSelection: $0, tooltipTheme: $1).frame(height: 300)) }
@@ -253,9 +257,11 @@ import SwiftUI
             return try XCTUnwrap(CartesianDemoControls.sections(b).filter { section == nil || $0.title == section }.flatMap(\.items).first { $0.label == name })
         }
         XCTAssertTrue(try item("fixedTopInset", section: "弹窗外观").isEnabled)
+        XCTAssertTrue(try item("fixedTopUsesPlotArea", section: "弹窗外观").isEnabled)
         XCTAssertFalse(try item("showsArrow", section: "弹窗外观").isEnabled)
         s.tooltipTheme.position = .automatic
         XCTAssertFalse(try item("fixedTopInset", section: "弹窗外观").isEnabled)
+        XCTAssertFalse(try item("fixedTopUsesPlotArea", section: "弹窗外观").isEnabled)
         s.interaction.tooltipSampleSelection.showsSourceLabel = false
         XCTAssertFalse(try item("提示取值来源模板").isEnabled)
         s.interaction.tooltipSeriesOffsets = "series-2:2,invalid, s : -3,series-2:0,x:no"

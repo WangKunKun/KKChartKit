@@ -191,3 +191,8 @@ public protocol HYMChartSnapHitProvider: HYMChartRenderer {
     /// - Returns: 吸附到的数据点 target；nil = 点在绘图区外（无吸附对象）
     func snapHit(at point: CGPoint) -> (any HYMChartHitTarget)?
 }
+
+/// 内置提示可选的绘图区边界，不扩展公共 renderer 必需协议，也不改变布局计算。
+protocol HYMChartTooltipPlotAreaProviding: AnyObject {
+    var tooltipPlotArea: CGRect { get }
+}

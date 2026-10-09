@@ -211,7 +211,8 @@ enum DemoThemeFields {
         items += [.picker(label: "position", selection: Binding(get: { v.wrappedValue.position.rawValue }, set: { v.wrappedValue.position = HYMChartTooltipPosition(rawValue: $0) ?? .automatic }), options: HYMChartTooltipPosition.allCases.map(\.rawValue)),
                   DemoProperty.number("offset.x", v.offset.x, -100...100),
                   DemoProperty.number("offset.y", v.offset.y, -100...100),
-                  DemoProperty.number("fixedTopInset", v.fixedTopInset, 0...40)]
+                  DemoProperty.number("fixedTopInset", v.fixedTopInset, 0...40),
+                  .toggle(label: "fixedTopUsesPlotArea", value: v.fixedTopUsesPlotArea)]
         return items
     }
     static func items(_ v: Binding<ChartLegendConfiguration>) -> [ChartDemoPanel.Item] {

@@ -7,6 +7,7 @@ assert framework.name == 'HYMCharts.framework' and framework.is_dir()
 files = sorted(p for p in framework.rglob('*') if p.is_file())
 header = framework / 'Headers/HYMCharts-Swift.h'
 assert 'HYMCartesianChartViewBridge' in header.read_text()
+assert 'fixedTopUsesPlotArea' in header.read_text()
 assert all(name in header.read_text() for name in ['HYMCartesianPlotLine', 'HYMCartesianPlotBand', 'HYMCartesianAnnotationLabelStyle', 'HYMCartesianSelectionStyle', 'dataLabelAvoidsOverlap'])
 assert 'HYMCartesianAxisStyle' in header.read_text() and 'categoryLabelInterval' in header.read_text()
 assert 'stackedAreaFollowsBaseline' in header.read_text()
@@ -28,6 +29,9 @@ for p in interfaces:
     assert all(name in text for name in ['ChartStackedAreaBoundary', 'stackedAreaBoundary', 'latestSchemaVersion'])
     assert all(name in text for name in ['ChartValueColorZone', 'ChartValueColorZones', 'ChartZoneValueSource', 'valueColorZones'])
     assert all(name in text for name in ['ChartFontWeight', 'ChartAxisLabelFormat', 'categoryLabelInterval', 'tickPositions', 'labelFormat', 'labelFontWeight'])
+    assert all(name in text for name in ['ChartPlotLine', 'ChartPlotBand', 'ChartAnnotationLabelStyle', 'ChartAnnotationAlignment', 'ChartAnnotationVerticalAlignment', 'ChartAnnotationBounds', 'plotLines', 'plotBands'])
+    assert all(name in text for name in ['ChartTooltipSpecification', 'ChartTooltipSeriesRule', 'ChartTooltipSampleSelection', 'ChartTooltipBoundaryPolicy', 'ChartLegendSpecification', 'HYMChartsSpecificationTooltipConfiguration', 'preservingRuntime'])
+    assert 'fixedTopUsesPlotArea' in text
     assert 'ChartSelfTest' not in text and 'CartesianChartDemo' not in text
 for p in files:
     assert p.suffix not in {'.js','.html','.xcassets'}, p
@@ -40,4 +44,4 @@ assert '@rpath/HYMCharts.framework/HYMCharts' in links, links
 assert not any(x in links for x in ['WebKit','AAChart','Highcharts','SwiftFunctionProject'])
 print(json.dumps(dict(framework=str(framework),binarySHA256=hashlib.sha256(binary.read_bytes()).hexdigest(),
     dependencies=links.splitlines(),files=[str(p.relative_to(framework)) for p in files],
-    checks=['G2 column/bar color zones Swift/OC API','G3 independent axes Swift/OC API','G4 annotations and data label avoidance Swift/OC API','G5 body selection Swift/OC API','G1 diverging shared sign chains Swift/OC API and fallback diagnostics','neutral schema v4 axis presentation, v3 value zones, v2 boundary API and backward-compatible v1 construction','generated Objective-C header','six public SwiftUI wrappers','@rpath install name','no AA/JS/WebKit/App dependency or fixture/Demo resources']),ensure_ascii=False,indent=2))
+    checks=['G2 column/bar color zones Swift/OC API','G3 independent axes Swift/OC API','G4 annotations and data label avoidance Swift/OC API','G5 body selection Swift/OC API','G1 diverging shared sign chains Swift/OC API and fallback diagnostics','neutral schema v6 serializable tooltip/legend configuration, v5 value-axis annotations, v4 axis presentation, v3 value zones, v2 boundary API and backward-compatible v1 construction','generated Objective-C header','six public SwiftUI wrappers','@rpath install name','no AA/JS/WebKit/App dependency or fixture/Demo resources']),ensure_ascii=False,indent=2))

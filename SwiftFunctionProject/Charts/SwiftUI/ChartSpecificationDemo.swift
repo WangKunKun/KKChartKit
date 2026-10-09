@@ -21,6 +21,8 @@ struct ChartSpecificationDemoSettings {
     var secondaryAxis = false
     var categoryLabelInterval: Int?
     var axisPresentation: [String: ChartSpecificationAxisDemoSettings] = [:]
+    var interaction = ChartSpecificationInteractionDemoSettings()
+    var annotations: [String: ChartSpecificationAnnotationDemoSettings] = [:]
 
     func axis(_ id: String) -> ChartAxisSpecification {
         let settings = axisPresentation[id] ?? .init()
@@ -66,6 +68,8 @@ struct ChartSpecificationDemoSettings {
                          interpolation: mark == .bar ? .linear : interpolation, appearance: appearance)
         }
         let axes = [axis("power")] + (hasSecondary ? [axis("temperature")] : [])
+        let plotLines = axes.compactMap { annotations[$0.id] }.filter(\.lineEnabled).map(\.line)
+        let plotBands = axes.compactMap { annotations[$0.id] }.filter(\.bandEnabled).map(\.band)
         var domainStyle = ChartAxisAppearance(); domainStyle.labelFontWeight = axisPresentation["domain"]?.weight
         let hasAxisPresentation = categoryLabelInterval != nil || domainStyle.labelFontWeight != nil
             || axes.contains { $0.tickPositions != nil || $0.labelFormat != nil || $0.appearance.labelFontWeight != nil }
@@ -75,8 +79,9 @@ struct ChartSpecificationDemoSettings {
                      groups: [.init(id: "energy", name: "能源")],
                      stacking: percent ? .percentOfAbsoluteTotal : .sum, showsLegend: legend,
                      domainAppearance: domainStyle,
-                     schemaVersion: hasAxisPresentation ? 4 : rows.contains { $0.appearance.valueColorZones != nil } ? 3 : boundary == .independent ? 1 : 2,
-                     stackedAreaBoundary: boundary, categoryLabelInterval: categoryLabelInterval)
+                     schemaVersion: interaction.isConfigured ? 6 : !plotLines.isEmpty || !plotBands.isEmpty ? 5 : hasAxisPresentation ? 4 : rows.contains { $0.appearance.valueColorZones != nil } ? 3 : boundary == .independent ? 1 : 2,
+                     stackedAreaBoundary: boundary, categoryLabelInterval: categoryLabelInterval, plotLines: plotLines, plotBands: plotBands,
+                     tooltip: interaction.usesTooltip ? interaction.tooltip : nil, legend: interaction.usesLegend ? interaction.legend : nil)
     }
 }
 
@@ -114,7 +119,7 @@ struct ChartSpecificationDemo: View {
         VStack(spacing: 8) {
             switch result {
             case .success(let configuration):
-                preview(configuration).frame(height: 270).padding(.horizontal, 12)
+                preview(configuration).accessibilityIdentifier("specification.chart").frame(height: 270).padding(.horizontal, 12)
                 Text("适配成功 · \(configuration.source.series.count) 个稳定系列 ID · 缺测保留 · 原始负值不改写")
                     .font(.caption).accessibilityIdentifier("specification.success")
                 Text("schema v\(configuration.source.schemaVersion) · \(configuration.source.stackedAreaBoundary.rawValue)")
@@ -199,6 +204,10 @@ struct ChartSpecificationDemo: View {
                     Text("示例使用固定 locale；百分比显示 %，其他轴显示 W / °C。不改值域或系列单位。间隔只是标签候选，空间不足仍会避让；按轴 ID 独立保存。")
                         .font(.caption)
                 }
+                ChartSpecificationAnnotationControls(settings: $settings.annotations,
+                    axisIDs: settings.secondaryAxis && kind != .bar ? ["power", "temperature"] : ["power"])
+                ChartSpecificationInteractionControls(settings: $settings.interaction,
+                    seriesIDs: (0..<(kind == .combined ? 3 : 2)).map { "source-\($0)" })
                 Section("目标能力检查") {
                     Toggle("真实数值 X（当前后端不支持）", isOn: $settings.numericDomain)
                         .accessibilityIdentifier("specification.numeric")
@@ -213,10 +222,30 @@ struct ChartSpecificationDemo: View {
 
     @ViewBuilder private func preview(_ configuration: HYMChartsSpecificationConfiguration) -> some View {
         switch configuration.kind {
-        case .line: LineChart(model: configuration.model, theme: configuration.theme, playsAnimationOnAppear: false)
-        case .column: ColumnChart(model: configuration.model, theme: configuration.theme, playsAnimationOnAppear: false)
-        case .bar: BarChart(model: configuration.model, theme: configuration.theme, playsAnimationOnAppear: false)
-        case .combined: CombinedChart(model: configuration.model, theme: configuration.theme, playsAnimationOnAppear: false)
+        case .line: LineChart(model: configuration.model, theme: configuration.theme, playsAnimationOnAppear: false,
+            isSharedTooltipOnTapEnabled: configuration.tooltip != nil ? true : nil,
+            tooltipTextOptions: configuration.tooltip?.textOptions ?? .init(),
+            cartesianTooltipPresentation: configuration.tooltip?.presentation() ?? .init(),
+            cartesianTooltipSampleSelection: configuration.tooltip?.sampleSelection ?? .init(),
+            tooltipTheme: configuration.tooltip?.theme() ?? .default)
+        case .column: ColumnChart(model: configuration.model, theme: configuration.theme, playsAnimationOnAppear: false,
+            isSharedTooltipOnTapEnabled: configuration.tooltip != nil ? true : nil,
+            tooltipTextOptions: configuration.tooltip?.textOptions ?? .init(),
+            cartesianTooltipPresentation: configuration.tooltip?.presentation() ?? .init(),
+            cartesianTooltipSampleSelection: configuration.tooltip?.sampleSelection ?? .init(),
+            tooltipTheme: configuration.tooltip?.theme() ?? .default)
+        case .bar: BarChart(model: configuration.model, theme: configuration.theme, playsAnimationOnAppear: false,
+            isSharedTooltipOnTapEnabled: configuration.tooltip != nil ? true : nil,
+            tooltipTextOptions: configuration.tooltip?.textOptions ?? .init(),
+            cartesianTooltipPresentation: configuration.tooltip?.presentation() ?? .init(),
+            cartesianTooltipSampleSelection: configuration.tooltip?.sampleSelection ?? .init(),
+            tooltipTheme: configuration.tooltip?.theme() ?? .default)
+        case .combined: CombinedChart(model: configuration.model, theme: configuration.theme, playsAnimationOnAppear: false,
+            isSharedTooltipOnTapEnabled: configuration.tooltip != nil ? true : nil,
+            tooltipTextOptions: configuration.tooltip?.textOptions ?? .init(),
+            cartesianTooltipPresentation: configuration.tooltip?.presentation() ?? .init(),
+            cartesianTooltipSampleSelection: configuration.tooltip?.sampleSelection ?? .init(),
+            tooltipTheme: configuration.tooltip?.theme() ?? .default)
         }
     }
 }

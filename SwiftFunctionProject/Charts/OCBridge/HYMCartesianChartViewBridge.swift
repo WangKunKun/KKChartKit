@@ -50,7 +50,7 @@ public enum HYMCartesianConfigurationError: Int, Error, CustomNSError {
     public var onHit: (([HYMCartesianDatum]) -> Void)?
     public var onSeriesVisibilityChanged: ((String, Bool) -> Void)?
     private let kind: HYMCartesianChartKind
-    private var apply: ((CartesianChartModel, CartesianChartTheme, Bool) -> Void)?
+    private var apply: ((CartesianChartModel, CartesianChartTheme, Bool, HYMChartsSpecificationTooltipConfiguration?) -> Void)?
     private var showRange: ((Range<Int>) -> Void)?
     private var reset: (() -> Void)?
     private var visibility: ((Bool, String) -> Void)?
@@ -72,14 +72,16 @@ public enum HYMCartesianConfigurationError: Int, Error, CustomNSError {
             self?.onHit?(((target as? CartesianHitDataSource)?.chartData ?? []).map(HYMCartesianDatum.init))
         }
         chart.onSeriesVisibilityChanged = { [weak self] id, visible in self?.onSeriesVisibilityChanged?(id, visible) }
-        apply = { [weak self] model, theme, preserve in
+        apply = { [weak self] model, theme, preserve, tooltip in
             guard let self else { return }
-            chart.showsTooltipOnHit = self.showsTooltip
+            chart.showsTooltipOnHit = tooltip?.isEnabled ?? self.showsTooltip
             chart.isSharedTooltipOnTapEnabled = self.usesSharedTooltip
-            chart.tooltipTextOptions = self.tooltipOptions.build()
-            chart.cartesianTooltipPresentation = self.tooltipOptions.buildPresentation()
-            chart.cartesianTooltipSampleSelection = self.tooltipOptions.buildSampleSelection()
-            chart.tooltipTheme = self.tooltipOptions.buildTooltipTheme(base: chart.tooltipTheme)
+            chart.tooltipTextOptions = tooltip?.textOptions ?? self.tooltipOptions.build()
+            let runtimePresentation = self.tooltipOptions.buildPresentation()
+            chart.cartesianTooltipPresentation = tooltip?.presentation(preservingRuntime: runtimePresentation) ?? runtimePresentation
+            chart.cartesianTooltipSampleSelection = tooltip?.sampleSelection ?? self.tooltipOptions.buildSampleSelection()
+            let runtimeTheme = self.tooltipOptions.buildTooltipTheme(base: chart.tooltipTheme)
+            chart.tooltipTheme = tooltip?.theme(preservingRuntime: runtimeTheme) ?? runtimeTheme
             chart.isZoomEnabled = self.isZoomEnabled
             chart.zoomAxisMode = self.kind == .bar ? .y : .x
             if preserve { chart.update(model: model, theme: theme) }
@@ -99,7 +101,8 @@ public enum HYMCartesianConfigurationError: Int, Error, CustomNSError {
     public func update(model: HYMCartesianModel, preserveViewport: Bool) throws { try apply(model, preserve: preserveViewport) }
 
     /// 使用通用模型初次配置/重置；数据、系列样式、轴和图例取自 document。
-    /// Tooltip/手势仍由本 bridge 配置；失败保留当前图表。须在主线程调用。
+    /// 非 nil 的 v6 Tooltip 覆盖 bridge 的内容/取值/位置；nil 恢复 bridge 设置。手势仍属宿主。
+    /// 失败保留当前图表（包括提示/图例）；须在主线程调用。
     @objc(configureWithSpecification:error:)
     public func configure(specification: HYMChartSpecificationDocument) throws {
         try apply(specification, preserve: false)
@@ -118,7 +121,7 @@ public enum HYMCartesianConfigurationError: Int, Error, CustomNSError {
                 message: "描述所需图形与当前 bridge 类型不一致；请按 nativeChartKind 创建对应 bridge")],
                 backendIdentifier: "hymcharts")
         }
-        apply?(configuration.model, configuration.theme, preserve)
+        apply?(configuration.model, configuration.theme, preserve, configuration.tooltip)
     }
 
     private func apply(_ model: HYMCartesianModel, preserve: Bool) throws {
@@ -147,7 +150,7 @@ public enum HYMCartesianConfigurationError: Int, Error, CustomNSError {
         theme.showsTooltipOnHit = showsTooltip
         theme.stackedAreaBoundaryMode = stackedAreaUsesDivergingChains ? .diverging
             : (stackedAreaFollowsBaseline ? .followBaseline : .independent)
-        apply?(model.build(), theme, preserve)
+        apply?(model.build(), theme, preserve, nil)
     }
 
     /// 类目区间为 NSRange 的 location/length；空范围忽略。

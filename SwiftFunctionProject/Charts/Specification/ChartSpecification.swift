@@ -3,8 +3,8 @@ import Foundation
 /// 与绘图库无关的轴系图表描述。只保存输入意图，不保存累计值、格式化缓存或 UIView。
 /// 可在任意线程构造/复制；同一可变变量仍需调用方同步。schemaVersion 用于持久化演进。
 public struct ChartSpecification: Codable, Equatable, Sendable {
-    /// 最新可读取版本。构造器仍默认 v1，新增边界语义须显式选择 v2。
-    public static let latestSchemaVersion: Int = 4
+    /// 最新可读取版本。构造器仍默认 v1，新增语义须显式选择对应版本：边界 v2、分区 v3、轴展示 v4、值轴标注 v5、提示/图例 v6。
+    public static let latestSchemaVersion: Int = 6
     public var schemaVersion: Int = 1
     public var id: String
     public var title: String?
@@ -21,6 +21,13 @@ public struct ChartSpecification: Codable, Equatable, Sendable {
     public var stacking: ChartStackingPolicy
     /// v1 固定 independent；v2 及以后在 JSON 中必须显式保存此字段。
     public var stackedAreaBoundary: ChartStackedAreaBoundary
+    /// schema v5；值轴标注固定层次，不改数据/域。v5 JSON 必须显式保存两个数组（可为空）。
+    public var plotLines: [ChartPlotLine]
+    public var plotBands: [ChartPlotBand]
+    /// schema v6；nil 保留宿主提示配置。v6 JSON 必须包含此键，允许 null。
+    public var tooltip: ChartTooltipSpecification?
+    /// schema v6；nil 沿用原有图例默认布局，不替代 showsLegend 总开关。
+    public var legend: ChartLegendSpecification?
     public var showsLegend: Bool
 
     /// 创建描述；通过 validate() 或适配器检查引用、数值和目标能力后使用。
@@ -30,8 +37,12 @@ public struct ChartSpecification: Codable, Equatable, Sendable {
                 stacking: ChartStackingPolicy = .none, showsLegend: Bool = true,
                 domainAppearance: ChartAxisAppearance = .init(),
                 schemaVersion: Int = 1, stackedAreaBoundary: ChartStackedAreaBoundary = .independent,
-                categoryLabelInterval: Int? = nil) {
+                categoryLabelInterval: Int? = nil,
+                plotLines: [ChartPlotLine] = [], plotBands: [ChartPlotBand] = [],
+                tooltip: ChartTooltipSpecification? = nil, legend: ChartLegendSpecification? = nil) {
         self.schemaVersion = schemaVersion; self.stackedAreaBoundary = stackedAreaBoundary
+        self.tooltip = tooltip; self.legend = legend
+        self.plotLines = plotLines; self.plotBands = plotBands
         self.categoryLabelInterval = categoryLabelInterval
         self.id = id; self.title = title; self.orientation = orientation; self.domain = domain
         self.valueAxes = valueAxes; self.series = series; self.groups = groups
