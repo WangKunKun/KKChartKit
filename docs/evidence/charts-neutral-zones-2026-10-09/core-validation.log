@@ -1,0 +1,15 @@
+$ xcrun swiftc -swift-version 6 -strict-concurrency=complete -parse-as-library -module-cache-path /tmp/hym-neutral-zones-module-cache SwiftFunctionProject/Charts/Specification/ChartAdapter.swift SwiftFunctionProject/Charts/Specification/ChartAppearanceSpecification.swift SwiftFunctionProject/Charts/Specification/ChartDataSpecification.swift SwiftFunctionProject/Charts/Specification/ChartSpecification.swift SwiftFunctionProject/Charts/Specification/ChartSpecificationCoding.swift SwiftFunctionProject/Charts/Specification/ChartSpecificationValidation.swift SwiftFunctionProject/Charts/Specification/ChartSpecificationVersionCoding.swift SwiftFunctionProject/Charts/Specification/ChartValueColorZones.swift Examples/ChartSpecifications/GenerateExample.swift -o /tmp/hym-neutral-zones-example
+
+exit=0
+$ /tmp/hym-neutral-zones-example /tmp/hym-zones-v1-final.json /tmp/hym-zones-v2-final.json /tmp/hym-zones-v3-final.json
+
+exit=0
+$ cmp Examples/ChartSpecifications/energy.json /tmp/hym-zones-v1-final.json
+
+exit=0
+$ cmp Examples/ChartSpecifications/energy-g1-v2.json /tmp/hym-zones-v2-final.json
+
+exit=0
+$ cmp Examples/ChartSpecifications/energy-zones-v3.json /tmp/hym-zones-v3-final.json
+
+exit=0

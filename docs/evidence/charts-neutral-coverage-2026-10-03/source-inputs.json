@@ -1,0 +1,238 @@
+{
+  "asOf": "2026-10-03T21:59:14.380468+08:00",
+  "scope": "Reviewed source anchors, legacy headers, direct audit changes, neutral model/adapter and selected test inputs. NOT the whole workspace or complete build dependency snapshot; prior dirty work remains. Git HEAD is not the tested input.",
+  "files": [
+    {
+      "path": "Examples/ChartSpecifications/GenerateExample.swift",
+      "sha256": "1ff259bceee45f6631b03ba5f2c0fc784e76a4ba05f3415c10e4dea7be07dc5f"
+    },
+    {
+      "path": "Examples/ChartSpecifications/energy.json",
+      "sha256": "6d174ae3d0008f9da05a48ed7d7fcbcb67ecde658d38351daceb68c8cf2e44b6"
+    },
+    {
+      "path": "SwiftFunctionProject.xcodeproj/project.pbxproj",
+      "sha256": "f8e2d29a86e0a74a426619cb34dfe51aac21deec5170e3b926325f9342191046"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Adapters/HYMChartsSpecificationAdapter.swift",
+      "sha256": "af1ef7bbc971fec17c554181beca051e1be720c7e8fd0936f1b78226b21e446b"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Cartesian/CartesianAnnotationLabel.swift",
+      "sha256": "bf5977ad9d4258f5cdfa3dbc04c7555c67a3f33cb3489c5d7fbe456f3b92dbc8"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Cartesian/CartesianAxisStyle.swift",
+      "sha256": "cbd9637c14a91e318d41d25b8a83545de5ac598d2081ea0695a1ec76fbeda026"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Cartesian/CartesianChartModel.swift",
+      "sha256": "32073aeb0f71f6064f401397f3e66ba928d57d44cbc06791e5476bf6d0a6bf71"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Cartesian/CartesianChartTheme.swift",
+      "sha256": "ab1dc17ab5bd028b2ae3ef3ff38195a4935f0415932ba54a3a7250c2893cf76d"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Cartesian/CartesianColorZones.swift",
+      "sha256": "690c6df6a10e23d6696d9b2f8815fb7131df9f22ab2028fcbdffc1e31de7322e"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Cartesian/CartesianSelectionStyle.swift",
+      "sha256": "b37f801bd5b5001c90d69b166690b139a3e2eee0f8a03190afc79db72c229244"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Cartesian/CartesianTooltipOptions.swift",
+      "sha256": "3b62cb0c816df606df1bde70ac7f4b984f1ffd89bb54544ed989d2777a2dcaed"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Cartesian/CartesianTooltipPresentation.swift",
+      "sha256": "a90ff6a69c067f31081690ef85ed9c3bcf7544d1169847014d5d87814fe4986e"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Cartesian/CartesianTooltipSampleSelection.swift",
+      "sha256": "ab070bcb527da637aa72b50566d2f6a1befb33a9016812cd04087a4d53abe652"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Cartesian/CartesianValueFormat.swift",
+      "sha256": "4b06a99ae38d5c2149ccd205c49f3e771c3a19b44ddf3804368721591d75664a"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Core/HYMChartTooltipTheme.swift",
+      "sha256": "48e46114c1c17cf5d336d7325e08239cf2431001b5606f27f8bb6666de066909"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Core/HYMChartView.swift",
+      "sha256": "632aa5b62e1a556f0689b19b014df4ddb11690edf418bed4a48f9a163c42ddaa"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/OCBridge/HYMCartesianAnnotations.swift",
+      "sha256": "5923bbd5219d1378c7de5dc56110deb1356d59ca41ffcfb68bf0fe6fd0dd654c"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/OCBridge/HYMCartesianChartViewBridge.swift",
+      "sha256": "98637d8f034a81355d5d6bbab554dba63ab7e2e73ee238e7c599c7304bb9e70e"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/OCBridge/HYMCartesianPresentation.swift",
+      "sha256": "327a08f4c4cf465a20fe8326699e59cbe668810ba560c264c7ef69a9aecb5b9f"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/OCBridge/HYMChartSpecificationDocument.swift",
+      "sha256": "518d1e53daa3eff0de0cddbc219ece862d8473aa066fad45d8a5b8f5a4e244d4"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Specification/ChartAdapter.swift",
+      "sha256": "be9a281e226a6c54fd932be67625df72edfc17f096cd2853f3748e6810749955"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Specification/ChartAppearanceSpecification.swift",
+      "sha256": "4974f30899b177da41fe155c11c49908f56caeaad4a48be865f0df532471b334"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Specification/ChartDataSpecification.swift",
+      "sha256": "1eb65dbf58f01070997d1cad93f59c7febc41d3005dd78c1d532922a82fea72d"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Specification/ChartSpecification.swift",
+      "sha256": "6a96cd57e27e1fda43796117a4dfdef716726a5a4cf1cb927f96e673ab62877c"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Specification/ChartSpecificationCoding.swift",
+      "sha256": "23a5efbaf1c5ababeb7b3e41f808f1b5e08aad2895b88faca5bbcd5afb5b117e"
+    },
+    {
+      "path": "SwiftFunctionProject/Charts/Specification/ChartSpecificationValidation.swift",
+      "sha256": "e1ab9475d4b69533a03f2cb29ca39733fd3d130b0212441650fffc62633363ee"
+    },
+    {
+      "path": "SwiftFunctionProject/参考图表/HMAAChartUtil.h",
+      "sha256": "69943a854bcb104980138e5cd324e4e070b97afaaeae8d476cc1715e9851cd12"
+    },
+    {
+      "path": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartFullScreenVC.h",
+      "sha256": "0b5b1a521bade5f1988a668b8cbbe498a2746964bd0c6cf6a782bbd8ffb549ac"
+    },
+    {
+      "path": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartManager.h",
+      "sha256": "e24e8d8f52d3acfa2b8a74eb5a930a3c7db1331e1a259e974a8bb92f7150f19c"
+    },
+    {
+      "path": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartManager.m",
+      "sha256": "21b61501c2a7f1a96744579c7080e2d8bf02d480f2eb996f7fa6abedfb473992"
+    },
+    {
+      "path": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h",
+      "sha256": "6fe10d57f9f358d855fd1f9c9d492764edb3bcdcd38d937915929b45080d82c6"
+    },
+    {
+      "path": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h",
+      "sha256": "cf69a9030cb1af407211c7e544055ae5997633954025bf00564b0625a8fc4d79"
+    },
+    {
+      "path": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h",
+      "sha256": "7bf499da8717082c759af203ed4a07f8399c16ce093efc4d41b26a4ec860b0e3"
+    },
+    {
+      "path": "SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartView.h",
+      "sha256": "718ba72779432f29ebccb3aec53626a6dda90e243c03dc0540782731f82283de"
+    },
+    {
+      "path": "SwiftFunctionProject/参考图表/HMAAChartView/HMLGAAChartView.h",
+      "sha256": "7c957e3ec51987e3b19e741aa6c824859933f79b7d148c29743ad434f2a6d44f"
+    },
+    {
+      "path": "SwiftFunctionProject/参考图表/HMAAChartView/HMMTAAChartView.h",
+      "sha256": "12298f1337278a191ee12b10707242a92e81aec404aa36ec61015969be8be571"
+    },
+    {
+      "path": "SwiftFunctionProjectTests/AnnotationStyleTests.swift",
+      "sha256": "b7bf8418e07788c26ab98719c8dbdb6d479abd8ecea1671238aa59355eaa2c90"
+    },
+    {
+      "path": "SwiftFunctionProjectTests/AxisStyleTests.swift",
+      "sha256": "a8d7594f1d7b6f3c38179b17ad1cb17e346f3ec3ef196705340721aa1be6d83a"
+    },
+    {
+      "path": "SwiftFunctionProjectTests/CartesianColorZoneTests.swift",
+      "sha256": "a67fc68f1bedabc7e4a4d73eec2e0b62e7a3495c4297e332cd89377809fec12a"
+    },
+    {
+      "path": "SwiftFunctionProjectTests/ChartLegendTests.swift",
+      "sha256": "fc0a1ce9b828c2a14b8eaa8c2f698aa3e3bdf3ae9efc831c92e6707c77732aa7"
+    },
+    {
+      "path": "SwiftFunctionProjectTests/ChartSpecificationTests.swift",
+      "sha256": "83fb96c71c493bddad6530680667c714a3f1dbb2147af93042b84d930c6b187a"
+    },
+    {
+      "path": "SwiftFunctionProjectTests/DivergingStackRendererTests.swift",
+      "sha256": "7f3c244376822258a3b7386154c99343b75b5eb2fd70b4f8375da80993184058"
+    },
+    {
+      "path": "SwiftFunctionProjectTests/RichTooltipTests.swift",
+      "sha256": "9ea3098064530cc6b0258589ea20f717bc6f509d078246f9cb1ea2dc325a4372"
+    },
+    {
+      "path": "SwiftFunctionProjectTests/TooltipSelectionTests.swift",
+      "sha256": "c6bee764cc4ce18b3ca96f39b7a5c9d722862003b5f73bf495aa68a6f00dbf48"
+    },
+    {
+      "path": "docs/charts-legacy-field-inventory.json",
+      "sha256": "fbc3e8396b183926d18f73d6164617ea75f7e84cbc2be287490607eb80f93f41"
+    },
+    {
+      "path": "docs/charts-legacy-field-inventory.md",
+      "sha256": "2c3106d7f9957efef1f0cb2ca06cece1ad221eda5f76c336d63b944642b0f1ba"
+    },
+    {
+      "path": "docs/charts-legacy-replacement-plan.md",
+      "sha256": "b82d491bd7ba4e55e5fa948277e6d0a24086556b7928b852d3158921fa179ea1"
+    },
+    {
+      "path": "docs/charts-neutral-coverage-task-progress-2026-10-03.md",
+      "sha256": "4b25923f582292cb155609693134eb3b3cbc86f41dd5f58d40d922a413dee431"
+    },
+    {
+      "path": "docs/charts-neutral-model-coverage.json",
+      "sha256": "bd0d4c03ebb531210624d40600ee02ec08e9a0f1dd589a14f4fd20626f6555a3"
+    },
+    {
+      "path": "docs/charts-neutral-model-coverage.md",
+      "sha256": "1e0e11d66d56c859f3cde745ff68d7abdb13e2ed4c74edff1f157ca35d73b4ca"
+    },
+    {
+      "path": "docs/charts-neutral-model-guide.md",
+      "sha256": "99ef29e20e090ba7e7cd8dd4afa180d39fd05440cb88368637366047d9c371c0"
+    },
+    {
+      "path": "docs/charts-neutral-model-task-progress-2026-10-03.md",
+      "sha256": "97be5682424c964dbf91d08ae47fe2c4ccd065f0636ef879886f1f898ce837f1"
+    },
+    {
+      "path": "docs/evidence/charts-neutral-coverage-2026-10-03/README.md",
+      "sha256": "7996f2ae8216d58b0a0814007a5601d325edf1f13a3ea74611f20999317edd4d"
+    },
+    {
+      "path": "scripts/check_chart_evidence.py",
+      "sha256": "c86775ec642600a57ac6f1983d5b36888faa4fdb2b83af7bcc2847975610a8df"
+    },
+    {
+      "path": "scripts/check_chart_migration_inventory.py",
+      "sha256": "ed0c604b580f9ce6725b7268ac0c648bae0ade19e9a619ecb85e7bc2245f9b21"
+    },
+    {
+      "path": "scripts/check_chart_neutral_coverage.py",
+      "sha256": "d21e914bc270c4b26e505f836c8dee46a809ad30e4bcd738cb4744499e1cfb75"
+    },
+    {
+      "path": "scripts/test_check_chart_evidence.py",
+      "sha256": "5f96c99f25d2126bf37f2560ba340c26bcfdaa0e1473f322f8adfcf4f337e097"
+    },
+    {
+      "path": "scripts/test_check_chart_neutral_coverage.py",
+      "sha256": "2880a9615d658656cf77cf1ba09066af7bebe0628b800a72602acac09b033d93"
+    }
+  ]
+}

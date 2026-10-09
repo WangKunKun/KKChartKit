@@ -1,0 +1,12 @@
+$ xcrun swiftc --version
+swift-driver version: 1.127.15 Apple Swift version 6.2.4 (swiftlang-6.2.4.1.4 clang-1700.6.4.2)
+Target: arm64-apple-macosx26.0
+exitCode=0
+$ xcrun swiftc -swift-version 6 -strict-concurrency=complete -parse-as-library -module-cache-path /tmp/hym-neutral-g1-module-cache SwiftFunctionProject/Charts/Specification/ChartAdapter.swift SwiftFunctionProject/Charts/Specification/ChartAppearanceSpecification.swift SwiftFunctionProject/Charts/Specification/ChartDataSpecification.swift SwiftFunctionProject/Charts/Specification/ChartSpecification.swift SwiftFunctionProject/Charts/Specification/ChartSpecificationCoding.swift SwiftFunctionProject/Charts/Specification/ChartSpecificationValidation.swift SwiftFunctionProject/Charts/Specification/ChartSpecificationVersionCoding.swift Examples/ChartSpecifications/GenerateExample.swift -o /tmp/hym-neutral-g1-example
+exitCode=0
+$ /tmp/hym-neutral-g1-example /tmp/hym-neutral-g1-energy.json /tmp/hym-neutral-g1-energy-v2.json
+exitCode=0
+$ cmp Examples/ChartSpecifications/energy.json /tmp/hym-neutral-g1-energy.json
+exitCode=0
+$ cmp Examples/ChartSpecifications/energy-g1-v2.json /tmp/hym-neutral-g1-energy-v2.json
+exitCode=0

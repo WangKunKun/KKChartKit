@@ -1,0 +1,232 @@
+{
+  "devices" : [
+    {
+      "architecture" : "arm64",
+      "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+      "deviceName" : "iPhone 16 Pro",
+      "modelName" : "iPhone 16 Pro",
+      "osBuildNumber" : "22G86",
+      "osVersion" : "18.6",
+      "platform" : "iOS Simulator"
+    }
+  ],
+  "testNodes" : [
+    {
+      "children" : [
+        {
+          "children" : [
+            {
+              "children" : [
+                {
+                  "duration" : "0.0021s",
+                  "durationInSeconds" : 0.0020619630813598633,
+                  "name" : "testAdapterContractAllowsAnotherBackendWithoutChangingModel()",
+                  "nodeIdentifier" : "ChartSpecificationTests/testAdapterContractAllowsAnotherBackendWithoutChangingModel()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/ChartSpecificationTests/testAdapterContractAllowsAnotherBackendWithoutChangingModel",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.00088s",
+                  "durationInSeconds" : 0.0008840560913085938,
+                  "name" : "testDuplicateLabelsAreValidButDuplicateIDsAndBlankIDsAreRejected()",
+                  "nodeIdentifier" : "ChartSpecificationTests/testDuplicateLabelsAreValidButDuplicateIDsAndBlankIDsAreRejected()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/ChartSpecificationTests/testDuplicateLabelsAreValidButDuplicateIDsAndBlankIDsAreRejected",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0003s",
+                  "durationInSeconds" : 0.0002950429916381836,
+                  "name" : "testInputStyleRangeAndLegacyPrecisionAreNotSilentlyClamped()",
+                  "nodeIdentifier" : "ChartSpecificationTests/testInputStyleRangeAndLegacyPrecisionAreNotSilentlyClamped()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/ChartSpecificationTests/testInputStyleRangeAndLegacyPrecisionAreNotSilentlyClamped",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.012s",
+                  "durationInSeconds" : 0.011613011360168457,
+                  "name" : "testJSONContractUsesNamedDiscriminatorsAndRejectsUnknownEnumValues()",
+                  "nodeIdentifier" : "ChartSpecificationTests/testJSONContractUsesNamedDiscriminatorsAndRejectsUnknownEnumValues()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/ChartSpecificationTests/testJSONContractUsesNamedDiscriminatorsAndRejectsUnknownEnumValues",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0029s",
+                  "durationInSeconds" : 0.002946019172668457,
+                  "name" : "testNonFiniteDataIsAnErrorAndZeroIsNotMissing()",
+                  "nodeIdentifier" : "ChartSpecificationTests/testNonFiniteDataIsAnErrorAndZeroIsNotMissing()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/ChartSpecificationTests/testNonFiniteDataIsAnErrorAndZeroIsNotMissing",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.00057s",
+                  "durationInSeconds" : 0.0005710124969482422,
+                  "name" : "testNumericAndTimeCoordinatesKeepUnitsAndRequireMatchingIncreasingDomain()",
+                  "nodeIdentifier" : "ChartSpecificationTests/testNumericAndTimeCoordinatesKeepUnitsAndRequireMatchingIncreasingDomain()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/ChartSpecificationTests/testNumericAndTimeCoordinatesKeepUnitsAndRequireMatchingIncreasingDomain",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.00046s",
+                  "durationInSeconds" : 0.0004609823226928711,
+                  "name" : "testRoundTripKeepsIdentityMissingSignAndPresentationWithoutUIKit()",
+                  "nodeIdentifier" : "ChartSpecificationTests/testRoundTripKeepsIdentityMissingSignAndPresentationWithoutUIKit()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/ChartSpecificationTests/testRoundTripKeepsIdentityMissingSignAndPresentationWithoutUIKit",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0019s",
+                  "durationInSeconds" : 0.0019450187683105469,
+                  "name" : "testSnapshotsDoNotShareMutableSourceData()",
+                  "nodeIdentifier" : "ChartSpecificationTests/testSnapshotsDoNotShareMutableSourceData()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/ChartSpecificationTests/testSnapshotsDoNotShareMutableSourceData",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.00038s",
+                  "durationInSeconds" : 0.00037992000579833984,
+                  "name" : "testStackingDoesNotConfuseBusinessGroupsUnitsOrIndependentSeries()",
+                  "nodeIdentifier" : "ChartSpecificationTests/testStackingDoesNotConfuseBusinessGroupsUnitsOrIndependentSeries()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/ChartSpecificationTests/testStackingDoesNotConfuseBusinessGroupsUnitsOrIndependentSeries",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.00032s",
+                  "durationInSeconds" : 0.00031697750091552734,
+                  "name" : "testUnknownReferencesReportFieldPaths()",
+                  "nodeIdentifier" : "ChartSpecificationTests/testUnknownReferencesReportFieldPaths()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/ChartSpecificationTests/testUnknownReferencesReportFieldPaths",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.00041s",
+                  "durationInSeconds" : 0.00041496753692626953,
+                  "name" : "testUnsupportedSchemaIsRejectedOnDecodeAndNSErrorCarriesDiagnostics()",
+                  "nodeIdentifier" : "ChartSpecificationTests/testUnsupportedSchemaIsRejectedOnDecodeAndNSErrorCarriesDiagnostics()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/ChartSpecificationTests/testUnsupportedSchemaIsRejectedOnDecodeAndNSErrorCarriesDiagnostics",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "ChartSpecificationTests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/ChartSpecificationTests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "duration" : "0.01s",
+                  "durationInSeconds" : 0.010136961936950684,
+                  "name" : "testAllExistingDemoKindsCompileRenderAndPreserveRawHitData()",
+                  "nodeIdentifier" : "HYMChartsSpecificationAdapterTests/testAllExistingDemoKindsCompileRenderAndPreserveRawHitData()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/HYMChartsSpecificationAdapterTests/testAllExistingDemoKindsCompileRenderAndPreserveRawHitData",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0015s",
+                  "durationInSeconds" : 0.001519918441772461,
+                  "name" : "testAxisGridIntentControlsActualScreenDirectionsAndRejectsSecondaryOnlyGrid()",
+                  "nodeIdentifier" : "HYMChartsSpecificationAdapterTests/testAxisGridIntentControlsActualScreenDirectionsAndRejectsSecondaryOnlyGrid()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/HYMChartsSpecificationAdapterTests/testAxisGridIntentControlsActualScreenDirectionsAndRejectsSecondaryOnlyGrid",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0011s",
+                  "durationInSeconds" : 0.0011429786682128906,
+                  "name" : "testBridgeRejectsWrongRendererAndEmptyDataIsSafe()",
+                  "nodeIdentifier" : "HYMChartsSpecificationAdapterTests/testBridgeRejectsWrongRendererAndEmptyDataIsSafe()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/HYMChartsSpecificationAdapterTests/testBridgeRejectsWrongRendererAndEmptyDataIsSafe",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0044s",
+                  "durationInSeconds" : 0.00439298152923584,
+                  "name" : "testObjectiveCDocumentAndBridgeKeepLastChartWhenUpdateFails()",
+                  "nodeIdentifier" : "HYMChartsSpecificationAdapterTests/testObjectiveCDocumentAndBridgeKeepLastChartWhenUpdateFails()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/HYMChartsSpecificationAdapterTests/testObjectiveCDocumentAndBridgeKeepLastChartWhenUpdateFails",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0004s",
+                  "durationInSeconds" : 0.0004049539566040039,
+                  "name" : "testSeriesAndAxisReorderingRetainStableBindings()",
+                  "nodeIdentifier" : "HYMChartsSpecificationAdapterTests/testSeriesAndAxisReorderingRetainStableBindings()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/HYMChartsSpecificationAdapterTests/testSeriesAndAxisReorderingRetainStableBindings",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.00065s",
+                  "durationInSeconds" : 0.0006459951400756836,
+                  "name" : "testSignedPercentUsesAbsoluteDenominatorAndLeavesRawValuesUnchanged()",
+                  "nodeIdentifier" : "HYMChartsSpecificationAdapterTests/testSignedPercentUsesAbsoluteDenominatorAndLeavesRawValuesUnchanged()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/HYMChartsSpecificationAdapterTests/testSignedPercentUsesAbsoluteDenominatorAndLeavesRawValuesUnchanged",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.00042s",
+                  "durationInSeconds" : 0.00041794776916503906,
+                  "name" : "testSparseUnorderedSamplesAlignByCategoryIDWithoutInventingIdentities()",
+                  "nodeIdentifier" : "HYMChartsSpecificationAdapterTests/testSparseUnorderedSamplesAlignByCategoryIDWithoutInventingIdentities()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/HYMChartsSpecificationAdapterTests/testSparseUnorderedSamplesAlignByCategoryIDWithoutInventingIdentities",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.00047s",
+                  "durationInSeconds" : 0.00047194957733154297,
+                  "name" : "testStyleAndGapConversionPreserveExplicitChoices()",
+                  "nodeIdentifier" : "HYMChartsSpecificationAdapterTests/testStyleAndGapConversionPreserveExplicitChoices()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/HYMChartsSpecificationAdapterTests/testStyleAndGapConversionPreserveExplicitChoices",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.00052s",
+                  "durationInSeconds" : 0.0005179643630981445,
+                  "name" : "testUnsupportedCoordinatesAxesAndIgnoredBarStylesAreRejected()",
+                  "nodeIdentifier" : "HYMChartsSpecificationAdapterTests/testUnsupportedCoordinatesAxesAndIgnoredBarStylesAreRejected()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/HYMChartsSpecificationAdapterTests/testUnsupportedCoordinatesAxesAndIgnoredBarStylesAreRejected",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "HYMChartsSpecificationAdapterTests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests/HYMChartsSpecificationAdapterTests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            }
+          ],
+          "name" : "SwiftFunctionProjectTests",
+          "nodeIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectTests",
+          "nodeType" : "Unit test bundle",
+          "result" : "Passed"
+        }
+      ],
+      "name" : "SwiftFunctionProject",
+      "nodeType" : "Test Plan",
+      "result" : "Passed"
+    }
+  ],
+  "testPlanConfigurations" : [
+    {
+      "configurationId" : "1",
+      "configurationName" : "Test Scheme Action"
+    }
+  ]
+}

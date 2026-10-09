@@ -1,0 +1,6 @@
+$ xcrun swiftc -swift-version 6 -strict-concurrency=complete -parse-as-library -module-cache-path /tmp/hym-neutral-axes-module-cache SwiftFunctionProject/Charts/Specification/ChartAdapter.swift SwiftFunctionProject/Charts/Specification/ChartAppearanceSpecification.swift SwiftFunctionProject/Charts/Specification/ChartAxisPresentation.swift SwiftFunctionProject/Charts/Specification/ChartDataSpecification.swift SwiftFunctionProject/Charts/Specification/ChartSpecification.swift SwiftFunctionProject/Charts/Specification/ChartSpecificationCoding.swift SwiftFunctionProject/Charts/Specification/ChartSpecificationValidation.swift SwiftFunctionProject/Charts/Specification/ChartSpecificationVersionCoding.swift SwiftFunctionProject/Charts/Specification/ChartValueColorZones.swift Examples/ChartSpecifications/GenerateExample.swift -o /tmp/hym-neutral-axes-example
+$ /tmp/hym-neutral-axes-example /tmp/hym-axes-v1-final.json /tmp/hym-axes-v2-final.json /tmp/hym-axes-v3-final.json /tmp/hym-axes-v4-final.json
+$ cmp Examples/ChartSpecifications/energy.json /tmp/hym-axes-v1-final.json
+$ cmp Examples/ChartSpecifications/energy-g1-v2.json /tmp/hym-axes-v2-final.json
+$ cmp Examples/ChartSpecifications/energy-zones-v3.json /tmp/hym-axes-v3-final.json
+$ cmp Examples/ChartSpecifications/energy-axes-v4.json /tmp/hym-axes-v4-final.json

@@ -1,0 +1,26 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+        "deviceName" : "iPhone 16 Pro",
+        "exportedFileName" : "ED5B9404-19A1-45B3-BF5E-B5FCF0601BF5.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "specification-混合图_0_037E0110-0D0B-4E12-A7B5-00496E2D7B7E.png",
+        "timestamp" : 1790990934.067
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+        "deviceName" : "iPhone 16 Pro",
+        "exportedFileName" : "762F7ABB-7F56-4CA0-92A9-B9EFBCC3CA10.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "specification-折线图_0_1292F1E7-0DE7-49F0-A4CB-E2DAF3A30630.png",
+        "timestamp" : 1790990925.26
+      }
+    ],
+    "testIdentifier" : "ChartDemoUITests/testNeutralSpecificationPreviewAndUnsupportedCapabilityRecovery()",
+    "testIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testNeutralSpecificationPreviewAndUnsupportedCapabilityRecovery"
+  }
+]

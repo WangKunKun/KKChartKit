@@ -1,0 +1,117 @@
+{
+  "scope": "All static evidence in this directory except this self-referential manifest; paths relative to this directory. Development failure logs are process records, not final acceptance.",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "9d551671a91b5a78f20c1ee279073da55d7a1e9e6021faaf9c75586316eb245b"
+    },
+    {
+      "path": "core-validation.json",
+      "sha256": "c767ef51c8a56df93e869d2b9f705cdf9c9caed484ccca356f9702bb3a27029e"
+    },
+    {
+      "path": "core-validation.log",
+      "sha256": "825faada221a4aa6b58c11bf2ae236f041603790027c22fc296f344131dcb01d"
+    },
+    {
+      "path": "coverage-summary.json",
+      "sha256": "fc8f0b3ea96580e3522094c04eb086bb4b152501a31ee75e641619cb8a7e14e3"
+    },
+    {
+      "path": "development-focused.log.gz",
+      "sha256": "f74d96cea9dc2c5d4fb400b502be289da7fd7e4cc89dce1f0cfa0edf2a9466e6"
+    },
+    {
+      "path": "development-main.log.gz",
+      "sha256": "860f4639e151d69b6cd6e54cbcd821ca41ecfc5add9ddd0a0eb7ae0dff88eb85"
+    },
+    {
+      "path": "diff-check.log",
+      "sha256": "684ae2de3d04379502f242a1039620e2330c97790c2ff02ccbffdffaa7a0ccc7"
+    },
+    {
+      "path": "evidence-check.log",
+      "sha256": "5faa78876c1849297de279a606255eec07d2cf4d5225baf4b46dd92ad0826a28"
+    },
+    {
+      "path": "framework-audit.json",
+      "sha256": "6dc24a81706c62f89106049cb3fc2a3ccf3b91db782c4fe296ed229fc8543b24"
+    },
+    {
+      "path": "inventory-check.log",
+      "sha256": "e4794e8b50a1dd4ce98c02dc7e1f23013a879de9ac07b5d71c5d8a30bc2e6387"
+    },
+    {
+      "path": "main-summary.json",
+      "sha256": "f782bed4a47c181b358229378b140c0d24da4d632adaf73b4ac18e83af49c219"
+    },
+    {
+      "path": "main-tests.json",
+      "sha256": "b86c22c8657d21855bcc0fbd840b0d018b3e6a80e5e548592d0f7b142a0a911b"
+    },
+    {
+      "path": "main-xcodebuild.log.gz",
+      "sha256": "cae5655cc7479457a12e61bef5bcdaa16e05db7ee6a3ec82011874f5a5724382"
+    },
+    {
+      "path": "public-import-build.log.gz",
+      "sha256": "b7e989e3fe75345bb0301bcff45f633adf0e4a434e76dfcda98f1560064fdce8"
+    },
+    {
+      "path": "public-import-summary.json",
+      "sha256": "47c8fed8a2378e105a1920a7a42bc726d7415c5dd380ddb6902111e1e89d1348"
+    },
+    {
+      "path": "public-import-tests.json",
+      "sha256": "41565f22996b651b352640d10bbd05479ae649f6fb7f94456b3b2c51f00bf8da"
+    },
+    {
+      "path": "public-import-xcodebuild.log.gz",
+      "sha256": "1cf34d3b1d58547f34c7a830eb889ef27899312ac2159e2aa14f8e5a5deb8d02"
+    },
+    {
+      "path": "python-tests.log",
+      "sha256": "04b826b94725235650fab60ed255d28a8a20cfda9846d766a054680936979b37"
+    },
+    {
+      "path": "screenshots/0258D6CF-F9FE-4EAF-B2AB-22C1FE55E285.png",
+      "sha256": "ea790e80c3262bf8a8d632b44f94a0cfe706e11cf53010dd6701c0e3e19677c1"
+    },
+    {
+      "path": "screenshots/05538A52-11CF-4C21-8775-D0F6ED414929.png",
+      "sha256": "d17d1af0ab38ced314491bf00552b014c281a310a012496bfd5e7f8babad1f5d"
+    },
+    {
+      "path": "screenshots/6132FD72-1678-400E-83FB-D4ABD46778C7.png",
+      "sha256": "b34c8153ad849ea6bed8640c78c2d291aed1540636857a72056049ca1c5bc24f"
+    },
+    {
+      "path": "screenshots/659EFB83-AD82-455B-8D05-49FEDD97B44F.png",
+      "sha256": "b9e78fce820be67d0d2daf476ab95951a68e1f0bd2c09fc641f28d3ba57df67c"
+    },
+    {
+      "path": "screenshots/74628E7E-7175-4202-A224-406B3E006A25.png",
+      "sha256": "8f61ffadfac31fc6f903d3bd3b4a26cd84ba31f98929e98c9866d20a5decc146"
+    },
+    {
+      "path": "screenshots/7708F2B0-230E-47F8-9FF8-4E759D2F34AA.png",
+      "sha256": "fdf7a426fc9dba0db12379e0a7f4c07d8742bb5f70a5725f84893ef80bbeed61"
+    },
+    {
+      "path": "screenshots/AC3EB33B-F57C-4F8E-8470-81F3D3A037E8.png",
+      "sha256": "1093ecbd485e5795287e53cab316afb3a3e8d30b6babf6e99fc512be5b5cc0c2"
+    },
+    {
+      "path": "screenshots/manifest.json",
+      "sha256": "344b28b10e367d0a085720bc7c938aa3a52a8edb94117c46956cee123f21df38"
+    },
+    {
+      "path": "screenshots/screenshots.json",
+      "sha256": "03564f17ee0c4ee455e3f12ca6b61c2a3273246a2d50a0918557153abe69cfa2"
+    },
+    {
+      "path": "source-inputs.json",
+      "sha256": "20fdb3b2cb1b313a52fab78c536b936d17e5d58ead21b352140bd397c9c9e803"
+    }
+  ]
+}

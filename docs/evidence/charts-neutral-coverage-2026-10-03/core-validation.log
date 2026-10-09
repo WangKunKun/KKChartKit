@@ -1,0 +1,5 @@
+$ xcrun swiftc -swift-version 6 -strict-concurrency=complete -parse-as-library -module-cache-path /tmp/hym-neutral-coverage-module-cache SwiftFunctionProject/Charts/Specification/ChartAdapter.swift SwiftFunctionProject/Charts/Specification/ChartAppearanceSpecification.swift SwiftFunctionProject/Charts/Specification/ChartDataSpecification.swift SwiftFunctionProject/Charts/Specification/ChartSpecification.swift SwiftFunctionProject/Charts/Specification/ChartSpecificationCoding.swift SwiftFunctionProject/Charts/Specification/ChartSpecificationValidation.swift Examples/ChartSpecifications/GenerateExample.swift -o /tmp/hym-neutral-coverage-example
+Exit: 0
+
+$ /tmp/hym-neutral-coverage-example /tmp/hym-neutral-coverage-energy.json
+Exit: 0

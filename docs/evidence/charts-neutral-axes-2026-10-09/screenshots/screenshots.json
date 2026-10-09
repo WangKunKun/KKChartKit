@@ -1,0 +1,62 @@
+[
+  {
+    "file": "C931EE28-A7A4-403B-B401-31AAAD5F5C0E.png",
+    "sha256": "83b20b763d1ace1d3f29af81f39a6242b45bc66b5aaab0192f54a658c14ff7e7",
+    "test": "ChartDemoUITests/testNeutralAxisPresentationPerAxisAndResetOnFourPages()",
+    "resultBundle": "/tmp/hym-neutral-axes-final2-20261009.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "781C9872-DAE0-4996-A623-36115772B60F",
+      "deviceName": "iPhone 16 Pro",
+      "exportedFileName": "C931EE28-A7A4-403B-B401-31AAAD5F5C0E.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "neutral-v4-axes-混合图_0_57B0EDDF-0D1B-431F-B8F8-F8B865A07108.png",
+      "timestamp": 1791515222.983
+    }
+  },
+  {
+    "file": "FFBFE8EF-A781-463B-A921-C6787639ED23.png",
+    "sha256": "64bd90975fbbbbc6413092a89e9b320662e9f0f3ed176cb54ea18ba2ef2d9ed7",
+    "test": "ChartDemoUITests/testNeutralAxisPresentationPerAxisAndResetOnFourPages()",
+    "resultBundle": "/tmp/hym-neutral-axes-final2-20261009.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "781C9872-DAE0-4996-A623-36115772B60F",
+      "deviceName": "iPhone 16 Pro",
+      "exportedFileName": "FFBFE8EF-A781-463B-A921-C6787639ED23.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "neutral-v4-axes-条形图_0_C239EB44-2DF8-49B0-8DDC-A97AEDCE9B2F.png",
+      "timestamp": 1791515160.311
+    }
+  },
+  {
+    "file": "5C71C068-0F2F-43E1-BFF7-305E29C8AF4D.png",
+    "sha256": "a8e2eb2b8f7b1b6ded104d5bcf87e498ae7e7b60eac84e3e5315d4da9a54c805",
+    "test": "ChartDemoUITests/testNeutralAxisPresentationPerAxisAndResetOnFourPages()",
+    "resultBundle": "/tmp/hym-neutral-axes-final2-20261009.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "781C9872-DAE0-4996-A623-36115772B60F",
+      "deviceName": "iPhone 16 Pro",
+      "exportedFileName": "5C71C068-0F2F-43E1-BFF7-305E29C8AF4D.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "neutral-v4-axes-柱状图_0_4F1746C0-2952-4D93-9B20-2E57C1B39954.png",
+      "timestamp": 1791515140.331
+    }
+  },
+  {
+    "file": "7083579F-305E-45F3-9F6A-3CF74A798BA8.png",
+    "sha256": "044f19bcc19e8884e6d2da42135a3b17bfb5af30a91e7ce6e93b1b828bce0b93",
+    "test": "ChartDemoUITests/testNeutralAxisPresentationPerAxisAndResetOnFourPages()",
+    "resultBundle": "/tmp/hym-neutral-axes-final2-20261009.xcresult",
+    "attachment": {
+      "configurationName": "Test Scheme Action",
+      "deviceId": "781C9872-DAE0-4996-A623-36115772B60F",
+      "deviceName": "iPhone 16 Pro",
+      "exportedFileName": "7083579F-305E-45F3-9F6A-3CF74A798BA8.png",
+      "isAssociatedWithFailure": false,
+      "suggestedHumanReadableName": "neutral-v4-axes-折线图_0_F619174C-91FD-4E41-8EB2-C0BC4C5CEDB9.png",
+      "timestamp": 1791515088.434
+    }
+  }
+]

@@ -1,0 +1,10 @@
+{
+  "result": "passed",
+  "swiftLanguageVersion": 6,
+  "strictConcurrency": "complete",
+  "imports": [
+    "Foundation"
+  ],
+  "command": "xcrun swiftc -swift-version 6 -strict-concurrency=complete -parse-as-library -module-cache-path /tmp/hym-spec-module-cache SwiftFunctionProject/Charts/Specification/*.swift Examples/ChartSpecifications/GenerateExample.swift -o /tmp/generate-neutral-chart",
+  "sampleSHA256": "6d174ae3d0008f9da05a48ed7d7fcbcb67ecde658d38351daceb68c8cf2e44b6"
+}

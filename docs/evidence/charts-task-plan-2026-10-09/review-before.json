@@ -1,0 +1,62 @@
+{
+  "reviewDate": "2026-10-09",
+  "timezone": "Asia/Shanghai",
+  "scope": "Read-only audit before planning-document edits; no XCTest/build/device/visual execution in this review.",
+  "priorSnapshotChecks": [
+    {
+      "manifest": "docs/evidence/charts-neutral-g1-2026-10-03/source-inputs.json",
+      "checked": 179,
+      "missing": [],
+      "mismatches": [],
+      "status": "PASS"
+    },
+    {
+      "manifest": "docs/evidence/charts-neutral-g1-2026-10-03/artifact-hashes.json",
+      "checked": 23,
+      "missing": [],
+      "mismatches": [],
+      "status": "PASS"
+    }
+  ],
+  "offlineChecks": [
+    {
+      "command": [
+        "python3",
+        "scripts/check_chart_migration_inventory.py"
+      ],
+      "exitCode": 0,
+      "log": "inventory-check.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/check_chart_neutral_coverage.py"
+      ],
+      "exitCode": 0,
+      "log": "coverage-check.log"
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "scripts",
+        "-p",
+        "test_check_chart_*.py",
+        "-v"
+      ],
+      "exitCode": 0,
+      "log": "python-tests.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/check_chart_evidence.py"
+      ],
+      "exitCode": 0,
+      "log": "evidence-check-before.log"
+    }
+  ]
+}

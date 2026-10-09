@@ -1,0 +1,97 @@
+{
+  "scope": "All static evidence in this directory except this self-referential manifest; paths relative to this directory. Preliminary screenshots remain process records, not final acceptance.",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "ed353342b981be36c823ffdd146d4262bea83c74c73179e55fe50fb349d9daf5"
+    },
+    {
+      "path": "core-validation.json",
+      "sha256": "5d6f390517823ca0a728e49ef8813656059ca0a2f0ed132d729eb53f5d0fb578"
+    },
+    {
+      "path": "core-validation.log",
+      "sha256": "87bd334d0c5659c1957a2d7ec1517b96a871b9728cb63d543d441eaeff9fea40"
+    },
+    {
+      "path": "coverage-summary.json",
+      "sha256": "3c4fcc2fedf08b38359989e08f9ca980f225243eecc6d0ff89bb9a5b3523ab9f"
+    },
+    {
+      "path": "evidence-check.log",
+      "sha256": "b0d1f9ba06676879b7feca6ed9462ff764ae36e2e3be2281b44bbfbe5d66840b"
+    },
+    {
+      "path": "framework-audit.json",
+      "sha256": "9fcaaff76cb92238fb49b37ac225ce00f90f24109d62dbf083a4be59b9644d13"
+    },
+    {
+      "path": "inventory-check.log",
+      "sha256": "e4794e8b50a1dd4ce98c02dc7e1f23013a879de9ac07b5d71c5d8a30bc2e6387"
+    },
+    {
+      "path": "main-summary.json",
+      "sha256": "07f803f343a48f97ee45d4cb7b9fd9ad16bdbf77c23e07991db2173b87f68808"
+    },
+    {
+      "path": "main-tests.json",
+      "sha256": "adfaf7e85ed26ae154ed3e59a7ae33602a98343b6bf26242642873c342bbcd23"
+    },
+    {
+      "path": "main-xcodebuild.log.gz",
+      "sha256": "11c607c7500aa55bde1674aae07ebe26d7d99b6763cf299ff33e93abac1cb047"
+    },
+    {
+      "path": "preliminary-screenshots/87D75DA4-01EE-46B6-9927-86005A68A970.png",
+      "sha256": "f707e615a759d42c7c54f487958d239f966e18e116d28d1d734ac2814a8a930a"
+    },
+    {
+      "path": "preliminary-screenshots/90450709-F50B-4205-9F46-CC4FC394024C.png",
+      "sha256": "af5055cb700a13c635024687d09014f4d663fa6d2e5a95dc9bc291cc696f1de2"
+    },
+    {
+      "path": "preliminary-screenshots/README.md",
+      "sha256": "c29ce58d38a08418e4fbe9fe72f678fb5e47ef8a7b2257fbfc7f73d4200b61d7"
+    },
+    {
+      "path": "preliminary-screenshots/manifest.json",
+      "sha256": "75b428f73af5411e3bc09714468d2021c9264331b152cd1f63febd9d515f4a37"
+    },
+    {
+      "path": "public-import-summary.json",
+      "sha256": "5e8b8ed38421e5bea31e465fc7c61d05ae495aff6a26be3f33503927f35d0b5d"
+    },
+    {
+      "path": "public-import-tests.json",
+      "sha256": "cfe9a7ae4714caa624c7661a4c6874affe8227bc8283263156a7d73bb475b044"
+    },
+    {
+      "path": "public-import-xcodebuild.log.gz",
+      "sha256": "a68c4b7061f339e3965216c727407524ea265231327dfe5aad8093829d8ef674"
+    },
+    {
+      "path": "python-tests.log",
+      "sha256": "ba2eeff0b3cdb816856d70a135d94cb2e60fb47d4a289d132a84e4c76edef447"
+    },
+    {
+      "path": "screenshots/8B0D8008-D46B-4486-AE14-A521130F229E.png",
+      "sha256": "e9fc60a55f24ba76d09e04e32c6d6efa67cb301fb5b9e5d6756b24e7a7100a11"
+    },
+    {
+      "path": "screenshots/E0D5BF50-20B3-4ABF-8776-5DA05292282B.png",
+      "sha256": "30f10d80195039f337ece27fbe74f169ac60b4a80972bed8b43c5dc227581129"
+    },
+    {
+      "path": "screenshots/manifest.json",
+      "sha256": "9cfef6e10ba4d705e230566408e9c4903e158d2d19a08d960591b3beb05e7d2b"
+    },
+    {
+      "path": "screenshots/screenshots.json",
+      "sha256": "6392ad5a7ade2e39ab7f61ef7a8cd1b4ecc4189c0ac77d96507851affed1119f"
+    },
+    {
+      "path": "source-inputs.json",
+      "sha256": "9ea1b1cd4a391e7e65eef25f3ffdb0bc0a463e6ad6d2b27e6ace08ee24a21d09"
+    }
+  ]
+}

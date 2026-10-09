@@ -1,0 +1,34 @@
+{
+  "status": "passed",
+  "languageVersion": "6",
+  "strictConcurrency": "complete",
+  "sourceModule": "Foundation only",
+  "commands": [
+    [
+      "xcrun",
+      "swiftc",
+      "-swift-version",
+      "6",
+      "-strict-concurrency=complete",
+      "-parse-as-library",
+      "-module-cache-path",
+      "/tmp/hym-neutral-coverage-module-cache",
+      "SwiftFunctionProject/Charts/Specification/ChartAdapter.swift",
+      "SwiftFunctionProject/Charts/Specification/ChartAppearanceSpecification.swift",
+      "SwiftFunctionProject/Charts/Specification/ChartDataSpecification.swift",
+      "SwiftFunctionProject/Charts/Specification/ChartSpecification.swift",
+      "SwiftFunctionProject/Charts/Specification/ChartSpecificationCoding.swift",
+      "SwiftFunctionProject/Charts/Specification/ChartSpecificationValidation.swift",
+      "Examples/ChartSpecifications/GenerateExample.swift",
+      "-o",
+      "/tmp/hym-neutral-coverage-example"
+    ],
+    [
+      "/tmp/hym-neutral-coverage-example",
+      "/tmp/hym-neutral-coverage-energy.json"
+    ]
+  ],
+  "sameJSONBytes": true,
+  "exampleSHA256": "6d174ae3d0008f9da05a48ed7d7fcbcb67ecde658d38351daceb68c8cf2e44b6",
+  "generatedSHA256": "6d174ae3d0008f9da05a48ed7d7fcbcb67ecde658d38351daceb68c8cf2e44b6"
+}

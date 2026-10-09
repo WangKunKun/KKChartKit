@@ -1,0 +1,60 @@
+{
+  "sourceReport": "SwiftFunctionProjectUITests-Runner-2026-10-09-104911.ips",
+  "scope": "Development XCTest runner startup crash before connecting to the test session; not counted as a passing run. Selected diagnostic fields only.",
+  "exception": {
+    "codes": "0x0000000000000001, 0x0000000000000008",
+    "rawCodes": [
+      1,
+      8
+    ],
+    "type": "EXC_BAD_ACCESS",
+    "signal": "SIGSEGV",
+    "subtype": "KERN_INVALID_ADDRESS at 0x0000000000000008"
+  },
+  "termination": {
+    "flags": 0,
+    "code": 11,
+    "namespace": "SIGNAL",
+    "indicator": "Segmentation fault: 11",
+    "byProc": "exc handler",
+    "byPid": 17579
+  },
+  "faultingFrames": [
+    {
+      "imageOffset": 609172,
+      "symbol": "_CFGetNonObjCTypeID",
+      "symbolLocation": 140,
+      "imageIndex": 17
+    },
+    {
+      "imageOffset": 1733904,
+      "symbol": "CFBundleGetInfoDictionary",
+      "symbolLocation": 20,
+      "imageIndex": 17
+    },
+    {
+      "imageOffset": 1736064,
+      "symbol": "CFBundleGetIdentifier",
+      "symbolLocation": 12,
+      "imageIndex": 17
+    },
+    {
+      "imageOffset": 7449080,
+      "symbol": "-[NSUserDefaults(NSUserDefaults) _initWithSuiteName:container:]",
+      "symbolLocation": 80,
+      "imageIndex": 18
+    },
+    {
+      "imageOffset": 19352928,
+      "symbol": "___UIKitUserDefaults_block_invoke",
+      "symbolLocation": 36,
+      "imageIndex": 15
+    },
+    {
+      "imageOffset": 115320,
+      "symbol": "_dispatch_client_callout",
+      "symbolLocation": 12,
+      "imageIndex": 19
+    }
+  ]
+}

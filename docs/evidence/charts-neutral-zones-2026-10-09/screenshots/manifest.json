@@ -1,0 +1,71 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+        "deviceName" : "iPhone 16 Pro",
+        "exportedFileName" : "0258D6CF-F9FE-4EAF-B2AB-22C1FE55E285.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "neutral-v3-draw-混合图_0_B9E902C3-CDBF-4A83-B931-632DDDCE6784.png",
+        "timestamp" : 1791512209.919
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+        "deviceName" : "iPhone 16 Pro",
+        "exportedFileName" : "659EFB83-AD82-455B-8D05-49FEDD97B44F.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "neutral-v3-raw-混合图_0_1C5357FF-9BD3-47DC-B523-83D6CFA3280D.png",
+        "timestamp" : 1791512209.233
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+        "deviceName" : "iPhone 16 Pro",
+        "exportedFileName" : "05538A52-11CF-4C21-8775-D0F6ED414929.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "neutral-v3-draw-条形图_0_825A69EC-6901-4E9B-92FE-6CBADB0B7E29.png",
+        "timestamp" : 1791512193.622
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+        "deviceName" : "iPhone 16 Pro",
+        "exportedFileName" : "7708F2B0-230E-47F8-9FF8-4E759D2F34AA.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "neutral-v3-raw-条形图_0_BB12A66F-7D17-4154-884E-EBAE83AACD05.png",
+        "timestamp" : 1791512192.947
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+        "deviceName" : "iPhone 16 Pro",
+        "exportedFileName" : "74628E7E-7175-4202-A224-406B3E006A25.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "neutral-v3-draw-柱状图_0_3C4B612B-B3C5-42F2-9CD2-BB1D1A234511.png",
+        "timestamp" : 1791512182.643
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+        "deviceName" : "iPhone 16 Pro",
+        "exportedFileName" : "6132FD72-1678-400E-83FB-D4ABD46778C7.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "neutral-v3-raw-柱状图_0_9AD155CB-DE9D-4D10-832B-AEB250BFF542.png",
+        "timestamp" : 1791512181.962
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+        "deviceName" : "iPhone 16 Pro",
+        "exportedFileName" : "AC3EB33B-F57C-4F8E-8470-81F3D3A037E8.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "neutral-v3-draw-折线图_0_8A0A21C3-6CCC-493B-8809-5FD4C5F5DA55.png",
+        "timestamp" : 1791512168.454
+      }
+    ],
+    "testIdentifier" : "ChartDemoUITests/testNeutralValueColorZonesPerSeriesSourceAndResetOnFourPages()",
+    "testIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testNeutralValueColorZonesPerSeriesSourceAndResetOnFourPages"
+  }
+]

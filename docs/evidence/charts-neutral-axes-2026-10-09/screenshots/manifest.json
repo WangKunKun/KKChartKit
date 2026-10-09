@@ -1,0 +1,44 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+        "deviceName" : "iPhone 16 Pro",
+        "exportedFileName" : "C931EE28-A7A4-403B-B401-31AAAD5F5C0E.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "neutral-v4-axes-混合图_0_57B0EDDF-0D1B-431F-B8F8-F8B865A07108.png",
+        "timestamp" : 1791515222.983
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+        "deviceName" : "iPhone 16 Pro",
+        "exportedFileName" : "FFBFE8EF-A781-463B-A921-C6787639ED23.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "neutral-v4-axes-条形图_0_C239EB44-2DF8-49B0-8DDC-A97AEDCE9B2F.png",
+        "timestamp" : 1791515160.311
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+        "deviceName" : "iPhone 16 Pro",
+        "exportedFileName" : "5C71C068-0F2F-43E1-BFF7-305E29C8AF4D.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "neutral-v4-axes-柱状图_0_4F1746C0-2952-4D93-9B20-2E57C1B39954.png",
+        "timestamp" : 1791515140.331
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+        "deviceName" : "iPhone 16 Pro",
+        "exportedFileName" : "7083579F-305E-45F3-9F6A-3CF74A798BA8.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "neutral-v4-axes-折线图_0_F619174C-91FD-4E41-8EB2-C0BC4C5CEDB9.png",
+        "timestamp" : 1791515088.434
+      }
+    ],
+    "testIdentifier" : "ChartDemoUITests/testNeutralAxisPresentationPerAxisAndResetOnFourPages()",
+    "testIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testNeutralAxisPresentationPerAxisAndResetOnFourPages"
+  }
+]

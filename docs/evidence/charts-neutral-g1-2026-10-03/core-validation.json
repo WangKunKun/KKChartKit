@@ -1,0 +1,71 @@
+{
+  "status": "PASS",
+  "scope": "Foundation-only Swift 6 strict-concurrency compile; v1/v2 generated examples byte-identical to repository files",
+  "commands": [
+    {
+      "command": [
+        "xcrun",
+        "swiftc",
+        "--version"
+      ],
+      "exitCode": 0
+    },
+    {
+      "command": [
+        "xcrun",
+        "swiftc",
+        "-swift-version",
+        "6",
+        "-strict-concurrency=complete",
+        "-parse-as-library",
+        "-module-cache-path",
+        "/tmp/hym-neutral-g1-module-cache",
+        "SwiftFunctionProject/Charts/Specification/ChartAdapter.swift",
+        "SwiftFunctionProject/Charts/Specification/ChartAppearanceSpecification.swift",
+        "SwiftFunctionProject/Charts/Specification/ChartDataSpecification.swift",
+        "SwiftFunctionProject/Charts/Specification/ChartSpecification.swift",
+        "SwiftFunctionProject/Charts/Specification/ChartSpecificationCoding.swift",
+        "SwiftFunctionProject/Charts/Specification/ChartSpecificationValidation.swift",
+        "SwiftFunctionProject/Charts/Specification/ChartSpecificationVersionCoding.swift",
+        "Examples/ChartSpecifications/GenerateExample.swift",
+        "-o",
+        "/tmp/hym-neutral-g1-example"
+      ],
+      "exitCode": 0
+    },
+    {
+      "command": [
+        "/tmp/hym-neutral-g1-example",
+        "/tmp/hym-neutral-g1-energy.json",
+        "/tmp/hym-neutral-g1-energy-v2.json"
+      ],
+      "exitCode": 0
+    },
+    {
+      "command": [
+        "cmp",
+        "Examples/ChartSpecifications/energy.json",
+        "/tmp/hym-neutral-g1-energy.json"
+      ],
+      "exitCode": 0
+    },
+    {
+      "command": [
+        "cmp",
+        "Examples/ChartSpecifications/energy-g1-v2.json",
+        "/tmp/hym-neutral-g1-energy-v2.json"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "examples": [
+    {
+      "path": "Examples/ChartSpecifications/energy.json",
+      "sha256": "6d174ae3d0008f9da05a48ed7d7fcbcb67ecde658d38351daceb68c8cf2e44b6"
+    },
+    {
+      "path": "Examples/ChartSpecifications/energy-g1-v2.json",
+      "sha256": "5f1b0fe5699e99e547cbbf091d82215dadc900a06a2447c831ef34843e9e1509"
+    }
+  ]
+}

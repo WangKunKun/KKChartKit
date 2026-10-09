@@ -1,0 +1,26 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+        "deviceName" : "iPhone 16 Pro",
+        "exportedFileName" : "8B0D8008-D46B-4486-AE14-A521130F229E.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "neutral-g1-v2-混合图_0_B0EF28C9-174A-4526-96CD-C48240476EC7.png",
+        "timestamp" : 1791037554.489
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "781C9872-DAE0-4996-A623-36115772B60F",
+        "deviceName" : "iPhone 16 Pro",
+        "exportedFileName" : "E0D5BF50-20B3-4ABF-8776-5DA05292282B.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "neutral-g1-v2-折线图_0_CAFF826E-F188-4D91-B13D-33D4B27616A1.png",
+        "timestamp" : 1791037543.706
+      }
+    ],
+    "testIdentifier" : "ChartDemoUITests/testNeutralG1BoundarySwitchAndResetInExistingPages()",
+    "testIdentifierURL" : "test://com.apple.xcode/SwiftFunctionProject/SwiftFunctionProjectUITests/ChartDemoUITests/testNeutralG1BoundarySwitchAndResetInExistingPages"
+  }
+]

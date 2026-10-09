@@ -1,0 +1,98 @@
+{
+  "reviewDate": "2026-10-09",
+  "timezone": "Asia/Shanghai",
+  "scope": "Planning/documentation changes only. Historical XCTest results not rerun. Existing source manifest retained unchanged.",
+  "status": "PASS",
+  "offlineChecks": [
+    {
+      "command": [
+        "python3",
+        "scripts/check_chart_migration_inventory.py"
+      ],
+      "exitCode": 0,
+      "log": "inventory-check-after.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/check_chart_neutral_coverage.py"
+      ],
+      "exitCode": 0,
+      "log": "coverage-check-after.log"
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "scripts",
+        "-p",
+        "test_check_chart_*.py",
+        "-v"
+      ],
+      "exitCode": 0,
+      "log": "python-tests-after.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/check_chart_evidence.py"
+      ],
+      "exitCode": 0,
+      "log": "evidence-check-after.log"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "log": "whitespace-check.log"
+    }
+  ],
+  "priorSnapshotChecks": [
+    {
+      "manifest": "docs/evidence/charts-neutral-g1-2026-10-03/source-inputs.json",
+      "checked": 179,
+      "missing": [],
+      "changed": [
+        "docs/charts-legacy-replacement-plan.md",
+        "docs/charts-neutral-model-coverage.md"
+      ],
+      "expectedChanges": [
+        "docs/charts-legacy-replacement-plan.md",
+        "docs/charts-neutral-model-coverage.md"
+      ],
+      "status": "PASS"
+    },
+    {
+      "manifest": "docs/evidence/charts-neutral-g1-2026-10-03/artifact-hashes.json",
+      "checked": 23,
+      "missing": [],
+      "changed": [],
+      "expectedChanges": [],
+      "status": "PASS"
+    }
+  ],
+  "documents": [
+    {
+      "path": "docs/charts-next-task-plan-2026-10-09.md",
+      "sha256": "e16956486e3a491d99b4acdbdf3beb47951e72f7bfdd95238647f37dac135293"
+    },
+    {
+      "path": "docs/charts-legacy-replacement-plan.md",
+      "sha256": "5495565b709f57ca528ef5ef45e9e00ad669956a5c768ff0867a1c6ec0886bac"
+    },
+    {
+      "path": "docs/charts-neutral-model-coverage.md",
+      "sha256": "3e39b4c2da5d12e17fbf8534bb697eca15f88841bd22cab21e53d3d36d20dcfa"
+    },
+    {
+      "path": "docs/evidence/charts-task-plan-2026-10-09/README.md",
+      "sha256": "b5057fca4172a81e49108a817c44dbffb563d7fdd4c473c7caba5768867bd72c"
+    }
+  ]
+}
