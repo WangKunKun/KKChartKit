@@ -47,7 +47,7 @@ class NeutralCoverageTests(unittest.TestCase):
         self.assertEqual(len(self.inventory['entries']), 197)
         self.assertEqual(coverage.validate(self.matrix), self.inventory)
         self.assertEqual(coverage.counts(self.matrix),
-                         {'expressed': 47, 'schema_gap': 39, 'external': 104, 'unsupported': 7})
+                         {'expressed': 60, 'schema_gap': 26, 'external': 104, 'unsupported': 7})
         self.assertEqual(sum(coverage.counts(self.matrix).values()), len(self.matrix['entries']))
 
     def test_value_color_slice_does_not_claim_complete_legacy_zones(self):
@@ -71,6 +71,35 @@ class NeutralCoverageTests(unittest.TestCase):
         self.assertIn('自定义字体资源/任意名称不在此契约', self.cap('axis-weight')['finding'])
         self.assertEqual(sum(e['capability'] in {'axis-weight', 'ticks', 'axis-value-format'}
                              for e in self.matrix['entries']), 7)
+
+    def test_annotation_slice_preserves_coordinate_and_layering_limits(self):
+        cap = self.cap('annotations')
+        self.assertEqual((cap['disposition'], cap['adapterSupport']), ('expressed', 'mapped'))
+        self.assertIn('ChartSpecification.plotLines', cap['schemaPaths'])
+        self.assertIn('ChartSpecification.plotBands', cap['schemaPaths'])
+        self.assertEqual(sum(e['capability'] == 'annotations' for e in self.matrix['entries']), 8)
+        self.assertEqual(self.cap('annotation-order')['disposition'], 'unsupported')
+        self.assertEqual(self.cap('continuous-domain')['adapterSupport'], 'rejected')
+        self.assertEqual(self.cap('reversed-axis')['adapterSupport'], 'rejected')
+        self.assertIn('不含 X/类目标注', cap['nextAction'])
+        entry = next(e for e in self.matrix['entries'] if e['key'] == 'HMAAPlotLinesElement.textDarkColor')
+        self.assertEqual(self.cap(entry['capability'])['disposition'], 'external')
+
+    def test_interaction_slice_does_not_claim_per_sample_images_groups_or_g6(self):
+        for capability in ['tooltip-basic', 'tooltip-offset', 'legend-layout']:
+            self.assertEqual(self.cap(capability)['disposition'], 'expressed')
+            self.assertEqual(self.cap(capability)['adapterSupport'], 'mapped')
+            self.assertIn(capability, self.matrix['nativeReview'])
+        for capability in ['tooltip', 'tooltip-style', 'group-summary', 'legend-style']:
+            self.assertEqual(self.cap(capability)['disposition'], 'schema_gap')
+        self.assertEqual(self.cap('group-legend')['disposition'], 'external')
+        self.assertEqual(self.cap('continuous-domain')['adapterSupport'], 'rejected')
+        self.assertEqual(self.cap('reversed-axis')['adapterSupport'], 'rejected')
+        self.assertEqual(sum(e['capability'] in {'tooltip-basic', 'tooltip-offset'}
+                             for e in self.matrix['entries']), 5)
+        self.assertEqual(sum(e['capability'] == 'legend-layout' for e in self.matrix['entries']), 0)
+        for key in ['HMAASeriesElement.names', 'HMAASeriesElement.hidePoints', 'HMAASeries.gnames', 'HMAASeries.onlyNameIntooltip']:
+            self.assertEqual(next(e for e in self.matrix['entries'] if e['key'] == key)['capability'], 'tooltip')
 
     def test_generated_markdown_is_deterministic_and_checked_in_sync(self):
         report = coverage.render(self.matrix, self.inventory)
@@ -145,7 +174,7 @@ class NeutralCoverageTests(unittest.TestCase):
         self.invalid('native support needs implementation evidence')
 
     def test_unmodeled_is_not_an_existing_rejection_diagnostic(self):
-        self.cap('annotations')['adapterSupport'] = 'rejected'
+        self.cap('title-style')['adapterSupport'] = 'rejected'
         self.invalid('schema gap cannot claim')
         self.matrix = deepcopy(self.baseline)
         cap = self.cap('continuous-domain')

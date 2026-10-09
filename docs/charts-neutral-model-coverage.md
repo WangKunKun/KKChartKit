@@ -1,12 +1,12 @@
 # 通用图表模型覆盖矩阵
 
-审计日期：2026-10-09；`ChartSpecification` schema v4。
+审计日期：2026-10-09；`ChartSpecification` schema v6。
 
 > 本文由 `scripts/check_chart_neutral_coverage.py --write` 从逐项审核的 JSON 生成；请先修改 JSON，再生成文档。工具不会自动判定新字段“已支持”。
 
 ## 结论与阅读方式
 
-- **197 个旧声明逐项处置**，对应 59 个能力/职责主题；另核对 15 个 G1–G6 / 后端边界主题（与旧字段覆盖有交集，不与 197 相加）。
+- **197 个旧声明逐项处置**，对应 61 个能力/职责主题；另核对 18 个 G1–G6 / 后端边界主题（与旧字段覆盖有交集，不与 197 相加）。
 - “已表达”只指描述语义及 HYMCharts 转换已有，**不表示旧输入 mapper 已交付或旧默认/累计规则完全等价**。真实业务调用仍未提供。
 - “外层”细分为业务 UI、运行时命令/事件、兼容解析/格式化与派生缓存，不能都算作 renderer 缺口，也不能都算作已完成。
 - “未建模”没有可被适配器检查的字段，**不等于已经返回 unsupportedCapability**。当前 Codable 会忽略额外对象键；mapper 必须在丢失信息前显式诊断，metadata/扩展键不得透传引擎选项。
@@ -15,8 +15,8 @@
 
 | 处置 | 旧声明数 |
 | --- | ---: |
-| 已表达 | 47 |
-| 需新增通用语义 | 39 |
+| 已表达 | 60 |
+| 需新增通用语义 | 26 |
 | 外层 UI / 运行时 / 兼容层 | 104 |
 | 应报不支持 | 7 |
 
@@ -39,7 +39,7 @@
 | [轴字体字重](#cap-axis-weight) | 已表达 | 已有 | 已映射 |
 | [显式值轴刻度与类目间隔](#cap-ticks) | 已表达 | 已有 | 已映射 |
 | [值轴刻度单位/格式](#cap-axis-value-format) | 已表达 | 已有 | 已映射 |
-| [标线、色带及文字](#cap-annotations) | 需新增通用语义 | 已有 | 未建模，尚无对应诊断入口 |
+| [标线、色带及文字](#cap-annotations) | 已表达 | 已有 | 已映射 |
 | [任意标注层级](#cap-annotation-order) | 应报不支持 | 缺失 | 未建模，尚无对应诊断入口 |
 | [数据标签与堆叠总量](#cap-data-labels) | 需新增通用语义 | 已有 | 仅部分映射 |
 | [G5 主体选中外观](#cap-selection) | 需新增通用语义 | 已有 | 未建模，尚无对应诊断入口 |
@@ -47,6 +47,9 @@
 | [G6 反向值轴](#cap-reversed-axis) | 应报不支持 | 缺失 | 已有显式拒绝 |
 | [轴数与横向图元限制](#cap-backend-limits) | 应报不支持 | 部分/语义有差异 | 已有显式拒绝 |
 | [仅次轴网格](#cap-secondary-grid) | 应报不支持 | 部分/语义有差异 | 已有显式拒绝 |
+| [提示开关、布局与逐系列内容](#cap-tooltip-basic) | 已表达 | 已有 | 已映射 |
+| [提示前值选择](#cap-tooltip-offset) | 已表达 | 已有 | 已映射 |
+| [图例布局与稳定系列标题](#cap-legend-layout) | 已表达 | 已有 | 已映射 |
 
 ## 逐声明覆盖（按原头文件清单排序）
 
@@ -151,7 +154,7 @@
 | [`HMAAChartModel.chartType`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h#L37) | 已表达 · [图元、插值及组合](#cap-marks) | areaspline→area+monotone，line→line+linear，column→bar+vertical；系列覆盖优先级需校验。 |
 | [`HMAAChartModel.stackType`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h#L38) | 已表达 · [数学堆叠与组键](#cap-stacking) | false→none，normal→sum；percent 仅在接受绝对值总分母契约后映射；不宣称旧净额累计兼容。 |
 | [`HMAAChartModel.xAxisArray`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h#L39) | 已表达 · [类目身份与标签](#cap-categories) | → domain.categories；保留顺序/重复标签，提供稳定 category ID。 |
-| [`HMAAChartModel.xSeriesArray`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h#L40) | 需新增通用语义 · [提示开关、布局与逐采样内容](#cap-tooltip) | 独立逐点提示表头；不能拿 category.label 或 metadata 原样塞入后就宣称可展示。 |
+| [`HMAAChartModel.xSeriesArray`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h#L40) | 需新增通用语义 · [逐采样提示、动态组名与组级规则](#cap-tooltip) | 独立逐点提示表头；不能拿 category.label 或 metadata 原样塞入后就宣称可展示。 |
 | [`HMAAChartModel.seriesArray`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h#L41) | 已表达 · [系列、采样及缺测](#cap-series) | 嵌套成员按稳定组/系列 ID 展平；原始值和 NSNull 位置分别处理。 |
 | [`HMAAChartModel.version`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h#L44) | 外层 UI / 运行时 / 兼容层 · [统计表头、日出日落与版本卡片](#cap-host-card) | 旧 v1/v2 是业务布局版本，绝不能映射为 schemaVersion。 |
 | [`HMAAChartModel.unit`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h#L45) | 外层 UI / 运行时 / 兼容层 · [统计表头、日出日落与版本卡片](#cap-host-card) | 旧 v2 标题通用单位属于卡片；不是每个系列的数学单位或轴标题。 |
@@ -180,9 +183,9 @@
 | [`HMAAChartModel.toolTipBackgroundColor`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h#L70) | 需新增通用语义 · [提示颜色主题](#cap-tooltip-style) | 原生 Swift 主题可配；通用描述及 OC 完整提示主题尚未覆盖。 |
 | [`HMAAChartModel.toolTipTextColor`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h#L71) | 需新增通用语义 · [提示颜色主题](#cap-tooltip-style) | 原生 Swift 主题可配；通用描述及 OC 完整提示主题尚未覆盖。 |
 | [`HMAAChartModel.closeDarkStyle`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h#L72) | 外层 UI / 运行时 / 兼容层 · [暗色资源与外观解析](#cap-host-appearance) | 宿主按用途解析深浅色后更新；对应 schema 外观字段缺口仍单独处理，不因解析颜色而算已覆盖。 |
-| [`HMAAChartModel.tooltipPinToTop`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h#L73) | 需新增通用语义 · [提示开关、布局与逐采样内容](#cap-tooltip) | 原生 fixedTop 已有；schema 未建模，超时/抬手行为另验收。 |
-| [`HMAAChartModel.tooltipDisable`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h#L74) | 需新增通用语义 · [提示开关、布局与逐采样内容](#cap-tooltip) | 原生提示开关已有；schema 未建模，不能通过隐藏全部系列模拟。 |
-| [`HMAAChartModel.yAxisPlotLines`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h#L75) | 需新增通用语义 · [标线、色带及文字](#cap-annotations) | 需中立标线数组、稳定目标轴与数值；原生 Swift/OC 已支持。 |
+| [`HMAAChartModel.tooltipPinToTop`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h#L73) | 已表达 · [提示开关、布局与逐系列内容](#cap-tooltip-basic) | v6 position=fixedTop；只固定位置，不锁定选择，不承诺旧超时/抬手行为。 |
+| [`HMAAChartModel.tooltipDisable`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h#L74) | 已表达 · [提示开关、布局与逐系列内容](#cap-tooltip-basic) | v6 isEnabled 取反；不通过隐藏系列模拟，回调命中不受影响。 |
+| [`HMAAChartModel.yAxisPlotLines`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h#L75) | 已表达 · [标线、色带及文字](#cap-annotations) | v5 plotLines 通过稳定 valueAxisID 绑定值轴；旧输入 mapper 未交付。 |
 | [`HMAAChartModel.nativeTooltip`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h#L76) | 外层 UI / 运行时 / 兼容层 · [统计表头、日出日落与版本卡片](#cap-host-card) | 旧 Web/native 实现选择不成为新数据字段；目标使用原生提示，旧卡片布局单独兼容。 |
 | [`HMAAChartModel.defaultScope`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h#L77) | 外层 UI / 运行时 / 兼容层 · [缩放与初始视口](#cap-runtime-viewport) | 旧闭区间→showCategoryRange 半开范围；保持采样数据不截断，明确半槽差异。 |
 | [`HMAAChartModel.headerDatas`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartModel.h#L80) | 外层 UI / 运行时 / 兼容层 · [统计表头、日出日落与版本卡片](#cap-host-card) | 外部统计/日出日落 view model；图表内部标签/Tooltip 内容不由这组字段冒充。 |
@@ -238,7 +241,7 @@
 | 旧声明 | 处置 / 能力 | 转换规则与边界 |
 | --- | --- | --- |
 | [`HMAASeries.gname`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L40) | 已表达 · [业务展示分组](#cap-groups) | → groups[].name；组名可重复但 ID 不能重复。 |
-| [`HMAASeries.gnames`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L41) | 需新增通用语义 · [提示开关、布局与逐采样内容](#cap-tooltip) | 逐采样组标题未建模，现原生静态业务组不能自动替代。 |
+| [`HMAASeries.gnames`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L41) | 需新增通用语义 · [逐采样提示、动态组名与组级规则](#cap-tooltip) | 逐采样组标题未建模，现原生静态业务组不能自动替代。 |
 | [`HMAASeries.element`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L42) | 已表达 · [业务展示分组](#cap-groups) | 按 groupID 关联展平后的 series；保留稳定 ID 和成员顺序。 |
 | [`HMAASeries.unitType`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L43) | 需新增通用语义 · [分组小计格式与来源](#cap-group-summary) | 旧组小计有独立格式；现 ChartGroupSpecification 无格式，不能偷用系列 valuePresentation。 |
 | [`HMAASeries.otherUnit`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L44) | 需新增通用语义 · [分组小计格式与来源](#cap-group-summary) | 旧组小计有独立格式；现 ChartGroupSpecification 无格式，不能偷用系列 valuePresentation。 |
@@ -248,7 +251,7 @@
 | [`HMAASeries.fractionDigits`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L50) | 需新增通用语义 · [分组小计格式与来源](#cap-group-summary) | 旧组小计有独立格式；现 ChartGroupSpecification 无格式，不能偷用系列 valuePresentation。 |
 | [`HMAASeries.fgdata`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L53) | 外层 UI / 运行时 / 兼容层 · [旧格式化和可见系列缓存](#cap-derived-cache) | 旧组格式化派生结果由兼容展示层重新计算，不写入 ChartGroupSpecification。 |
 | [`HMAASeries.formatGroupData`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L55) | 外层 UI / 运行时 / 兼容层 · [旧格式化和可见系列缓存](#cap-derived-cache) | 旧组格式化派生结果由兼容展示层重新计算，不写入 ChartGroupSpecification。 |
-| [`HMAASeries.onlyNameIntooltip`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L57) | 需新增通用语义 · [提示开关、布局与逐采样内容](#cap-tooltip) | 需组级隐藏数值规则；逐系列 row provider 不等于已兼容整组。 |
+| [`HMAASeries.onlyNameIntooltip`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L57) | 需新增通用语义 · [逐采样提示、动态组名与组级规则](#cap-tooltip) | 需组级隐藏数值规则；逐系列 row provider 不等于已兼容整组。 |
 | [`HMAASeries.icon`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L60) | 外层 UI / 运行时 / 兼容层 · [旧分组卡片式图例](#cap-group-legend) | 旧 v2 分组图例卡片/分栏/间距；外部组合，不把显示组误作 stackID。 |
 | [`HMAASeries.color`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L61) | 外层 UI / 运行时 / 兼容层 · [旧分组卡片式图例](#cap-group-legend) | 旧 v2 分组图例卡片/分栏/间距；外部组合，不把显示组误作 stackID。 |
 | [`HMAASeries.gcname`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L62) | 外层 UI / 运行时 / 兼容层 · [旧分组卡片式图例](#cap-group-legend) | 旧 v2 分组图例卡片/分栏/间距；外部组合，不把显示组误作 stackID。 |
@@ -260,7 +263,7 @@
 | 旧声明 | 处置 / 能力 | 转换规则与边界 |
 | --- | --- | --- |
 | [`HMAASeriesElement.name`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L70) | 已表达 · [系列、采样及缺测](#cap-series) | → series[].name；不把显示名称当 ID。 |
-| [`HMAASeriesElement.names`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L71) | 需新增通用语义 · [提示开关、布局与逐采样内容](#cap-tooltip) | 逐采样提示行名需声明式覆盖；不能直接改系列 name。 |
+| [`HMAASeriesElement.names`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L71) | 需新增通用语义 · [逐采样提示、动态组名与组级规则](#cap-tooltip) | 逐采样提示行名需声明式覆盖；不能直接改系列 name。 |
 | [`HMAASeriesElement.color`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L72) | 已表达 · [系列颜色及负值颜色](#cap-color) | → appearance.color；空值继承明确政策，非法 hex 报错。 |
 | [`HMAASeriesElement.data`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L73) | 已表达 · [系列、采样及缺测](#cap-series) | → samples[].value；NSNull→nil 保位，零/负数不改，坐标与样本 ID 单独保留。 |
 | [`HMAASeriesElement.unitType`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L74) | 已表达 · [系列单位与显示进位](#cap-units) | 白名单解析为 unit + scale/currencySymbol；未知枚举诊断。 |
@@ -277,21 +280,21 @@
 | [`HMAASeriesElement.dashStyle`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L95) | 已表达 · [线条与点标记](#cap-stroke-marker) | 仅可明确映射 solid/dashed/dotted；其他旧 dash 值必须诊断或扩展语义。 |
 | [`HMAASeriesElement.zones`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L98) | 需新增通用语义 · [旧完整 zones（X/Y 与分区填充）](#cap-zones) | v3 可表达值轴颜色子集；旧 X 分区/分区填充与原值取色必须先判别，不可整字段静默截断后算已覆盖。 |
 | [`HMAASeriesElement.zoneAxisX`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L99) | 需新增通用语义 · [旧完整 zones（X/Y 与分区填充）](#cap-zones) | v3 valueColorZones 仅值轴；旧 true 对应类目原始索引，仍未建模，不能借 metadata 透传或当成连续 X。 |
-| [`HMAASeriesElement.hideInTooltip`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L102) | 需新增通用语义 · [提示开关、布局与逐采样内容](#cap-tooltip) | 只过滤提示行，不隐藏绘制或从百分比分母剔除系列。 |
+| [`HMAASeriesElement.hideInTooltip`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L102) | 已表达 · [提示开关、布局与逐系列内容](#cap-tooltip-basic) | v6 seriesRules[id].isHidden 只过滤提示行，不改变图形或百分比分母。 |
 | [`HMAASeriesElement.fillAlpha`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L103) | 已表达 · [面积纯色或纵向渐变](#cap-area-fill) | 先合成单个 ChartAreaFill；明确三者优先级与透明度一次计算，非 area 使用须报错。 |
 | [`HMAASeriesElement.fillColor`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L104) | 已表达 · [面积纯色或纵向渐变](#cap-area-fill) | 先合成单个 ChartAreaFill；明确三者优先级与透明度一次计算，非 area 使用须报错。 |
 | [`HMAASeriesElement.negativeColor`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L105) | 已表达 · [系列颜色及负值颜色](#cap-color) | → appearance.negativeColor；不得 abs 原始数据。 |
 | [`HMAASeriesElement.isStep`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L106) | 已表达 · [图元、插值及组合](#cap-marks) | 确认旧方向后设 stepAfter；与 series.chartType 的优先级必须显式。 |
 | [`HMAASeriesElement.markerHidden`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L107) | 已表达 · [线条与点标记](#cap-stroke-marker) | true→appearance.marker.none；false 恢复明确 marker/引擎默认，不影响原始样本。 |
-| [`HMAASeriesElement.showPrev`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L108) | 需新增通用语义 · [提示前值选择](#cap-tooltip-offset) | 仅提示取值偏移 -1 + clamp；命中 ID、当前表头/名字保留，不整体平移数据。 |
+| [`HMAASeriesElement.showPrev`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L108) | 已表达 · [提示前值选择](#cap-tooltip-offset) | 仅提示取值偏移 -1 + clamp；命中 ID、当前表头/名字保留，不整体平移数据。 |
 | [`HMAASeriesElement.formatData`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L111) | 外层 UI / 运行时 / 兼容层 · [旧格式化和可见系列缓存](#cap-derived-cache) | 旧格式化缓存归兼容展示层；源 raw 值不能替换为格式字符串。 |
 | [`HMAASeriesElement.fdata`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L112) | 外层 UI / 运行时 / 兼容层 · [旧格式化和可见系列缓存](#cap-derived-cache) | 旧格式化缓存归兼容展示层；源 raw 值不能替换为格式字符串。 |
-| [`HMAASeriesElement.hidePoints`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L113) | 需新增通用语义 · [提示开关、布局与逐采样内容](#cap-tooltip) | 按当前命中采样身份过滤提示；与 showPrev 的取值索引必须区分。 |
+| [`HMAASeriesElement.hidePoints`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L113) | 需新增通用语义 · [逐采样提示、动态组名与组级规则](#cap-tooltip) | 按当前命中采样身份过滤提示；与 showPrev 的取值索引必须区分。 |
 | [`HMAASeriesElement.legendBgColor`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L117) | 需新增通用语义 · [逐系列图例符号/背景](#cap-legend-style) | 原生逐项图例外观/图片已有；v1 无图例外观资源协议，alpha 只算一次。 |
 | [`HMAASeriesElement.legendBgColorAlpha`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L118) | 需新增通用语义 · [逐系列图例符号/背景](#cap-legend-style) | 原生逐项图例外观/图片已有；v1 无图例外观资源协议，alpha 只算一次。 |
 | [`HMAASeriesElement.isHidden`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L119) | 已表达 · [图例和系列显隐](#cap-legend-visible) | 取反→isVisible；不改变 showsInLegend，不删掉业务系列。 |
 | [`HMAASeriesElement.icon`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L122) | 需新增通用语义 · [逐系列图例符号/背景](#cap-legend-style) | 原生逐项图例外观/图片已有；v1 无图例外观资源协议，alpha 只算一次。 |
-| [`HMAASeriesElement.hideNameInTooltip`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L123) | 需新增通用语义 · [提示开关、布局与逐采样内容](#cap-tooltip) | 只隐藏提示标题，不删除图例名/系列名。 |
+| [`HMAASeriesElement.hideNameInTooltip`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAASeries.h#L123) | 已表达 · [提示开关、布局与逐系列内容](#cap-tooltip-basic) | v6 seriesRules[id].title 设空字符串；仅隐藏系列名，不改图例名/来源说明。 |
 
 ### HMAASeriesUtil
 
@@ -315,15 +318,15 @@
 
 | 旧声明 | 处置 / 能力 | 转换规则与边界 |
 | --- | --- | --- |
-| [`HMAAPlotLinesElement.color`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h#L15) | 需新增通用语义 · [标线、色带及文字](#cap-annotations) | 标线 stroke 颜色需中立 annotation 字段；原生 Swift/OC 已具备。 |
-| [`HMAAPlotLinesElement.dashStyle`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h#L29) | 需新增通用语义 · [标线、色带及文字](#cap-annotations) | 旧标线转换未消费此声明；新原生可配但 schema 未建模，需明确白名单，不继承静默忽略。 |
-| [`HMAAPlotLinesElement.width`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h#L30) | 需新增通用语义 · [标线、色带及文字](#cap-annotations) | 标线逻辑点线宽；非负有限值。 |
-| [`HMAAPlotLinesElement.value`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h#L31) | 需新增通用语义 · [标线、色带及文字](#cap-annotations) | 标线值与绑定值轴共同定义；不是类目下标。 |
+| [`HMAAPlotLinesElement.color`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h#L15) | 已表达 · [标线、色带及文字](#cap-annotations) | v5 plotLines[].color 为 sRGB RGBA；nil 保留后端默认。 |
+| [`HMAAPlotLinesElement.dashStyle`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h#L29) | 已表达 · [标线、色带及文字](#cap-annotations) | v5 strokePattern 为 solid/dashed/dotted；旧转换未消费此声明，不继承静默忽略，其他旧枚举仍需 mapper 明确拒绝。 |
+| [`HMAAPlotLinesElement.width`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h#L30) | 已表达 · [标线、色带及文字](#cap-annotations) | v5 lineWidth 为非负有限逻辑点。 |
+| [`HMAAPlotLinesElement.value`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h#L31) | 已表达 · [标线、色带及文字](#cap-annotations) | v5 value 与稳定 valueAxisID 共同定义；不是类目下标，百分比用逻辑百分数。 |
 | [`HMAAPlotLinesElement.zIndex`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h#L32) | 应报不支持 · [任意标注层级](#cap-annotation-order) | 旧声明未被消费（实现写死3），不是既有可回归层级能力；新后端无任意层级契约，未来 mapper 应报差异。 |
-| [`HMAAPlotLinesElement.text`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h#L33) | 需新增通用语义 · [标线、色带及文字](#cap-annotations) | annotation 标签内容；与线条颜色独立。 |
-| [`HMAAPlotLinesElement.textColor`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h#L34) | 需新增通用语义 · [标线、色带及文字](#cap-annotations) | annotation 独立 labelStyle.color 原生已支持，schema 未建模。 |
-| [`HMAAPlotLinesElement.textDarkColor`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h#L35) | 外层 UI / 运行时 / 兼容层 · [暗色资源与外观解析](#cap-host-appearance) | 先由宿主选出当前外观颜色，再输入待扩展 annotation 样式；解析颜色不等于已支持 annotation。 |
-| [`HMAAPlotLinesElement.fontSize`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h#L36) | 需新增通用语义 · [标线、色带及文字](#cap-annotations) | annotation labelStyle.font 原生已支持，schema 未建模。 |
+| [`HMAAPlotLinesElement.text`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h#L33) | 已表达 · [标线、色带及文字](#cap-annotations) | v5 label 内容；nil/空字符串不画标签，不自动追加单位。 |
+| [`HMAAPlotLinesElement.textColor`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h#L34) | 已表达 · [标线、色带及文字](#cap-annotations) | v5 labelStyle.color，与标线颜色独立；nil 继承标注色。 |
+| [`HMAAPlotLinesElement.textDarkColor`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h#L35) | 外层 UI / 运行时 / 兼容层 · [暗色资源与外观解析](#cap-host-appearance) | 宿主选择当前外观颜色后输入 v5 labelStyle.color；主题自动切换仍为外层职责。 |
+| [`HMAAPlotLinesElement.fontSize`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAPlotLinesElement.h#L36) | 已表达 · [标线、色带及文字](#cap-annotations) | v5 labelStyle.fontSize 为正有限逻辑点，系统字体九种字重，不含任意字体资源。 |
 
 ### HMAAChartManager
 
@@ -543,12 +546,12 @@
 - **源码/契约入口**：[view-native](#evidence-view-native)
 
 <a id="cap-tooltip"></a>
-### 提示开关、布局与逐采样内容
+### 逐采样提示、动态组名与组级规则
 
 - **处置**：需新增通用语义。**HYM 原生**：部分/语义有差异。**v1/v2/v3 适配器**：未建模，尚无对应诊断入口。
 - **已有 schema 落点**：无；不凭空假设新增字段已存在。
-- **判定**：原生有 Tooltip、逐行 provider、分组及固定顶部；v1–v4 没有提示语义。逐点表头/动态组名和旧超时不是已有 schema 能力。
-- **后续动作**：以稳定 sample ID 建立声明式覆盖和显示规则；闭包、图片解析、事件生命周期留适配/运行时层，R3 核对 header/name/hidePoints 索引。
+- **判定**：v6 已将通用开关/布局/逐系列规则拆到 tooltip-basic；逐采样表头/行名/隐藏点、动态组名和组级 onlyName 仍无对应通用契约。
+- **后续动作**：R3 核对当前 sample ID 与偏移取值身份、整组行为及旧超时，再设计声明式覆盖；回调/图片解析仍为运行时。
 - **源码/契约入口**：[tooltip-native](#evidence-tooltip-native) · [tooltip-options](#evidence-tooltip-options) · [tooltip-theme](#evidence-tooltip-theme) · [tooltip-test](#evidence-tooltip-test)
 
 <a id="cap-tooltip-style"></a>
@@ -556,18 +559,18 @@
 
 - **处置**：需新增通用语义。**HYM 原生**：部分/语义有差异。**v1/v2/v3 适配器**：未建模，尚无对应诊断入口。
 - **已有 schema 落点**：无；不凭空假设新增字段已存在。
-- **判定**：Swift 原生 TooltipTheme 支持主题；OC options 仅部分外观，JSON v1–v4 无提示颜色配置。
+- **判定**：Swift 原生 TooltipTheme 支持主题；OC options 仅部分外观，JSON v1–v6 无提示颜色/字体配置。
 - **后续动作**：统一中立提示文字/背景语义后补两端转换；不可声称现 OC options 已覆盖完整主题。
 - **源码/契约入口**：[tooltip-theme](#evidence-tooltip-theme) · [tooltip-native](#evidence-tooltip-native)
 
 <a id="cap-tooltip-offset"></a>
 ### 提示前值选择
 
-- **处置**：需新增通用语义。**HYM 原生**：已有。**v1/v2/v3 适配器**：未建模，尚无对应诊断入口。
-- **已有 schema 落点**：无；不凭空假设新增字段已存在。
-- **判定**：原生偏移/边界政策已有，保持当前命中身份及当前表头；v1–v4 无字段。
-- **后续动作**：设计可序列化的提示取值偏移及 omit/clamp/current，明确实际时间聚合仍取当前桶。
-- **源码/契约入口**：[tooltip-offset](#evidence-tooltip-offset) · [offset-test](#evidence-offset-test)
+- **处置**：已表达。**HYM 原生**：已有。**v1/v2/v3 适配器**：已映射。
+- **已有 schema 落点**：`ChartTooltipSpecification.sampleSelection`、`ChartTooltipSampleSelection.offset`、`ChartTooltipSampleSelection.offsetsBySeriesID`、`ChartTooltipSampleSelection.boundaryPolicy`
+- **判定**：v6 表达全局/逐稳定系列 ID 的类目槽位偏移与 omit/clamp/current、取值来源标签；保留当前命中/表头/准线与原值，缺测不搜索。聚合桶维持原生当前桶规则。
+- **后续动作**：R2 将 showPrev 转为 -1 + clamp；不解释成数值距离/时间间隔，不据此开放 G6。
+- **源码/契约入口**：[schema](#evidence-schema) · [interaction-schema](#evidence-interaction-schema) · [interaction-adapter](#evidence-interaction-adapter) · [interaction-test](#evidence-interaction-test) · [interaction-coding-test](#evidence-interaction-coding-test) · [tooltip-offset](#evidence-tooltip-offset) · [offset-test](#evidence-offset-test)
 
 <a id="cap-group-summary"></a>
 ### 分组小计格式与来源
@@ -592,7 +595,7 @@
 
 - **处置**：需新增通用语义。**HYM 原生**：已有。**v1/v2/v3 适配器**：未建模，尚无对应诊断入口。
 - **已有 schema 落点**：`ChartSpecification.showsLegend`、`ChartSeriesSpecification.showsInLegend`
-- **判定**：原生图例支持 itemOverrides/图片/背景，Swift/OC 已有；v1–v4 只支持显隐，未定义资源引用或图例布局。
+- **判定**：原生逐项图片/符号/背景已有；v6 legend-layout 只覆盖布局与标题，未定义资源引用或这些外观字段。
 - **后续动作**：先定义中立资源 ID 与图例外观，宿主解析图片；不能把 UIImage/provider 写入 JSON。
 - **源码/契约入口**：[schema](#evidence-schema) · [data](#evidence-data) · [legend-native](#evidence-legend-native)
 
@@ -608,11 +611,11 @@
 <a id="cap-annotations"></a>
 ### 标线、色带及文字
 
-- **处置**：需新增通用语义。**HYM 原生**：已有。**v1/v2/v3 适配器**：未建模，尚无对应诊断入口。
-- **已有 schema 落点**：无；不凭空假设新增字段已存在。
-- **判定**：原生 G4 的标线/色带、轴绑定、标签样式已实现（含 OC）；v1–v4 无 annotation。旧标线转换忽略 dashStyle 且写死 zIndex=3，声明不等于曾生效。
-- **后续动作**：首切片限定绑定稳定 valueAxisID 的值轴标线/色带及文字外观；原生不是类目/连续 X 标注能力。固定绘制层次，不承接任意 zIndex。
-- **源码/契约入口**：[native-model](#evidence-native-model) · [labels-native](#evidence-labels-native) · [annotations-native](#evidence-annotations-native) · [annotation-test](#evidence-annotation-test) · [legacy-plot-line](#evidence-legacy-plot-line)
+- **处置**：已表达。**HYM 原生**：已有。**v1/v2/v3 适配器**：已映射。
+- **已有 schema 落点**：`ChartSpecification.plotLines`、`ChartSpecification.plotBands`、`ChartPlotLine.valueAxisID`、`ChartPlotBand.valueAxisID`、`ChartAnnotationLabelStyle`
+- **判定**：schema v5 已表达有限值轴标线/色带、统一唯一 ID、稳定 valueAxisID、显隐、颜色/线宽/三种线型及独立标签样式；HYM 映射复用 G4 固定层次，保留源身份。v1–v4 拒绝标注键；旧 dashStyle 未生效、zIndex 写死的历史不转化为新语义。
+- **后续动作**：当前切片不含 X/类目标注、任意 zIndex、自定义字体资源或可执行 formatter；旧输入仍须未来 mapper 明确轴 ID 与线型白名单。
+- **源码/契约入口**：[native-model](#evidence-native-model) · [labels-native](#evidence-labels-native) · [annotations-native](#evidence-annotations-native) · [annotation-test](#evidence-annotation-test) · [legacy-plot-line](#evidence-legacy-plot-line) · [annotation-schema](#evidence-annotation-schema) · [schema](#evidence-schema) · [adapter](#evidence-adapter) · [annotation-schema-test](#evidence-annotation-schema-test) · [annotation-adapter-test](#evidence-annotation-adapter-test)
 
 <a id="cap-annotation-order"></a>
 ### 任意标注层级
@@ -866,6 +869,24 @@
 - **后续动作**：迁移直接消费者到 ChartSpecification/适配结果；mapper 遇此依赖明确报告，不以 metadata 透传。
 - **源码/契约入口**：[schema](#evidence-schema) · [adapter](#evidence-adapter) · [migration-plan](#evidence-migration-plan)
 
+<a id="cap-tooltip-basic"></a>
+### 提示开关、布局与逐系列内容
+
+- **处置**：已表达。**HYM 原生**：已有。**v1/v2/v3 适配器**：已映射。
+- **已有 schema 落点**：`ChartSpecification.tooltip`、`ChartTooltipSpecification.layout`、`ChartTooltipSpecification.position`、`ChartTooltipSpecification.seriesRules`
+- **判定**：v6 可表达开关、text/columns、automatic/fixedTop、当前表头模板、零值过滤和稳定系列 ID 行隐藏/标题/隐藏数值。nil 保留宿主运行时；非 nil 完整覆盖已建模内容，图片/provider 与外观保留运行时。 N4 fixedTop 自动限制在绘图区，避开标题/图例；原生开关默认 false，不新增 schema 字段，仍覆盖数据。
+- **后续动作**：R2 对 tooltipDisable 取反、hideInTooltip 映射 isHidden、hideNameInTooltip 使用空标题；不承诺旧超时或逐采样规则。
+- **源码/契约入口**：[schema](#evidence-schema) · [interaction-schema](#evidence-interaction-schema) · [interaction-adapter](#evidence-interaction-adapter) · [interaction-test](#evidence-interaction-test) · [interaction-coding-test](#evidence-interaction-coding-test) · [tooltip-layout-test](#evidence-tooltip-layout-test)
+
+<a id="cap-legend-layout"></a>
+### 图例布局与稳定系列标题
+
+- **处置**：已表达。**HYM 原生**：已有。**v1/v2/v3 适配器**：已映射。
+- **已有 schema 落点**：`ChartSpecification.legend`、`ChartLegendSpecification.position`、`ChartLegendSpecification.titlesBySeriesID`
+- **判定**：v6 表达屏幕四方向、行对齐、scroll/expand、最大行数/尺寸、点击显隐与相邻组换行；标题按稳定系列 ID 覆盖，不改变系列顺序或 Tooltip 名称。
+- **后续动作**：保留 showsLegend/showsInLegend/isVisible；未覆盖符号/图片/背景/动态组标题/业务卡片，不补造旧字段数量。
+- **源码/契约入口**：[schema](#evidence-schema) · [interaction-schema](#evidence-interaction-schema) · [interaction-adapter](#evidence-interaction-adapter) · [interaction-test](#evidence-interaction-test) · [interaction-coding-test](#evidence-interaction-coding-test) · [legend-native](#evidence-legend-native)
+
 ## 源码与现有契约入口
 
 以下是审计定位依据。锚点存在不等于功能正确；“test”表示现有契约测试入口，**不表示本批已重新执行这些 XCTest**。本批实际执行范围见任务进度及独立审计证据。
@@ -915,21 +936,21 @@
 <a id="evidence-tooltip-theme"></a>
 - **tooltip-theme** (native)：[`public struct HYMChartTooltipTheme`](../SwiftFunctionProject/Charts/Core/HYMChartTooltipTheme.swift#L7)
 <a id="evidence-legend-native"></a>
-- **legend-native** (native)：[`public final class HYMCartesianLegendItemStyle:`](../SwiftFunctionProject/Charts/OCBridge/HYMCartesianPresentation.swift#L92)
+- **legend-native** (native)：[`public final class HYMCartesianLegendItemStyle:`](../SwiftFunctionProject/Charts/OCBridge/HYMCartesianPresentation.swift#L95)
 <a id="evidence-view-native"></a>
 - **view-native** (native)：[`public var onHit:`](../SwiftFunctionProject/Charts/Core/HYMChartView.swift#L26)
 <a id="evidence-zoom-native"></a>
-- **zoom-native** (native)：[`public var zoomAxisMode:`](../SwiftFunctionProject/Charts/Core/HYMChartView.swift#L70)
+- **zoom-native** (native)：[`public var zoomAxisMode:`](../SwiftFunctionProject/Charts/Core/HYMChartView.swift#L73)
 <a id="evidence-viewport-native"></a>
-- **viewport-native** (native)：[`public func showCategoryRange(`](../SwiftFunctionProject/Charts/Core/HYMChartView.swift#L306)
+- **viewport-native** (native)：[`public func showCategoryRange(`](../SwiftFunctionProject/Charts/Core/HYMChartView.swift#L309)
 <a id="evidence-visibility-native"></a>
-- **visibility-native** (native)：[`public func setSeriesVisible(`](../SwiftFunctionProject/Charts/Core/HYMChartView.swift#L271)
+- **visibility-native** (native)：[`public func setSeriesVisible(`](../SwiftFunctionProject/Charts/Core/HYMChartView.swift#L274)
 <a id="evidence-legend-order"></a>
 - **legend-order** (native)：[`public var legendOrder:`](../SwiftFunctionProject/Charts/Cartesian/CartesianChartModel.swift#L94)
 <a id="evidence-oc-native"></a>
-- **oc-native** (native)：[`public func setSeriesVisible(`](../SwiftFunctionProject/Charts/OCBridge/HYMCartesianChartViewBridge.swift#L160)
+- **oc-native** (native)：[`public func setSeriesVisible(`](../SwiftFunctionProject/Charts/OCBridge/HYMCartesianChartViewBridge.swift#L163)
 <a id="evidence-neutral-guide"></a>
-- **neutral-guide** (guide)：[`fractionDigits`](../docs/charts-neutral-model-guide.md#L238)
+- **neutral-guide** (guide)：[`fractionDigits`](../docs/charts-neutral-model-guide.md#L322)
 <a id="evidence-migration-plan"></a>
 - **migration-plan** (guide)：[`R4`](../docs/charts-legacy-replacement-plan.md#L141)
 <a id="evidence-legacy-series"></a>
@@ -987,7 +1008,7 @@
 <a id="evidence-legacy-title"></a>
 - **legacy-title** (legacy)：[`if (_chartModel.name.length > 0 && _chartModel.version != 2) {`](../SwiftFunctionProject/参考图表/HMAAChartView/HMAAChartTool/HMAAChartManager.m#L57)
 <a id="evidence-boundary-coding"></a>
-- **boundary-coding** (schema)：[`if schemaVersion >= 2 { try c.encode(stackedAreaBoundary, forKey: .stackedAreaBoundary) }`](../SwiftFunctionProject/Charts/Specification/ChartSpecificationVersionCoding.swift#L98)
+- **boundary-coding** (schema)：[`if schemaVersion >= 2 { try c.encode(stackedAreaBoundary, forKey: .stackedAreaBoundary) }`](../SwiftFunctionProject/Charts/Specification/ChartSpecificationVersionCoding.swift#L125)
 <a id="evidence-g1-model-test"></a>
 - **g1-model-test** (test)：[`func testV1CannotSmuggleBoundaryKeyOrSilentlyDowngradeV2(`](../SwiftFunctionProjectTests/ChartSpecificationBoundaryTests.swift#L59)
 <a id="evidence-g1-adapter-test"></a>
@@ -1004,6 +1025,22 @@
 - **axis-presentation-test** (test)：[`func testFourRenderersConsumeIndependentAxisTicksFontsAndFormattedLabels(`](../SwiftFunctionProjectTests/ChartSpecificationAxisPresentationTests.swift#L147)
 <a id="evidence-axis-version-test"></a>
 - **axis-version-test** (test)：[`func testPriorVersionsRejectEveryReservedKeyEvenNullThroughBothDecoders(`](../SwiftFunctionProjectTests/ChartSpecificationAxisPresentationTests.swift#L38)
+<a id="evidence-annotation-schema"></a>
+- **annotation-schema** (schema)：[`public struct ChartPlotLine:`](../SwiftFunctionProject/Charts/Specification/ChartAnnotationSpecification.swift#L44)
+<a id="evidence-annotation-schema-test"></a>
+- **annotation-schema-test** (test)：[`func testV5RoundTripAllLabelEnumsVisibilityAndEmptyArrays(`](../SwiftFunctionProjectTests/ChartSpecificationAnnotationTests.swift#L13)
+<a id="evidence-annotation-adapter-test"></a>
+- **annotation-adapter-test** (test)：[`func testStableAxisAndAnnotationIDsSurviveReorderAndHiddenItemsRemainInSource(`](../SwiftFunctionProjectTests/HYMChartsSpecificationAnnotationTests.swift#L27)
+<a id="evidence-interaction-schema"></a>
+- **interaction-schema** (schema)：[`public struct ChartTooltipSpecification:`](../SwiftFunctionProject/Charts/Specification/ChartInteractionSpecification.swift#L37)
+<a id="evidence-interaction-adapter"></a>
+- **interaction-adapter** (adapter)：[`public struct HYMChartsSpecificationTooltipConfiguration`](../SwiftFunctionProject/Charts/Adapters/HYMChartsSpecificationInteraction.swift#L5)
+<a id="evidence-interaction-test"></a>
+- **interaction-test** (test)：[`func testFourRenderersPreviousRawValuesKeepCurrentHitHeaderG1AndPercentCoordinates(`](../SwiftFunctionProjectTests/HYMChartsSpecificationInteractionTests.swift#L78)
+<a id="evidence-interaction-coding-test"></a>
+- **interaction-coding-test** (test)：[`func testOldVersionsRejectReservedKeysAndDowngradeEvenDisabledDefaults(`](../SwiftFunctionProjectTests/ChartSpecificationInteractionTests.swift#L43)
+<a id="evidence-tooltip-layout-test"></a>
+- **tooltip-layout-test** (test)：[`func testOptInPreservesNativeDefaultsPlotViewportHitAndAutomaticPlacement(`](../SwiftFunctionProjectTests/FixedTooltipLayoutTests.swift#L44)
 
 ## 离线检查与边界
 

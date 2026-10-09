@@ -18,6 +18,9 @@ BATCHES = (
     "docs/evidence/charts-neutral-g1-2026-10-03/screenshots",
     "docs/evidence/charts-neutral-zones-2026-10-09/screenshots",
     "docs/evidence/charts-neutral-axes-2026-10-09/screenshots",
+    "docs/evidence/charts-neutral-annotations-2026-10-09/screenshots",
+    "docs/evidence/charts-neutral-interaction-2026-10-09/screenshots",
+    "docs/evidence/charts-neutral-tooltip-layout-2026-10-09/screenshots",
 )
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 

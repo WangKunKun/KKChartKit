@@ -1,6 +1,8 @@
 # 通用图表模型任务进度与交接
 
-> **2026-10-09 最新入口**：[N1 值轴颜色分区 v3](charts-neutral-zones-task-progress-2026-10-09.md)已验收；[N2 轴展示 v4](charts-neutral-axes-task-progress-2026-10-09.md)已按限定契约验收（419 单元 + 4 相关 UI = 423/423，Release 双宿主 2/2），视觉限制见该进度。下一入口是 N3 值轴标线/色带。G1 v2 保留；G6、旧输入 mapper、第二生产后端未因这两批而完成。下文保留 10 月 3 日历史交接，不作为今天的测试总数。
+> 2026-10-09 后续：[N4 固定顶部提示布局质量](charts-neutral-tooltip-layout-task-progress-2026-10-09.md)新增默认关闭的原生绘图区边界，N4 fixedTop 自动启用。仍为数据覆盖层，不新增 schema 或开放 G6。
+
+> **2026-10-09 最新入口**：[N4 Tooltip／图例 v6](charts-neutral-interaction-task-progress-2026-10-09.md)有限可序列化切片已验收（443 单元 + 6 UI、公共宿主 2、Python 28 全通过），固定顶部提示／顶部图例避让留作质量待办；N1 v3、N2 v4、N3 v5 与 G1 v2 保留。矩阵为 **60 已表达 / 26 待补 / 104 外层 / 7 不承接**。下文保留历史规划／交接；最新验证和下一建议以 N4 进度为准。
 
 > 后续更新：G1 通用边界已进入 schema v2，见[本轮增量进度](charts-neutral-g1-task-progress-2026-10-03.md)。本文的首版/覆盖核对测试结果及“G1 未建模”描述保留为当时快照；当前 API 和支持状态以模型指南及覆盖矩阵为准。
 

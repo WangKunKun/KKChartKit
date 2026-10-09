@@ -1,7 +1,7 @@
 {
   "matrixVersion": 1,
   "asOf": "2026-10-09",
-  "specificationVersion": 4,
+  "specificationVersion": 6,
   "inventory": "docs/charts-legacy-field-inventory.json",
   "evidence": {
     "schema": {
@@ -338,6 +338,46 @@
       "kind": "test",
       "path": "SwiftFunctionProjectTests/ChartSpecificationAxisPresentationTests.swift",
       "anchor": "func testPriorVersionsRejectEveryReservedKeyEvenNullThroughBothDecoders("
+    },
+    "annotation-schema": {
+      "kind": "schema",
+      "path": "SwiftFunctionProject/Charts/Specification/ChartAnnotationSpecification.swift",
+      "anchor": "public struct ChartPlotLine:"
+    },
+    "annotation-schema-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/ChartSpecificationAnnotationTests.swift",
+      "anchor": "func testV5RoundTripAllLabelEnumsVisibilityAndEmptyArrays("
+    },
+    "annotation-adapter-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/HYMChartsSpecificationAnnotationTests.swift",
+      "anchor": "func testStableAxisAndAnnotationIDsSurviveReorderAndHiddenItemsRemainInSource("
+    },
+    "interaction-schema": {
+      "kind": "schema",
+      "path": "SwiftFunctionProject/Charts/Specification/ChartInteractionSpecification.swift",
+      "anchor": "public struct ChartTooltipSpecification:"
+    },
+    "interaction-adapter": {
+      "kind": "adapter",
+      "path": "SwiftFunctionProject/Charts/Adapters/HYMChartsSpecificationInteraction.swift",
+      "anchor": "public struct HYMChartsSpecificationTooltipConfiguration"
+    },
+    "interaction-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/HYMChartsSpecificationInteractionTests.swift",
+      "anchor": "func testFourRenderersPreviousRawValuesKeepCurrentHitHeaderG1AndPercentCoordinates("
+    },
+    "interaction-coding-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/ChartSpecificationInteractionTests.swift",
+      "anchor": "func testOldVersionsRejectReservedKeysAndDowngradeEvenDisabledDefaults("
+    },
+    "tooltip-layout-test": {
+      "kind": "test",
+      "path": "SwiftFunctionProjectTests/FixedTooltipLayoutTests.swift",
+      "anchor": "func testOptInPreservesNativeDefaultsPlotViewportHitAndAutomaticPlacement("
     }
   },
   "capabilities": [
@@ -806,13 +846,13 @@
     },
     {
       "id": "tooltip",
-      "title": "提示开关、布局与逐采样内容",
+      "title": "逐采样提示、动态组名与组级规则",
       "disposition": "schema_gap",
       "nativeSupport": "partial",
       "adapterSupport": "unmodeled",
       "schemaPaths": [],
-      "finding": "原生有 Tooltip、逐行 provider、分组及固定顶部；v1–v4 没有提示语义。逐点表头/动态组名和旧超时不是已有 schema 能力。",
-      "nextAction": "以稳定 sample ID 建立声明式覆盖和显示规则；闭包、图片解析、事件生命周期留适配/运行时层，R3 核对 header/name/hidePoints 索引。",
+      "finding": "v6 已将通用开关/布局/逐系列规则拆到 tooltip-basic；逐采样表头/行名/隐藏点、动态组名和组级 onlyName 仍无对应通用契约。",
+      "nextAction": "R3 核对当前 sample ID 与偏移取值身份、整组行为及旧超时，再设计声明式覆盖；回调/图片解析仍为运行时。",
       "evidence": [
         "tooltip-native",
         "tooltip-options",
@@ -827,7 +867,7 @@
       "nativeSupport": "partial",
       "adapterSupport": "unmodeled",
       "schemaPaths": [],
-      "finding": "Swift 原生 TooltipTheme 支持主题；OC options 仅部分外观，JSON v1–v4 无提示颜色配置。",
+      "finding": "Swift 原生 TooltipTheme 支持主题；OC options 仅部分外观，JSON v1–v6 无提示颜色/字体配置。",
       "nextAction": "统一中立提示文字/背景语义后补两端转换；不可声称现 OC options 已覆盖完整主题。",
       "evidence": [
         "tooltip-theme",
@@ -837,13 +877,23 @@
     {
       "id": "tooltip-offset",
       "title": "提示前值选择",
-      "disposition": "schema_gap",
+      "disposition": "expressed",
       "nativeSupport": "supported",
-      "adapterSupport": "unmodeled",
-      "schemaPaths": [],
-      "finding": "原生偏移/边界政策已有，保持当前命中身份及当前表头；v1–v4 无字段。",
-      "nextAction": "设计可序列化的提示取值偏移及 omit/clamp/current，明确实际时间聚合仍取当前桶。",
+      "adapterSupport": "mapped",
+      "schemaPaths": [
+        "ChartTooltipSpecification.sampleSelection",
+        "ChartTooltipSampleSelection.offset",
+        "ChartTooltipSampleSelection.offsetsBySeriesID",
+        "ChartTooltipSampleSelection.boundaryPolicy"
+      ],
+      "finding": "v6 表达全局/逐稳定系列 ID 的类目槽位偏移与 omit/clamp/current、取值来源标签；保留当前命中/表头/准线与原值，缺测不搜索。聚合桶维持原生当前桶规则。",
+      "nextAction": "R2 将 showPrev 转为 -1 + clamp；不解释成数值距离/时间间隔，不据此开放 G6。",
       "evidence": [
+        "schema",
+        "interaction-schema",
+        "interaction-adapter",
+        "interaction-test",
+        "interaction-coding-test",
         "tooltip-offset",
         "offset-test"
       ]
@@ -895,7 +945,7 @@
         "ChartSpecification.showsLegend",
         "ChartSeriesSpecification.showsInLegend"
       ],
-      "finding": "原生图例支持 itemOverrides/图片/背景，Swift/OC 已有；v1–v4 只支持显隐，未定义资源引用或图例布局。",
+      "finding": "原生逐项图片/符号/背景已有；v6 legend-layout 只覆盖布局与标题，未定义资源引用或这些外观字段。",
       "nextAction": "先定义中立资源 ID 与图例外观，宿主解析图片；不能把 UIImage/provider 写入 JSON。",
       "evidence": [
         "schema",
@@ -923,18 +973,29 @@
     {
       "id": "annotations",
       "title": "标线、色带及文字",
-      "disposition": "schema_gap",
+      "disposition": "expressed",
       "nativeSupport": "supported",
-      "adapterSupport": "unmodeled",
-      "schemaPaths": [],
-      "finding": "原生 G4 的标线/色带、轴绑定、标签样式已实现（含 OC）；v1–v4 无 annotation。旧标线转换忽略 dashStyle 且写死 zIndex=3，声明不等于曾生效。",
-      "nextAction": "首切片限定绑定稳定 valueAxisID 的值轴标线/色带及文字外观；原生不是类目/连续 X 标注能力。固定绘制层次，不承接任意 zIndex。",
+      "adapterSupport": "mapped",
+      "schemaPaths": [
+        "ChartSpecification.plotLines",
+        "ChartSpecification.plotBands",
+        "ChartPlotLine.valueAxisID",
+        "ChartPlotBand.valueAxisID",
+        "ChartAnnotationLabelStyle"
+      ],
+      "finding": "schema v5 已表达有限值轴标线/色带、统一唯一 ID、稳定 valueAxisID、显隐、颜色/线宽/三种线型及独立标签样式；HYM 映射复用 G4 固定层次，保留源身份。v1–v4 拒绝标注键；旧 dashStyle 未生效、zIndex 写死的历史不转化为新语义。",
+      "nextAction": "当前切片不含 X/类目标注、任意 zIndex、自定义字体资源或可执行 formatter；旧输入仍须未来 mapper 明确轴 ID 与线型白名单。",
       "evidence": [
         "native-model",
         "labels-native",
         "annotations-native",
         "annotation-test",
-        "legacy-plot-line"
+        "legacy-plot-line",
+        "annotation-schema",
+        "schema",
+        "adapter",
+        "annotation-schema-test",
+        "annotation-adapter-test"
       ]
     },
     {
@@ -1407,6 +1468,51 @@
         "adapter",
         "migration-plan"
       ]
+    },
+    {
+      "id": "tooltip-basic",
+      "title": "提示开关、布局与逐系列内容",
+      "disposition": "expressed",
+      "nativeSupport": "supported",
+      "adapterSupport": "mapped",
+      "schemaPaths": [
+        "ChartSpecification.tooltip",
+        "ChartTooltipSpecification.layout",
+        "ChartTooltipSpecification.position",
+        "ChartTooltipSpecification.seriesRules"
+      ],
+      "finding": "v6 可表达开关、text/columns、automatic/fixedTop、当前表头模板、零值过滤和稳定系列 ID 行隐藏/标题/隐藏数值。nil 保留宿主运行时；非 nil 完整覆盖已建模内容，图片/provider 与外观保留运行时。 N4 fixedTop 自动限制在绘图区，避开标题/图例；原生开关默认 false，不新增 schema 字段，仍覆盖数据。",
+      "nextAction": "R2 对 tooltipDisable 取反、hideInTooltip 映射 isHidden、hideNameInTooltip 使用空标题；不承诺旧超时或逐采样规则。",
+      "evidence": [
+        "schema",
+        "interaction-schema",
+        "interaction-adapter",
+        "interaction-test",
+        "interaction-coding-test",
+        "tooltip-layout-test"
+      ]
+    },
+    {
+      "id": "legend-layout",
+      "title": "图例布局与稳定系列标题",
+      "disposition": "expressed",
+      "nativeSupport": "supported",
+      "adapterSupport": "mapped",
+      "schemaPaths": [
+        "ChartSpecification.legend",
+        "ChartLegendSpecification.position",
+        "ChartLegendSpecification.titlesBySeriesID"
+      ],
+      "finding": "v6 表达屏幕四方向、行对齐、scroll/expand、最大行数/尺寸、点击显隐与相邻组换行；标题按稳定系列 ID 覆盖，不改变系列顺序或 Tooltip 名称。",
+      "nextAction": "保留 showsLegend/showsInLegend/isVisible；未覆盖符号/图片/背景/动态组标题/业务卡片，不补造旧字段数量。",
+      "evidence": [
+        "schema",
+        "interaction-schema",
+        "interaction-adapter",
+        "interaction-test",
+        "interaction-coding-test",
+        "legend-native"
+      ]
     }
   ],
   "nativeReview": [
@@ -1424,7 +1530,10 @@
     "continuous-domain",
     "reversed-axis",
     "backend-limits",
-    "secondary-grid"
+    "secondary-grid",
+    "tooltip-basic",
+    "tooltip-offset",
+    "legend-layout"
   ],
   "entries": [
     {
@@ -1854,18 +1963,18 @@
     },
     {
       "key": "HMAAChartModel.tooltipPinToTop",
-      "capability": "tooltip",
-      "rule": "原生 fixedTop 已有；schema 未建模，超时/抬手行为另验收。"
+      "capability": "tooltip-basic",
+      "rule": "v6 position=fixedTop；只固定位置，不锁定选择，不承诺旧超时/抬手行为。"
     },
     {
       "key": "HMAAChartModel.tooltipDisable",
-      "capability": "tooltip",
-      "rule": "原生提示开关已有；schema 未建模，不能通过隐藏全部系列模拟。"
+      "capability": "tooltip-basic",
+      "rule": "v6 isEnabled 取反；不通过隐藏系列模拟，回调命中不受影响。"
     },
     {
       "key": "HMAAChartModel.yAxisPlotLines",
       "capability": "annotations",
-      "rule": "需中立标线数组、稳定目标轴与数值；原生 Swift/OC 已支持。"
+      "rule": "v5 plotLines 通过稳定 valueAxisID 绑定值轴；旧输入 mapper 未交付。"
     },
     {
       "key": "HMAAChartModel.nativeTooltip",
@@ -2214,8 +2323,8 @@
     },
     {
       "key": "HMAASeriesElement.hideInTooltip",
-      "capability": "tooltip",
-      "rule": "只过滤提示行，不隐藏绘制或从百分比分母剔除系列。"
+      "capability": "tooltip-basic",
+      "rule": "v6 seriesRules[id].isHidden 只过滤提示行，不改变图形或百分比分母。"
     },
     {
       "key": "HMAASeriesElement.fillAlpha",
@@ -2284,8 +2393,8 @@
     },
     {
       "key": "HMAASeriesElement.hideNameInTooltip",
-      "capability": "tooltip",
-      "rule": "只隐藏提示标题，不删除图例名/系列名。"
+      "capability": "tooltip-basic",
+      "rule": "v6 seriesRules[id].title 设空字符串；仅隐藏系列名，不改图例名/来源说明。"
     },
     {
       "key": "HMAASeriesUtil.doubleWithOriginData:showFabs:fractionDigits:",
@@ -2355,22 +2464,22 @@
     {
       "key": "HMAAPlotLinesElement.color",
       "capability": "annotations",
-      "rule": "标线 stroke 颜色需中立 annotation 字段；原生 Swift/OC 已具备。"
+      "rule": "v5 plotLines[].color 为 sRGB RGBA；nil 保留后端默认。"
     },
     {
       "key": "HMAAPlotLinesElement.dashStyle",
       "capability": "annotations",
-      "rule": "旧标线转换未消费此声明；新原生可配但 schema 未建模，需明确白名单，不继承静默忽略。"
+      "rule": "v5 strokePattern 为 solid/dashed/dotted；旧转换未消费此声明，不继承静默忽略，其他旧枚举仍需 mapper 明确拒绝。"
     },
     {
       "key": "HMAAPlotLinesElement.width",
       "capability": "annotations",
-      "rule": "标线逻辑点线宽；非负有限值。"
+      "rule": "v5 lineWidth 为非负有限逻辑点。"
     },
     {
       "key": "HMAAPlotLinesElement.value",
       "capability": "annotations",
-      "rule": "标线值与绑定值轴共同定义；不是类目下标。"
+      "rule": "v5 value 与稳定 valueAxisID 共同定义；不是类目下标，百分比用逻辑百分数。"
     },
     {
       "key": "HMAAPlotLinesElement.zIndex",
@@ -2380,22 +2489,22 @@
     {
       "key": "HMAAPlotLinesElement.text",
       "capability": "annotations",
-      "rule": "annotation 标签内容；与线条颜色独立。"
+      "rule": "v5 label 内容；nil/空字符串不画标签，不自动追加单位。"
     },
     {
       "key": "HMAAPlotLinesElement.textColor",
       "capability": "annotations",
-      "rule": "annotation 独立 labelStyle.color 原生已支持，schema 未建模。"
+      "rule": "v5 labelStyle.color，与标线颜色独立；nil 继承标注色。"
     },
     {
       "key": "HMAAPlotLinesElement.textDarkColor",
       "capability": "host-appearance",
-      "rule": "先由宿主选出当前外观颜色，再输入待扩展 annotation 样式；解析颜色不等于已支持 annotation。"
+      "rule": "宿主选择当前外观颜色后输入 v5 labelStyle.color；主题自动切换仍为外层职责。"
     },
     {
       "key": "HMAAPlotLinesElement.fontSize",
       "capability": "annotations",
-      "rule": "annotation labelStyle.font 原生已支持，schema 未建模。"
+      "rule": "v5 labelStyle.fontSize 为正有限逻辑点，系统字体九种字重，不含任意字体资源。"
     },
     {
       "key": "HMAAChartManager.series",

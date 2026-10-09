@@ -1,8 +1,12 @@
 # HYMCharts 当前能力清单
 
+> 2026-10-09 后续：[N4 固定顶部提示布局质量](charts-neutral-tooltip-layout-task-progress-2026-10-09.md)新增默认关闭的原生绘图区边界，N4 fixedTop 自动启用。仍为数据覆盖层，不新增 schema 或开放 G6。
+
+> 2026-10-09 当前中立模型入口：[N4 Tooltip／图例 v6](charts-neutral-interaction-task-progress-2026-10-09.md)；核心和适配已接通，验证范围以该进度为准。G6 与旧输入 mapper 未因此完成。
+
 更新：2026-10-03。以当前工作区源码为准；历史 specs/plans 记录设计过程，不代表当前待办。
 
-最新任务入口：[通用模型任务进度与交接](charts-neutral-model-task-progress-2026-10-03.md)。本批最终 384 项单元 + 2 项相关 UI、独立 Release Swift/纯 OC 宿主 2 项均通过；验证范围及未完成项见该交接，不能与下方历史轮次计数混用。
+历史首版任务入口：[通用模型任务进度与交接](charts-neutral-model-task-progress-2026-10-03.md)。本批最终 384 项单元 + 2 项相关 UI、独立 Release Swift/纯 OC 宿主 2 项均通过；验证范围及未完成项见该交接，不能与下方历史轮次计数混用。
 
 2026-10-03 新增独立于绘图库的 [ChartSpecification 通用模型](charts-neutral-model-guide.md)：Foundation 值类型、明确数据/身份/样式、结构化校验、版本化 JSON、适配协议及 HYMCharts 转换、OC 文档快照和同页 Demo。其他第三方适配器及旧 HMAA 输入 mapper 尚未实现；此批不将正式旧模型迁移 R2 标为完成。
 
