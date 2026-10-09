@@ -23,8 +23,27 @@ enum DemoProperty {
         [enabled("自定义 \(label)", value, default: .systemBlue)] + (value.wrappedValue == nil ? [] : [.color(label: label, value: optional(value, default: .systemBlue))])
     }
     static func font(_ label: String, _ value: Binding<UIFont>) -> [Item] {
-        [number(label + " 字号", Binding(get: { value.wrappedValue.pointSize }, set: { value.wrappedValue = value.wrappedValue.withSize($0) }), 8...40),
-         .picker(label: label + " 字体", selection: Binding(get: { value.wrappedValue.fontName }, set: { value.wrappedValue = UIFont(name: $0, size: value.wrappedValue.pointSize) ?? value.wrappedValue }), options: Array(Set([value.wrappedValue.fontName, UIFont.systemFont(ofSize: 12).fontName, UIFont.boldSystemFont(ofSize: 12).fontName, UIFont.monospacedSystemFont(ofSize: 12, weight: .regular).fontName])).sorted())]
+        // .SFUI-* 是系统私有字体名，不能通过 UIFont(name:) 可靠重建（会退回 Times）。
+        // 保存 UIFont/descriptor，并使用公共工厂创建系统字体；调字号仍保留字体类型。
+        let size = value.wrappedValue.pointSize
+        var choices: [(String, UIFont)] = [
+            ("系统常规", .systemFont(ofSize: size)),
+            ("系统半粗", .systemFont(ofSize: size, weight: .semibold)),
+            ("系统粗体", .boldSystemFont(ofSize: size)),
+            ("系统等宽", .monospacedSystemFont(ofSize: size, weight: .regular))
+        ]
+        if !choices.contains(where: { $0.1.isEqual(value.wrappedValue) }) {
+            choices.append(("当前字体 " + value.wrappedValue.fontName, value.wrappedValue))
+        }
+        let selection = Binding<String>(get: {
+            choices.first { $0.1.withSize(value.wrappedValue.pointSize).isEqual(value.wrappedValue) }?.0 ?? choices[0].0
+        }, set: { name in
+            if let font = choices.first(where: { $0.0 == name })?.1 {
+                value.wrappedValue = font.withSize(value.wrappedValue.pointSize)
+            }
+        })
+        return [number(label + " 字号", Binding(get: { value.wrappedValue.pointSize }, set: { value.wrappedValue = value.wrappedValue.withSize($0) }), 8...40),
+                .picker(label: label + " 字体", selection: selection, options: choices.map { $0.0 })]
     }
     static func insets(_ label: String, _ value: Binding<UIEdgeInsets>) -> [Item] {
         [number(label + " 上", value.top), number(label + " 左", value.left), number(label + " 下", value.bottom), number(label + " 右", value.right)]
@@ -54,5 +73,41 @@ enum DemoProperty {
             items += [.color(label: "阴影颜色", value: s.color), number("偏移 X", s.offsetX, -10...10), number("偏移 Y", s.offsetY, -10...10), number("模糊半径", s.blurRadius, 0...12), number("透明度", s.opacity, 0...1, step: 0.05)]
         }
         return items
+    }
+}
+
+/// 精确整数输入：完成编辑时提交，避免逐字输入“123”时中间的“1”被下限钳制。
+struct DemoIntegerInput: View {
+    let label: String
+    @Binding var value: Int
+    let range: ClosedRange<Int>
+    @State private var draft = ""
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label).font(.caption).foregroundStyle(.secondary)
+            HStack {
+                TextField(label, text: $draft).keyboardType(.numbersAndPunctuation)
+                    .textInputAutocapitalization(.never).autocorrectionDisabled()
+                    .focused($focused).submitLabel(.done)
+                    .accessibilityIdentifier("demo.input." + label)
+                    .onSubmit { commit(); focused = false }
+                Button("应用") { commit(); focused = false }
+                    .buttonStyle(.bordered).accessibilityIdentifier("demo.apply." + label)
+            }
+        }
+        .onAppear { draft = String(value) }
+        .onChange(of: value) { draft = String($0) }
+        .onChange(of: focused) { if !$0 { commit() } }
+    }
+
+    static func resolved(_ text: String, previous: Int, range: ClosedRange<Int>) -> Int {
+        guard let parsed = Int(text.trimmingCharacters(in: .whitespacesAndNewlines)) else { return previous }
+        return min(range.upperBound, max(range.lowerBound, parsed))
+    }
+    private func commit() {
+        value = Self.resolved(draft, previous: value, range: range)
+        draft = String(value)
     }
 }

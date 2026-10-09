@@ -17,12 +17,33 @@ enum DemoThemeFields {
         return items
     }
 
+    static func annotationItems(_ prefix: String, _ v: Binding<CartesianAnnotationLabelStyle>) -> [ChartDemoPanel.Item] {
+        var items = DemoProperty.color(prefix + "文字颜色", v.color)
+        items += DemoProperty.color(prefix + "文字背景", v.backgroundColor)
+        items += [DemoProperty.enabled(prefix + "自定义字体", v.font, default: UIFont.systemFont(ofSize: 12))]
+        if v.wrappedValue.font != nil {
+            items += DemoProperty.font(prefix + "字体", DemoProperty.optional(v.font, default: UIFont.systemFont(ofSize: 12)))
+        }
+        items += [DemoProperty.choice(prefix + "水平对齐", v.alignment),
+                  DemoProperty.choice(prefix + "垂直对齐", v.verticalAlignment),
+                  DemoProperty.number(prefix + "偏移 X", v.offset.width, -100...100),
+                  DemoProperty.number(prefix + "偏移 Y", v.offset.height, -100...100),
+                  DemoProperty.choice(prefix + "越界策略", v.bounds),
+                  .button(label: prefix + "恢复默认文字样式") { v.wrappedValue = .init() }]
+        return items
+    }
+
     static func lineSamplingItems(_ v: Binding<LineChartSampling?>) -> [ChartDemoPanel.Item] {
         var items = [DemoProperty.enabled("启用 Min/Max 降采样（非堆叠直线）", v, default: LineChartSampling())]
         if v.wrappedValue != nil {
             let c = DemoProperty.optional(v, default: LineChartSampling())
+            items.append(DemoProperty.enabled("按目标点数采样 targetPointCount", c.targetPointCount, default: 200))
+            if c.wrappedValue.targetPointCount != nil {
+                items.append(.integerInput(label: "每系列目标绘制点数 targetPointCount",
+                    value: DemoProperty.optional(c.targetPointCount, default: 200), range: 2...3000))
+            }
             items += [DemoProperty.number("分组宽度 bucketWidth（pt）", c.bucketWidth, 1...12, step: 0.5),
-                DemoProperty.integer("可见有效点门槛 minimumVisiblePoints", c.minimumVisiblePoints, 2...3000),
+                DemoProperty.integer("启动门槛 minimumVisiblePoints（非保留点数）", c.minimumVisiblePoints, 2...3000),
                 .toggle(label: "密集时隐藏标记 hidesDenseMarkers", value: c.hidesDenseMarkers),
                 .toggle(label: "密集时隐藏标签 hidesDenseDataLabels", value: c.hidesDenseDataLabels)]
         }
@@ -57,13 +78,21 @@ enum DemoThemeFields {
         items += [DemoProperty.number("pointHoleRadius", v.pointHoleRadius, 0...40)]
         items += [.color(label: "pointHoleColor", value: v.pointHoleColor)]
         items += [.toggle(label: "showsArea", value: v.showsArea)]
+        items += [DemoProperty.choice("stackedAreaBoundaryMode 堆叠面积边界", v.stackedAreaBoundaryMode)]
         items += [.toggle(label: "showsDataLabels", value: v.showsDataLabels)]
         items += [DemoProperty.number("dataLabelFontSize", v.dataLabelFontSize, 6...40)]
         items += DemoProperty.color("dataLabelColor", v.dataLabelColor)
+        items += DemoProperty.color("dataLabelBackgroundColor", v.dataLabelBackgroundColor)
+        items += [.toggle(label: "dataLabelAvoidsOverlap 标签避让", value: v.dataLabelAvoidsOverlap)]
         items += [DemoProperty.choice("dataLabelPosition", v.dataLabelPosition)]
         items += [DemoProperty.integer("dataLabelMaxMarkCount", v.dataLabelMaxMarkCount, 0...1000)]
         items += [.toggle(label: "showsEntranceAnimation", value: v.showsEntranceAnimation)]
         items += [.toggle(label: "showsTooltipOnHit", value: v.showsTooltipOnHit)]
+        items += [.toggle(label: "selection 主体选中高亮", value: v.selection.isEnabled),
+                  .color(label: "selection 高亮颜色", value: v.selection.color),
+                  DemoProperty.number("selection 边框宽度", v.selection.lineWidth, 0...20),
+                  DemoProperty.number("selection 填充透明度", v.selection.fillOpacity, 0...1, step: 0.05),
+                  DemoProperty.number("selection 点环半径", v.selection.pointRadius, 1...30)]
         items += [DemoProperty.enabled("固定间距 columnSpacing（pt）", v.columnSpacing, default: CartesianColumnSpacing(columnWidth: 12))]
         if v.columnSpacing.wrappedValue != nil {
             let spacing = DemoProperty.optional(v.columnSpacing, default: CartesianColumnSpacing(columnWidth: 12))
@@ -163,6 +192,7 @@ enum DemoThemeFields {
         items += [DemoProperty.enabled("自定义 selectionBorderCornerRadius", v.selectionBorderCornerRadius, default: 0.5)]
         if v.selectionBorderCornerRadius.wrappedValue != nil { items.append(DemoProperty.number("selectionBorderCornerRadius", DemoProperty.optional(v.selectionBorderCornerRadius, default: 0.5), 0...20, step: 0.05)) }
         items += [.toggle(label: "showsTooltipOnHit", value: v.showsTooltipOnHit)]
+
         return items
     }
     static func items(_ v: Binding<HYMChartTooltipTheme>) -> [ChartDemoPanel.Item] {
@@ -178,6 +208,10 @@ enum DemoThemeFields {
         items += DemoProperty.color("shadowColor", v.shadowColor)
         items += [.toggle(label: "showsAnimation", value: v.showsAnimation)]
         items += [DemoProperty.number("gap", v.gap, 0...40)]
+        items += [.picker(label: "position", selection: Binding(get: { v.wrappedValue.position.rawValue }, set: { v.wrappedValue.position = HYMChartTooltipPosition(rawValue: $0) ?? .automatic }), options: HYMChartTooltipPosition.allCases.map(\.rawValue)),
+                  DemoProperty.number("offset.x", v.offset.x, -100...100),
+                  DemoProperty.number("offset.y", v.offset.y, -100...100),
+                  DemoProperty.number("fixedTopInset", v.fixedTopInset, 0...40)]
         return items
     }
     static func items(_ v: Binding<ChartLegendConfiguration>) -> [ChartDemoPanel.Item] {
@@ -197,7 +231,8 @@ enum DemoThemeFields {
         items += [DemoProperty.number("maxHeight", v.maxHeight, 40...400)]
         items += [DemoProperty.number("maxWidth", v.maxWidth, 40...400)]
         items += DemoProperty.size("minimumPlotSize", v.minimumPlotSize, 0...200)
-        items += [.toggle(label: "allowsToggling", value: v.allowsToggling)]
+        items += [.toggle(label: "allowsToggling", value: v.allowsToggling),
+                  .toggle(label: "业务组变化时另起一行", value: v.startsNewRowPerGroup)]
         return items
     }
 }

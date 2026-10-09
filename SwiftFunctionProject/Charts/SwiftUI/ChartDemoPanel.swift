@@ -2,7 +2,7 @@ import SwiftUI
 import UIKit
 
 /// demo 专用实时属性面板（规格 §8.3）：声明式描述属性项，自动生成控件。
-/// 变更经 Binding 直改 demo 的 @State，驱动图表 `configure` 重绘——
+/// 变更经 Binding 直改 demo 的 @State，驱动图表 `update` 重绘——
 /// 面板即数据流的压力测试工具。不进入 SDK API 承诺面。
 struct ChartDemoPanel: View {
     struct DemoSection: Identifiable {
@@ -14,6 +14,7 @@ struct ChartDemoPanel: View {
     enum Item {
         case slider(label: String, value: Binding<Double>,
                    range: ClosedRange<Double>, step: Double = 1)
+        case integerInput(label: String, value: Binding<Int>, range: ClosedRange<Int>)
         case stepper(label: String, value: Binding<Double>, step: Double)
         case toggle(label: String, value: Binding<Bool>)
         case picker(label: String, selection: Binding<String>, options: [String])
@@ -21,6 +22,8 @@ struct ChartDemoPanel: View {
         case date(label: String, value: Binding<Date>)
         case textField(label: String, value: Binding<String>)
         case button(label: String, action: () -> Void)
+        case note(label: String)
+        indirect case availability(Item, reason: String, enabled: Bool)
     }
 
     let sections: [DemoSection]
@@ -47,17 +50,27 @@ struct ChartDemoPanel: View {
     @ViewBuilder
     private func row(_ item: Item) -> some View {
         switch item {
+        case .availability(let control, let reason, let enabled):
+            VStack(alignment: .leading, spacing: 4) {
+                AnyView(row(control)).disabled(!enabled)
+                Text(reason).font(.caption).foregroundStyle(.secondary)
+                    .accessibilityIdentifier("demo.rule." + control.label)
+            }
+        case .note(let label):
+            Text(label).font(.caption).foregroundStyle(.secondary)
         case .slider(let label, let value, let range, let step):
             VStack(alignment: .leading, spacing: 2) {
                 HStack {
                     Text(label)
                     Spacer()
-                    Text("\(value.wrappedValue, specifier: step < 1 ? "%.1f" : "%.0f")")
+                    Text("\(value.wrappedValue, specifier: step < 0.1 ? "%.2f" : step < 1 ? "%.1f" : "%.0f")")
                         .foregroundStyle(.secondary)
                         .monospacedDigit()
                 }
                 Slider(value: value, in: range, step: step)
             }
+        case .integerInput(let label, let value, let range):
+            DemoIntegerInput(label: label, value: value, range: range)
         case .stepper(let label, let value, let step):
             Stepper("\(label)：\(value.wrappedValue, specifier: "%.0f")",
                     value: value, step: step)
@@ -83,6 +96,7 @@ struct ChartDemoPanel: View {
             VStack(alignment: .leading) {
                 Text(label).font(.caption).foregroundStyle(.secondary)
                 TextField(label, text: value).textInputAutocapitalization(.never).autocorrectionDisabled()
+                    .accessibilityIdentifier("demo.input." + label)
             }
         case .button(let label, let action):
             Button(label, action: action)
@@ -112,8 +126,16 @@ extension ChartDemoPanel {
 extension ChartDemoPanel.Item {
     var label: String {
         switch self {
-        case .slider(let label, _, _, _), .stepper(let label, _, _), .toggle(let label, _),
-             .picker(let label, _, _), .color(let label, _), .date(let label, _), .textField(let label, _), .button(let label, _): return label
+        case .integerInput(let label, _, _), .slider(let label, _, _, _), .stepper(let label, _, _), .toggle(let label, _),
+             .note(let label), .picker(let label, _, _), .color(let label, _), .date(let label, _), .textField(let label, _), .button(let label, _): return label
+        case .availability(let item, _, _): return item.label
         }
     }
+}
+
+// 测试和面板共用可用性元数据；禁用不会清空原配置，恢复条件后继续生效。
+extension ChartDemoPanel.Item {
+    var control: Self { if case .availability(let item, _, _) = self { return item.control }; return self }
+    var isEnabled: Bool { if case .availability(_, _, let enabled) = self { return enabled }; return true }
+    var reason: String? { if case .availability(_, let reason, _) = self { return reason }; return nil }
 }

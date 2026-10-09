@@ -262,7 +262,7 @@ import SwiftUI
         }
     }
 
-    func testCombinedSecondaryAxisUsesItsDomainAndColumnsIgnoreZones() throws {
+    func testCombinedSecondaryAxisUsesItsDomainAndColumnsApplyZones() throws {
         var source = model(config(.y, 150, fill: true))
         source.series[0].data = [100, 200, 300]; source.series[0].kind = .areaspline
         source.series[0].yAxisIndex = 1
@@ -275,7 +275,7 @@ import SwiftUI
         XCTAssertEqual(try XCTUnwrap(copies.first?.superlayer).frame.minY, boundary, accuracy: 0.001)
         let before = image(view).pngData()
         source.series[0].colorZones = nil; view.update(model: source); view.layoutIfNeeded()
-        XCTAssertEqual(image(view).pngData(), before)
+        XCTAssertNotEqual(image(view).pngData(), before)
         view.setSeriesVisible(false, for: "power"); view.layoutIfNeeded()
         XCTAssertTrue(renderer.lines.seriesLayer.sublayers?.isEmpty ?? true)
         view.setSeriesVisible(true, for: "power"); view.layoutIfNeeded()
@@ -345,6 +345,7 @@ import SwiftUI
     func testDemoBindingsCoverThresholdColorsFillAndOff() throws {
         var settings = DemoSeriesSettings(name: "Zones")
         let binding = Binding(get: { settings }, set: { settings = $0 })
+        settings.kind = .line
         for kind in [CartesianDemoKind.line, .combined] {
             let items = DemoSeriesSettings.items(binding, kind: kind)
             guard case .picker(_, let mode, _) = items.first(where: { $0.label == "颜色分区 zones" }) else { return XCTFail() }
@@ -359,7 +360,7 @@ import SwiftUI
             mode.wrappedValue = "关闭"; XCTAssertNil(settings.colorZones)
         }
         for kind in [CartesianDemoKind.column, .bar] {
-            XCTAssertFalse(DemoSeriesSettings.items(binding, kind: kind).contains { $0.label == "颜色分区 zones" })
+            XCTAssertTrue(DemoSeriesSettings.items(binding, kind: kind).contains { $0.label == "颜色分区 zones" })
         }
     }
 }
