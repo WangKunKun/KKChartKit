@@ -23,10 +23,25 @@ public struct LegendItemStyle {
     public var title: String?
     public var symbol: ChartLegendSymbol?
     public var symbolColor: UIColor?
-    public init(title: String? = nil, symbol: ChartLegendSymbol? = nil, symbolColor: UIColor? = nil) {
+    /// 图片在 symbolSize 内等比显示，template 图片使用 symbolColor。
+    public var image: UIImage?
+    /// 系列隐藏时优先使用；nil 沿用 image。
+    public var hiddenImage: UIImage?
+    /// 自定义符号优先于图片与内置形状。主线程每次图例更新调用，参数为系列可见性。
+    /// 返回专属于该项的 UIView（可复用）；nil 回退图片/形状。符号固定在 symbolSize 内，点击由图例处理。
+    public var symbolViewProvider: ((Bool) -> UIView?)?
+    public var backgroundColor: UIColor?
+    public var cornerRadius: CGFloat = 0
+    public init(title: String? = nil, symbol: ChartLegendSymbol? = nil, symbolColor: UIColor? = nil,
+                image: UIImage? = nil, hiddenImage: UIImage? = nil,
+                backgroundColor: UIColor? = nil, cornerRadius: CGFloat = 0,
+                symbolViewProvider: ((Bool) -> UIView?)? = nil) {
         self.title = title
         self.symbol = symbol
         self.symbolColor = symbolColor
+        self.image = image; self.hiddenImage = hiddenImage
+        self.backgroundColor = backgroundColor; self.cornerRadius = cornerRadius
+        self.symbolViewProvider = symbolViewProvider
     }
 }
 
@@ -51,6 +66,8 @@ public struct ChartLegendConfiguration {
     public var maxWidth: CGFloat = 140
     public var minimumPlotSize = CGSize(width: 80, height: 80)
     public var allowsToggling = true
+    /// 相邻项的业务 groupID 改变时另起一行；不重排 legendOrder，不改变数学堆叠。
+    public var startsNewRowPerGroup = false
     /// key 必须是唯一、稳定的 series.id。
     public var itemOverrides: [String: LegendItemStyle] = [:]
     public init() {}
@@ -63,6 +80,8 @@ struct ChartLegendItem {
     let color: UIColor
     let dashStyle: LineDashStyle
     let isVisible: Bool
+    var groupID: String? = nil
+    var style = LegendItemStyle()
 
     static func orderedSeries(in model: CartesianChartModel) -> [CartesianSeriesElement] {
         model.series.enumerated().filter { $0.element.showsInLegend }.sorted {
@@ -106,11 +125,12 @@ public final class ChartLegendMeasurer {
     ///   左右图例还会受坐标轴宽度影响，调用方应传入实际可分配的图例宽度预算。
     public static func measure(model: CartesianChartModel, theme: CartesianChartTheme,
                                availableWidth: CGFloat) -> ChartLegendMeasurement {
-        let titles = ChartLegendItem.orderedSeries(in: model).map {
+        let series = ChartLegendItem.orderedSeries(in: model)
+        let titles = series.map {
             theme.legend.itemOverrides[$0.id]?.title ?? $0.name
         }
         return ChartLegendContentLayout.make(titles: titles, configuration: theme.legend,
-                                              availableWidth: availableWidth).measurement
+                                              availableWidth: availableWidth, groupIDs: series.map(\.groupID)).measurement
     }
 }
 
@@ -124,6 +144,7 @@ private struct ChartLegendContentLayout {
 
     static func make(titles: [String], configuration c: ChartLegendConfiguration,
                      availableWidth: CGFloat,
+                     groupIDs: [String?] = [],
                      maximumHeight: CGFloat = .greatestFiniteMagnitude) -> ChartLegendContentLayout {
         let empty = ChartLegendContentLayout(measurement: .zero, itemFrames: [])
         guard c.isEnabled, !titles.isEmpty, availableWidth.isFinite, availableWidth > 0 else { return empty }
@@ -141,9 +162,11 @@ private struct ChartLegendContentLayout {
         var x: CGFloat = 0
         var y: CGFloat = 0
         var rowStart = 0
-        for naturalWidth in itemWidths {
+        for (index, naturalWidth) in itemWidths.enumerated() {
             let itemWidth = min(width, naturalWidth)
-            if x > 0 && (side || x + itemWidth > width) {
+            let newGroup = c.startsNewRowPerGroup && index > 0 && groupIDs.count == itemWidths.count
+                && groupIDs[index] != groupIDs[index - 1]
+            if x > 0 && (side || newGroup || x + itemWidth > width) {
                 rows.append(rowStart..<frames.count)
                 rowStart = frames.count
                 y += rowHeight + spacing
@@ -198,6 +221,7 @@ struct ChartLegendLayout {
         let heightBudget = side ? available.height : max(0, plot.height - max(0, c.minimumPlotSize.height) - gap)
         let content = ChartLegendContentLayout.make(titles: items.map(\.title), configuration: c,
                                                      availableWidth: side ? min(widthBudget, available.width) : available.width,
+                                                     groupIDs: items.map(\.groupID),
                                                      maximumHeight: heightBudget)
         guard !content.itemFrames.isEmpty else { return empty }
         var frame = CGRect(origin: available.origin, size: content.measurement.size)
@@ -266,73 +290,5 @@ final class ChartLegendView: UIScrollView {
     @objc private func tapped(_ button: ChartLegendButton) {
         guard let item = button.item else { return }
         onToggle?(item.id, !item.isVisible)
-    }
-}
-
-final class ChartLegendButton: UIControl {
-    private(set) var item: ChartLegendItem?
-    private let label = UILabel()
-    private let symbolLayer = CAShapeLayer()
-    private let markerLayer = CAShapeLayer()
-    private var configuration = ChartLegendConfiguration()
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        addSubview(label)
-        layer.addSublayer(symbolLayer)
-        layer.addSublayer(markerLayer)
-        isAccessibilityElement = true
-    }
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
-
-    func configure(item: ChartLegendItem, configuration: ChartLegendConfiguration) {
-        self.item = item
-        self.configuration = configuration
-        label.text = item.title
-        label.font = configuration.font
-        label.textColor = configuration.textColor
-        label.lineBreakMode = .byTruncatingTail
-        alpha = item.isVisible ? 1 : min(1, max(0, configuration.hiddenAlpha))
-        isEnabled = configuration.allowsToggling
-        accessibilityLabel = item.title
-        accessibilityValue = item.isVisible ? "已显示" : "已隐藏"
-        accessibilityHint = configuration.allowsToggling ? "双击切换系列显示" : nil
-        accessibilityTraits = configuration.allowsToggling ? .button : .staticText
-        if item.isVisible { accessibilityTraits.insert(.selected) }
-        setNeedsLayout()
-    }
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        guard let item else { return }
-        let w = min(max(0, configuration.symbolSize.width), bounds.width)
-        let h = min(max(0, configuration.symbolSize.height), bounds.height)
-        let rect = CGRect(x: 0, y: (bounds.height - h) / 2, width: w, height: h)
-        let labelX = min(bounds.width, w + max(0, configuration.symbolTextSpacing))
-        label.frame = CGRect(x: labelX, y: 0, width: max(0, bounds.width - labelX), height: bounds.height)
-        symbolLayer.path = nil
-        markerLayer.path = nil
-        symbolLayer.fillColor = item.color.cgColor
-        symbolLayer.strokeColor = nil
-        symbolLayer.lineDashPattern = nil
-        markerLayer.fillColor = item.color.cgColor
-        let center = CGPoint(x: rect.midX, y: rect.midY)
-        switch item.symbol {
-        case .rectangle: symbolLayer.path = UIBezierPath(rect: rect).cgPath
-        case .roundedRectangle: symbolLayer.path = UIBezierPath(roundedRect: rect, cornerRadius: 3).cgPath
-        case .marker(let marker): symbolLayer.path = marker.path(center: center, radius: min(w, h) / 2)
-        case .line, .lineWithMarker:
-            let path = UIBezierPath()
-            path.move(to: CGPoint(x: rect.minX, y: rect.midY))
-            path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
-            symbolLayer.path = path.cgPath
-            symbolLayer.strokeColor = item.color.cgColor
-            symbolLayer.fillColor = nil
-            symbolLayer.lineWidth = 2
-            symbolLayer.lineDashPattern = item.dashStyle.dashPattern
-            if case .lineWithMarker(let marker) = item.symbol {
-                markerLayer.path = marker.path(center: center, radius: min(w, h) / 2)
-            }
-        }
     }
 }

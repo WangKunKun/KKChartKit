@@ -54,16 +54,20 @@ public struct HYMChartTooltipTextOptions: Equatable {
     public var valueSuffix: String?
     /// 数值固定小数位数；nil = 自动（整数无小数、非整数最多 2 位去尾零）。
     public var valueDecimals: Int?
+    /// 仅轴系命中使用；默认保留平铺提示及所有数据行。
+    public var cartesian: CartesianTooltipOptions
 
     public init(header: String? = nil,
                 valueSuffix: String? = nil,
-                valueDecimals: Int? = nil) {
+                valueDecimals: Int? = nil,
+                cartesian: CartesianTooltipOptions = .init()) {
         self.header = header
         self.valueSuffix = valueSuffix
         self.valueDecimals = valueDecimals
+        self.cartesian = cartesian
     }
 
-    /// 是否全默认（此时直接回落 target 自带格式，零开销）
+    /// 通用文本模板是否默认；轴系业务分组在格式化入口独立应用。
     public var isDefault: Bool { header == nil && valueSuffix == nil && valueDecimals == nil }
 
     /// 按模板格式化数值：decimals 固定位数；nil 自动（同数据标签默认：整型不带小数、非整型两位去尾零）

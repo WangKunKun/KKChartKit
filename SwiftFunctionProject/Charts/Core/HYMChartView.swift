@@ -103,6 +103,11 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
     /// 内置弹窗文本模板（表头 {key} / 数值后缀 / 固定小数位）。
     /// 命中 target 实现 HYMChartTooltipDataSource 时生效，否则回落 target.tooltipText 固定格式。
     public var tooltipTextOptions = HYMChartTooltipTextOptions()
+    /// 轴系内置提示的结构化展示；默认保持多行文本，逐点规则同时适用于单点与共享提示。
+    /// 修改后下一次命中生效；需要立即清除旧展示时调用 update(model:theme:)。
+    public var cartesianTooltipPresentation = CartesianTooltipPresentation()
+    /// 内置轴系提示的取值索引策略；偏移不修改原始命中、表头或准线。
+    public var cartesianTooltipSampleSelection = CartesianTooltipSampleSelection()
     /// 点击按 X 类目取**整列**数据（shared tooltip，Highcharts 同款）。
     /// - `nil`（默认，自动）：多系列图表开（整列对比信息密度最高）、单系列关（逐点+吸附更直观）；
     /// - `true`：强制整列；`false`：强制逐点。
@@ -290,7 +295,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
         var view = touch.view
         while let current = view, current !== self {
-            if current is ChartLegendView { return false }
+            if current is ChartLegendView || current is HYMChartTooltip { return false }
             view = current.superview
         }
         return true
@@ -306,9 +311,12 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
         controlling.showCategoryRange(range)
     }
 
-    /// 播放入场动画（幂等，可重复调用）
+    /// 播放入场动画（幂等，可重复调用）；清除旧选择、准线和提示，避免新旧几何混用。
     public func playEntranceAnimation() {
         guard model != nil, theme != nil else { return }
+        renderer.applySelection(nil)
+        hideCrosshair()
+        tooltipController?.hide(animated: false)
         pendingAnimation = true
         setNeedsLayout()   // 触发 layoutSubviews → performEntranceAnimation
     }
@@ -331,6 +339,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
                             bounds: bounds,
                             center: CGPoint(x: bounds.midX, y: bounds.midY)))
         panGesture.isEnabled = isZoomEnabled || automaticPanAxis != nil
+        tooltipController?.relayout(in: bounds)
         if pendingAnimation {
             pendingAnimation = false
             performEntranceAnimation()
@@ -448,6 +457,18 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
         (renderer as? HYMChartXAxisZoomable)?.xAxisViewport
     }
 
+    /// 内部 Demo 诊断订阅，不暴露 renderer，也不改变 SDK 命中/交互 API。
+    func observeLineSampling(_ handler: @escaping ([LineSamplingStatistics]) -> Void) {
+        observeLineDiagnostics { statistics, _, _ in handler(statistics) }
+    }
+
+    func observeLineDiagnostics(_ handler: @escaping ([LineSamplingStatistics], Set<Int>, Set<Int>) -> Void) {
+        let line = (renderer as? LineChartRenderer) ?? (renderer as? CombinedChartRenderer)?.lines
+        line?.onSamplingStatistics = { [weak line] statistics in
+            handler(statistics, line?.divergingBoundarySeries ?? [], line?.divergingLinearFallbackSeries ?? [])
+        }
+    }
+
     /// 供 @testable 验证容器更新后的实际 renderer 状态。
     var rendererForTesting: Renderer { renderer }
 
@@ -462,6 +483,8 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
     /// 自动档（nil）：单系列（整列只有一条数据）回落逐点+吸附，多系列才整列。
     /// tap 与滑动选中（drag）共用：drag 更新不重播淡入（弹窗跟手逐列移动，不闪动）。
     private func handleSharedIfActive(at p: CGPoint, gesture: HYMChartGesture) -> Bool {
+        // 外部弹窗需要单点 context，不能被 shared 提前消费掉事件。
+        guard popupContentProvider == nil, onHitLocated == nil else { return false }
         guard let shared = (renderer as? HYMChartSharedHitProvider)?.sharedHit(at: p) else { return false }
         let entryCount = (shared.target as? CartesianSharedHitTarget)?.entries.count ?? 0
         let useShared = isSharedTooltipOnTapEnabled ?? (entryCount > 1)
@@ -477,14 +500,11 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
                       : [shared.crosshair])
         // popup / onHitLocated 模式沿用逐点 target 的外部链路；shared 组合文本走内置 tooltip
         if popupContentProvider == nil && onHitLocated == nil {
-            if let text = formattedTooltipText(for: shared.target) {
-                ensureTooltipController().show(anchor: shared.anchor.frame, text: text,
-                                               in: bounds,
-                                               preferred: shared.anchor.preferredPlacements,
-                                               animated: gesture != .drag)
-            } else {
+            guard showsTooltipOnHit, (theme as? CartesianChartTheme)?.showsTooltipOnHit != false else {
                 tooltipController?.hide()
+                return true
             }
+            showBuiltinTooltip(for: shared.target, anchor: shared.anchor, animated: gesture != .drag)
         }
         return true
     }
@@ -598,6 +618,8 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
                 }
                 return
             }
+            renderer.applySelection(nil)
+            tooltipController?.hide(animated: false)
             hideCrosshair()   // 拖视口：准线所属视口已失效
             let total = gr.translation(in: self)
             let dx = total.x - lastPanTranslation.x
@@ -610,6 +632,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
                 yz.panYAxis(screenDeltaY: dy, allowsRubberBand: isRubberBandEnabled)
             }
         case .ended, .cancelled:
+            if gr.state == .cancelled { renderer.applySelection(nil); hideCrosshair(); tooltipController?.hide(animated: false) }
             guard !panIsHighlightMode else { return }
             if isRubberBandEnabled { reboundIfNeeded() }   // 越界 → 回弹优先（不叠加惯性）
             if !isRebounding, isDragDecelerationEnabled, gr.state == .ended,
@@ -709,6 +732,7 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
     private func finishEntranceAnimationIfNeeded() {
         animator.stop()
         decelAnimator.stop()
+        renderer.applySelection(nil)
         hideCrosshair()
         pendingAnimation = false
         CATransaction.begin()
@@ -727,12 +751,25 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
         return c
     }
 
+    /// 解析当前 renderer 的取值策略并构造轴系提示快照，供外部 UI 复用。
+    /// 需先完成 configure/layout；非轴系 target 返回 nil。UI 与 provider 在主线程使用。
+    public func cartesianTooltipContent(for target: any HYMChartHitTarget) -> CartesianTooltipContent? {
+        guard let source = target as? CartesianHitDataSource else { return nil }
+        let data = source.chartData
+        guard !data.isEmpty else { return nil }
+        let samples = (renderer as? CartesianTooltipSampleProviding)?.tooltipSamples(
+            for: data, selection: cartesianTooltipSampleSelection)
+            ?? data.map { CartesianTooltipSample(hitDatum: $0, displayedDatum: $0) }
+        return CartesianTooltipContent.make(samples: samples, options: tooltipTextOptions,
+            presentation: cartesianTooltipPresentation,
+            header: (target as? HYMChartTooltipDataSource)?.tooltipHeaderKey)
+    }
+
     /// 按文本模板组装弹窗内容：target 提供结构化行 + options 配置（表头/后缀/小数位）；
     /// 模板未配置或 target 未实现数据源 → 回落 target.tooltipText 固定格式。
     func formattedTooltipText(for target: HYMChartHitTarget) -> String? {
         if let source = target as? CartesianHitDataSource, !source.chartData.isEmpty {
-            return CartesianDatumText.text(source.chartData, options: tooltipTextOptions,
-                header: (target as? HYMChartTooltipDataSource)?.tooltipHeaderKey)
+            return cartesianTooltipContent(for: target)?.text
         }
         guard !tooltipTextOptions.isDefault,
               let dataSource = target as? HYMChartTooltipDataSource else {
@@ -759,14 +796,30 @@ public final class HYMChartView<Renderer: HYMChartRenderer>: UIView, UIGestureRe
         if onHitLocated != nil { tooltipController?.hide(); return }   // 外部接管弹窗 → 跳过内置
         guard showsTooltipOnHit else { tooltipController?.hide(); return }
         guard let target,
-              let text = formattedTooltipText(for: target),
               let anchor = renderer.tooltipAnchor(for: target) else {
             tooltipController?.hide()
             return
         }
-        ensureTooltipController().show(anchor: anchor.frame, text: text,
-                                       in: bounds, preferred: anchor.preferredPlacements,
-                                       animated: animated)
+        showBuiltinTooltip(for: target, anchor: anchor, animated: animated)
+    }
+
+    private func showBuiltinTooltip(for target: HYMChartHitTarget, anchor: HYMChartTooltipAnchor, animated: Bool) {
+        if let source = target as? CartesianHitDataSource, !source.chartData.isEmpty {
+            guard let content = cartesianTooltipContent(for: target) else {
+                tooltipController?.hide(); return
+            }
+            if cartesianTooltipPresentation.layout == .columns {
+                let view = CartesianTooltipContentView(content: content, presentation: cartesianTooltipPresentation, theme: tooltipTheme)
+                ensureTooltipController().show(anchor: anchor.frame, contentView: view, in: bounds,
+                    preferred: anchor.preferredPlacements, animated: animated, allowsContentInteraction: true)
+            } else {
+                ensureTooltipController().show(anchor: anchor.frame, text: content.text, in: bounds,
+                    preferred: anchor.preferredPlacements, animated: animated)
+            }
+        } else if let text = formattedTooltipText(for: target) {
+            ensureTooltipController().show(anchor: anchor.frame, text: text, in: bounds,
+                preferred: anchor.preferredPlacements, animated: animated)
+        } else { tooltipController?.hide() }
     }
 
     deinit {

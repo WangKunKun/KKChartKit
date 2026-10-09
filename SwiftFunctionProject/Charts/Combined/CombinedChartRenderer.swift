@@ -8,6 +8,8 @@ public final class CombinedChartRenderer: CartesianRendererBase<CartesianChartTh
     let lines = LineChartRenderer()
     public override var supportsFixedColumnLayout: Bool { true }
 
+    override var supportsDivergingStackGeometry: Bool { true }
+
     override func resolvedModel(_ model: CartesianChartModel) -> CartesianChartModel {
         var result = model
         result.usesMixedSeries = true
@@ -18,6 +20,7 @@ public final class CombinedChartRenderer: CartesianRendererBase<CartesianChartTh
         (series.kind?.isColumn ?? true) ? .roundedRectangle : lines.legendSymbol(for: series, theme: theme)
     }
     public override func drawSeries(model: CartesianChartModel, theme: CartesianChartTheme, plotFrame: CGRect) {
+        defer { resolveDataLabelCollisions(theme: theme) }
         for pass in [columns as CartesianRendererBase<CartesianChartTheme>, lines] {
             pass.currentModel = model
             pass.currentTheme = theme
@@ -59,6 +62,7 @@ public final class CombinedChartRenderer: CartesianRendererBase<CartesianChartTh
     public override func updateSeriesAnimation(progress: Double) {
         columns.updateSeriesAnimation(progress: progress)
         lines.updateSeriesAnimation(progress: progress)
+        if let theme = currentTheme { resolveDataLabelCollisions(theme: theme) }
     }
     public override func unmount(from view: UIView) {
         columns.unmount(from: view)

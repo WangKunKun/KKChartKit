@@ -20,8 +20,8 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
 
     /// 子类实现：绘制 series
     ///
-    /// 性能设计：每系列的柱体合并为 ≤2 个 CAShapeLayer 的复合 path
-    /// （正值色一条 + 负值覆盖色一条）——大数据量（1440 柱）从千级 layer
+    /// 性能设计：每系列同色柱体合并为一个 CAShapeLayer 复合 path
+    /// （每种实际填充色一条）——大数据量（1440 柱）从千级 layer
     /// 降到个位数，手势期间的逐帧重排不再掉帧。命中测试用几何计算，不依赖 layer。
     public override func drawSeries(
         model: CartesianChartModel,
@@ -32,7 +32,7 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         seriesObjects.begin(reusing: theme.reusesRenderingObjects)
-        defer { seriesObjects.end(); CATransaction.commit() }
+        defer { resolveDataLabelCollisions(theme: theme); seriesObjects.end(); CATransaction.commit() }
         seriesLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
         clearSeriesShadowCasters()
         annotationLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
@@ -56,15 +56,14 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
             let element = model.series[seriesIndex]
             guard element.isVisible, includesSeries(seriesIndex) else { continue }
             let slot = slots[seriesIndex] ?? 0
-            let baseColor = element.color ?? theme.seriesColor
-            let negativeColor = element.negativeColor ?? baseColor
+            let colors = CartesianColumnColors(series: element, defaultColor: theme.seriesColor)
             let axisIdx = element.effectiveYAxisIndex
             let seriesZeroY = CartesianGeometry.zeroAxisPosition(
                 viewport: currentViewport, plotArea: plotFrame, isHorizontal: false,
                 valueDomain: axisIdx == 1 ? currentSecondaryYDomain : nil)
 
             // 按最终填充色分组的复合 path（同色合一层，大数据量性能与单色一致）：
-            // 取色优先级 = 负值换色 negativeColor > 逐柱色 barColors（按类目循环）> 系列色
+            // 有效分区整段取色；无配置时保留负值色/逐柱调色板的旧优先级。
             var pathsByColor: [UIColor: UIBezierPath] = [:]
             var separatorPath = UIBezierPath()  // 堆叠分隔线（同色同宽合并）
 
@@ -118,14 +117,10 @@ public final class ColumnChartRenderer: CartesianRendererBase<CartesianChartThem
                     roundedRect: rect, byRoundingCorners: corners,
                     cornerRadii: CGSize(width: cornerRadius, height: cornerRadius))
 
-                let fillColor: UIColor
-                if value < 0, negativeColor != baseColor {
-                    fillColor = negativeColor
-                } else if let barColors = element.barColors, !barColors.isEmpty {
-                    fillColor = barColors[index % barColors.count]
-                } else {
-                    fillColor = baseColor
-                }
+                let fillColor = colors.color(
+                    categoryIndex: index,
+                    sourceIndex: model.timeBucket(series: seriesIndex, category: index)?.sourceRange.lowerBound ?? index,
+                    rawValue: element.data[index], drawValue: value)
                 if pathsByColor[fillColor] == nil { pathsByColor[fillColor] = UIBezierPath() }
                 pathsByColor[fillColor]!.append(columnPath)
 

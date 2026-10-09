@@ -76,11 +76,33 @@ extension CartesianSharedHitTarget: HYMChartTooltipDataSource {
 ///
 /// 遵循 `HYMChartXAxisZoomable`：所有轴系子类（Column/Bar/Line…）自动获得
 /// X 轴视口缩放/平移能力（Y 轴视口始终数据驱动，不参与手势）。
-open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, HYMChartXAxisZoomable, HYMChartYAxisZoomable, HYMChartViewportUpdating, HYMChartLegendProviding, HYMChartCategoryViewportControlling, HYMChartAutomaticCategoryScrolling {
+open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, HYMChartXAxisZoomable, HYMChartYAxisZoomable, HYMChartViewportUpdating, HYMChartLegendProviding, HYMChartCategoryViewportControlling, HYMChartAutomaticCategoryScrolling, CartesianTooltipSampleProviding {
     public typealias Model = CartesianChartModel
     public typealias Theme = ChartTheme
 
     public required init() {}
+
+    public func tooltipSamples(for data: [CartesianDatum], selection: CartesianTooltipSampleSelection) -> [CartesianTooltipSample] {
+        guard let model = currentModel else { return [] }
+        return data.compactMap { hit in
+            // 不将桶位置当作原始索引；实际聚合时整份提示保持统计语义（含末尾单点桶）。
+            guard model.timeBucketStride == 1, hit.aggregatedValue == nil else {
+                return .init(hitDatum: hit, displayedDatum: hit)
+            }
+            guard model.series.indices.contains(hit.seriesIndex),
+                  model.series[hit.seriesIndex].id == hit.seriesID,
+                  let index = selection.index(for: hit.sourceRange.lowerBound,
+                      count: model.series[hit.seriesIndex].data.count, seriesID: hit.seriesID),
+                  let displayed = datum(series: hit.seriesIndex, category: index) else { return nil }
+            let label: String?
+            if selection.showsSourceLabel, index != hit.sourceRange.lowerBound {
+                let key = currentCategoryLabels.indices.contains(index) ? currentCategoryLabels[index] : String(index)
+                let text = selection.sourceLabelTemplate.replacingOccurrences(of: "{key}", with: key)
+                label = text.isEmpty ? nil : text
+            } else { label = nil }
+            return .init(hitDatum: hit, displayedDatum: displayed, sourceLabel: label)
+        }
+    }
 
     var onLegendToggle: ((String, Bool) -> Void)?
     let legendView = ChartLegendView()
@@ -107,6 +129,10 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
     // MARK: - layer 子树
     /// 根容器（网格/轴线/series 挂其下；入场动画的 opacity 单元）。
     let rootLayer = CALayer()
+    let selectionLayer = CALayer()
+    var selectionKeys: [CartesianSelectionKey] = []
+    var selectionShapes: [CAShapeLayer] = []
+    public func applySelection(_ target: HYMChartHitTarget?) { setBodySelection(target) }
     /// series 专用挂载层（frame = plot 区、masksToBounds）。
     ///
     /// 子类必须把数据系列画在这里而不是 `rootLayer`：
@@ -116,6 +142,7 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
     private weak var hostView: UIView?
     private var titleLabels: [UILabel] = []
     private var tickLabels: [UILabel] = []
+    private var axisLabelInsets = UIEdgeInsets.zero
 
     // MARK: - 渲染期状态（供子类命中/动画读取）
     /// 当前生效的 viewport（render 时重算；x 域受手势视口影响，y 域始终数据驱动）。
@@ -234,6 +261,7 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
     }
 
     open func unmount(from view: UIView) {
+        applySelection(nil)
         renderDataCache.invalidate()
         decorationObjects.clear()
         seriesObjects.clear()
@@ -254,6 +282,7 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
     /// 入场动画逐帧：转发给子类（折线 strokeEnd 生长等）。
     public func updateEntranceAnimation(progress: Double) {
         updateSeriesAnimation(progress: progress)
+        refreshBodySelection()
     }
     /// 子类逐帧动画钩子（progress 0...1，已 ease）。
     open func updateSeriesAnimation(progress: Double) {}
@@ -545,6 +574,9 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
         else { previousGroupingStride = nil }
     }
 
+    /// Only line and combined renderers opt into this extra interpolation envelope.
+    var supportsDivergingStackGeometry: Bool { false }
+
     private func renderPrepared(data: CartesianRenderDataCache.Prepared, theme: ChartTheme, context: HYMChartRenderContext) {
         var model = data.model
         model.padsTimeBuckets = supportsFixedColumnLayout
@@ -582,6 +614,19 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
             backgroundLayer.cornerRadius = cartTheme.backgroundCornerRadius
         } else {
             backgroundLayer.isHidden = true
+        }
+
+        if supportsDivergingStackGeometry, cartTheme.stackedAreaBoundaryMode == .diverging {
+            let bounds = LineDivergingStackGeometry.valueBounds(model: model, baseValues: currentBaseValues) { index in
+                includesSeries(index) && (!model.usesMixedSeries || !(model.series[index].kind?.isColumn ?? true))
+            }
+            func expanded(_ current: (min: Double, max: Double)?, _ extra: (min: Double, max: Double)?) -> (min: Double, max: Double)? {
+                guard let extra else { return current }
+                guard let current else { return extra }
+                return (min(current.min, extra.min), max(current.max, extra.max))
+            }
+            currentPrimaryBounds = expanded(currentPrimaryBounds, bounds[0])
+            currentSecondaryBounds = expanded(currentSecondaryBounds, bounds[1])
         }
 
         // 2) viewport（值域：显式或 nice，始终数据驱动；X 轴：手势窗口优先，否则全量）
@@ -640,36 +685,46 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
             : makeValueTicks(axis: model.yAxis,
                              domain: isHorizontalValueAxis ? currentViewport.xDomain : currentViewport.yDomain,
                              bounds: currentPrimaryBounds)
-        let leadingLabelWidth: CGFloat = isHorizontalValueAxis
-            ? currentCategoryLabels.map { textSize($0, font: cartTheme.tickLabelFont).width }.max() ?? 0
+        let categoryTheme = model.xAxis.style.resolving(cartTheme)
+        let valueTheme = model.yAxis.style.resolving(cartTheme)
+        let secondaryTheme = model.secondaryYAxis?.style.resolving(cartTheme) ?? cartTheme
+        let leadingAxis = isHorizontalValueAxis ? model.xAxis : model.yAxis
+        let bottomAxis = isHorizontalValueAxis ? model.yAxis : model.xAxis
+        let leadingLabelWidth: CGFloat = !leadingAxis.style.showsLabels ? 0 : (isHorizontalValueAxis
+            ? currentCategoryLabels.map { textSize($0, font: categoryTheme.tickLabelFont).width }.max() ?? 0
             : currentValueTicks.map { textSize(AxisRenderer.tickText($0, formatter: model.yAxis.labelFormatter),
-                                               font: cartTheme.tickLabelFont).width }.max() ?? 0
-        // 底部让高：默认刻度字体行高；垂直图类目标签旋转时按旋转包围盒加高
-        // （水平图底部是数值刻度，不参与旋转）
+                                               font: valueTheme.tickLabelFont).width }.max() ?? 0)
+        let rotation = model.xAxis.tickLabelRotation.isFinite ? model.xAxis.tickLabelRotation : 0
         let xTickHeight: CGFloat
-        if !isHorizontalValueAxis, model.xAxis.tickLabelRotation != 0 {
-            let labels = currentCategoryLabels
-            let w = labels.map { textSize($0, font: cartTheme.tickLabelFont).width }.max() ?? 0
-            let h = textSize("0", font: cartTheme.tickLabelFont).height
-            xTickHeight = CartesianGeometry.rotatedBounds(
-                width: w, height: h,
-                angleDegrees: model.xAxis.tickLabelRotation).height
+        if !bottomAxis.style.showsLabels {
+            xTickHeight = 0
+        } else if !isHorizontalValueAxis, rotation != 0 {
+            let w = currentCategoryLabels.map { textSize($0, font: categoryTheme.tickLabelFont).width }.max() ?? 0
+            let h = textSize("0", font: categoryTheme.tickLabelFont).height
+            xTickHeight = CartesianGeometry.rotatedBounds(width: w, height: h, angleDegrees: rotation).height
         } else {
-            xTickHeight = textSize("0", font: cartTheme.tickLabelFont).height
+            xTickHeight = textSize("0", font: isHorizontalValueAxis
+                                   ? valueTheme.tickLabelFont : categoryTheme.tickLabelFont).height
         }
         let titleHeight = model.title.map { textSize($0, font: cartTheme.titleFont).height } ?? 0
-        let rightAxisLabelWidth: CGFloat = currentSecondaryYDomain == nil ? 0 :
+        let rightAxisLabelWidth: CGFloat = currentSecondaryYDomain == nil
+            || model.secondaryYAxis?.style.showsLabels == false ? 0 :
             currentSecondaryValueTicks.map {
                 textSize(AxisRenderer.tickText($0, formatter: model.secondaryYAxis?.labelFormatter),
-                         font: cartTheme.tickLabelFont).width }.max() ?? 0
+                         font: secondaryTheme.tickLabelFont).width }.max() ?? 0
         currentPlotFrame = CartesianGeometry.layout(
-            bounds: context.bounds,
-            contentInset: cartTheme.contentInset,
-            yAxisTickLabelWidth: leadingLabelWidth,
-            xAxisTickLabelHeight: xTickHeight,
-            axisLabelGap: cartTheme.axisLabelGap,
-            titleHeight: titleHeight,
-            rightAxisLabelWidth: rightAxisLabelWidth)
+            bounds: context.bounds, contentInset: cartTheme.contentInset,
+            yAxisTickLabelWidth: leadingLabelWidth, xAxisTickLabelHeight: xTickHeight,
+            axisLabelGap: cartTheme.axisLabelGap, titleHeight: titleHeight,
+            rightAxisLabelWidth: rightAxisLabelWidth,
+            showsLeadingLabels: leadingAxis.style.showsLabels,
+            showsBottomLabels: bottomAxis.style.showsLabels)
+
+        let axisContent = context.bounds.inset(by: cartTheme.contentInset)
+        axisLabelInsets = UIEdgeInsets(top: 0,
+            left: max(0, currentPlotFrame.minX - axisContent.minX),
+            bottom: max(0, axisContent.maxY - currentPlotFrame.maxY),
+            right: max(0, axisContent.maxX - currentPlotFrame.maxX))
 
         // 图例先测量并预留区域，轴标签仍由最终 plotFrame 排列。
         let configuration = cartTheme.legend
@@ -679,7 +734,8 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
                                    symbol: override?.symbol ?? legendSymbol(for: series, theme: cartTheme),
                                    color: override?.symbolColor ?? series.color ?? cartTheme.seriesColor,
                                    dashStyle: series.lineDashStyle ?? cartTheme.lineDashStyle,
-                                   isVisible: series.isVisible)
+                                   isVisible: series.isVisible, groupID: series.groupID,
+                                   style: override ?? .init())
         }
         var available = context.bounds.inset(by: cartTheme.contentInset)
         available.origin.y += titleHeight + cartTheme.axisLabelGap
@@ -704,9 +760,15 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
             isHorizontalValueAxis: isHorizontalValueAxis,
             secondaryValueTicks: secondaryGridTicks,
             secondaryYDomain: currentSecondaryYDomain, layer: decorationObjects.shape()))
-        rootLayer.addSublayer(AxisRenderer.makeAxisLinesLayer(
-            plotFrame: currentPlotFrame, theme: cartTheme,
-            showsRightAxis: currentSecondaryYDomain != nil, layer: decorationObjects.shape()))
+        for (axis, edge) in [(leadingAxis, AxisRenderer.Edge.left), (bottomAxis, .bottom)]
+            where axis.style.showsLine {
+            rootLayer.addSublayer(AxisRenderer.makeAxisLine(edge: edge, plotFrame: currentPlotFrame,
+                theme: axis.style.resolving(cartTheme), layer: decorationObjects.shape()))
+        }
+        if currentSecondaryYDomain != nil, let axis = model.secondaryYAxis, axis.style.showsLine {
+            rootLayer.addSublayer(AxisRenderer.makeAxisLine(edge: .right, plotFrame: currentPlotFrame,
+                theme: secondaryTheme, layer: decorationObjects.shape()))
+        }
         addTickLabels(model: model, theme: cartTheme)
         addTitleLabel(model: model, theme: cartTheme)
 
@@ -727,6 +789,13 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
         drawSeries(model: model, theme: theme, plotFrame: currentPlotFrame)
         // 6) 标线（阈值参考线）：画在系列之上，超出当前值域自动隐藏（缩放平移跟随）
         drawPlotLines(model: model, theme: cartTheme)
+        // 色带体仍在系列下方，但文字保持可读，不被不透明柱/面积覆盖。
+        for label in (rootLayer.sublayers ?? []).filter({ $0.name == "chart.annotation.band" }) {
+            label.removeFromSuperlayer(); rootLayer.addSublayer(label)
+        }
+        // 标线文字在系列之后生成，最后再避让一次，防止新标注遮住数据/总量。
+        resolveDataLabelCollisions(theme: cartTheme)
+        refreshBodySelection()
     }
 
     // MARK: - 色带（plotBands）
@@ -735,6 +804,7 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
     private func drawPlotBands(model: CartesianChartModel, theme: CartesianChartTheme) {
         guard !model.plotBands.isEmpty else { return }
         for band in model.plotBands {
+            guard band.from.isFinite, band.to.isFinite else { continue }
             let lo = min(band.from, band.to), hi = max(band.from, band.to)
             let axisIdx = band.yAxisIndex == 1 ? 1 : 0
             let domain: ClosedRange<Double>?
@@ -771,16 +841,9 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
             rootLayer.addSublayer(bandLayer)
 
             if let text = band.label {
-                let fontSize = theme.tickLabelFont.pointSize
-                let size = dataLabelTextSize(text, fontSize: fontSize)
-                // 带中央；带比文字矮时上下钳回带内（贴上/下沿）
-                let half = size.height / 2
-                let cy = max(frame.minY + min(half, frame.height / 2),
-                             min(frame.maxY - min(half, frame.height / 2), frame.midY))
-                rootLayer.addSublayer(makeDataLabelLayer(
-                    text: text, fontSize: fontSize,
-                    color: band.color.withAlphaComponent(1),
-                    center: CGPoint(x: frame.midX, y: cy)))
+                addAnnotationLabel(text: text, style: band.labelStyle,
+                    defaultColor: band.color.withAlphaComponent(1), theme: theme,
+                    reference: frame, defaultCenter: CGPoint(x: frame.midX, y: frame.midY), name: "band")
             }
         }
     }
@@ -839,7 +902,7 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
 
             let path = UIBezierPath()
             let labelCenter: CGPoint
-            let labelSize = pl.label.map { dataLabelTextSize($0, fontSize: theme.tickLabelFont.pointSize) }
+            let labelSize = pl.label.map { textSize($0, font: annotationFont(pl.labelStyle, theme: theme)) }
             if isHorizontalValueAxis {
                 let x = CartesianGeometry.point(x: pl.value, y: 0,
                                                 viewport: currentViewport,
@@ -865,10 +928,60 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
             rootLayer.addSublayer(line)
 
             if let text = pl.label {
-                rootLayer.addSublayer(makeDataLabelLayer(
-                    text: text, fontSize: theme.tickLabelFont.pointSize,
-                    color: pl.color, center: labelCenter))
+                addAnnotationLabel(text: text, style: pl.labelStyle, defaultColor: pl.color,
+                    theme: theme, reference: path.bounds, defaultCenter: labelCenter, name: "line")
             }
+        }
+    }
+
+    private func annotationFont(_ style: CartesianAnnotationLabelStyle, theme: CartesianChartTheme) -> UIFont {
+        if let font = style.font, font.pointSize.isFinite, font.pointSize > 0 { return font }
+        return .systemFont(ofSize: theme.tickLabelFont.pointSize, weight: .medium)
+    }
+
+    private func addAnnotationLabel(text: String, style: CartesianAnnotationLabelStyle,
+        defaultColor: UIColor, theme: CartesianChartTheme, reference: CGRect,
+        defaultCenter: CGPoint, name: String) {
+        guard !text.isEmpty else { return }
+        let font = annotationFont(style, theme: theme)
+        let size = textSize(text, font: font)
+        guard let frame = CartesianAnnotationLabelGeometry.frame(size: size, defaultCenter: defaultCenter,
+            reference: reference, plot: currentPlotFrame, style: style) else { return }
+        let label = decorationObjects.text()
+        label.name = "chart.annotation." + name
+        label.string = text; label.font = font; label.fontSize = font.pointSize
+        label.foregroundColor = (style.color ?? defaultColor).cgColor
+        label.backgroundColor = style.backgroundColor?.cgColor
+        label.alignmentMode = style.alignment == .leading ? .left : style.alignment == .trailing ? .right : .center
+        label.truncationMode = .end; label.isWrapped = false
+        label.contentsScale = hostView?.window?.screen.scale ?? UIScreen.main.scale
+        label.frame = frame
+        rootLayer.addSublayer(label)
+    }
+
+    /// 避开已放置的标注文字，再总量优先；不修改命中或数据，只省略碰撞标签。
+    func resolveDataLabelCollisions(theme: CartesianChartTheme) {
+        guard theme.dataLabelAvoidsOverlap else { return }
+        func all(_ layer: CALayer) -> [CATextLayer] {
+            (layer.sublayers ?? []).flatMap { child -> [CATextLayer] in
+                if let text = child as? CATextLayer, text.name?.hasPrefix("chart.label.") == true { return [text] }
+                return all(child)
+            }
+        }
+        let labels = all(rootLayer)
+        let ordered = labels.filter { $0.name == "chart.label.total" } + labels.filter { $0.name != "chart.label.total" }
+        // 标注位置由调用方定义，不参与移动；数据标签让开标注，标注之间不自动排布。
+        var occupied = (rootLayer.sublayers ?? []).compactMap { layer -> CGRect? in
+            guard layer.name?.hasPrefix("chart.annotation.") == true else { return nil }
+            return layer.convert(layer.bounds, to: rootLayer)
+        }
+        for label in ordered {
+            let frame = label.convert(label.bounds, to: rootLayer)
+            guard currentPlotFrame.insetBy(dx: -0.001, dy: -0.001).contains(frame),
+                  !occupied.contains(where: { $0.insetBy(dx: -2, dy: -2).intersects(frame) }) else {
+                label.removeFromSuperlayer(); continue
+            }
+            occupied.append(frame)
         }
     }
 
@@ -941,6 +1054,9 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
         let font = UIFont.systemFont(ofSize: fontSize, weight: .medium)
         let size = textSize(text, font: font)
         let label = (objects ?? decorationObjects).text()
+        label.name = "chart.label.data"
+        label.backgroundColor = (currentTheme as? CartesianChartTheme)?.dataLabelBackgroundColor?.cgColor
+        label.truncationMode = .none; label.isWrapped = false
         label.string = text
         label.font = font
         label.fontSize = fontSize
@@ -1035,43 +1151,56 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
 
     private func addTickLabels(model: CartesianChartModel, theme: CartesianChartTheme) {
         guard let view = hostView else { return }
-        if isHorizontalValueAxis {
-            tickLabels.append(contentsOf: AxisRenderer.makeBottomValueTickLabels(
-                ticks: currentValueTicks, viewport: currentViewport,
-                plotFrame: currentPlotFrame, theme: theme,
-                formatter: model.yAxis.labelFormatter, makeLabel: decorationObjects.label))
-            tickLabels.append(contentsOf: AxisRenderer.makeLeftCategoryLabels(
-                labels: currentCategoryLabels, viewport: currentViewport,
-                plotFrame: currentPlotFrame, theme: theme, makeLabel: decorationObjects.label))
-        } else {
-            tickLabels.append(contentsOf: AxisRenderer.makeYTickLabels(
-                ticks: currentValueTicks, viewport: currentViewport,
-                plotFrame: currentPlotFrame, theme: theme,
-                formatter: model.yAxis.labelFormatter, makeLabel: decorationObjects.label))
-            if let secondary = model.secondaryYAxis, !isHorizontalValueAxis {
-                tickLabels.append(contentsOf: AxisRenderer.makeRightValueTickLabels(
-                    ticks: currentSecondaryValueTicks, viewport: currentViewport,
-                    plotFrame: currentPlotFrame, theme: theme,
-                    formatter: secondary.labelFormatter,
-                    secondaryDomain: currentSecondaryYDomain, makeLabel: decorationObjects.label))
+        let categoryTheme = model.xAxis.style.resolving(theme)
+        let valueTheme = model.yAxis.style.resolving(theme)
+        let plot = currentPlotFrame, gap = theme.axisLabelGap
+        // 最终 plot 已含图例让位；标签只能占对应边带，不能侵占图例。
+        func append(_ labels: [UILabel], edge: AxisRenderer.Edge) {
+            let region: CGRect
+            switch edge {
+            case .left:
+                let width = max(0, axisLabelInsets.left - gap)
+                region = CGRect(x: plot.minX - gap - width, y: view.bounds.minY,
+                                width: width, height: view.bounds.height)
+            case .right:
+                region = CGRect(x: plot.maxX + gap, y: view.bounds.minY,
+                    width: max(0, axisLabelInsets.right - gap), height: view.bounds.height)
+            case .bottom:
+                region = CGRect(x: view.bounds.minX, y: plot.maxY + gap,
+                    width: view.bounds.width, height: max(0, axisLabelInsets.bottom - gap))
             }
-            let categoryLabels = AxisRenderer.makeCategoryLabels(
-                labels: currentCategoryLabels, viewport: currentViewport,
-                plotFrame: currentPlotFrame, theme: theme,
-                rotation: model.xAxis.tickLabelRotation, makeLabel: decorationObjects.label)
-            // 日期边缘与相邻文字留出空隙；缩放时非整数类目跨度可能使抽稀后的标签挤在一起。
-            if model.timeAxis == nil {
-                tickLabels.append(contentsOf: categoryLabels)
-            } else {
-                var previousMaxX = -CGFloat.greatestFiniteMagnitude
-                for label in categoryLabels {
-                    guard label.frame.minX >= view.bounds.minX, label.frame.maxX <= view.bounds.maxX else { continue }
-                    if model.xAxis.tickLabelRotation == 0 {
-                        guard label.frame.minX >= previousMaxX + 4 else { continue }
-                        previousMaxX = label.frame.maxX
-                    }
-                    tickLabels.append(label)
-                }
+            let fitted = AxisRenderer.fit(labels, edge: edge, region: region)
+            fitted.forEach { $0.accessibilityIdentifier = "chart.axis.\(edge)" }
+            tickLabels.append(contentsOf: fitted)
+        }
+        if isHorizontalValueAxis {
+            if model.yAxis.style.showsLabels {
+                append(AxisRenderer.makeBottomValueTickLabels(
+                    ticks: currentValueTicks, viewport: currentViewport, plotFrame: plot, theme: valueTheme,
+                    formatter: model.yAxis.labelFormatter, makeLabel: decorationObjects.label), edge: .bottom)
+            }
+            if model.xAxis.style.showsLabels {
+                append(AxisRenderer.makeLeftCategoryLabels(
+                    labels: currentCategoryLabels, viewport: currentViewport, plotFrame: plot, theme: categoryTheme,
+                    interval: model.xAxis.categoryLabelInterval, makeLabel: decorationObjects.label), edge: .left)
+            }
+        } else {
+            if model.yAxis.style.showsLabels {
+                append(AxisRenderer.makeYTickLabels(
+                    ticks: currentValueTicks, viewport: currentViewport, plotFrame: plot, theme: valueTheme,
+                    formatter: model.yAxis.labelFormatter, makeLabel: decorationObjects.label), edge: .left)
+            }
+            if let secondary = model.secondaryYAxis, secondary.style.showsLabels {
+                append(AxisRenderer.makeRightValueTickLabels(
+                    ticks: currentSecondaryValueTicks, viewport: currentViewport, plotFrame: plot,
+                    theme: secondary.style.resolving(theme), formatter: secondary.labelFormatter,
+                    secondaryDomain: currentSecondaryYDomain, makeLabel: decorationObjects.label), edge: .right)
+            }
+            if model.xAxis.style.showsLabels {
+                append(AxisRenderer.makeCategoryLabels(
+                    labels: currentCategoryLabels, viewport: currentViewport, plotFrame: plot, theme: categoryTheme,
+                    rotation: model.xAxis.tickLabelRotation.isFinite ? model.xAxis.tickLabelRotation : 0,
+                    interval: model.xAxis.categoryLabelInterval, makeLabel: decorationObjects.label), edge: .bottom)
             }
         }
         tickLabels.forEach { view.addSubview($0) }
@@ -1091,7 +1220,8 @@ open class CartesianRendererBase<ChartTheme: HYMChartTheme>: HYMChartRenderer, H
     }
 
     private func textSize(_ s: String, font: UIFont) -> CGSize {
-        (s as NSString).size(withAttributes: [.font: font])
+        let size = (s as NSString).size(withAttributes: [.font: font])
+        return CGSize(width: ceil(size.width), height: ceil(size.height))
     }
 }
 

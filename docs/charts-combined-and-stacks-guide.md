@@ -71,7 +71,7 @@ chart.configure(model: model, theme: theme)
 | `areaGradientColors` | nil 继承主题；[] 恢复系列默认渐变；单色为纯色，多个颜色为垂直渐变 |
 | `fillOpacity` | 0...1，与渐变色 alpha 相乘；nil 为 1 |
 
-现有 `color`、`negativeColor`、`pointSymbol`、`lineDashStyle`、`connectNulls`、`shadow`、`dataLabelsEnabled` 继续逐系列生效。覆盖优先级为系列 style → kind 默认 → theme。赋值 `style = .init()` 恢复所有样式继承。连续同符号面积堆叠的下边界沿用前层连线形态；一段内因缺测或符号变化而切换基准系列时，仍按本段形态插值，复杂交替正负/缺测接缝需在下一阶段继续处理。曲线负值颜色及长短缺测策略属于下一阶段。
+现有 `color`、`negativeColor`、`pointSymbol`、`lineDashStyle`、`connectNulls`、`shadow`、`dataLabelsEnabled` 继续逐系列生效。覆盖优先级为系列 style → kind 默认 → theme。赋值 `style = .init()` 恢复所有样式继承。堆叠面积的下边界逐区间复用前层实际路径（包括原曲线控制点和阶梯转折），不再按截取后的点重算切线。没有共同前层路径的正负/缺测过渡区间直连原始基准点，仍不保证任意组合全域无缝。规则、Demo 与验证见 [堆叠面积接缝](charts-stacked-area-seams-guide.md)。曲线负值颜色及长短缺测策略见 [颜色分区](charts-color-zones-guide.md) 与 [缺测策略](charts-gap-policy-guide.md)。
 
 ## 固定尺寸和密集数据边界
 
@@ -109,3 +109,8 @@ HYMCartesianChartViewBridge *bridge = [[HYMCartesianChartViewBridge alloc]
 新增 18 项单元测试覆盖独立组/轴/图形族、正负缺测及短系列、组内百分比、显隐释放柱槽、Column/Bar/Combined 固定尺寸与命中、双轴 shared tooltip、渐变/标记覆盖及恢复、图形切换清理、组总量与动画、2000 点区间定位、分组聚合、OC 字段快照、属性面板绑定、面积/柱段接缝。
 
 最终 150 项单元测试通过；完整 8 项 Demo UI 回归通过，最后接缝修改后重新验证混合图和 OC 两项 UI。此处是模拟器功能验证，不代表真机性能或老项目迁移验收完成。
+
+
+## G1 正负分链统一断段（2026-10-02）
+
+`theme.stackedAreaBoundaryMode = .diverging` 显式启用线族共享正负几何及共同缺测策略；OC 对应 `stackedAreaUsesDivergingChains`。Combined 中柱族与线族数学分组隔离，柱的缺测不会切断线族。该规则不修改各 series 的业务 ID、数值或原始命中；默认独立插值与既有沿基线模式保持兼容。[完整说明及验证](charts-diverging-stacks-guide.md)。

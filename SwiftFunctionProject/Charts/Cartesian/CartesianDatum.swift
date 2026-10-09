@@ -46,26 +46,12 @@ public protocol CartesianHitDataSource {
 
 enum CartesianDatumText {
     static func text(_ data: [CartesianDatum], options: HYMChartTooltipTextOptions = .init(), header: String? = nil) -> String? {
-        guard !data.isEmpty else { return nil }
-        var lines: [String] = []
-        let interval = data.first?.timeBucket?.intervalLabel
-        if let interval { lines.append(interval) }
-        if let template = options.header, let header {
-            let title = template.replacingOccurrences(of: "{key}", with: header)
-            if title != interval { lines.append(title) }
-        }
-        for row in data {
-            let value: String
-            // 显式系列格式优先；未配置的系列沿用全局小数位/后缀模板。
-            if row.valueFormat != nil { value = row.formattedValue }
-            else {
-                value = HYMChartTooltipTextOptions.formatValue(row.displayValue, decimals: options.valueDecimals)
-                    + (options.valueSuffix ?? row.unit.flatMap { $0.isEmpty ? nil : " " + $0 } ?? "")
-            }
-            let detail = row.timeBucket.map { " · " + $0.detailLabel } ?? ""
-            lines.append(row.name + detail + ": " + value + (row.yAxisIndex == 1 ? " (右轴)" : ""))
-        }
-        return lines.joined(separator: "\n")
+        CartesianTooltipContent.make(data: data, options: options, header: header)?.text
+    }
+
+    static func value(_ value: Double, unit: String?, options: HYMChartTooltipTextOptions) -> String {
+        HYMChartTooltipTextOptions.formatValue(value, decimals: options.valueDecimals)
+            + (options.valueSuffix ?? unit.flatMap { $0.isEmpty ? nil : " " + $0 } ?? "")
     }
 }
 

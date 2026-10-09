@@ -1,19 +1,27 @@
 import UIKit
 
-/// 折线/面积的颜色分区轴。X 使用原始采样索引（可为小数），不是时间戳；
-/// Y 使用系列所属值轴的绘制值（堆叠为累计值，百分比为百分比值）。
+/// 颜色分区的逻辑轴，不随 Bar 的屏幕方向交换。X 使用原始采样索引（可为小数），不是时间戳；
+/// Y 在线族使用所属值轴的绘制值，在柱/条使用 columnValueSource 指定的数值。
 public enum CartesianZoneAxis { case x, y }
 
+/// 柱/条 Y 分区的取值方式；线族始终按累计绘制值着色，不使用此配置。
+public enum CartesianColumnZoneValueSource {
+    /// 每段自身原值，不包含前层累计；时间聚合时使用该桶的统计值，不冒充单个原始采样。
+    case rawValue
+    /// 柱/段终点的累计绘制值；百分比堆叠时是百分比坐标，而不是本段占比或动画中间位置。
+    case drawValue
+}
+
 /// 一个半开颜色区间：[前一上限, upperBound)。首段从负无穷开始。
-/// 仅影响折线/面积，不改变业务数据、值域、图例和命中；柱/条忽略此配置。
+/// 折线/面积连续分区，柱/条按取值整段换色；不改变业务数据、值域、图例和命中。
 public struct CartesianColorZone {
     /// nil 表示正无穷，只能出现在末段。有限上限必须严格递增。
     public var upperBound: Double?
-    /// nil 继承系列线色；标记跟随区间颜色，但显式 pointColor 优先。
+    /// nil 继承系列色，不回落到 negativeColor/barColors；线标记跟随分区，但显式 pointColor 优先。
     public var color: UIColor?
     /// nil 继承系列/主题渐变；空数组用本区间线色生成默认渐变；
     /// 一个颜色为纯色，多个颜色为沿整个绘图区的垂直渐变，不在分区边界重新开始。
-    /// 所有颜色 alpha 仍乘系列 fillOpacity。
+    /// 所有颜色 alpha 仍乘系列 fillOpacity。柱/条忽略面积渐变，只使用 color。
     public var areaGradientColors: [UIColor]?
 
     /// 创建分区；此值配置应用到图表时须在主线程，勿并发修改同一变量。
@@ -23,15 +31,18 @@ public struct CartesianColorZone {
     }
 }
 
-/// 逐系列连续线色/面积分区。有效配置优先于 negativeColor；nil 或无效配置回退旧行为。
+/// 逐系列颜色分区。有效配置优先于 negativeColor 和 barColors；nil 或无效配置回退旧行为。
 /// 未给末段 nil 上限时，剩余区间自动继承系列线色/填充。阈值处属于后一段。
 public struct CartesianColorZones {
     public var axis: CartesianZoneAxis
     public var zones: [CartesianColorZone]
+    /// 仅柱/条 Y 分区使用；默认原值，避免前层显隐改变本段的业务阈值颜色。
+    public var columnValueSource: CartesianColumnZoneValueSource
 
     /// 创建配置；区间按上限严格递增，不自动排序或合并。
-    public init(axis: CartesianZoneAxis = .y, zones: [CartesianColorZone]) {
-        self.axis = axis; self.zones = zones
+    public init(axis: CartesianZoneAxis = .y, zones: [CartesianColorZone],
+                columnValueSource: CartesianColumnZoneValueSource = .rawValue) {
+        self.axis = axis; self.zones = zones; self.columnValueSource = columnValueSource
     }
 
     /// 空配置、非有限/重复/逆序上限、非末段无上限均无效；整份回退，避免部分误着色。

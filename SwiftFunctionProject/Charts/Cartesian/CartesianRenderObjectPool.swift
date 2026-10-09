@@ -47,7 +47,8 @@ final class CartesianRenderObjectPool {
     var retainedCount: Int { shapes.objects.count + gradients.objects.count + texts.objects.count + layers.objects.count + labels.objects.count }
 
     func begin(reusing: Bool) {
-        // mask 不在 sublayers 中；先解除旧关联，避免旧渐变持有下一帧的线/标记。
+        // mask 不在 sublayers 中；先解除旧关联，避免旧面积/描边持有下一帧的线/标记。
+        for shape in shapes.objects where shape.mask != nil { shape.mask = nil }
         for gradient in gradients.objects { gradient.mask = nil }
         // 分区容器必须在取出任一子层前解除旧关联，避免下一帧重排时移除已复用子层。
         for layer in layers.objects { layer.sublayers = nil; layer.mask = nil }
@@ -103,11 +104,13 @@ final class CartesianRenderObjectPool {
             // 先归零 transform 再量尺寸，否则旋转刻度切换回普通标签时位置错误。
             label.transform = .identity
             label.bounds = .zero
+            label.accessibilityIdentifier = nil
         }
     }
 
     /// 仅重置本模块实际会改动的状态；路径/文字/颜色随后由对应绘制函数覆盖。
     private func resetLayer(_ layer: CALayer) {
+        if layer.name != nil { layer.name = nil }
         if layer.animationKeys() != nil { layer.removeAllAnimations() }
         if layer.mask != nil { layer.mask = nil }
         if layer.masksToBounds { layer.masksToBounds = false }

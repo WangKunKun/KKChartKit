@@ -6,6 +6,7 @@ import UIKit
 public final class HYMChartTooltipController {
     private weak var host: UIView?
     private let tooltip: HYMChartTooltip
+    private var displayRevision = 0
     public var theme: HYMChartTooltipTheme
 
     public init(host: UIView, theme: HYMChartTooltipTheme = .default) {
@@ -18,79 +19,80 @@ public final class HYMChartTooltipController {
         tooltip.layer.zPosition = 1000
     }
 
-    /// 显示弹窗。
-    /// - Parameters:
-    ///   - anchor: 锚点 frame（host 坐标系）
-    ///   - text: 显示文本
-    ///   - container: 可显示区域（host 坐标系）
-    ///   - preferred: 偏好方向序列
-    /// - Parameter animated: false 时跳过淡入动画（弹窗已可见、滑动选中逐列移动的跟手更新）。
-    public func show(anchor: CGRect, text: String,
-                     in container: CGRect,
-                     preferred: [HYMChartTooltipPlacement],
-                     animated: Bool = true) {
-        guard let host = host else { return }
-        tooltip.configure(text: text, theme: theme)
-        let size = tooltip.sizeThatFits(CGSize(width: theme.maxWidth, height: .greatestFiniteMagnitude))
-        guard let r = HYMChartTooltipGeometry.resolve(
-            anchor: anchor, size: size, container: container,
-            preferred: preferred, gap: theme.gap) else {
-            tooltip.isHidden = true
-            return
-        }
-        host.bringSubviewToFront(tooltip)   // 确保在标签等子视图之上
-        tooltip.frame = r.frame
-        tooltip.applyArrow(placement: r.placement, arrowX: r.arrowX)
-        tooltip.layoutIfNeeded()
+    private enum Content {
+        case text(String)
+        case view(UIView, interactive: Bool)
+    }
+    private var lastContent: Content?
+    private var lastAnchor: CGRect = .zero
+    private var lastPreferred: [HYMChartTooltipPlacement] = []
+    private var lastContainer: CGRect?
 
-        // 已可见的移动更新（如滑动选中）不重播淡入，避免逐点闪动
+    /// 显示文本提示；animated=false 用于跟手更新，固定顶部模式受容器尺寸约束。
+    public func show(anchor: CGRect, text: String, in container: CGRect,
+                     preferred: [HYMChartTooltipPlacement], animated: Bool = true) {
+        show(content: .text(text), anchor: anchor, in: container, preferred: preferred, animated: animated)
+    }
+
+    /// 显示自定义内容。allowsContentInteraction 默认关闭，开启可接收触摸与内嵌滚动。
+    /// 内容须实现 sizeThatFits；固定顶部/交互内容受 container 尺寸约束。
+    public func show(anchor: CGRect, contentView: UIView, in container: CGRect,
+                     preferred: [HYMChartTooltipPlacement],
+                     animated: Bool = true, allowsContentInteraction: Bool = false) {
+        show(content: .view(contentView, interactive: allowsContentInteraction), anchor: anchor,
+             in: container, preferred: preferred, animated: animated)
+    }
+
+    /// 容器尺寸变化时重新测量并定位已显示的固定顶部提示，不重播动画。
+    /// automatic 的锚点属于原绘图区，不在这里猜测新的点位置。
+    public func relayout(in container: CGRect) {
+        guard theme.position == .fixedTop, !tooltip.isHidden, lastContainer != container,
+              let content = lastContent else { return }
+        show(content: content, anchor: lastAnchor, in: container, preferred: lastPreferred, animated: false)
+    }
+
+    private func show(content: Content, anchor: CGRect, in container: CGRect,
+                      preferred: [HYMChartTooltipPlacement], animated: Bool) {
+        guard let host else { return }
+        displayRevision += 1
+        tooltip.layer.removeAllAnimations()
+        tooltip.transform = .identity
+        var effectiveTheme = theme
+        if theme.position == .fixedTop { effectiveTheme.showsArrow = false }
+        let interactive: Bool
+        switch content {
+        case .text(let text):
+            interactive = false
+            tooltip.configure(text: text, theme: effectiveTheme)
+        case .view(let view, let enabled):
+            interactive = enabled
+            tooltip.configure(contentView: view, theme: effectiveTheme, allowsInteraction: enabled)
+        }
+        let constrained = interactive || theme.position == .fixedTop
+        let constraint = constrained ? container.size : CGSize(width: theme.maxWidth, height: .greatestFiniteMagnitude)
+        let size = tooltip.sizeThatFits(constraint)
+        guard let result = HYMChartTooltipGeometry.resolve(anchor: anchor, size: size, container: container,
+            preferred: preferred, gap: theme.gap, position: theme.position, offset: theme.offset, topInset: theme.fixedTopInset) else {
+            hide(animated: false); return
+        }
+        lastContent = content; lastAnchor = anchor; lastPreferred = preferred; lastContainer = container
+        tooltip.accessibilityIdentifier = theme.position == .fixedTop ? "chart.tooltip.fixedTop" : "chart.tooltip.automatic"
+        host.bringSubviewToFront(tooltip)
+        tooltip.frame = result.frame
+        tooltip.applyArrow(placement: result.placement, arrowX: result.arrowX)
+        tooltip.layoutIfNeeded()
         let playsEntrance = theme.showsAnimation && animated && tooltip.isHidden
+        tooltip.isHidden = false
         if playsEntrance {
             tooltip.alpha = 0
             tooltip.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
-            tooltip.isHidden = false
-            UIView.animate(withDuration: 0.18, delay: 0, options: []) {
+            UIView.animate(withDuration: 0.18) {
                 self.tooltip.alpha = 1
                 self.tooltip.transform = .identity
             }
         } else {
             tooltip.alpha = 1
             tooltip.transform = .identity
-            tooltip.isHidden = false
-        }
-    }
-
-    /// 显示「自定义内容 view」弹窗（contentView 模式）。
-    /// 复用 HYMChartTooltipGeometry 定位与 show/hide 动画；外壳由 HYMChartTooltip 提供。
-    public func show(anchor: CGRect, contentView: UIView,
-                     in container: CGRect,
-                     preferred: [HYMChartTooltipPlacement]) {
-        guard let host = host else { return }
-        tooltip.configure(contentView: contentView, theme: theme)
-        let size = tooltip.sizeThatFits(CGSize(width: theme.maxWidth, height: .greatestFiniteMagnitude))
-        guard let r = HYMChartTooltipGeometry.resolve(
-            anchor: anchor, size: size, container: container,
-            preferred: preferred, gap: theme.gap) else {
-            tooltip.isHidden = true
-            return
-        }
-        host.bringSubviewToFront(tooltip)
-        tooltip.frame = r.frame
-        tooltip.applyArrow(placement: r.placement, arrowX: r.arrowX)
-        tooltip.layoutIfNeeded()
-
-        if theme.showsAnimation {
-            tooltip.alpha = 0
-            tooltip.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
-            tooltip.isHidden = false
-            UIView.animate(withDuration: 0.18, delay: 0, options: []) {
-                self.tooltip.alpha = 1
-                self.tooltip.transform = .identity
-            }
-        } else {
-            tooltip.alpha = 1
-            tooltip.transform = .identity
-            tooltip.isHidden = false
         }
     }
 
@@ -99,13 +101,17 @@ public final class HYMChartTooltipController {
     ///   弹窗锚点属于旧视口，带动画淡出期间它会悬在原位，与正在平移的内容错开，
     ///   视觉上就是"残影"。
     public func hide(animated: Bool = true) {
+        lastContent = nil; lastContainer = nil
         guard !tooltip.isHidden else { return }
+        displayRevision += 1
+        let revision = displayRevision
         if animated, theme.showsAnimation {
             UIView.animate(withDuration: 0.15, delay: 0, options: [],
                            animations: {
                 self.tooltip.alpha = 0
                 self.tooltip.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
             }, completion: { _ in
+                guard revision == self.displayRevision else { return }
                 self.tooltip.isHidden = true
                 self.tooltip.transform = .identity
             })

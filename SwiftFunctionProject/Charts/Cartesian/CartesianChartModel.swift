@@ -45,12 +45,17 @@ public struct CartesianAxisModel {
     /// 刻度标签旋转角度（度，顺时针为正；默认 0 = 不旋转）。
     /// 仅作用于垂直图底部类目标签；数值轴与 Bar 左侧标签忽略。
     public var tickLabelRotation: CGFloat = 0
+    public var style: CartesianAxisStyle
+    /// 类目标签候选步长（绝对原始索引取模）；nil/非正数自动。
+    /// 为避免重叠，空间不足时按该步长的整数倍继续抽稀；不改变刻度、网格或数据。
+    public var categoryLabelInterval: Int?
 
     public init(kind: CartesianAxisKind,
                 min: Double? = nil, max: Double? = nil, tickInterval: Double? = nil,
                 tickCount: Int? = nil, tickPositions: [Double]? = nil,
                 labelFormatter: ((Double) -> String)? = nil, showsGridlines: Bool? = nil,
-                tickLabelRotation: CGFloat = 0) {
+                tickLabelRotation: CGFloat = 0, style: CartesianAxisStyle = .init(),
+                categoryLabelInterval: Int? = nil) {
         self.kind = kind
         self.min = min
         self.max = max
@@ -60,6 +65,7 @@ public struct CartesianAxisModel {
         self.labelFormatter = labelFormatter
         self.showsGridlines = showsGridlines
         self.tickLabelRotation = tickLabelRotation
+        self.style = style; self.categoryLabelInterval = categoryLabelInterval
     }
 }
 
@@ -101,10 +107,10 @@ public struct CartesianSeriesElement {
     public var connectNulls: Bool
     /// nil 兼容 connectNulls；非 nil 优先使用显式策略，仅影响折线/面积路径。
     public var gapPolicy: CartesianGapPolicy?
-    /// 逐系列 X/Y 线色与面积分区；nil 保持旧行为，柱/条忽略。
+    /// 逐系列 X/Y 分区；线族连续裁色，柱/条按指定数值整段换色。nil 保持旧行为。
     public var colorZones: CartesianColorZones?
     /// 逐柱/逐条颜色（Column/Bar 消费；nil = 系列色）。按类目索引循环取色——
-    /// 传调色板即 AAChartKit colorByPoint 形态。负值柱优先系列 negativeColor。
+    /// 传调色板即 colorByPoint 形态。有效 colorZones 优先，其次为不同于系列色的 negativeColor。
     public var barColors: [UIColor]?
     /// 系列阴影（nil = 跟随主题 seriesShadow；两者皆 nil = 无阴影）。
     /// 作用于系列主体层：柱/条体、折线（Highcharts shadow 同款）。
@@ -168,18 +174,20 @@ public struct CartesianPlotLine {
     public var color: UIColor
     public var lineWidth: CGFloat
     public var dashStyle: LineDashStyle
-    /// 标线旁文字（nil = 无标签；颜色随线色）
+    /// 标线旁文字（nil = 无标签；未覆盖文字颜色时跟随线色）
     public var label: String?
+    public var labelStyle: CartesianAnnotationLabelStyle
 
     public init(value: Double, yAxisIndex: Int = 0,
                 color: UIColor = .systemRed, lineWidth: CGFloat = 1,
-                dashStyle: LineDashStyle = .solid, label: String? = nil) {
+                dashStyle: LineDashStyle = .solid, label: String? = nil,
+                labelStyle: CartesianAnnotationLabelStyle = .init()) {
         self.value = value
         self.yAxisIndex = yAxisIndex
         self.color = color
         self.lineWidth = lineWidth
         self.dashStyle = dashStyle
-        self.label = label
+        self.label = label; self.labelStyle = labelStyle
     }
 }
 
@@ -195,17 +203,18 @@ public struct CartesianPlotBand {
     public var yAxisIndex: Int
     /// 带体颜色（建议半透明，如 `UIColor.systemGreen.withAlphaComponent(0.12)`）
     public var color: UIColor
-    /// 带内文字（nil = 无标签；置于带中央，颜色取带色同色系不透明版）
+    /// 带内文字（nil = 无标签；默认居中，文字默认取带色的不透明版）
     public var label: String?
+    public var labelStyle: CartesianAnnotationLabelStyle
 
     public init(from: Double, to: Double, yAxisIndex: Int = 0,
                 color: UIColor = UIColor.systemGreen.withAlphaComponent(0.12),
-                label: String? = nil) {
+                label: String? = nil, labelStyle: CartesianAnnotationLabelStyle = .init()) {
         self.from = from
         self.to = to
         self.yAxisIndex = yAxisIndex
         self.color = color
-        self.label = label
+        self.label = label; self.labelStyle = labelStyle
     }
 }
 

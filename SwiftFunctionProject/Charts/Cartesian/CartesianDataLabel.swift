@@ -80,7 +80,7 @@ public enum CartesianDataLabelGeometry {
     public static func labelText(_ value: Double, formatter: ((Double) -> String)? = nil) -> String {
         if let formatter { return formatter(value) }
         guard value.isFinite else { return "–" }
-        if abs(value - value.rounded()) < 1e-9 { return String(Int(value.rounded())) }
+        if abs(value - value.rounded()) < 1e-9, let integer = Int(exactly: value.rounded()) { return String(integer) }
         let s = String(format: "%.2f", value)
         return s.replacingOccurrences(of: #"\.?0+$"#, with: "", options: .regularExpression)
     }

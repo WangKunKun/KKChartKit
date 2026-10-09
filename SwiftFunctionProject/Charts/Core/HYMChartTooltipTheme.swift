@@ -27,6 +27,11 @@ public struct HYMChartTooltipTheme {
     public var showsAnimation: Bool
     /// 弹窗与锚点间距。
     public var gap: CGFloat
+    /// 固定顶部策略仍随下一次命中更新内容；不是锁定选择状态。
+    public var position: HYMChartTooltipPosition
+    /// 容器坐标偏移，正 x 向右、正 y 向下；最终位置仍受边界约束。
+    public var offset: CGPoint
+    public var fixedTopInset: CGFloat
 
     public init(backgroundColor: UIColor = UIColor.black.withAlphaComponent(0.8),
                 textColor: UIColor = .white,
@@ -38,7 +43,10 @@ public struct HYMChartTooltipTheme {
                 arrowSize: CGSize = CGSize(width: 10, height: 6),
                 shadowColor: UIColor? = UIColor.black.withAlphaComponent(0.15),
                 showsAnimation: Bool = true,
-                gap: CGFloat = 6) {
+                gap: CGFloat = 6,
+                position: HYMChartTooltipPosition = .automatic,
+                offset: CGPoint = .zero,
+                fixedTopInset: CGFloat = 8) {
         self.backgroundColor = backgroundColor
         self.textColor = textColor
         self.font = font
@@ -50,6 +58,7 @@ public struct HYMChartTooltipTheme {
         self.shadowColor = shadowColor
         self.showsAnimation = showsAnimation
         self.gap = gap
+        self.position = position; self.offset = offset; self.fixedTopInset = fixedTopInset
     }
 
     /// 默认主题。

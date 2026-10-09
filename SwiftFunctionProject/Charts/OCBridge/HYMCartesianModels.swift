@@ -72,10 +72,13 @@ import UIKit
     }
 }
 
-/// 连续折线/面积分区轴；X 是原始采样索引，Y 是所属轴绘制值。
+/// 逻辑分区轴，不随 Bar 水平镜像交换；X 是原始采样索引，Y 由图形族和取值配置决定。
 @objc public enum HYMCartesianZoneAxis: Int { case x, y }
 
-/// 半开区间的线色/填充；upperBound 为 nil 时无上限且必须为末段。
+/// 柱/条 Y 分区取值；原值在聚合时为桶统计值，绘制值为累计/百分比终点。线族忽略。
+@objc public enum HYMCartesianColumnZoneValueSource: Int { case rawValue, drawValue }
+
+/// 半开区间的颜色/面积填充；upperBound 为 nil 时无上限且必须为末段。柱/条忽略面积渐变。
 @objcMembers public final class HYMCartesianColorZone: NSObject {
     public var upperBound: NSNumber?
     public var color: UIColor?
@@ -89,9 +92,11 @@ import UIKit
 @objcMembers public final class HYMCartesianColorZones: NSObject {
     public var axis: HYMCartesianZoneAxis = .y
     public var zones: [HYMCartesianColorZone] = []
+    public var columnValueSource: HYMCartesianColumnZoneValueSource = .rawValue
     public var isValid: Bool { build().isValid }
     func build() -> CartesianColorZones {
-        .init(axis: axis == .x ? .x : .y, zones: zones.map { $0.build() })
+        .init(axis: axis == .x ? .x : .y, zones: zones.map { $0.build() },
+              columnValueSource: columnValueSource == .rawValue ? .rawValue : .drawValue)
     }
 }
 
@@ -140,6 +145,21 @@ import UIKit
 }
 
 /// 第一阶段 OC 模型；支持类目、多系列、主次轴范围与现有堆叠模式。
+/// 值对象；build 时快照，修改后请调用 update。
+@objcMembers public final class HYMCartesianAxisStyle: NSObject {
+    public var labelColor: UIColor?
+    public var labelFont: UIFont?
+    public var lineColor: UIColor?
+    public var lineWidth: NSNumber?
+    public var showsLabels = true
+    public var showsLine = true
+    func build() -> CartesianAxisStyle {
+        .init(labelColor: labelColor, labelFont: labelFont, lineColor: lineColor,
+              lineWidth: lineWidth.map { CGFloat($0.doubleValue) },
+              showsLabels: showsLabels, showsLine: showsLine)
+    }
+}
+
 @objcMembers public final class HYMCartesianModel: NSObject {
     public var title: String?
     public var categories: [String] = []
@@ -148,11 +168,21 @@ import UIKit
     public var samplingInterval: TimeInterval = 300
     public var series: [HYMCartesianSeries] = []
     public var groups: [HYMCartesianGroup] = []
+    public var plotLines: [HYMCartesianPlotLine] = []
+    public var plotBands: [HYMCartesianPlotBand] = []
     public var stacking: HYMCartesianStacking = .none
     public var stackGroupCount: Int = 2
     public var percentageBase: Double = 100
     public var minimum: NSNumber?
     public var maximum: NSNumber?
+    public var xAxisStyle = HYMCartesianAxisStyle()
+    public var yAxisStyle = HYMCartesianAxisStyle()
+    public var secondaryYAxisStyle = HYMCartesianAxisStyle()
+    public var categoryLabelInterval: NSNumber?
+    public var categoryLabelRotation: CGFloat = 0
+    public var categoryGridlines: NSNumber?
+    public var valueGridlines: NSNumber?
+    public var secondaryGridlines: NSNumber?
     public var usesSecondaryAxis = false
     public var secondaryMinimum: NSNumber?
     public var secondaryMaximum: NSNumber?
@@ -166,10 +196,15 @@ import UIKit
         case .grouped: stack = .grouped(groupCount: stackGroupCount)
         }
         return .init(title: title, series: series.map { $0.build() },
-            xAxis: .init(kind: .category(labels: categories)),
-            yAxis: .init(kind: .value, min: minimum?.doubleValue, max: maximum?.doubleValue),
-            secondaryYAxis: usesSecondaryAxis ? .init(kind: .value, min: secondaryMinimum?.doubleValue, max: secondaryMaximum?.doubleValue) : nil,
-            stacking: stack,
+            xAxis: .init(kind: .category(labels: categories), showsGridlines: categoryGridlines?.boolValue,
+                         tickLabelRotation: categoryLabelRotation, style: xAxisStyle.build(),
+                         categoryLabelInterval: categoryLabelInterval?.intValue),
+            yAxis: .init(kind: .value, min: minimum?.doubleValue, max: maximum?.doubleValue,
+                         showsGridlines: valueGridlines?.boolValue, style: yAxisStyle.build()),
+            secondaryYAxis: usesSecondaryAxis ? .init(kind: .value, min: secondaryMinimum?.doubleValue,
+                max: secondaryMaximum?.doubleValue, showsGridlines: secondaryGridlines?.boolValue,
+                style: secondaryYAxisStyle.build()) : nil,
+            stacking: stack, plotLines: plotLines.map { $0.build() }, plotBands: plotBands.map { $0.build() },
             timeAxis: samplingStart.map { CartesianTimeAxis(start: $0, interval: samplingInterval) },
             groups: groups.map { .init(id: $0.identifier, name: $0.name) })
     }

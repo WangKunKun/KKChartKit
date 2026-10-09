@@ -4,12 +4,19 @@ import UIKit
 /// 裁剪容器与子层均由 renderer 的池管理；不参与数据、采样、值域或命中计算。
 enum LineChartColorLayers {
     static func line(path: CGPath, color: UIColor, theme: CartesianChartTheme,
-                     dash: LineDashStyle, clip: CGRect?, parent: CALayer,
+                     dash: LineDashStyle, clip: CGRect?, insideArea: CGPath? = nil, parent: CALayer,
                      pool: CartesianRenderObjectPool) -> CAShapeLayer {
         let line = pool.shape()
         line.path = path; line.strokeColor = color.cgColor; line.fillColor = nil
-        line.lineWidth = theme.lineWidth; line.lineJoin = .round; line.lineCap = .round
+        // 内侧描边：双倍宽度后裁掉外半边，保留配置的可见宽度；薄层/零厚度处以面积为界。
+        line.lineWidth = theme.lineWidth * (insideArea == nil ? 1 : 2)
+        line.lineJoin = .round; line.lineCap = .round
         line.lineDashPattern = dash.dashPattern
+        if let insideArea {
+            let mask = pool.shape()
+            mask.path = insideArea; mask.fillColor = UIColor.black.cgColor; mask.strokeColor = nil
+            line.mask = mask
+        }
         attach(line, clip: clip, parent: parent, pool: pool)
         return line
     }

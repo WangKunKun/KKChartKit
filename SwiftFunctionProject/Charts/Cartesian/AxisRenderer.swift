@@ -61,6 +61,7 @@ enum AxisRenderer {
                                    plotFrame: CGRect,
                                    theme: CartesianChartTheme,
                                    rotation: CGFloat = 0,
+                                   interval: Int? = nil,
                                    makeLabel: () -> UILabel = { UILabel() }) -> [UILabel] {
         let visible = CartesianGeometry.visibleCategoryRange(viewport: viewport, count: labels.count)
         guard !visible.isEmpty else { return [] }
@@ -74,8 +75,8 @@ enum AxisRenderer {
             : CartesianGeometry.rotatedBounds(width: maxLabelWidth, height: labelHeight,
                                               angleDegrees: rotation).width
         let slotWidth = plotFrame.width / CGFloat(max(viewport.xSpan, 1e-9))
-        let stride = CartesianGeometry.categoryLabelStride(labelWidth: effectiveWidth,
-                                                           slotWidth: slotWidth)
+        let stride = labelStride(automatic: CartesianGeometry.categoryLabelStride(
+            labelWidth: effectiveWidth, slotWidth: slotWidth), interval: interval)
 
         var out: [UILabel] = []
         for i in visible where i % stride == 0 {
@@ -160,14 +161,15 @@ enum AxisRenderer {
                                         viewport: CartesianViewport,
                                         plotFrame: CGRect,
                                         theme: CartesianChartTheme,
-                                        makeLabel: () -> UILabel = { UILabel() }) -> [UILabel] {
+                                        interval: Int? = nil,
+                                       makeLabel: () -> UILabel = { UILabel() }) -> [UILabel] {
         guard !labels.isEmpty else { return [] }
         let fontAttrs: [NSAttributedString.Key: Any] = [.font: theme.tickLabelFont]
         let maxLabelHeight = labels.map { ($0 as NSString).size(withAttributes: fontAttrs).height }.max() ?? 0
         // 槽高按类目轴跨度（Y）计算；categoryLabelStride 的数学对高度维度同样适用
         let slotHeight = plotFrame.height / CGFloat(max(viewport.ySpan, 1e-9))
-        let stride = CartesianGeometry.categoryLabelStride(labelWidth: maxLabelHeight,
-                                                           slotWidth: slotHeight)
+        let stride = labelStride(automatic: CartesianGeometry.categoryLabelStride(
+            labelWidth: maxLabelHeight, slotWidth: slotHeight), interval: interval)
 
         var out: [UILabel] = []
         let categoryViewport = CartesianViewport(xMin: viewport.yMin, xMax: viewport.yMax, yMin: 0, yMax: 1)
@@ -189,6 +191,69 @@ enum AxisRenderer {
         return out
     }
 
+    /// 步长按显式候选的整数倍扩展，防止极大 Int 的乘法溢出。
+    static func labelStride(automatic: Int, interval: Int?) -> Int {
+        guard let interval, interval > 0 else { return max(1, automatic) }
+        let automatic = max(1, automatic)
+        let multiplier = automatic / interval + (automatic % interval == 0 ? 0 : 1)
+        let result = max(1, multiplier).multipliedReportingOverflow(by: interval)
+        return result.overflow ? Int.max : result.partialValue
+    }
+
+    enum Edge { case left, bottom, right }
+
+    static func makeAxisLine(edge: Edge, plotFrame: CGRect, theme: CartesianChartTheme,
+                             layer: CAShapeLayer) -> CAShapeLayer {
+        let path = UIBezierPath()
+        switch edge {
+        case .left:
+            path.move(to: CGPoint(x: plotFrame.minX, y: plotFrame.minY))
+            path.addLine(to: CGPoint(x: plotFrame.minX, y: plotFrame.maxY))
+        case .bottom:
+            path.move(to: CGPoint(x: plotFrame.minX, y: plotFrame.maxY))
+            path.addLine(to: CGPoint(x: plotFrame.maxX, y: plotFrame.maxY))
+        case .right:
+            path.move(to: CGPoint(x: plotFrame.maxX, y: plotFrame.minY))
+            path.addLine(to: CGPoint(x: plotFrame.maxX, y: plotFrame.maxY))
+        }
+        layer.name = "axis.\(edge)"; layer.path = path.cgPath
+        layer.strokeColor = theme.axisLineColor.cgColor; layer.fillColor = nil
+        layer.lineWidth = theme.axisLineWidth
+        return layer
+    }
+
+    /// 在可用边带内截断文字，不移动其刻度锚点；无法容纳一行字体时省略。
+    /// 旋转标签按真实包围盒限宽，并在底部重新贴边，避免窄屏与大字体溢出。
+    static func fit(_ labels: [UILabel], edge: Edge, region: CGRect) -> [UILabel] {
+        guard region.width > 0, region.height > 0 else { return [] }
+        var accepted: [UILabel] = []
+        for label in labels {
+            let h = label.bounds.height
+            var w = label.bounds.width
+            if edge == .bottom {
+                let c = abs(label.transform.a), s = abs(label.transform.b)
+                let availableWidth = 2 * min(label.center.x - region.minX, region.maxX - label.center.x)
+                if c > 1e-6 { w = min(w, (availableWidth - s * h) / c) }
+                else if s * h > availableWidth { continue }
+                if s > 1e-6 { w = min(w, (region.height - c * h) / s) }
+                else if c * h > region.height { continue }
+                guard w > 0 else { continue }
+                label.bounds.size.width = w
+                label.center.y = region.minY + (w * s + h * c) / 2
+            } else {
+                guard label.center.y - h / 2 >= region.minY,
+                      label.center.y + h / 2 <= region.maxY else { continue }
+                w = min(w, region.width); label.bounds.size.width = w
+                label.center.x = edge == .left ? region.maxX - w / 2 : region.minX + w / 2
+            }
+            label.lineBreakMode = .byTruncatingTail
+            // 数值刻度也可能被自定义 tickPositions 挤在一起；保持首个可读标签。
+            if accepted.contains(where: { $0.frame.insetBy(dx: -2, dy: -2).intersects(label.frame) }) { continue }
+            accepted.append(label)
+        }
+        return accepted
+    }
+
     /// 刻度文本：formatter 优先，否则内置去尾零格式。
     static func tickText(_ tick: Double, formatter: ((Double) -> String)?) -> String {
         formatter?(tick) ?? format(tick)
@@ -197,8 +262,8 @@ enum AxisRenderer {
     /// 刻度文本：去尾零（80.0 → "80"；0.2 → "0.2"；-0.0 → "0"）。
     /// ≥100 的非整数 %g 会产生科学计数法（123.456 → "1.2e+02"），退化为固定 1 位小数。
     static func format(_ value: Double) -> String {
-        if value.truncatingRemainder(dividingBy: 1) == 0 {
-            return String(Int(value))
+        if value.truncatingRemainder(dividingBy: 1) == 0, let integer = Int(exactly: value) {
+            return String(integer)
         }
         let s = String(format: "%.2g", value)
         if s.contains("e") {

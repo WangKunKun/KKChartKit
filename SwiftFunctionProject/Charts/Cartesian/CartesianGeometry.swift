@@ -17,15 +17,25 @@ public enum CartesianGeometry {
                               xAxisTickLabelHeight: CGFloat,
                               axisLabelGap: CGFloat,
                               titleHeight: CGFloat,
-                              rightAxisLabelWidth: CGFloat = 0) -> CGRect {
-        let x = bounds.minX + contentInset.left + yAxisTickLabelWidth + axisLabelGap
-        let y = bounds.minY + contentInset.top + titleHeight + axisLabelGap
-        let w = max(0, bounds.width - contentInset.left - contentInset.right
-                        - yAxisTickLabelWidth - axisLabelGap
-                        - rightAxisLabelWidth - (rightAxisLabelWidth > 0 ? axisLabelGap : 0))
-        let h = max(0, bounds.height - contentInset.top - contentInset.bottom
-                        - titleHeight - axisLabelGap - xAxisTickLabelHeight - axisLabelGap)
-        return CGRect(x: x, y: y, width: w, height: h)
+                              rightAxisLabelWidth: CGFloat = 0,
+                              showsLeadingLabels: Bool = true,
+                              showsBottomLabels: Bool = true) -> CGRect {
+        let leadingGap = showsLeadingLabels ? axisLabelGap : 0
+        let bottomGap = showsBottomLabels ? axisLabelGap : 0
+        let rightGap = rightAxisLabelWidth > 0 ? axisLabelGap : 0
+        let availableWidth = max(0, bounds.width - contentInset.left - contentInset.right)
+        let availableHeight = max(0, bounds.height - contentInset.top - contentInset.bottom
+                                  - titleHeight - axisLabelGap)
+        // 极窄布局时保留至少 40% plot 空间，标签在实际边带内截断/省略。
+        let totalSide = yAxisTickLabelWidth + leadingGap + rightAxisLabelWidth + rightGap
+        let factor = totalSide > 0 ? min(1, availableWidth * 0.6 / totalSide) : 1
+        let left = (yAxisTickLabelWidth + leadingGap) * factor
+        let right = (rightAxisLabelWidth + rightGap) * factor
+        let bottom = min(xAxisTickLabelHeight + bottomGap, availableHeight * 0.4)
+        return CGRect(x: bounds.minX + contentInset.left + left,
+                      y: bounds.minY + contentInset.top + titleHeight + axisLabelGap,
+                      width: max(0, availableWidth - left - right),
+                      height: max(0, availableHeight - bottom))
     }
 
     /// 值 → 屏幕（view 坐标系）。x/y 均为线性映射；y 轴屏幕向下，故值越大 y 越小。
@@ -64,7 +74,9 @@ public enum CartesianGeometry {
                                            slotWidth: CGFloat,
                                            minGap: CGFloat = 4) -> Int {
         guard slotWidth > 0, labelWidth + minGap > slotWidth else { return 1 }
-        return Int(ceil((labelWidth + minGap) / slotWidth))
+        let value = ceil((labelWidth + minGap) / slotWidth)
+        guard value.isFinite, value < CGFloat(Int.max) else { return Int.max }
+        return max(1, Int(value))
     }
 
     /// 旋转后的轴对齐包围盒（angleDegrees 度，顺时针为正；正负角包围盒相同）。

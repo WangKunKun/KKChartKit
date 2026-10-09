@@ -20,6 +20,9 @@ public struct CombinedChart: View {
     private let crosshairLineWidth: CGFloat
     private let crosshairDashStyle: LineDashStyle
     private let isCrosshairDualDirectionEnabled: Bool
+    private let cartesianTooltipPresentation: CartesianTooltipPresentation
+    private let cartesianTooltipSampleSelection: CartesianTooltipSampleSelection
+    private let tooltipTheme: HYMChartTooltipTheme
     private let tooltipTextOptions: HYMChartTooltipTextOptions
     private let onSeriesVisibilityChanged: ((String, Bool) -> Void)?
     /// 初次创建或范围变化时定位；其余更新保留用户手势窗口。nil 恢复全量。
@@ -45,7 +48,10 @@ public struct CombinedChart: View {
                 tooltipTextOptions: HYMChartTooltipTextOptions = HYMChartTooltipTextOptions(),
                 viewportUpdatePolicy: HYMChartViewportUpdatePolicy = .preserve,
                 onSeriesVisibilityChanged: ((String, Bool) -> Void)? = nil,
-                visibleCategoryRange: Range<Int>? = nil) {
+                visibleCategoryRange: Range<Int>? = nil,
+                cartesianTooltipPresentation: CartesianTooltipPresentation = .init(),
+                cartesianTooltipSampleSelection: CartesianTooltipSampleSelection = .init(),
+                tooltipTheme: HYMChartTooltipTheme = .default) {
         self.model = model
         self.theme = theme
         self.playsAnimationOnAppear = playsAnimationOnAppear
@@ -63,6 +69,9 @@ public struct CombinedChart: View {
         self.crosshairDashStyle = crosshairDashStyle
         self.isCrosshairDualDirectionEnabled = isCrosshairDualDirectionEnabled
         self.tooltipTextOptions = tooltipTextOptions
+        self.cartesianTooltipPresentation = cartesianTooltipPresentation
+        self.cartesianTooltipSampleSelection = cartesianTooltipSampleSelection
+        self.tooltipTheme = tooltipTheme
         self.visibleCategoryRange = visibleCategoryRange
         self.onSeriesVisibilityChanged = onSeriesVisibilityChanged
         self.viewportUpdatePolicy = viewportUpdatePolicy
@@ -87,7 +96,10 @@ public struct CombinedChart: View {
                                tooltipTextOptions: tooltipTextOptions,
                                viewportUpdatePolicy: viewportUpdatePolicy,
                                onSeriesVisibilityChanged: onSeriesVisibilityChanged,
-                               visibleCategoryRange: visibleCategoryRange)
+                               visibleCategoryRange: visibleCategoryRange,
+                               cartesianTooltipPresentation: cartesianTooltipPresentation,
+                               cartesianTooltipSampleSelection: cartesianTooltipSampleSelection,
+                               tooltipTheme: tooltipTheme)
     }
 }
 
@@ -108,6 +120,9 @@ public struct CombinedChartRepresentable: UIViewRepresentable {
     private let crosshairLineWidth: CGFloat
     private let crosshairDashStyle: LineDashStyle
     private let isCrosshairDualDirectionEnabled: Bool
+    private let cartesianTooltipPresentation: CartesianTooltipPresentation
+    private let cartesianTooltipSampleSelection: CartesianTooltipSampleSelection
+    private let tooltipTheme: HYMChartTooltipTheme
     private let tooltipTextOptions: HYMChartTooltipTextOptions
     private let onSeriesVisibilityChanged: ((String, Bool) -> Void)?
     /// 初次创建或范围变化时定位；其余更新保留用户手势窗口。nil 恢复全量。
@@ -128,7 +143,10 @@ public struct CombinedChartRepresentable: UIViewRepresentable {
                 tooltipTextOptions: HYMChartTooltipTextOptions,
                 viewportUpdatePolicy: HYMChartViewportUpdatePolicy = .preserve,
                 onSeriesVisibilityChanged: ((String, Bool) -> Void)? = nil,
-                visibleCategoryRange: Range<Int>? = nil) {
+                visibleCategoryRange: Range<Int>? = nil,
+                cartesianTooltipPresentation: CartesianTooltipPresentation = .init(),
+                cartesianTooltipSampleSelection: CartesianTooltipSampleSelection = .init(),
+                tooltipTheme: HYMChartTooltipTheme = .default) {
         self.model = model
         self.theme = theme
         self.playsAnimationOnAppear = playsAnimationOnAppear
@@ -146,6 +164,9 @@ public struct CombinedChartRepresentable: UIViewRepresentable {
         self.crosshairDashStyle = crosshairDashStyle
         self.isCrosshairDualDirectionEnabled = isCrosshairDualDirectionEnabled
         self.tooltipTextOptions = tooltipTextOptions
+        self.cartesianTooltipPresentation = cartesianTooltipPresentation
+        self.cartesianTooltipSampleSelection = cartesianTooltipSampleSelection
+        self.tooltipTheme = tooltipTheme
         self.visibleCategoryRange = visibleCategoryRange
         self.onSeriesVisibilityChanged = onSeriesVisibilityChanged
         self.viewportUpdatePolicy = viewportUpdatePolicy
@@ -173,6 +194,9 @@ public struct CombinedChartRepresentable: UIViewRepresentable {
         chart.crosshairDashStyle = crosshairDashStyle
         chart.isCrosshairDualDirectionEnabled = isCrosshairDualDirectionEnabled
         chart.tooltipTextOptions = tooltipTextOptions
+        chart.cartesianTooltipPresentation = cartesianTooltipPresentation
+        chart.cartesianTooltipSampleSelection = cartesianTooltipSampleSelection
+        chart.tooltipTheme = tooltipTheme
         chart.onHit = { target, gesture in
             onHit?(target, gesture)
         }
@@ -201,6 +225,9 @@ public struct CombinedChartRepresentable: UIViewRepresentable {
         uiView.crosshairDashStyle = crosshairDashStyle
         uiView.isCrosshairDualDirectionEnabled = isCrosshairDualDirectionEnabled
         uiView.tooltipTextOptions = tooltipTextOptions
+        uiView.cartesianTooltipPresentation = cartesianTooltipPresentation
+        uiView.cartesianTooltipSampleSelection = cartesianTooltipSampleSelection
+        uiView.tooltipTheme = tooltipTheme
         // 每次更新替换回调，避免继续调用 makeUIView 时捕获的旧闭包。
         uiView.onHit = onHit.map { callback in
             { target, gesture in

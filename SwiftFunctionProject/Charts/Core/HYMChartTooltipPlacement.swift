@@ -1,5 +1,11 @@
 import CoreGraphics
 
+/// automatic 沿锚点避让；fixedTop 居中于容器顶部，忽略锚点方向并隐藏箭头。
+public enum HYMChartTooltipPosition: String, CaseIterable {
+    case automatic
+    case fixedTop
+}
+
 /// 通用图表弹窗（tooltip）相对锚点的放置方向。
 public enum HYMChartTooltipPlacement {
     /// 弹窗在锚点上方（箭头朝下，指向锚点）。
@@ -41,19 +47,45 @@ public enum HYMChartTooltipGeometry {
         anchor: CGRect, size: CGSize, container: CGRect,
         preferred: [HYMChartTooltipPlacement], gap: CGFloat
     ) -> Result? {
-        guard size.width > 0, size.height > 0 else { return nil }
+        resolve(anchor: anchor, size: size, container: container, preferred: preferred, gap: gap,
+                position: .automatic)
+    }
+
+    /// offset 是容器坐标的 pt 偏移，正 x 向右、正 y 向下；偏移后仍裁入边界。
+    /// fixedTop 使用容器中心 x / minY + topInset，尺寸过大时约束为容器尺寸。
+    /// 非有限 offset 分量按 0；非法尺寸/容器/锚点返回 nil。
+    public static func resolve(
+        anchor: CGRect, size: CGSize, container: CGRect,
+        preferred: [HYMChartTooltipPlacement], gap: CGFloat,
+        position: HYMChartTooltipPosition, offset: CGPoint = .zero, topInset: CGFloat = 8
+    ) -> Result? {
+        guard size.width.isFinite, size.height.isFinite, size.width > 0, size.height > 0,
+              container.width.isFinite, container.height.isFinite, container.width > 0, container.height > 0,
+              container.minX.isFinite, container.minY.isFinite,
+              anchor.minX.isFinite, anchor.minY.isFinite, anchor.width.isFinite, anchor.height.isFinite else { return nil }
+        let dx = offset.x.isFinite ? offset.x : 0
+        let dy = offset.y.isFinite ? offset.y : 0
+        let gap = gap.isFinite ? max(0, gap) : 0
+        if position == .fixedTop {
+            let width = min(size.width, container.width)
+            let height = min(size.height, container.height)
+            let inset = topInset.isFinite ? max(0, topInset) : 0
+            let x = max(container.minX, min(container.maxX - width, container.midX - width / 2 + dx))
+            let y = max(container.minY, min(container.maxY - height, container.minY + inset + dy))
+            return Result(frame: CGRect(x: x, y: y, width: width, height: height), placement: .top, arrowX: x + width / 2)
+        }
         let prefs = preferred.isEmpty ? [.top, .bottom] : preferred
         let halfW = size.width / 2
 
         func candidateFrame(_ placement: HYMChartTooltipPlacement) -> CGRect {
             switch placement {
             case .top:
-                return CGRect(x: anchor.midX - halfW,
-                              y: anchor.minY - gap - size.height,
+                return CGRect(x: anchor.midX - halfW + dx,
+                              y: anchor.minY - gap - size.height + dy,
                               width: size.width, height: size.height)
             case .bottom:
-                return CGRect(x: anchor.midX - halfW,
-                              y: anchor.maxY + gap,
+                return CGRect(x: anchor.midX - halfW + dx,
+                              y: anchor.maxY + gap + dy,
                               width: size.width, height: size.height)
             }
         }

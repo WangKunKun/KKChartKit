@@ -20,6 +20,9 @@ public struct LineChart: View {
     private let crosshairLineWidth: CGFloat
     private let crosshairDashStyle: LineDashStyle
     private let isCrosshairDualDirectionEnabled: Bool
+    private let cartesianTooltipPresentation: CartesianTooltipPresentation
+    private let cartesianTooltipSampleSelection: CartesianTooltipSampleSelection
+    private let tooltipTheme: HYMChartTooltipTheme
     private let tooltipTextOptions: HYMChartTooltipTextOptions
     private let onSeriesVisibilityChanged: ((String, Bool) -> Void)?
     private let viewportUpdatePolicy: HYMChartViewportUpdatePolicy
@@ -42,7 +45,10 @@ public struct LineChart: View {
                 isCrosshairDualDirectionEnabled: Bool = false,
                 tooltipTextOptions: HYMChartTooltipTextOptions = HYMChartTooltipTextOptions(),
                 viewportUpdatePolicy: HYMChartViewportUpdatePolicy = .preserve,
-                onSeriesVisibilityChanged: ((String, Bool) -> Void)? = nil) {
+                onSeriesVisibilityChanged: ((String, Bool) -> Void)? = nil,
+                cartesianTooltipPresentation: CartesianTooltipPresentation = .init(),
+                cartesianTooltipSampleSelection: CartesianTooltipSampleSelection = .init(),
+                tooltipTheme: HYMChartTooltipTheme = .default) {
         self.model = model
         self.theme = theme
         self.playsAnimationOnAppear = playsAnimationOnAppear
@@ -60,6 +66,9 @@ public struct LineChart: View {
         self.crosshairDashStyle = crosshairDashStyle
         self.isCrosshairDualDirectionEnabled = isCrosshairDualDirectionEnabled
         self.tooltipTextOptions = tooltipTextOptions
+        self.cartesianTooltipPresentation = cartesianTooltipPresentation
+        self.cartesianTooltipSampleSelection = cartesianTooltipSampleSelection
+        self.tooltipTheme = tooltipTheme
         self.onSeriesVisibilityChanged = onSeriesVisibilityChanged
         self.viewportUpdatePolicy = viewportUpdatePolicy
     }
@@ -80,6 +89,9 @@ public struct LineChart: View {
                                crosshairLineWidth: crosshairLineWidth,
                                crosshairDashStyle: crosshairDashStyle,
                                isCrosshairDualDirectionEnabled: isCrosshairDualDirectionEnabled,
+                               cartesianTooltipPresentation: cartesianTooltipPresentation,
+                               cartesianTooltipSampleSelection: cartesianTooltipSampleSelection,
+                               tooltipTheme: tooltipTheme,
                                tooltipTextOptions: tooltipTextOptions,
                                onSeriesVisibilityChanged: onSeriesVisibilityChanged,
                                viewportUpdatePolicy: viewportUpdatePolicy)
@@ -103,6 +115,9 @@ private struct LineChartRepresentable: UIViewRepresentable {
     let crosshairLineWidth: CGFloat
     let crosshairDashStyle: LineDashStyle
     let isCrosshairDualDirectionEnabled: Bool
+    let cartesianTooltipPresentation: CartesianTooltipPresentation
+    let cartesianTooltipSampleSelection: CartesianTooltipSampleSelection
+    let tooltipTheme: HYMChartTooltipTheme
     let tooltipTextOptions: HYMChartTooltipTextOptions
     let onSeriesVisibilityChanged: ((String, Bool) -> Void)?
     let viewportUpdatePolicy: HYMChartViewportUpdatePolicy
@@ -124,6 +139,9 @@ private struct LineChartRepresentable: UIViewRepresentable {
         chart.crosshairDashStyle = crosshairDashStyle
         chart.isCrosshairDualDirectionEnabled = isCrosshairDualDirectionEnabled
         chart.tooltipTextOptions = tooltipTextOptions
+        chart.cartesianTooltipPresentation = cartesianTooltipPresentation
+        chart.cartesianTooltipSampleSelection = cartesianTooltipSampleSelection
+        chart.tooltipTheme = tooltipTheme
         chart.onHit = { target, gesture in
             if let h = target as? LineHitTarget { onHit?(h, gesture) }
         }
@@ -150,6 +168,9 @@ private struct LineChartRepresentable: UIViewRepresentable {
         uiView.crosshairDashStyle = crosshairDashStyle
         uiView.isCrosshairDualDirectionEnabled = isCrosshairDualDirectionEnabled
         uiView.tooltipTextOptions = tooltipTextOptions
+        uiView.cartesianTooltipPresentation = cartesianTooltipPresentation
+        uiView.cartesianTooltipSampleSelection = cartesianTooltipSampleSelection
+        uiView.tooltipTheme = tooltipTheme
         // 每次更新替换回调，避免继续调用 makeUIView 时捕获的旧闭包。
         uiView.onHit = onHit.map { callback in
             { target, gesture in

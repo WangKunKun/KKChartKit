@@ -1,5 +1,7 @@
 # 内置图例、系列显隐与尺寸分配
 
+> 2026-09-30：新增图片/隐藏态图片、自定义符号视图、背景和业务组换行；参见 [分组提示与图例指南](charts-grouped-presentation-guide.md)。
+
 适用：`LineChart` / `ColumnChart` / `BarChart`，以及对应 `HYMChartView<Renderer>`。图例默认关闭，保持旧页面布局。实现于 2026-09-24。
 
 ## 最小接入
@@ -118,7 +120,7 @@ theme.legend.itemOverrides["solar"] = LegendItemStyle(
 
 如果连一整行都放不下，自动隐藏整个图例，优先保留绘图区。总尺寸本身不足以容纳坐标轴和最小绘图区时，SDK 不会自行撑大父容器。增加外部高度或减少字体/行数即可调整分配。左右布局保留宽度，上下布局保留高度；标题仍在顶部。
 
-本版提供外部静态测量与完整展开模式，但没有自动 intrinsic height、固定比例分配、图内悬浮图例、自定义 UIView/SwiftUI 图例或任意图片/路径图标。
+本版提供外部静态测量与完整展开模式，并支持图片和自定义 UIView 符号。仍没有自动 intrinsic height、固定比例分配、图内悬浮图例或任意整行模板；自定义符号固定在 symbolSize 内，详见分组展示指南。
 
 ## 点击、状态更新与外部控制
 

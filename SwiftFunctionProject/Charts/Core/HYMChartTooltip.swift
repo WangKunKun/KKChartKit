@@ -52,6 +52,7 @@ public final class HYMChartTooltip: UIView {
     /// 设置内容与外观（text 模式）。
     public func configure(text: String, theme: HYMChartTooltipTheme) {
         self.theme = theme
+        isUserInteractionEnabled = false
         self.lastText = text
         // 恢复 textLabel（contentView 模式会移除它），并清理可能残留的 contentView
         if textLabel.superview == nil { addSubview(textLabel) }
@@ -61,14 +62,17 @@ public final class HYMChartTooltip: UIView {
         textLabel.text = text
         textLabel.textColor = theme.textColor
         textLabel.font = theme.font
+        textLabel.lineBreakMode = theme.position == .fixedTop ? .byTruncatingTail : .byWordWrapping
         textLabel.preferredMaxLayoutWidth = theme.maxWidth - theme.contentInset.left - theme.contentInset.right
         applyBackgroundAppearance(theme)
     }
 
     /// 设置自定义内容 view 与外观（contentView 模式）。外壳(背景合成形状/阴影/箭头)复用，
     /// 内容区装外部 view（替代 textLabel）。与 configure(text:) 互斥使用（由调用方保证不同时）。
-    public func configure(contentView: UIView, theme: HYMChartTooltipTheme) {
+    /// allowsInteraction 默认关闭，触摸透传；开启可用于内嵌滚动内容。
+    public func configure(contentView: UIView, theme: HYMChartTooltipTheme, allowsInteraction: Bool = false) {
         self.theme = theme
+        isUserInteractionEnabled = allowsInteraction
         textLabel.removeFromSuperview()
         self.contentView?.removeFromSuperview()
         self.contentView = contentView
@@ -96,6 +100,8 @@ public final class HYMChartTooltip: UIView {
             contentFrame.size.height -= arrowH
             if placement == .bottom { contentFrame.origin.y += arrowH }
         }
+        contentFrame.size.width = max(0, contentFrame.width)
+        contentFrame.size.height = max(0, contentFrame.height)
         if let cv = contentView {
             cv.frame = contentFrame
         } else {
@@ -151,12 +157,15 @@ public final class HYMChartTooltip: UIView {
         let inset = theme.contentInset
         let arrowH = theme.showsArrow ? theme.arrowSize.height : 0
         if let cv = contentView {
-            let maxW = max(0, theme.maxWidth - inset.left - inset.right)
-            let s = cv.sizeThatFits(CGSize(width: maxW, height: .greatestFiniteMagnitude))
-            return CGSize(width: s.width + inset.left + inset.right,
-                          height: s.height + inset.top + inset.bottom + arrowH)
+            let width = max(0, min(theme.maxWidth, size.width))
+            let maxW = max(0, width - inset.left - inset.right)
+            let maxH = max(0, size.height - inset.top - inset.bottom - arrowH)
+            let s = cv.sizeThatFits(CGSize(width: maxW, height: maxH))
+            return CGSize(width: min(width, s.width + inset.left + inset.right),
+                          height: min(size.height, s.height + inset.top + inset.bottom + arrowH))
         }
-        let maxTextWidth = max(0, theme.maxWidth - inset.left - inset.right)
+        let maxWidth = max(0, min(theme.maxWidth, size.width))
+        let maxTextWidth = max(0, maxWidth - inset.left - inset.right)
         let textBounds = (lastText as NSString).boundingRect(
             with: CGSize(width: maxTextWidth, height: .greatestFiniteMagnitude),
             options: [.usesLineFragmentOrigin, .usesFontLeading],
@@ -165,6 +174,6 @@ public final class HYMChartTooltip: UIView {
         let textH = ceil(textBounds.height)
         let w = ceil(textBounds.width + inset.left + inset.right)
         let h = textH + inset.top + inset.bottom + arrowH
-        return CGSize(width: max(w, inset.left + inset.right), height: h)
+        return CGSize(width: min(maxWidth, max(w, inset.left + inset.right)), height: min(size.height, h))
     }
 }

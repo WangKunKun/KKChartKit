@@ -69,9 +69,11 @@ extension CartesianRendererBase {
                            available.maxX - size.width / 2)
             center.y = min(max(center.y, available.minY + size.height / 2),
                            available.maxY - size.height / 2)
-            layer.addSublayer(makeDataLabelLayer(
+            let label = makeDataLabelLayer(
                 text: text, fontSize: theme.dataLabelFontSize,
-                color: dataLabelColor(theme: theme, inside: false), center: center, objects: seriesObjects))
+                color: dataLabelColor(theme: theme, inside: false), center: center, objects: seriesObjects)
+            label.name = "chart.label.total"
+            layer.addSublayer(label)
         }
     }
 }

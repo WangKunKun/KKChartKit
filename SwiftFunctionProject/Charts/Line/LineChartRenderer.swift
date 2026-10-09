@@ -20,8 +20,11 @@ public struct LineHitTarget: HYMChartHitTarget, CartesianHitDataSource {
     public let tooltipText: String?
     /// 系列名（弹窗模板数据源用）
     public let name: String
+    /// 命中的类目/时间标签，供弹窗 {key} 模板使用。
+    public let categoryLabel: String?
 
-    public init(seriesIndex: Int, index: Int, value: Double, label: String?, yAxisIndex: Int = 0, seriesID: String? = nil, datum: CartesianDatum? = nil) {
+    public init(seriesIndex: Int, index: Int, value: Double, label: String?, yAxisIndex: Int = 0, seriesID: String? = nil, datum: CartesianDatum? = nil, categoryLabel: String? = nil) {
+        self.categoryLabel = categoryLabel
         self.datum = datum
         self.seriesID = seriesID
         self.seriesIndex = seriesIndex
@@ -42,7 +45,7 @@ extension LineHitTarget: HYMChartTooltipDataSource {
         if let datum { return [(datum.name, datum.displayValue, datum.yAxisIndex == 1)] }
         return [(name, value, yAxisIndex == 1)]
     }
-    public var tooltipHeaderKey: String? { nil }
+    public var tooltipHeaderKey: String? { categoryLabel }
 }
 
 /// 折线图渲染器：CartesianRendererBase 的首个薄 Renderer——
@@ -61,7 +64,16 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
     /// 内部诊断（测试检查绘制规模，不改变公开命中值语义）。
     private(set) var renderedIndices: [Int: [[Int]]] = [:]
     private(set) var denseSeries: Set<Int> = []
-    private var usesSampling = false
+    private(set) var usesSampling = false
+    private(set) var samplingStatistics: [LineSamplingStatistics] = []
+    /// Internal diagnostics: percent chains that passed geometry/denominator compatibility.
+    private(set) var percentBoundarySeries: Set<Int> = []
+    /// 最近一次绘制中采用正负分链的系列索引；仅在主线程读取，重绘时重新计算。
+    public private(set) var divergingBoundarySeries: Set<Int> = []
+    /// 正负分链中因精度/预算限制整组降为共享直线的系列索引；不改变原始业务数据。
+    public private(set) var divergingLinearFallbackSeries: Set<Int> = []
+    /// Demo 内部观察入口；每次实际重绘后发送，包含平移、缩放、显隐变化及空数据。
+    var onSamplingStatistics: (([LineSamplingStatistics]) -> Void)?
     /// 折线层（入场动画 strokeEnd 驱动）。
     private var lineLayers: [CAShapeLayer] = []
     /// 命中半径（pt）。
@@ -72,6 +84,16 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
         return theme.showsPoints ? .lineWithMarker(series.pointSymbol ?? theme.pointSymbol) : .line
     }
 
+    /// 面板和实际渲染共享准入规则，防止只检查主题却漏掉系列覆盖。
+    static func supportsSampling(model: CartesianChartModel, theme: CartesianChartTheme) -> Bool {
+        if case .grouped = model.stacking { return false }
+        return !model.isStacked && model.series.filter(\.isVisible).allSatisfy {
+            $0.lineTheme(theme).lineConnectionStyle == .straight
+        }
+    }
+
+    override var supportsDivergingStackGeometry: Bool { true }
+
     // MARK: - drawSeries（模板方法扩展点）
     public override func drawSeries(model: CartesianChartModel,
                                     theme: CartesianChartTheme,
@@ -80,20 +102,32 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         seriesObjects.begin(reusing: theme.reusesRenderingObjects)
-        defer { seriesObjects.end(); CATransaction.commit() }
+        defer { resolveDataLabelCollisions(theme: theme); seriesObjects.end(); CATransaction.commit() }
         seriesLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
         lastPointFrames.removeAll()
         renderedIndices.removeAll()
+        samplingStatistics.removeAll()
+        defer { onSamplingStatistics?(samplingStatistics) }
         denseSeries.removeAll()
-        usesSampling = theme.lineSampling != nil && !model.isStacked
-            && model.series.filter(\.isVisible).allSatisfy { $0.lineTheme(theme).lineConnectionStyle == .straight }
-        if case .grouped = model.stacking { usesSampling = false }
+        usesSampling = theme.lineSampling != nil && Self.supportsSampling(model: model, theme: theme)
         lineLayers.removeAll()
         clearSeriesShadowCasters()
 
         // 堆叠：normal=符号链累计 / percent=百分比累计；非堆叠用原值
         let dataToDraw = currentDrawValues
-        let inheritedTheme = theme
+        let percentContours = LinePercentStackedAreaGeometry.contours(model: model, theme: theme,
+            drawValues: currentDrawValues, baseValues: currentBaseValues, includes: includesSeries) { x, y, axis in
+                screenPoint(x: x, y: y, yAxisIndex: axis)
+            }
+        let diverging = LineDivergingStackGeometry.contours(model: model, theme: theme,
+            drawValues: currentDrawValues, baseValues: currentBaseValues, includes: includesSeries) { x, y, axis in
+                screenPoint(x: x, y: y, yAxisIndex: axis)
+            }
+        divergingBoundarySeries = Set(diverging.contours.keys)
+        divergingLinearFallbackSeries = diverging.linearFallbackSeries
+        percentBoundarySeries = Set(percentContours.keys)
+        if model.stacking == .percent { percentBoundarySeries.formUnion(divergingBoundarySeries) }
+        var stackContours: [Int: LineStackedAreaGeometry.Contour] = [:]
         let sampleInterval = model.timeAxis.flatMap { $0.isValid(count: model.maxPointCount) ? $0.interval : nil }
 
         for (s, element) in model.series.enumerated() {
@@ -120,6 +154,13 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
                                                          gapPolicy: element.gapPolicy, sampleInterval: sampleInterval)
                 selection = LineRenderSelection(segments: original,
                     visiblePointCount: original.reduce(0) { $0 + $1.count }, isDense: false)
+            }
+            if usesSampling {
+                samplingStatistics.append(LineSamplingStatistics(seriesName: element.name,
+                    visiblePointCount: selection.visiblePointCount, sourcePointCount: selection.sourcePointCount,
+                    renderedPointCount: selection.renderedPointCount,
+                    targetPointCount: theme.lineSampling?.targetPointCount.map { max(2, $0) },
+                    minimumRequiredPointCount: selection.minimumRequiredPointCount))
             }
             let segments = selection.segments
             guard !segments.isEmpty else { continue }
@@ -150,69 +191,59 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
                 negativeColor: element.negativeColor, baseColor: color)
             let regions = zones?.regions(viewport: currentViewport,
                 yDomain: axisIdx == 1 ? currentSecondaryYDomain : nil, plot: plotFrame) ?? []
-            let path = UIBezierPath()
-            for pts in segmentPoints {
-                guard let first = pts.first else { continue }
-                if theme.lineConnectionStyle == .smooth {
-                    path.move(to: first)
-                    CartesianGeometry.appendSmoothCurve(to: path, points: pts)
-                } else {
-                    let pathPts = CartesianGeometry.steppedScreenPoints(pts, style: theme.lineConnectionStyle)
-                    for (i, p) in pathPts.enumerated() {
-                        i == 0 ? path.move(to: p) : path.addLine(to: p)
+            let base: [Double]? = model.isStacked ? values.enumerated().map { index, value in
+                value - (currentBaseValues[s].indices.contains(index) ? currentBaseValues[s][index] : 0)
+            } : nil
+            var contour = LineStackedAreaGeometry.Contour(indices: segments, points: segmentPoints,
+                                                          style: theme.lineConnectionStyle)
+            if let shared = diverging.contours[s] {
+                contour = shared
+            } else if let percent = percentContours[s] {
+                contour = percent
+            } else if theme.showsArea, model.stacking != .percent,
+               theme.stackedAreaBoundaryMode == .followBaseline, let base {
+                contour = LineStackedAreaGeometry.followingBaseline(contour, series: s, base: base,
+                    style: theme.lineConnectionStyle, model: model, drawValues: currentDrawValues,
+                    rawValues: currentBaseValues, contours: stackContours) { index, value in
+                        screenPoint(x: Double(index), y: value, yAxisIndex: axisIdx)
                     }
-                }
             }
+            if model.isStacked { stackContours[s] = contour }
+            let path = contour.path
+            var strokeArea: CGPath?
 
             // 面积填充（面积图形态）：每段独立闭合（空值处面积断开）；
             // 堆叠时分层下边界 = 同符号链基准（自身累计 − 基准原值，percent 为归一化原值）。
             if theme.showsArea, !path.isEmpty {
-                var base: [Double]? = nil
-                if model.isStacked {
-                    let rawBaseFull = currentBaseValues[s]
-                    let rawBase = rawBaseFull + [Double](repeating: 0,
-                        count: max(0, values.count - rawBaseFull.count))
-                    base = zip(values, rawBase).map { $0 - $1 }
-                }
                 // 每段独立构建面积子路径（正向折线 + 反向下边界 + close）：
                 // 不能从整条折线 path 拷贝后追加——close 会闭错子路径、回走起点错乱
                 let areaPath = UIBezierPath()
-                for (segIdx, seg) in segments.enumerated() {
-                    let pts = segmentPoints[segIdx]
+                for segment in contour.segments {
+                    let seg = segment.indices, pts = segment.points
                     guard let first = pts.first, let last = pts.last else { continue }
-                    // 正向：与折线同一连接形态
-                    if theme.lineConnectionStyle == .smooth {
-                        areaPath.move(to: first)
-                        CartesianGeometry.appendSmoothCurve(to: areaPath, points: pts)
-                    } else {
-                        let pathPts = CartesianGeometry.steppedScreenPoints(pts, style: theme.lineConnectionStyle)
-                        for (i, p) in pathPts.enumerated() {
-                            i == 0 ? areaPath.move(to: p) : areaPath.addLine(to: p)
-                        }
+                    if let pieces = segment.areaPieces {
+                        for piece in pieces { piece.append(to: areaPath) }
+                        continue
                     }
-                    // 反向：下边界（堆叠 = 同符号链基准，与折线同形态；否则闭合到零轴）
+                    // 上边界与描边共用同一组控制点；下边界按区间回走实际前层路径。
+                    segment.append(to: areaPath)
                     if let base = base {
-                        let baseData = seg.map { idx in
-                            screenPoint(x: Double(idx), y: base[idx], yAxisIndex: axisIdx)
-                        }
-                        let lowerStyle = baselineStyle(series: s, indices: seg, base: base,
-                                                       model: model, theme: inheritedTheme)
-                        if lowerStyle == .smooth {
-                            // 下边界 = 前一层累计线的同一条平滑曲线倒序回走：
-                            // 若用直连线（旧实现），上层面积顶部是曲线、下层底部是弦线——
-                            // 曲线拱起处露白、下凹处叠色（堆叠+平滑+面积的报告缺陷）
-                            if let lastBase = baseData.last { areaPath.addLine(to: lastBase) }
-                            CartesianGeometry.appendSmoothCurveReversed(to: areaPath, points: baseData)
-                        } else {
-                            let basePts = CartesianGeometry.steppedScreenPoints(
-                                baseData, style: lowerStyle)
-                            for pp in basePts.reversed() { areaPath.addLine(to: pp) }
-                        }
+                        LineStackedAreaGeometry.appendBaseline(to: areaPath, series: s, indices: seg,
+                            base: base, model: model, drawValues: currentDrawValues,
+                            rawValues: currentBaseValues, contours: stackContours) { index, value in
+                                screenPoint(x: Double(index), y: value, yAxisIndex: axisIdx)
+                            }
                     } else {
                         areaPath.addLine(to: CGPoint(x: last.x, y: zeroY))
                         areaPath.addLine(to: CGPoint(x: first.x, y: zeroY))
                     }
                     areaPath.close()
+                }
+                // 沿基线模式的描边向面积内绘制，包含基底系列和跨零片的退化端点。
+                // 仅改端帽不足以避免斜线的半个线宽压入相邻层；复用完整填充边界裁剪。
+                if diverging.contours[s] != nil || (base != nil && (model.stacking != .percent || percentContours[s] != nil)
+                    && theme.stackedAreaBoundaryMode == .followBaseline) {
+                    strokeArea = areaPath.cgPath
                 }
 
                 if zones?.overridesArea == true {
@@ -237,11 +268,12 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
                     for region in regions {
                         lineLayers.append(LineChartColorLayers.line(path: path.cgPath,
                             color: region.zone.color ?? color, theme: theme, dash: dash, clip: region.clip,
-                            parent: seriesLayer, pool: seriesObjects))
+                            insideArea: strokeArea, parent: seriesLayer, pool: seriesObjects))
                     }
                 } else {
                     lineLayers.append(LineChartColorLayers.line(path: path.cgPath, color: color,
-                        theme: theme, dash: dash, clip: nil, parent: seriesLayer, pool: seriesObjects))
+                        theme: theme, dash: dash, clip: nil, insideArea: strokeArea,
+                        parent: seriesLayer, pool: seriesObjects))
                 }
                 // 阴影使用完整路径一次，不因分区叠加加深。
                 if let shadowStyle = element.shadow ?? theme.seriesShadow {
@@ -305,23 +337,6 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
         }
     }
 
-    /// 连续同符号链的下边界沿用前层形态，避免逐系列连接覆盖造成层间露白/叠色。
-    /// 缺测或换符号导致一段内基准来自不同系列时，回退该段自身的连接方式。
-    private func baselineStyle(series: Int, indices: [Int], base: [Double],
-                               model: CartesianChartModel, theme: CartesianChartTheme) -> LineConnectionStyle {
-        let key = model.stackKey(for: series)
-        for previous in (0..<series).reversed() {
-            let element = model.series[previous]
-            guard element.isVisible, model.stackKey(for: previous) == key else { continue }
-            let values = currentDrawValues[previous]
-            if indices.allSatisfy({ index in
-                index < element.data.count && element.data[index].isFinite && index < values.count
-                && abs(values[index] - base[index]) <= 1e-9
-            }) { return element.lineTheme(theme).lineConnectionStyle }
-        }
-        return model.series[series].lineTheme(theme).lineConnectionStyle
-    }
-
     // MARK: - 命中（近者优先；正方形 frame 含点即命中）
     public override func seriesHitTest(_ point: CGPoint) -> HYMChartHitTarget? {
         guard let model = currentModel else { return nil }
@@ -339,7 +354,7 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
                                  value: value,
                                  label: model.series[hit.series].name,
                                  yAxisIndex: model.series[hit.series].effectiveYAxisIndex,
-                                 seriesID: model.series[hit.series].id, datum: datum(series: hit.series, category: hit.index))
+                                 seriesID: model.series[hit.series].id, datum: datum(series: hit.series, category: hit.index), categoryLabel: categoryLabel(at: hit.index))
         }
         return nil
     }
@@ -380,7 +395,7 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
                 let element = model.series[s]
                 return LineHitTarget(seriesIndex: s, index: hit.index, value: element.data[hit.index],
                     label: element.name, yAxisIndex: element.effectiveYAxisIndex, seriesID: element.id,
-                    datum: datum(series: s, category: hit.index))
+                    datum: datum(series: s, category: hit.index), categoryLabel: categoryLabel(at: hit.index))
             }
         }
         return nil
@@ -423,6 +438,10 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
     /// DEBUG 自检辅助：seriesLayer 子层（面积渐变层数量断言用）。
     func seriesLayerSublayersForTesting() -> [CALayer] { seriesLayer.sublayers ?? [] }
 
+    private func categoryLabel(at index: Int) -> String? {
+        currentCategoryLabels.indices.contains(index) ? currentCategoryLabels[index] : nil
+    }
+
     /// 吸附命中 → LineHitTarget（含轴索引，弹窗带右轴标记）。
     public override func makeHitTarget(seriesIndex: Int, categoryIndex: Int, value: Double)
         -> (any HYMChartHitTarget)? {
@@ -431,6 +450,6 @@ public final class LineChartRenderer: CartesianRendererBase<CartesianChartTheme>
         return LineHitTarget(seriesIndex: seriesIndex, index: categoryIndex,
                              value: value, label: element.name,
                              yAxisIndex: element.effectiveYAxisIndex, seriesID: element.id,
-                             datum: datum(series: seriesIndex, category: categoryIndex))
+                             datum: datum(series: seriesIndex, category: categoryIndex), categoryLabel: categoryLabel(at: categoryIndex))
     }
 }
